@@ -49,6 +49,7 @@ class MockElement {
     this.tagName = tagName;
     this.id = id;
     this.className = '';
+    this.attributes = {};
     const classes = new Set();
     this.classList = {
       add: (...names) => names.forEach(n => classes.add(n)),
@@ -64,6 +65,12 @@ class MockElement {
     this.listeners = {};
     this.disabled = false;
   }
+  setAttribute(name, value) {
+    this.attributes[name] = String(value);
+  }
+  getAttribute(name) {
+    return this.attributes[name] !== undefined ? this.attributes[name] : null;
+  }
   addEventListener(event, fn) {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(fn);
@@ -77,6 +84,22 @@ class MockElement {
   appendChild(child) {
     this.children.push(child);
   }
+  querySelector(selector) {
+    for (const child of this.children) {
+      if (selector.startsWith('.') && child.classList.contains(selector.slice(1))) {
+        return child;
+      }
+      if (selector.startsWith('#') && child.id === selector.slice(1)) {
+        return child;
+      }
+      if (child.tagName.toLowerCase() === selector.toLowerCase()) {
+        return child;
+      }
+      const found = child.querySelector(selector);
+      if (found) return found;
+    }
+    return null;
+  }
   get innerHTML() {
     return this._innerHTML;
   }
@@ -87,9 +110,25 @@ class MockElement {
     const idMatches = [...val.matchAll(/id="([^"]+)"/g)];
     idMatches.forEach(m => {
       const id = m[1];
-      if (!elementsById.has(id)) {
-        elementsById.set(id, new MockElement('div', id));
+      const el = getOrCreateElement(id);
+      el.children = [];
+      el.textContent = '';
+      el._innerHTML = '';
+    });
+
+    // Parse simple child spans or elements
+    const tagMatches = [...val.matchAll(/<([a-z0-9]+)([^>]*)>(.*?)<\/\1>/gi)];
+    tagMatches.forEach(m => {
+      const tag = m[1];
+      const attrs = m[2];
+      const content = m[3];
+      const el = new MockElement(tag);
+      const classMatch = attrs.match(/class="([^"]+)"/);
+      if (classMatch) {
+        classMatch[1].split(/\s+/).forEach(c => el.classList.add(c));
       }
+      el.textContent = content;
+      this.children.push(el);
     });
   }
 }
@@ -107,12 +146,22 @@ const ids = [
   'quiz-header', 'timer-display', 'progress-text', 'progress-bar-fill',
   'quiz-card', 'options-container', 'feedback-container', 'feedback-result',
   'feedback-explanation', 'next-btn', 'score-display', 'streak-display',
-  'best-streak-display', 'accuracy-display', 'history-list'
+  'best-streak-display', 'accuracy-display', 'history-list', 'progress-track'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
+const progressTrack = getOrCreateElement('progress-track');
+progressTrack.classList.add('progress-track');
+progressTrack.setAttribute('aria-valuenow', '1');
+
 global.document = {
   getElementById: (id) => elementsById.get(id) || null,
+  querySelector: (selector) => {
+    if (selector === '.progress-track') {
+      return elementsById.get('progress-track') || null;
+    }
+    return null;
+  },
   querySelectorAll: (selector) => {
     if (selector === '.option-btn') {
       const optContainer = elementsById.get('options-container');
@@ -124,19 +173,29 @@ global.document = {
   addEventListener: () => {}
 };
 
-// Test renderHeader
+// Test renderHeader & aria-valuenow
 restartQuiz();
 state.elapsedSeconds = 65;
 renderHeader();
 assert.strictEqual(getOrCreateElement('timer-display').textContent, '01:05');
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
 assert.strictEqual(getOrCreateElement('progress-bar-fill').style.width, '17%');
+assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should be 1 on Q1');
 
-// Test renderQuestion
+// Test renderQuestion with HTML tags in options (Question 1)
 renderQuestion();
 const optContainer = getOrCreateElement('options-container');
 assert.strictEqual(optContainer.children.length, 4);
 assert.strictEqual(optContainer.children[0].dataset.index, 0);
+
+// Verify Question 1 options preserve literal HTML markup without rendering as DOM tags
+const expectedOptsQ1 = ['<link>', '<style>', '<css>', '<stylesheet>'];
+expectedOptsQ1.forEach((expectedText, i) => {
+  const btn = optContainer.children[i];
+  const textSpan = btn.querySelector('.option-text');
+  assert.ok(textSpan, `Button ${i} must have .option-text element`);
+  assert.strictEqual(textSpan.textContent, expectedText, `Option ${i} textContent must preserve literal text "${expectedText}"`);
+});
 
 // Test handleOptionClick with correct choice
 const correctIdx = QUESTIONS[0].correctIndex;
@@ -155,11 +214,24 @@ assert.strictEqual(getOrCreateElement('accuracy-display').textContent, '100%');
 const historyList = getOrCreateElement('history-list');
 assert.strictEqual(historyList.children.length, 1);
 
-// Test handleNextClick
+// Test handleNextClick and aria-valuenow update
 handleNextClick();
 assert.strictEqual(state.currentIndex, 1);
 assert.strictEqual(state.isAnswered, false);
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 2 of 6');
+assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '2', 'aria-valuenow should be 2 on Q2');
+
+// Verify Question 4 options (which contain <section>, <div>, <article>, <main>)
+state.currentIndex = 3;
+state.isAnswered = false;
+renderQuestion();
+const expectedOptsQ4 = ['<section>', '<div>', '<article>', '<main>'];
+expectedOptsQ4.forEach((expectedText, i) => {
+  const btn = optContainer.children[i];
+  const textSpan = btn.querySelector('.option-text');
+  assert.ok(textSpan, `Button ${i} on Q4 must have .option-text element`);
+  assert.strictEqual(textSpan.textContent, expectedText, `Option ${i} textContent must preserve literal text "${expectedText}"`);
+});
 
 // Test renderAll with quiz finished
 state.currentIndex = QUESTIONS.length - 1;
@@ -175,6 +247,7 @@ assert.strictEqual(state.currentIndex, 0);
 assert.strictEqual(state.score, 0);
 assert.strictEqual(state.isFinished, false);
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
+assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should reset to 1');
 
 // Clean up timer interval
 if (state.timerIntervalId) {
@@ -183,4 +256,3 @@ if (state.timerIntervalId) {
 }
 
 console.log('All Component Rendering tests passed!');
-

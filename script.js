@@ -123,6 +123,7 @@ function renderHeader() {
   const timerDisplay = document.getElementById('timer-display');
   const progressText = document.getElementById('progress-text');
   const progressBarFill = document.getElementById('progress-bar-fill');
+  const progressTrack = document.querySelector ? document.querySelector('.progress-track') : null;
 
   if (timerDisplay) {
     timerDisplay.textContent = formatTime(state.elapsedSeconds);
@@ -138,6 +139,10 @@ function renderHeader() {
   if (progressBarFill) {
     const pct = state.isFinished ? 100 : Math.round((currentNum / total) * 100);
     progressBarFill.style.width = `${pct}%`;
+  }
+
+  if (progressTrack) {
+    progressTrack.setAttribute('aria-valuenow', currentNum);
   }
 }
 
@@ -204,7 +209,11 @@ function renderQuestion() {
     btn.type = 'button';
     btn.className = 'option-btn';
     btn.dataset.index = idx;
-    btn.innerHTML = `<span class="badge">${badges[idx]}</span> <span class="option-text">${optText}</span>`;
+    btn.innerHTML = `<span class="badge">${badges[idx]}</span> <span class="option-text"></span>`;
+    const textSpan = btn.querySelector ? btn.querySelector('.option-text') : null;
+    if (textSpan) {
+      textSpan.textContent = optText;
+    }
     btn.addEventListener('click', () => handleOptionClick(idx));
     optionsContainer.appendChild(btn);
   });
