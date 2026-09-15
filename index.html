@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Dev Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Component 1: Header / Timer & Progress -->
+    <header id="quiz-header" class="quiz-header" aria-label="Quiz Header">
+      <div class="header-top">
+        <h1 class="brand-title">Web Dev Quiz</h1>
+        <div class="timer-badge">
+          <span class="timer-icon" aria-hidden="true">⏱</span>
+          <span id="timer-display" class="timer-text">00:00</span>
+        </div>
+      </div>
+      <div class="header-progress">
+        <div class="progress-labels">
+          <span id="progress-text" class="progress-text">Question 1 of 6</span>
+        </div>
+        <div class="progress-track" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+          <div id="progress-bar-fill" class="progress-fill" style="width: 16.6%;"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Area: Question Card + Scoreboard -->
+    <div class="main-content-grid">
+      <!-- Component 2: Active Question Card -->
+      <main id="quiz-card" class="quiz-card" aria-live="polite">
+        <div class="card-inner">
+          <h2 id="question-text" class="question-heading">Loading question...</h2>
+          <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
+          <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
+            <div id="feedback-result" class="feedback-result"></div>
+            <p id="feedback-explanation" class="feedback-explanation"></p>
+          </div>
+          <div class="action-footer">
+            <button id="next-btn" class="btn btn-primary hidden" type="button">Next Question →</button>
+          </div>
+        </div>
+      </main>
+
+      <!-- Component 3: Scoreboard / Stats & History -->
+      <aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
+        <h2 class="scoreboard-title">Live Scoreboard</h2>
+        <div class="stats-cards">
+          <div class="stat-card">
+            <span class="stat-label">Total Score</span>
+            <span id="score-display" class="stat-value highlight">0</span>
+            <span class="stat-unit">pts</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Streak</span>
+            <div class="streak-value-wrap">
+              <span class="streak-icon" aria-hidden="true">🔥</span>
+              <span id="streak-display" class="stat-value">0</span>
+            </div>
+            <span id="best-streak-display" class="stat-sub">Best: 0</span>
+          </div>
+          <div class="stat-card">
+            <span class="stat-label">Accuracy</span>
+            <span id="accuracy-display" class="stat-value">0%</span>
+          </div>
+        </div>
+
+        <div class="history-section">
+          <h3 class="history-title">Question History</h3>
+          <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
