@@ -27,6 +27,14 @@ requiredSelectors.forEach(sel => {
   assert.ok(css.includes(sel), `CSS must include selector ${sel}`);
 });
 
+// Check accessibility styles: focus-visible and contrast
+assert.ok(css.includes(':focus-visible'), 'CSS must include :focus-visible rules');
+assert.ok(css.includes('.option-btn:focus-visible'), 'CSS must include .option-btn:focus-visible');
+assert.ok(css.includes('.btn:focus-visible'), 'CSS must include .btn:focus-visible');
+assert.ok(css.includes('outline: 2px solid var(--color-primary)'), 'CSS must specify 2px solid var(--color-primary) outline');
+assert.ok(css.includes('outline-offset: 2px'), 'CSS must specify outline-offset: 2px');
+assert.ok(css.includes('#064e3b'), 'CSS must use high-contrast text color #064e3b on correct badge');
+
 // Check responsiveness
 assert.ok(css.includes('@media'), 'CSS must include media queries for responsive layout');
 

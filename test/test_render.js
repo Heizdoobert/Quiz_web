@@ -11,6 +11,7 @@ assert.ok(scriptContent.includes('function renderQuestion'), 'Must define render
 assert.ok(scriptContent.includes('function renderScoreboard'), 'Must define renderScoreboard');
 assert.ok(scriptContent.includes('function renderAll'), 'Must define renderAll');
 assert.ok(scriptContent.includes('document.addEventListener'), 'Must bind DOM events');
+assert.ok(scriptContent.includes("document.getElementById('question-text').textContent = currentQ.question"), 'Must set question-text via textContent');
 
 // Execute simulated DOM tests
 const {
@@ -181,8 +182,23 @@ assert.strictEqual(getOrCreateElement('timer-display').textContent, '01:05');
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
 assert.strictEqual(getOrCreateElement('progress-bar-fill').style.width, '17%');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should be 1 on Q1');
+assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS.length), 'aria-valuemax should be updated on Q1');
 
 // Test renderQuestion with HTML tags in options (Question 1)
+renderQuestion();
+const questionHeading = getOrCreateElement('question-text');
+assert.strictEqual(questionHeading.textContent, QUESTIONS[0].question, 'Question heading textContent should match question text');
+
+// Verify question text containing HTML tags is rendered safely as literal textContent
+const origQ = QUESTIONS[0].question;
+QUESTIONS[0].question = 'What do <section> and <article> elements represent?';
+renderQuestion();
+assert.strictEqual(getOrCreateElement('question-text').textContent, 'What do <section> and <article> elements represent?');
+assert.ok(
+  !getOrCreateElement('quiz-card').innerHTML.includes('class="question-heading">What do'),
+  'Question text must not be raw interpolated into innerHTML'
+);
+QUESTIONS[0].question = origQ;
 renderQuestion();
 const optContainer = getOrCreateElement('options-container');
 assert.strictEqual(optContainer.children.length, 4);
@@ -220,11 +236,13 @@ assert.strictEqual(state.currentIndex, 1);
 assert.strictEqual(state.isAnswered, false);
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 2 of 6');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '2', 'aria-valuenow should be 2 on Q2');
+assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS.length), 'aria-valuemax should match QUESTIONS.length on Q2');
 
 // Verify Question 4 options (which contain <section>, <div>, <article>, <main>)
 state.currentIndex = 3;
 state.isAnswered = false;
 renderQuestion();
+assert.strictEqual(getOrCreateElement('question-text').textContent, QUESTIONS[3].question, 'Question 4 heading textContent should match');
 const expectedOptsQ4 = ['<section>', '<div>', '<article>', '<main>'];
 expectedOptsQ4.forEach((expectedText, i) => {
   const btn = optContainer.children[i];
@@ -248,6 +266,7 @@ assert.strictEqual(state.score, 0);
 assert.strictEqual(state.isFinished, false);
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should reset to 1');
+assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS.length), 'aria-valuemax should reset to QUESTIONS.length');
 
 // Clean up timer interval
 if (state.timerIntervalId) {

@@ -184,7 +184,7 @@ body {
 
 .option-btn.correct .badge {
   background-color: var(--color-success);
-  color: #fff;
+  color: #064e3b;
 }
 
 .option-btn.incorrect {
@@ -249,6 +249,12 @@ body {
 
 .btn-primary:hover {
   background-color: var(--color-primary-hover);
+}
+
+.option-btn:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Component 3: Scoreboard */

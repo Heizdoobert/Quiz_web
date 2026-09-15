@@ -143,6 +143,7 @@ function renderHeader() {
 
   if (progressTrack) {
     progressTrack.setAttribute('aria-valuenow', currentNum);
+    progressTrack.setAttribute('aria-valuemax', total);
   }
 }
 
@@ -187,7 +188,7 @@ function renderQuestion() {
   const currentQ = QUESTIONS[state.currentIndex];
   questionCard.innerHTML = `
     <div class="card-inner">
-      <h2 id="question-text" class="question-heading">${currentQ.question}</h2>
+      <h2 id="question-text" class="question-heading"></h2>
       <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
       <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
         <div id="feedback-result" class="feedback-result"></div>
@@ -200,6 +201,8 @@ function renderQuestion() {
       </div>
     </div>
   `;
+
+  document.getElementById('question-text').textContent = currentQ.question;
 
   const optionsContainer = document.getElementById('options-container');
   const badges = ['A', 'B', 'C', 'D'];
