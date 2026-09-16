@@ -852,6 +852,13 @@ function initIntroModal() {
     headerGuideBtn.addEventListener('click', openIntroModal);
   }
 
+  // Close modal when clicking outside on backdrop
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) closeIntroModal();
+    });
+  }
+
   // Show intro modal on initial load if questions are blank
   if (QUESTIONS.length === 0) {
     openIntroModal();
@@ -947,6 +954,13 @@ function initTimerSettings() {
       updateActivePresetPill(s);
     });
   });
+
+  const timerModal = document.getElementById('timer-settings-modal');
+  if (timerModal) {
+    timerModal.addEventListener('click', (e) => {
+      if (e.target === timerModal) closeTimerSettingsModal();
+    });
+  }
 }
 
 function initApp() {
