@@ -52,6 +52,19 @@ const DEFAULT_QUESTIONS = [
 const MAX_QUESTIONS = 50;
 const ADS_URL = 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde';
 
+function escapeHTML(str) {
+  if (typeof str !== 'string') {
+    if (str === null || str === undefined) return '';
+    return String(str);
+  }
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 // Leaderboard Storage & Rank Logic
 let inMemoryLeaderboard = [];
 const LEADERBOARD_KEY = 'quick_quiz_leaderboard';
@@ -337,6 +350,18 @@ function addCustomQuestion(data) {
   if (QUESTIONS.length >= MAX_QUESTIONS) {
     return null;
   }
+  if (data.question.trim().length > 500) {
+    return null;
+  }
+  for (const opt of data.options) {
+    if (opt.trim().length > 300) return null;
+  }
+  if (data.category && typeof data.category === 'string' && data.category.trim().length > 100) {
+    return null;
+  }
+  if (data.explanation && typeof data.explanation === 'string' && data.explanation.trim().length > 700) {
+    return null;
+  }
 
   const newId = QUESTIONS.length > 0 ? Math.max(...QUESTIONS.map(q => q.id)) + 1 : 1;
   const newQuestion = {
@@ -600,7 +625,7 @@ function getTopics() {
 function addTopic(topicName) {
   if (!topicName || typeof topicName !== 'string') return false;
   const trimmed = topicName.trim();
-  if (!trimmed) return false;
+  if (!trimmed || trimmed.length > 50) return false;
   if (trimmed.toLowerCase() === 'all') return false;
 
   const topics = getTopics();
@@ -624,9 +649,10 @@ function deleteTopic(topicName) {
   if (!topicName || typeof topicName !== 'string') return false;
   const trimmed = topicName.trim();
   const topics = getTopics();
-  const idx = topics.findIndex(t => t.toLowerCase() === trimmed.toLowerCase());
+  const idx = topics.findIndex(t => t.toLowerCase() === trimmed.toLowerCase() || escapeHTML(t).toLowerCase() === trimmed.toLowerCase());
   if (idx === -1) return false;
 
+  const actualTopic = topics[idx];
   topics.splice(idx, 1);
   state.topics = topics;
   if (typeof window !== 'undefined' && window.localStorage) {
@@ -638,7 +664,7 @@ function deleteTopic(topicName) {
   // Reassign any questions under this topic to 'General'
   let modified = false;
   QUESTIONS.forEach(q => {
-    if (q.category && q.category.toLowerCase() === trimmed.toLowerCase()) {
+    if (q.category && (q.category.toLowerCase() === actualTopic.toLowerCase() || q.category.toLowerCase() === trimmed.toLowerCase())) {
       q.category = 'General';
       modified = true;
     }
@@ -648,7 +674,7 @@ function deleteTopic(topicName) {
   }
 
   // If deleted topic was active, reset to 'All'
-  if (state.activeCategory && state.activeCategory.toLowerCase() === trimmed.toLowerCase()) {
+  if (state.activeCategory && (state.activeCategory.toLowerCase() === actualTopic.toLowerCase() || state.activeCategory.toLowerCase() === trimmed.toLowerCase())) {
     setCategoryFilter('All');
   }
 
@@ -684,10 +710,11 @@ function renderCategoryFilters() {
 
   topics.forEach(topic => {
     const isActive = active.toLowerCase() === topic.toLowerCase();
+    const safeTopic = escapeHTML(topic);
     html += `
       <div class="category-pill-wrap">
-        <button class="category-pill ${isActive ? 'active' : ''}" data-category="${topic}" type="button">${topic}</button>
-        <button class="btn-topic-delete" data-topic="${topic}" type="button" title="Delete topic ${topic}" aria-label="Delete topic ${topic}">✕</button>
+        <button class="category-pill ${isActive ? 'active' : ''}" data-category="${safeTopic}" type="button">${safeTopic}</button>
+        <button class="btn-topic-delete" data-topic="${safeTopic}" type="button" title="Delete topic ${safeTopic}" aria-label="Delete topic ${safeTopic}">✕</button>
       </div>
     `;
   });
@@ -814,12 +841,17 @@ function handleSkip() {
 // Category Filtering Handlers
 // ==========================================================================
 function handleCategoryFilter(category) {
-  setCategoryFilter(category);
+  if (!category || typeof category !== 'string') return;
+  const topics = getTopics();
+  const matched = topics.find(t => t.toLowerCase() === category.toLowerCase() || escapeHTML(t).toLowerCase() === category.toLowerCase());
+  const targetCategory = matched || category;
+  setCategoryFilter(targetCategory);
   if (typeof document !== 'undefined') {
     const pills = document.querySelectorAll('.category-pill');
     pills.forEach(pill => {
       if (pill.dataset && pill.dataset.category) {
-        if (pill.dataset.category.toLowerCase() === state.activeCategory.toLowerCase()) {
+        const pillCat = pill.dataset.category.toLowerCase();
+        if (pillCat === state.activeCategory.toLowerCase() || pillCat === escapeHTML(state.activeCategory).toLowerCase()) {
           pill.classList.add('active');
         } else {
           pill.classList.remove('active');
@@ -999,13 +1031,13 @@ function openReviewModal() {
 
     item.innerHTML = `
       <div class="review-meta-row">
-        <span class="category-card-badge">${q.category || 'Web Dev'}</span>
+        <span class="category-card-badge">${escapeHTML(q.category || 'Web Dev')}</span>
         <span class="review-badge ${badgeClass}">${badgeText}</span>
       </div>
-      <h3 class="review-q-title">Q${idx + 1}: ${q.question}</h3>
-      <p style="font-size: 0.82rem; margin: 4px 0 2px;">Your Answer: <strong>${chosenText}</strong></p>
-      ${!ans.isCorrect ? `<p style="font-size: 0.82rem; margin: 0 0 4px; color: var(--color-success);">Correct Answer: <strong>${correctText}</strong></p>` : ''}
-      <p class="review-explanation"><strong>Explanation:</strong> ${q.explanation || 'No explanation available.'}</p>
+      <h3 class="review-q-title">Q${idx + 1}: ${escapeHTML(q.question)}</h3>
+      <p style="font-size: 0.82rem; margin: 4px 0 2px;">Your Answer: <strong>${escapeHTML(chosenText)}</strong></p>
+      ${!ans.isCorrect ? `<p style="font-size: 0.82rem; margin: 0 0 4px; color: var(--color-success);">Correct Answer: <strong>${escapeHTML(correctText)}</strong></p>` : ''}
+      <p class="review-explanation"><strong>Explanation:</strong> ${escapeHTML(q.explanation || 'No explanation available.')}</p>
     `;
     reviewList.appendChild(item);
   });
@@ -1253,7 +1285,7 @@ function renderQuestion() {
         <!-- Front Face: Question Prompt and Options -->
         <div class="flip-card-front">
           <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <span class="category-card-badge">${currentQ.category || 'Web Dev'}</span>
+            <span class="category-card-badge">${escapeHTML(currentQ.category || 'Web Dev')}</span>
             <div id="card-timer-badge" class="card-timer-badge ${state.timerMode !== 'stopwatch' && state.remainingSeconds <= 5 && !state.isAnswered ? 'timer-urgent' : ''}">
               <span class="timer-icon" aria-hidden="true">⏱</span>
               <span id="timer-display" class="timer-text">${formatTime(state.timerMode === 'stopwatch' ? state.elapsedSeconds : state.remainingSeconds)}</span>
@@ -1356,15 +1388,17 @@ function renderLeaderboard() {
   records.forEach((rec, idx) => {
     const item = document.createElement('div');
     item.className = 'leaderboard-item';
+    const medal = rec.rank ? rec.rank.medal : '🏅';
+    const tierLabel = rec.rank ? rec.rank.label : 'Ranked';
     item.innerHTML = `
       <div style="display: flex; align-items: center;">
-        <span class="leaderboard-rank">${rec.rank ? rec.rank.medal : '🏅'}</span>
+        <span class="leaderboard-rank">${escapeHTML(medal)}</span>
         <div class="leaderboard-info">
-          <span class="leaderboard-score-line">#${idx + 1} • ${rec.score} pts</span>
-          <span class="leaderboard-meta">${rec.accuracy}% acc • ${formatTime(rec.timeSpent)} • ${rec.date}</span>
+          <span class="leaderboard-score-line">#${idx + 1} • ${Number(rec.score) || 0} pts</span>
+          <span class="leaderboard-meta">${Number(rec.accuracy) || 0}% acc • ${formatTime(Number(rec.timeSpent) || 0)} • ${escapeHTML(rec.date)}</span>
         </div>
       </div>
-      <span class="leaderboard-tier-badge">${rec.rank ? rec.rank.label : 'Ranked'}</span>
+      <span class="leaderboard-tier-badge">${escapeHTML(tierLabel)}</span>
     `;
     listContainer.appendChild(item);
   });
@@ -2048,6 +2082,8 @@ if (typeof module !== 'undefined' && module.exports) {
     DEFAULT_QUESTIONS,
     QUESTIONS,
     MAX_QUESTIONS,
+    ADS_URL,
+    escapeHTML,
     MiniStore,
     loadSampleQuestions,
     addCustomQuestion,
@@ -2087,7 +2123,6 @@ if (typeof module !== 'undefined' && module.exports) {
     initSound,
     playCompletionFanfare,
     playDefeatSound,
-    ADS_URL,
     getRank,
     getLeaderboard,
     saveLeaderboardRecord,

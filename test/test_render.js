@@ -140,6 +140,10 @@ class MockElement {
     return all.length > 0 ? all[0] : null;
   }
   get innerHTML() {
+    if (this._innerHTML) return this._innerHTML;
+    if (this.children.length > 0) {
+      return this.children.map(c => c.innerHTML).join('');
+    }
     return this._innerHTML;
   }
   set innerHTML(val) {
@@ -703,5 +707,40 @@ state.answers = [
 renderQuestion();
 assert.ok(qCard.innerHTML.includes('cat-clapping-wrapper'), 'Pass test (> 50% accuracy) must render .cat-clapping-wrapper');
 assert.ok(qCard.innerHTML.includes('Congratulations'), 'Pass test must render Congratulations heading');
+
+// 23. Test XSS Protection Across All Dynamic Views
+const xssPayload = '<img src=x onerror=alert("XSS")>';
+const xssTopic = '"><script>alert("XSS_TOPIC")</script>';
+
+// A. Test escapeHTML utility
+const { escapeHTML } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof escapeHTML, 'function', 'escapeHTML function must be defined and exported');
+assert.strictEqual(escapeHTML(xssPayload), '&lt;img src=x onerror=alert(&quot;XSS&quot;)&gt;', 'escapeHTML must sanitize HTML characters');
+
+// B. Test topic rendering in category filters
+addTopic(xssTopic);
+renderCategoryFilters();
+const categoryContainer = getOrCreateElement('category-filters');
+assert.ok(!categoryContainer.innerHTML.includes('<script>'), 'category-filters must never inject raw script tags');
+assert.ok(categoryContainer.innerHTML.includes('&lt;script&gt;'), 'category-filters must escape topic name in HTML');
+
+// C. Test Review Modal with XSS question and answers
+state.answers = [{ questionIndex: 0, selectedIndex: 0, isCorrect: false }];
+QUESTIONS[0] = {
+  id: 'q-xss-test',
+  question: 'What is <script>alert(1)</script>?',
+  options: ['<img src=x onerror=alert(2)>', 'Safe Opt B', 'Safe Opt C', 'Safe Opt D'],
+  correctIndex: 0,
+  explanation: 'Because <svg/onload=alert(3)>',
+  category: '<iframe src="javascript:alert(4)">'
+};
+
+openReviewModal();
+const modalReviewList = getOrCreateElement('review-list');
+assert.ok(!modalReviewList.innerHTML.includes('<script>alert(1)</script>'), 'review modal must not contain unescaped script tags');
+assert.ok(!modalReviewList.innerHTML.includes('<img src=x onerror'), 'review modal must not contain unescaped img tags');
+assert.ok(!modalReviewList.innerHTML.includes('<svg/onload'), 'review modal must not contain unescaped svg tags');
+assert.ok(!modalReviewList.innerHTML.includes('<iframe'), 'review modal must not contain unescaped iframe tags');
+assert.ok(modalReviewList.innerHTML.includes('&lt;script&gt;'), 'review modal must encode script tags');
 
 console.log('All Component Rendering tests passed!');

@@ -119,7 +119,7 @@
 
       <div class="form-group">
         <label for="new-q-text">Question Prompt <span class="req">*</span></label>
-        <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" required>
+        <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" maxlength="250" required>
       </div>
 
       <div class="options-inputs-header">
@@ -134,7 +134,7 @@
             <span class="custom-radio"></span>
             <span class="opt-tag">A</span>
           </label>
-          <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" required>
+          <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" maxlength="120" required>
         </div>
 
         <div class="option-input-row">
@@ -143,7 +143,7 @@
             <span class="custom-radio"></span>
             <span class="opt-tag">B</span>
           </label>
-          <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" required>
+          <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" maxlength="120" required>
         </div>
 
         <div class="option-input-row">
@@ -152,7 +152,7 @@
             <span class="custom-radio"></span>
             <span class="opt-tag">C</span>
           </label>
-          <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" required>
+          <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" maxlength="120" required>
         </div>
 
         <div class="option-input-row">
@@ -161,7 +161,7 @@
             <span class="custom-radio"></span>
             <span class="opt-tag">D</span>
           </label>
-          <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" required>
+          <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" maxlength="120" required>
         </div>
       </div>
 
@@ -177,7 +177,7 @@
 
       <div class="form-group">
         <label for="new-q-cat">Topic / Category <span class="hint-text">(e.g. HTML, CSS, JavaScript, or create a new topic)</span></label>
-        <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic...">
+        <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic..." maxlength="30">
         <datalist id="topics-datalist">
           <option value="HTML"></option>
           <option value="CSS"></option>
@@ -187,7 +187,7 @@
 
       <div class="form-group">
         <label for="new-q-exp">Explanation <span class="hint-text">(optional)</span></label>
-        <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets.">
+        <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets." maxlength="350">
       </div>
 
       <div class="form-actions">
