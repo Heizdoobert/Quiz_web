@@ -44,35 +44,53 @@
         </div>
       </main>
 
-      <!-- Component 3: Scoreboard / Stats & History -->
-      <aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
-        <h2 class="scoreboard-title">Live Scoreboard</h2>
-        <div class="stats-cards">
-          <div class="stat-card">
-            <span class="stat-label">Total Score</span>
-            <span id="score-display" class="stat-value highlight">0</span>
-            <span class="stat-unit">pts</span>
-          </div>
-          <div class="stat-card">
-            <span class="stat-label">Streak</span>
-            <div class="streak-value-wrap">
-              <span class="streak-icon" aria-hidden="true">🔥</span>
-              <span id="streak-display" class="stat-value">0</span>
+      <div class="sidebar-column">
+        <!-- Component 3: Scoreboard / Stats & History -->
+        <aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
+          <h2 class="scoreboard-title">Live Scoreboard</h2>
+          <div class="stats-cards">
+            <div class="stat-card">
+              <span class="stat-label">Total Score</span>
+              <span id="score-display" class="stat-value highlight">0</span>
+              <span class="stat-unit">pts</span>
             </div>
-            <span id="best-streak-display" class="stat-sub">Best: 0</span>
+            <div class="stat-card">
+              <span class="stat-label">Streak</span>
+              <div class="streak-value-wrap">
+                <span class="streak-icon" aria-hidden="true">🔥</span>
+                <span id="streak-display" class="stat-value">0</span>
+              </div>
+              <span id="best-streak-display" class="stat-sub">Best: 0</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Accuracy</span>
+              <span id="accuracy-display" class="stat-value">0%</span>
+            </div>
           </div>
-          <div class="stat-card">
-            <span class="stat-label">Accuracy</span>
-            <span id="accuracy-display" class="stat-value">0%</span>
-          </div>
-        </div>
 
-        <div class="history-section">
-          <h3 class="history-title">Question History</h3>
-          <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
-        </div>
-      </aside>
+          <div class="history-section">
+            <h3 class="history-title">Question History</h3>
+            <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
+          </div>
+        </aside>
+
+        <!-- Affiliate / Ad Banner Zone -->
+        <section id="affiliate-zone" class="ad-card" aria-label="Sponsored Content">
+          <div class="ad-badge">Sponsored</div>
+          <div class="ad-content">
+            <!-- Replace with affiliate banner or ad script (e.g. Google AdSense) -->
+            <a href="https://github.com/Heizdoobert/Quiz_web" class="ad-link" target="_blank" rel="noopener sponsored">
+              <div class="ad-placeholder-art" aria-hidden="true">🚀</div>
+              <div class="ad-text">
+                <strong class="ad-title">Recommended Dev Tools</strong>
+                <p class="ad-desc">Explore curated web dev resources, cloud hosting & courses.</p>
+              </div>
+            </a>
+          </div>
+        </section>
+      </div>
     </div>
+
   </div>
 
   <script src="script.js"></script>

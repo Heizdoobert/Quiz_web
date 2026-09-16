@@ -400,6 +400,86 @@ body {
   margin: 8px 0;
 }
 
+/* Sidebar Column Layout */
+.sidebar-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Affiliate / Ad Card */
+.ad-card {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  box-shadow: var(--shadow-card);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.ad-card:hover {
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.ad-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  background-color: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 10px;
+}
+
+.ad-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--color-text-main);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  background-color: rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
+}
+
+.ad-link:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  transform: translateY(-1px);
+}
+
+.ad-link:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.ad-placeholder-art {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+}
+
+.ad-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.ad-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+.ad-desc {
+  font-size: 0.775rem;
+  color: var(--color-text-muted);
+  line-height: 1.35;
+}
+
 /* Utility */
 .hidden {
   display: none !important;
@@ -411,3 +491,4 @@ body {
     grid-template-columns: 1fr;
   }
 }
+

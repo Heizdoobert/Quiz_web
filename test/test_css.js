@@ -38,4 +38,9 @@ assert.ok(css.includes('#064e3b'), 'CSS must use high-contrast text color #064e3
 // Check responsiveness
 assert.ok(css.includes('@media'), 'CSS must include media queries for responsive layout');
 
+// Check ad styling classes
+assert.ok(css.includes('.ad-card'), 'CSS must style .ad-card');
+assert.ok(css.includes('.ad-badge'), 'CSS must style .ad-badge');
+
 console.log('All CSS styling tests passed!');
+

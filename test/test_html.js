@@ -38,4 +38,9 @@ requiredIds.forEach(id => {
 assert.ok(!html.includes('id="quiz-card" class="quiz-card" aria-live'), 'quiz-card must not have aria-live attribute');
 assert.ok(html.includes('id="feedback-container" class="feedback-card hidden" aria-live="polite"'), 'feedback-container must have aria-live="polite"');
 
+// Check affiliate ad zone
+assert.ok(html.includes('id="affiliate-zone"'), 'Affiliate ad zone must exist');
+assert.ok(html.includes('class="ad-card"'), 'Ad card styling class must exist');
+
 console.log('All HTML structure tests passed!');
+
