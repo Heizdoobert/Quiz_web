@@ -110,6 +110,28 @@ assert.ok(html.includes('id="btn-lifeline-skip"'), 'Skip Lifeline button must ex
 assert.ok(html.includes('id="review-modal"'), 'Review answers modal must exist in index.html');
 assert.ok(html.includes('id="review-list"'), 'Review answers list must exist in index.html');
 
+// Check Sub-HTML Components Structure and Builder
+assert.ok(fs.existsSync('template.html'), 'template.html must exist as modular main template');
+const templateHtml = fs.readFileSync('template.html', 'utf8');
+assert.ok(templateHtml.includes('<!-- @include components/header.html -->'), 'template.html must include header component');
+assert.ok(templateHtml.includes('<!-- @include components/question-form.html -->'), 'template.html must include question-form component');
+assert.ok(templateHtml.includes('<!-- @include components/quiz-card.html -->'), 'template.html must include quiz-card component');
+assert.ok(templateHtml.includes('<!-- @include components/scoreboard.html -->'), 'template.html must include scoreboard component');
+assert.ok(templateHtml.includes('<!-- @include components/modals.html -->'), 'template.html must include modals component');
+
+const requiredComponents = [
+  'components/header.html',
+  'components/question-form.html',
+  'components/quiz-card.html',
+  'components/scoreboard.html',
+  'components/modals.html'
+];
+requiredComponents.forEach(comp => {
+  assert.ok(fs.existsSync(comp), `Sub-HTML component file ${comp} must exist`);
+});
+
+assert.ok(fs.existsSync('build.js'), 'build.js must exist to compile components into index.html');
+
 console.log('All HTML structure and SEO tests passed!');
 
 

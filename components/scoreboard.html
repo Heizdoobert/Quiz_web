@@ -1,0 +1,54 @@
+<!-- Component 3: Scoreboard / Stats & History -->
+<aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
+  <h2 class="scoreboard-title">Live Scoreboard</h2>
+  <div class="stats-cards">
+    <div class="stat-card">
+      <span class="stat-label">Total Score</span>
+      <span id="score-display" class="stat-value highlight">0</span>
+      <span class="stat-unit">pts</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Streak</span>
+      <div class="streak-value-wrap">
+        <span class="streak-icon" aria-hidden="true">🔥</span>
+        <span id="streak-display" class="stat-value">0</span>
+      </div>
+      <span id="best-streak-display" class="stat-sub">Best: 0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Accuracy</span>
+      <span id="accuracy-display" class="stat-value">0%</span>
+    </div>
+  </div>
+
+  <div class="history-section">
+    <h3 class="history-title">Question History</h3>
+    <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
+  </div>
+
+  <!-- Leaderboard Section -->
+  <div id="quiz-leaderboard" class="leaderboard-section">
+    <div class="leaderboard-header">
+      <h3 class="leaderboard-title">🏆 Top Records</h3>
+      <button id="btn-clear-leaderboard" class="btn-text-subtle" type="button" title="Clear saved leaderboard records">Reset</button>
+    </div>
+    <div id="leaderboard-list" class="leaderboard-list" aria-label="Top quiz scores">
+      <p class="leaderboard-empty">No records yet. Complete a quiz to rank!</p>
+    </div>
+  </div>
+</aside>
+
+<!-- Affiliate / Ad Banner Zone -->
+<section id="affiliate-zone" class="ad-card" aria-label="Sponsored Content">
+  <div class="ad-badge">Sponsored</div>
+  <div class="ad-content">
+    <!-- Affiliate banner or ad network link -->
+    <a href="https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde" class="ad-link" target="_blank" rel="noopener sponsored">
+      <div class="ad-placeholder-art" aria-hidden="true">🚀</div>
+      <div class="ad-text">
+        <strong class="ad-title">Recommended Dev Tools & Offers</strong>
+        <p class="ad-desc">Explore curated web dev resources, cloud hosting & exclusive deals.</p>
+      </div>
+    </a>
+  </div>
+</section>

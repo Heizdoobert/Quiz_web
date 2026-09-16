@@ -1,0 +1,97 @@
+<!-- Custom Question Creator (Collapsible, Transparent Glassmorphism) -->
+<section id="custom-question-section" class="custom-question-card" aria-label="Add Custom Question">
+  <div class="custom-header-bar">
+    <div class="custom-title-wrap">
+      <span class="custom-icon" aria-hidden="true">✏️</span>
+      <h2 class="custom-heading">Custom Questions</h2>
+      <span id="question-count-badge" class="count-badge">(6/50 questions)</span>
+    </div>
+    <button id="toggle-add-form-btn" class="btn btn-secondary btn-sm" type="button" aria-expanded="false" aria-controls="add-question-form">
+      ➕ Add Custom Question
+    </button>
+  </div>
+
+  <div class="form-collapsible">
+    <form id="add-question-form" class="custom-form" novalidate>
+      <div id="form-alert-msg" class="form-alert hidden" role="alert"></div>
+
+      <div class="form-group">
+        <label for="new-q-text">Question Prompt <span class="req">*</span></label>
+        <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" required>
+      </div>
+
+      <div class="options-inputs-header">
+        <span>Answer Options <span class="req">*</span></span>
+        <span class="hint-text">Select the radio button for the correct answer</span>
+      </div>
+
+      <div class="options-inputs-grid">
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="0" checked aria-label="Option A is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">A</span>
+          </label>
+          <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="1" aria-label="Option B is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">B</span>
+          </label>
+          <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="2" aria-label="Option C is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">C</span>
+          </label>
+          <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="3" aria-label="Option D is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">D</span>
+          </label>
+          <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" required>
+        </div>
+      </div>
+
+      <div class="form-group correct-answer-group">
+        <label for="correct-opt-select">Correct Answer <span class="req">*</span> <span class="hint-text">(which option is correct)</span></label>
+        <select id="correct-opt-select" class="input-field">
+          <option value="0" selected>Option A</option>
+          <option value="1">Option B</option>
+          <option value="2">Option C</option>
+          <option value="3">Option D</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="new-q-cat">Topic / Category <span class="hint-text">(e.g. HTML, CSS, JavaScript, or create a new topic)</span></label>
+        <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic...">
+        <datalist id="topics-datalist">
+          <option value="HTML"></option>
+          <option value="CSS"></option>
+          <option value="JavaScript"></option>
+        </datalist>
+      </div>
+
+      <div class="form-group">
+        <label for="new-q-exp">Explanation <span class="hint-text">(optional)</span></label>
+        <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets.">
+      </div>
+
+      <div class="form-actions">
+        <button id="btn-add-question" class="btn btn-secondary" type="button">Add Question</button>
+        <button id="btn-add-start-quiz" class="btn btn-primary" type="button">Add & Start Quiz 🚀</button>
+      </div>
+    </form>
+  </div>
+</section>

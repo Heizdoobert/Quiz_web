@@ -1,0 +1,131 @@
+<!-- 3-Step Introduction Modal -->
+<div id="intro-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="intro-modal-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">💡</span>
+        <h2 id="intro-modal-title" class="modal-title">How to Create & Play</h2>
+      </div>
+      <button id="btn-intro-close" class="modal-close-btn" type="button" aria-label="Close introduction">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Step 1 -->
+      <div id="intro-step-1" class="intro-step active">
+        <div class="step-badge">Step 1 of 3</div>
+        <div class="step-illustration" aria-hidden="true">✍️</div>
+        <h3 class="step-title">1. Create Your Questions</h3>
+        <p class="step-desc">Click <strong>"Add Custom Question"</strong> above to enter your question text, 4 answer options, and select the radio button next to the correct answer.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div id="intro-step-2" class="intro-step">
+        <div class="step-badge">Step 2 of 3</div>
+        <div class="step-illustration" aria-hidden="true">📦</div>
+        <h3 class="step-title">2. Build Up to 50 Questions</h3>
+        <p class="step-desc">Add up to 50 questions for your quiz session. Questions are stored temporarily in your local session and reload will reset cleanly.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div id="intro-step-3" class="intro-step">
+        <div class="step-badge">Step 3 of 3</div>
+        <div class="step-illustration" aria-hidden="true">🎯</div>
+        <h3 class="step-title">3. Play & Track Your Score</h3>
+        <p class="step-desc">Click <strong>"Add & Start Quiz"</strong> to play! Use keys <strong>1–4</strong> or <strong>A–D</strong> to answer, press <strong>Enter/Space</strong> to advance, enjoy audio effects, and compete for top ranks on the Leaderboard!</p>
+      </div>
+
+      <!-- Step Indicator Dots -->
+      <div class="step-indicator" role="tablist" aria-label="Step progress">
+        <button class="step-dot active" data-step="1" type="button" aria-label="Step 1"></button>
+        <button class="step-dot" data-step="2" type="button" aria-label="Step 2"></button>
+        <button class="step-dot" data-step="3" type="button" aria-label="Step 3"></button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button id="btn-intro-prev" class="btn btn-secondary btn-sm hidden" type="button">← Back</button>
+      <button id="btn-intro-next" class="btn btn-primary btn-sm" type="button">Next Step →</button>
+    </div>
+  </div>
+</div>
+
+<!-- Timer & Clock Settings Modal -->
+<div id="timer-settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="timer-modal-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">⏱️</span>
+        <h2 id="timer-modal-title" class="modal-title">Clock & Time Lapse</h2>
+      </div>
+      <button id="btn-close-timer" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="timer-mode-group">
+        <label for="timer-mode-select">Timer Mode</label>
+        <select id="timer-mode-select" class="input-field">
+          <option value="per-question" selected>Per-Question Countdown</option>
+          <option value="total">Total Quiz Countdown</option>
+          <option value="stopwatch">Stopwatch (Counting Up)</option>
+        </select>
+      </div>
+      <div id="timer-duration-group" class="timer-duration-group">
+        <label for="timer-limit-input">Time Limit (Seconds)</label>
+        <div class="timer-presets">
+          <button type="button" class="preset-pill" data-seconds="15">15s</button>
+          <button type="button" class="preset-pill active" data-seconds="30">30s</button>
+          <button type="button" class="preset-pill" data-seconds="60">60s</button>
+          <button type="button" class="preset-pill" data-seconds="120">2m</button>
+        </div>
+        <input id="timer-limit-input" class="input-field" type="number" min="5" max="600" value="30">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-cancel-timer" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+      <button id="btn-apply-timer" class="btn btn-primary btn-sm" type="button">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add New Topic Mini Popup Modal -->
+<div id="topic-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="topic-modal-title">
+  <div class="modal-card topic-modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">🏷️</span>
+        <h2 id="topic-modal-title" class="modal-title">Add New Topic</h2>
+      </div>
+      <button id="btn-close-topic-modal" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 12px;">Create a new topic or category for your quiz questions:</p>
+      <div class="form-group">
+        <label for="input-topic-name">Topic Name <span class="req">*</span></label>
+        <input id="input-topic-name" class="input-field" type="text" placeholder="e.g. React, Python, Docker..." maxlength="30" autocomplete="off">
+        <div id="topic-modal-error" class="form-alert error hidden" style="margin-top: 8px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button id="btn-cancel-topic" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+      <button id="btn-save-topic" class="btn btn-primary btn-sm" type="button">Add Topic</button>
+    </div>
+  </div>
+</div>
+
+<!-- Post-Quiz Review / Answer Breakdown Modal -->
+<div id="review-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+  <div class="modal-card review-modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">📋</span>
+        <h2 id="review-modal-title" class="modal-title">Answer Breakdown</h2>
+      </div>
+      <button id="btn-close-review" class="modal-close-btn" type="button" aria-label="Close review modal">✕</button>
+    </div>
+    <div class="modal-body review-modal-body">
+      <div id="review-list" class="review-list" aria-label="Detailed answers review"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-review-close-footer" class="btn btn-secondary btn-sm" type="button">Back to Summary</button>
+    </div>
+  </div>
+</div>

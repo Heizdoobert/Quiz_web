@@ -56,392 +56,395 @@
 
   <div class="app-layout">
     <!-- Component 1: Header / Timer & Progress -->
-    <header id="quiz-header" class="quiz-header" aria-label="Quiz Header">
-      <div class="header-top">
-        <h1 class="brand-title">Quick Quiz</h1>
-        <div class="header-actions">
-          <button id="btn-theme-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">🌙 Dark</button>
-          <button id="btn-sound-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle sound effects" title="Toggle sound effects">🔊 Sound</button>
-          <button id="btn-header-guide" class="btn btn-secondary btn-sm" type="button">📖 How to Play</button>
-          <button id="btn-timer-settings" class="btn btn-secondary btn-sm" type="button" aria-label="Timer Settings" title="Timer Settings">⏱️ Set Time</button>
-        </div>
-      </div>
+    <!-- Component 1: Header / Timer & Progress -->
+<header id="quiz-header" class="quiz-header" aria-label="Quiz Header">
+  <div class="header-top">
+    <h1 class="brand-title">Quick Quiz</h1>
+    <div class="header-actions">
+      <button id="btn-theme-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">🌙 Dark</button>
+      <button id="btn-sound-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle sound effects" title="Toggle sound effects">🔊 Sound</button>
+      <button id="btn-header-guide" class="btn btn-secondary btn-sm" type="button">📖 How to Play</button>
+      <button id="btn-timer-settings" class="btn btn-secondary btn-sm" type="button" aria-label="Timer Settings" title="Timer Settings">⏱️ Set Time</button>
+    </div>
+  </div>
 
-      <!-- Topic & Category Filter Pills -->
-      <div id="category-filters" class="category-filters" role="tablist" aria-label="Question Categories">
-        <button class="category-pill active" data-category="All" type="button">All Topics</button>
-        <div class="category-pill-wrap">
-          <button class="category-pill" data-category="HTML" type="button">HTML</button>
-          <button class="btn-topic-delete" data-topic="HTML" type="button" title="Delete topic HTML" aria-label="Delete topic HTML">✕</button>
-        </div>
-        <div class="category-pill-wrap">
-          <button class="category-pill" data-category="CSS" type="button">CSS</button>
-          <button class="btn-topic-delete" data-topic="CSS" type="button" title="Delete topic CSS" aria-label="Delete topic CSS">✕</button>
-        </div>
-        <div class="category-pill-wrap">
-          <button class="category-pill" data-category="JavaScript" type="button">JavaScript</button>
-          <button class="btn-topic-delete" data-topic="JavaScript" type="button" title="Delete topic JavaScript" aria-label="Delete topic JavaScript">✕</button>
-        </div>
-        <button id="btn-add-topic-pill" class="category-pill add-topic-pill" type="button" title="Add a new topic">➕ Topic</button>
-      </div>
+  <!-- Topic & Category Filter Pills -->
+  <div id="category-filters" class="category-filters" role="tablist" aria-label="Question Categories">
+    <button class="category-pill active" data-category="All" type="button">All Topics</button>
+    <div class="category-pill-wrap">
+      <button class="category-pill" data-category="HTML" type="button">HTML</button>
+      <button class="btn-topic-delete" data-topic="HTML" type="button" title="Delete topic HTML" aria-label="Delete topic HTML">✕</button>
+    </div>
+    <div class="category-pill-wrap">
+      <button class="category-pill" data-category="CSS" type="button">CSS</button>
+      <button class="btn-topic-delete" data-topic="CSS" type="button" title="Delete topic CSS" aria-label="Delete topic CSS">✕</button>
+    </div>
+    <div class="category-pill-wrap">
+      <button class="category-pill" data-category="JavaScript" type="button">JavaScript</button>
+      <button class="btn-topic-delete" data-topic="JavaScript" type="button" title="Delete topic JavaScript" aria-label="Delete topic JavaScript">✕</button>
+    </div>
+    <button id="btn-add-topic-pill" class="category-pill add-topic-pill" type="button" title="Add a new topic">➕ Topic</button>
+  </div>
 
-      <div class="header-progress">
-        <div class="progress-labels">
-          <span id="progress-text" class="progress-text">Question 1 of 6</span>
-        </div>
-        <div class="progress-track" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
-          <div id="progress-bar-fill" class="progress-fill" style="width: 16.6%;"></div>
-        </div>
-      </div>
-    </header>
+  <div class="header-progress">
+    <div class="progress-labels">
+      <span id="progress-text" class="progress-text">Question 1 of 6</span>
+    </div>
+    <div class="progress-track" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="6">
+      <div id="progress-bar-fill" class="progress-fill" style="width: 16.6%;"></div>
+    </div>
+  </div>
+</header>
+
 
     <!-- Main Content Area: Question Card + Scoreboard -->
     <div class="main-content-grid">
       <div class="quiz-main-column">
         <!-- Custom Question Creator (Collapsible, Transparent Glassmorphism) -->
-        <section id="custom-question-section" class="custom-question-card" aria-label="Add Custom Question">
-          <div class="custom-header-bar">
-            <div class="custom-title-wrap">
-              <span class="custom-icon" aria-hidden="true">✏️</span>
-              <h2 class="custom-heading">Custom Questions</h2>
-              <span id="question-count-badge" class="count-badge">(6/50 questions)</span>
-            </div>
-            <button id="toggle-add-form-btn" class="btn btn-secondary btn-sm" type="button" aria-expanded="false" aria-controls="add-question-form">
-              ➕ Add Custom Question
-            </button>
-          </div>
+<section id="custom-question-section" class="custom-question-card" aria-label="Add Custom Question">
+  <div class="custom-header-bar">
+    <div class="custom-title-wrap">
+      <span class="custom-icon" aria-hidden="true">✏️</span>
+      <h2 class="custom-heading">Custom Questions</h2>
+      <span id="question-count-badge" class="count-badge">(6/50 questions)</span>
+    </div>
+    <button id="toggle-add-form-btn" class="btn btn-secondary btn-sm" type="button" aria-expanded="false" aria-controls="add-question-form">
+      ➕ Add Custom Question
+    </button>
+  </div>
 
-          <div class="form-collapsible">
-            <form id="add-question-form" class="custom-form" novalidate>
-              <div id="form-alert-msg" class="form-alert hidden" role="alert"></div>
+  <div class="form-collapsible">
+    <form id="add-question-form" class="custom-form" novalidate>
+      <div id="form-alert-msg" class="form-alert hidden" role="alert"></div>
 
-              <div class="form-group">
-                <label for="new-q-text">Question Prompt <span class="req">*</span></label>
-                <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" required>
-              </div>
-
-              <div class="options-inputs-header">
-                <span>Answer Options <span class="req">*</span></span>
-                <span class="hint-text">Select the radio button for the correct answer</span>
-              </div>
-
-              <div class="options-inputs-grid">
-                <div class="option-input-row">
-                  <label class="radio-label">
-                    <input type="radio" name="correct-opt" value="0" checked aria-label="Option A is correct">
-                    <span class="custom-radio"></span>
-                    <span class="opt-tag">A</span>
-                  </label>
-                  <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" required>
-                </div>
-
-                <div class="option-input-row">
-                  <label class="radio-label">
-                    <input type="radio" name="correct-opt" value="1" aria-label="Option B is correct">
-                    <span class="custom-radio"></span>
-                    <span class="opt-tag">B</span>
-                  </label>
-                  <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" required>
-                </div>
-
-                <div class="option-input-row">
-                  <label class="radio-label">
-                    <input type="radio" name="correct-opt" value="2" aria-label="Option C is correct">
-                    <span class="custom-radio"></span>
-                    <span class="opt-tag">C</span>
-                  </label>
-                  <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" required>
-                </div>
-
-                <div class="option-input-row">
-                  <label class="radio-label">
-                    <input type="radio" name="correct-opt" value="3" aria-label="Option D is correct">
-                    <span class="custom-radio"></span>
-                    <span class="opt-tag">D</span>
-                  </label>
-                  <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" required>
-                </div>
-              </div>
-
-              <div class="form-group correct-answer-group">
-                <label for="correct-opt-select">Correct Answer <span class="req">*</span> <span class="hint-text">(which option is correct)</span></label>
-                <select id="correct-opt-select" class="input-field">
-                  <option value="0" selected>Option A</option>
-                  <option value="1">Option B</option>
-                  <option value="2">Option C</option>
-                  <option value="3">Option D</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="new-q-cat">Topic / Category <span class="hint-text">(e.g. HTML, CSS, JavaScript, or create a new topic)</span></label>
-                <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic...">
-                <datalist id="topics-datalist">
-                  <option value="HTML"></option>
-                  <option value="CSS"></option>
-                  <option value="JavaScript"></option>
-                </datalist>
-              </div>
-
-              <div class="form-group">
-                <label for="new-q-exp">Explanation <span class="hint-text">(optional)</span></label>
-                <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets.">
-              </div>
-
-              <div class="form-actions">
-                <button id="btn-add-question" class="btn btn-secondary" type="button">Add Question</button>
-                <button id="btn-add-start-quiz" class="btn btn-primary" type="button">Add & Start Quiz 🚀</button>
-              </div>
-            </form>
-          </div>
-        </section>
-
-        <!-- Component 2: Active Question Card -->
-        <main id="quiz-card" class="quiz-card">
-          <!-- Welcome Overlay when quiz is empty -->
-          <div id="welcome-overlay" class="welcome-overlay">
-            <div class="welcome-badge">🚀 Get Started</div>
-            <h2 class="welcome-heading">Welcome to Quiz Web</h2>
-            <p class="welcome-desc">No quiz questions yet. Click below to add your first question or load sample web trivia to begin!</p>
-            <div class="welcome-actions">
-              <button id="btn-welcome-add" class="btn btn-primary" type="button">➕ Add New Quiz</button>
-              <button id="btn-welcome-sample" class="btn btn-secondary" type="button">⚡ Load Sample Questions</button>
-              <button id="btn-welcome-intro" class="btn btn-secondary" type="button">📖 How to Play</button>
-            </div>
-          </div>
-
-          <!-- Active Question Card Content (revealed when questions exist) -->
-          <div class="card-inner hidden">
-            <div id="flip-card-inner" class="flip-card-inner">
-              <!-- Front Face: Question Prompt and Options -->
-              <div class="flip-card-front">
-                <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-                  <span class="category-card-badge">Web Dev</span>
-                  <div id="card-timer-badge" class="card-timer-badge">
-                    <span class="timer-icon" aria-hidden="true">⏱</span>
-                    <span id="timer-display" class="timer-text">00:00:30</span>
-                    <button id="btn-card-timer-settings" class="btn-card-timer-settings" type="button" title="Timer Settings" aria-label="Timer Settings">⚙️</button>
-                  </div>
-                  <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
-                    <span class="lifelines-label">Power-Ups:</span>
-                    <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
-                    <button id="btn-lifeline-skip" class="btn-lifeline" type="button" title="Skip this question without penalty (Once per quiz)">⏭️ Skip</button>
-                  </div>
-                </div>
-                <h2 id="question-text" class="question-heading">Loading question...</h2>
-                <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
-              </div>
-
-              <!-- Back Face: Answer Feedback & Next Button (No Scrolling Required) -->
-              <div class="flip-card-back">
-                <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
-                  <div id="feedback-result" class="feedback-result"></div>
-                  <div id="feedback-correct-answer" class="feedback-correct-answer"></div>
-                  <p id="feedback-explanation" class="feedback-explanation"></p>
-                </div>
-                <div class="action-footer">
-                  <button id="next-btn" class="btn btn-primary hidden" type="button">Next Question →</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
+      <div class="form-group">
+        <label for="new-q-text">Question Prompt <span class="req">*</span></label>
+        <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" required>
       </div>
 
+      <div class="options-inputs-header">
+        <span>Answer Options <span class="req">*</span></span>
+        <span class="hint-text">Select the radio button for the correct answer</span>
+      </div>
+
+      <div class="options-inputs-grid">
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="0" checked aria-label="Option A is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">A</span>
+          </label>
+          <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="1" aria-label="Option B is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">B</span>
+          </label>
+          <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="2" aria-label="Option C is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">C</span>
+          </label>
+          <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" required>
+        </div>
+
+        <div class="option-input-row">
+          <label class="radio-label">
+            <input type="radio" name="correct-opt" value="3" aria-label="Option D is correct">
+            <span class="custom-radio"></span>
+            <span class="opt-tag">D</span>
+          </label>
+          <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" required>
+        </div>
+      </div>
+
+      <div class="form-group correct-answer-group">
+        <label for="correct-opt-select">Correct Answer <span class="req">*</span> <span class="hint-text">(which option is correct)</span></label>
+        <select id="correct-opt-select" class="input-field">
+          <option value="0" selected>Option A</option>
+          <option value="1">Option B</option>
+          <option value="2">Option C</option>
+          <option value="3">Option D</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="new-q-cat">Topic / Category <span class="hint-text">(e.g. HTML, CSS, JavaScript, or create a new topic)</span></label>
+        <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic...">
+        <datalist id="topics-datalist">
+          <option value="HTML"></option>
+          <option value="CSS"></option>
+          <option value="JavaScript"></option>
+        </datalist>
+      </div>
+
+      <div class="form-group">
+        <label for="new-q-exp">Explanation <span class="hint-text">(optional)</span></label>
+        <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets.">
+      </div>
+
+      <div class="form-actions">
+        <button id="btn-add-question" class="btn btn-secondary" type="button">Add Question</button>
+        <button id="btn-add-start-quiz" class="btn btn-primary" type="button">Add & Start Quiz 🚀</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+        <!-- Component 2: Active Question Card -->
+<main id="quiz-card" class="quiz-card">
+  <!-- Welcome Overlay when quiz is empty -->
+  <div id="welcome-overlay" class="welcome-overlay">
+    <div class="welcome-badge">🚀 Get Started</div>
+    <h2 class="welcome-heading">Welcome to Quiz Web</h2>
+    <p class="welcome-desc">No quiz questions yet. Click below to add your first question or load sample web trivia to begin!</p>
+    <div class="welcome-actions">
+      <button id="btn-welcome-add" class="btn btn-primary" type="button">➕ Add New Quiz</button>
+      <button id="btn-welcome-sample" class="btn btn-secondary" type="button">⚡ Load Sample Questions</button>
+      <button id="btn-welcome-intro" class="btn btn-secondary" type="button">📖 How to Play</button>
+    </div>
+  </div>
+
+  <!-- Active Question Card Content (revealed when questions exist) -->
+  <div class="card-inner hidden">
+    <div id="flip-card-inner" class="flip-card-inner">
+      <!-- Front Face: Question Prompt and Options -->
+      <div class="flip-card-front">
+        <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span class="category-card-badge">Web Dev</span>
+          <div id="card-timer-badge" class="card-timer-badge">
+            <span class="timer-icon" aria-hidden="true">⏱</span>
+            <span id="timer-display" class="timer-text">00:00:30</span>
+            <button id="btn-card-timer-settings" class="btn-card-timer-settings" type="button" title="Timer Settings" aria-label="Timer Settings">⚙️</button>
+          </div>
+          <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
+            <span class="lifelines-label">Power-Ups:</span>
+            <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
+            <button id="btn-lifeline-skip" class="btn-lifeline" type="button" title="Skip this question without penalty (Once per quiz)">⏭️ Skip</button>
+          </div>
+        </div>
+        <h2 id="question-text" class="question-heading">Loading question...</h2>
+        <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
+      </div>
+
+      <!-- Back Face: Answer Feedback & Next Button (No Scrolling Required) -->
+      <div class="flip-card-back">
+        <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
+          <div id="feedback-result" class="feedback-result"></div>
+          <div id="feedback-correct-answer" class="feedback-correct-answer"></div>
+          <p id="feedback-explanation" class="feedback-explanation"></p>
+        </div>
+        <div class="action-footer">
+          <button id="next-btn" class="btn btn-primary hidden" type="button">Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+      </div>
 
       <div class="sidebar-column">
         <!-- Component 3: Scoreboard / Stats & History -->
-        <aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
-          <h2 class="scoreboard-title">Live Scoreboard</h2>
-          <div class="stats-cards">
-            <div class="stat-card">
-              <span class="stat-label">Total Score</span>
-              <span id="score-display" class="stat-value highlight">0</span>
-              <span class="stat-unit">pts</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Streak</span>
-              <div class="streak-value-wrap">
-                <span class="streak-icon" aria-hidden="true">🔥</span>
-                <span id="streak-display" class="stat-value">0</span>
-              </div>
-              <span id="best-streak-display" class="stat-sub">Best: 0</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Accuracy</span>
-              <span id="accuracy-display" class="stat-value">0%</span>
-            </div>
-          </div>
-
-          <div class="history-section">
-            <h3 class="history-title">Question History</h3>
-            <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
-          </div>
-
-          <!-- Leaderboard Section -->
-          <div id="quiz-leaderboard" class="leaderboard-section">
-            <div class="leaderboard-header">
-              <h3 class="leaderboard-title">🏆 Top Records</h3>
-              <button id="btn-clear-leaderboard" class="btn-text-subtle" type="button" title="Clear saved leaderboard records">Reset</button>
-            </div>
-            <div id="leaderboard-list" class="leaderboard-list" aria-label="Top quiz scores">
-              <p class="leaderboard-empty">No records yet. Complete a quiz to rank!</p>
-            </div>
-          </div>
-        </aside>
-
-        <!-- Affiliate / Ad Banner Zone -->
-        <section id="affiliate-zone" class="ad-card" aria-label="Sponsored Content">
-          <div class="ad-badge">Sponsored</div>
-          <div class="ad-content">
-            <!-- Affiliate banner or ad network link -->
-            <a href="https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde" class="ad-link" target="_blank" rel="noopener sponsored">
-              <div class="ad-placeholder-art" aria-hidden="true">🚀</div>
-              <div class="ad-text">
-                <strong class="ad-title">Recommended Dev Tools & Offers</strong>
-                <p class="ad-desc">Explore curated web dev resources, cloud hosting & exclusive deals.</p>
-              </div>
-            </a>
-          </div>
-        </section>
-      </div>
+<aside id="quiz-scoreboard" class="quiz-scoreboard" aria-label="Scoreboard">
+  <h2 class="scoreboard-title">Live Scoreboard</h2>
+  <div class="stats-cards">
+    <div class="stat-card">
+      <span class="stat-label">Total Score</span>
+      <span id="score-display" class="stat-value highlight">0</span>
+      <span class="stat-unit">pts</span>
     </div>
-
+    <div class="stat-card">
+      <span class="stat-label">Streak</span>
+      <div class="streak-value-wrap">
+        <span class="streak-icon" aria-hidden="true">🔥</span>
+        <span id="streak-display" class="stat-value">0</span>
+      </div>
+      <span id="best-streak-display" class="stat-sub">Best: 0</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Accuracy</span>
+      <span id="accuracy-display" class="stat-value">0%</span>
+    </div>
   </div>
 
+  <div class="history-section">
+    <h3 class="history-title">Question History</h3>
+    <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
+  </div>
+
+  <!-- Leaderboard Section -->
+  <div id="quiz-leaderboard" class="leaderboard-section">
+    <div class="leaderboard-header">
+      <h3 class="leaderboard-title">🏆 Top Records</h3>
+      <button id="btn-clear-leaderboard" class="btn-text-subtle" type="button" title="Clear saved leaderboard records">Reset</button>
+    </div>
+    <div id="leaderboard-list" class="leaderboard-list" aria-label="Top quiz scores">
+      <p class="leaderboard-empty">No records yet. Complete a quiz to rank!</p>
+    </div>
+  </div>
+</aside>
+
+<!-- Affiliate / Ad Banner Zone -->
+<section id="affiliate-zone" class="ad-card" aria-label="Sponsored Content">
+  <div class="ad-badge">Sponsored</div>
+  <div class="ad-content">
+    <!-- Affiliate banner or ad network link -->
+    <a href="https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde" class="ad-link" target="_blank" rel="noopener sponsored">
+      <div class="ad-placeholder-art" aria-hidden="true">🚀</div>
+      <div class="ad-text">
+        <strong class="ad-title">Recommended Dev Tools & Offers</strong>
+        <p class="ad-desc">Explore curated web dev resources, cloud hosting & exclusive deals.</p>
+      </div>
+    </a>
+  </div>
+</section>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals (Intro, Timer Settings, Topic Management, Review) -->
   <!-- 3-Step Introduction Modal -->
-  <div id="intro-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="intro-modal-title">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon" aria-hidden="true">💡</span>
-          <h2 id="intro-modal-title" class="modal-title">How to Create & Play</h2>
-        </div>
-        <button id="btn-intro-close" class="modal-close-btn" type="button" aria-label="Close introduction">✕</button>
+<div id="intro-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="intro-modal-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">💡</span>
+        <h2 id="intro-modal-title" class="modal-title">How to Create & Play</h2>
+      </div>
+      <button id="btn-intro-close" class="modal-close-btn" type="button" aria-label="Close introduction">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Step 1 -->
+      <div id="intro-step-1" class="intro-step active">
+        <div class="step-badge">Step 1 of 3</div>
+        <div class="step-illustration" aria-hidden="true">✍️</div>
+        <h3 class="step-title">1. Create Your Questions</h3>
+        <p class="step-desc">Click <strong>"Add Custom Question"</strong> above to enter your question text, 4 answer options, and select the radio button next to the correct answer.</p>
       </div>
 
-      <div class="modal-body">
-        <!-- Step 1 -->
-        <div id="intro-step-1" class="intro-step active">
-          <div class="step-badge">Step 1 of 3</div>
-          <div class="step-illustration" aria-hidden="true">✍️</div>
-          <h3 class="step-title">1. Create Your Questions</h3>
-          <p class="step-desc">Click <strong>"Add Custom Question"</strong> above to enter your question text, 4 answer options, and select the radio button next to the correct answer.</p>
-        </div>
-
-        <!-- Step 2 -->
-        <div id="intro-step-2" class="intro-step">
-          <div class="step-badge">Step 2 of 3</div>
-          <div class="step-illustration" aria-hidden="true">📦</div>
-          <h3 class="step-title">2. Build Up to 50 Questions</h3>
-          <p class="step-desc">Add up to 50 questions for your quiz session. Questions are stored temporarily in your local session and reload will reset cleanly.</p>
-        </div>
-
-        <!-- Step 3 -->
-        <div id="intro-step-3" class="intro-step">
-          <div class="step-badge">Step 3 of 3</div>
-          <div class="step-illustration" aria-hidden="true">🎯</div>
-          <h3 class="step-title">3. Play & Track Your Score</h3>
-          <p class="step-desc">Click <strong>"Add & Start Quiz"</strong> to play! Use keys <strong>1–4</strong> or <strong>A–D</strong> to answer, press <strong>Enter/Space</strong> to advance, enjoy audio effects, and compete for top ranks on the Leaderboard!</p>
-        </div>
-
-        <!-- Step Indicator Dots -->
-        <div class="step-indicator" role="tablist" aria-label="Step progress">
-          <button class="step-dot active" data-step="1" type="button" aria-label="Step 1"></button>
-          <button class="step-dot" data-step="2" type="button" aria-label="Step 2"></button>
-          <button class="step-dot" data-step="3" type="button" aria-label="Step 3"></button>
-        </div>
+      <!-- Step 2 -->
+      <div id="intro-step-2" class="intro-step">
+        <div class="step-badge">Step 2 of 3</div>
+        <div class="step-illustration" aria-hidden="true">📦</div>
+        <h3 class="step-title">2. Build Up to 50 Questions</h3>
+        <p class="step-desc">Add up to 50 questions for your quiz session. Questions are stored temporarily in your local session and reload will reset cleanly.</p>
       </div>
 
-      <div class="modal-footer">
-        <button id="btn-intro-prev" class="btn btn-secondary btn-sm hidden" type="button">← Back</button>
-        <button id="btn-intro-next" class="btn btn-primary btn-sm" type="button">Next Step →</button>
+      <!-- Step 3 -->
+      <div id="intro-step-3" class="intro-step">
+        <div class="step-badge">Step 3 of 3</div>
+        <div class="step-illustration" aria-hidden="true">🎯</div>
+        <h3 class="step-title">3. Play & Track Your Score</h3>
+        <p class="step-desc">Click <strong>"Add & Start Quiz"</strong> to play! Use keys <strong>1–4</strong> or <strong>A–D</strong> to answer, press <strong>Enter/Space</strong> to advance, enjoy audio effects, and compete for top ranks on the Leaderboard!</p>
+      </div>
+
+      <!-- Step Indicator Dots -->
+      <div class="step-indicator" role="tablist" aria-label="Step progress">
+        <button class="step-dot active" data-step="1" type="button" aria-label="Step 1"></button>
+        <button class="step-dot" data-step="2" type="button" aria-label="Step 2"></button>
+        <button class="step-dot" data-step="3" type="button" aria-label="Step 3"></button>
       </div>
     </div>
-  </div>
 
-  <!-- Timer & Clock Settings Modal -->
-  <div id="timer-settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="timer-modal-title">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon" aria-hidden="true">⏱️</span>
-          <h2 id="timer-modal-title" class="modal-title">Clock & Time Lapse</h2>
-        </div>
-        <button id="btn-close-timer" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="timer-mode-group">
-          <label for="timer-mode-select">Timer Mode</label>
-          <select id="timer-mode-select" class="input-field">
-            <option value="per-question" selected>Per-Question Countdown</option>
-            <option value="total">Total Quiz Countdown</option>
-            <option value="stopwatch">Stopwatch (Counting Up)</option>
-          </select>
-        </div>
-        <div id="timer-duration-group" class="timer-duration-group">
-          <label for="timer-limit-input">Time Limit (Seconds)</label>
-          <div class="timer-presets">
-            <button type="button" class="preset-pill" data-seconds="15">15s</button>
-            <button type="button" class="preset-pill active" data-seconds="30">30s</button>
-            <button type="button" class="preset-pill" data-seconds="60">60s</button>
-            <button type="button" class="preset-pill" data-seconds="120">2m</button>
-          </div>
-          <input id="timer-limit-input" class="input-field" type="number" min="5" max="600" value="30">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="btn-cancel-timer" class="btn btn-secondary btn-sm" type="button">Cancel</button>
-        <button id="btn-apply-timer" class="btn btn-primary btn-sm" type="button">Save Settings</button>
-      </div>
+    <div class="modal-footer">
+      <button id="btn-intro-prev" class="btn btn-secondary btn-sm hidden" type="button">← Back</button>
+      <button id="btn-intro-next" class="btn btn-primary btn-sm" type="button">Next Step →</button>
     </div>
   </div>
+</div>
 
-  <!-- Add New Topic Mini Popup Modal -->
-  <div id="topic-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="topic-modal-title">
-    <div class="modal-card topic-modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon" aria-hidden="true">🏷️</span>
-          <h2 id="topic-modal-title" class="modal-title">Add New Topic</h2>
-        </div>
-        <button id="btn-close-topic-modal" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+<!-- Timer & Clock Settings Modal -->
+<div id="timer-settings-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="timer-modal-title">
+  <div class="modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">⏱️</span>
+        <h2 id="timer-modal-title" class="modal-title">Clock & Time Lapse</h2>
       </div>
-      <div class="modal-body">
-        <p class="modal-desc" style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 12px;">Create a new topic or category for your quiz questions:</p>
-        <div class="form-group">
-          <label for="input-topic-name">Topic Name <span class="req">*</span></label>
-          <input id="input-topic-name" class="input-field" type="text" placeholder="e.g. React, Python, Docker..." maxlength="30" autocomplete="off">
-          <div id="topic-modal-error" class="form-alert error hidden" style="margin-top: 8px;"></div>
-        </div>
+      <button id="btn-close-timer" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="timer-mode-group">
+        <label for="timer-mode-select">Timer Mode</label>
+        <select id="timer-mode-select" class="input-field">
+          <option value="per-question" selected>Per-Question Countdown</option>
+          <option value="total">Total Quiz Countdown</option>
+          <option value="stopwatch">Stopwatch (Counting Up)</option>
+        </select>
       </div>
-      <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end;">
-        <button id="btn-cancel-topic" class="btn btn-secondary btn-sm" type="button">Cancel</button>
-        <button id="btn-save-topic" class="btn btn-primary btn-sm" type="button">Add Topic</button>
+      <div id="timer-duration-group" class="timer-duration-group">
+        <label for="timer-limit-input">Time Limit (Seconds)</label>
+        <div class="timer-presets">
+          <button type="button" class="preset-pill" data-seconds="15">15s</button>
+          <button type="button" class="preset-pill active" data-seconds="30">30s</button>
+          <button type="button" class="preset-pill" data-seconds="60">60s</button>
+          <button type="button" class="preset-pill" data-seconds="120">2m</button>
+        </div>
+        <input id="timer-limit-input" class="input-field" type="number" min="5" max="600" value="30">
       </div>
     </div>
-  </div>
-
-  <!-- Post-Quiz Review / Answer Breakdown Modal -->
-  <div id="review-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
-    <div class="modal-card review-modal-card">
-      <div class="modal-header">
-        <div class="modal-title-wrap">
-          <span class="modal-icon" aria-hidden="true">📋</span>
-          <h2 id="review-modal-title" class="modal-title">Answer Breakdown</h2>
-        </div>
-        <button id="btn-close-review" class="modal-close-btn" type="button" aria-label="Close review modal">✕</button>
-      </div>
-      <div class="modal-body review-modal-body">
-        <div id="review-list" class="review-list" aria-label="Detailed answers review"></div>
-      </div>
-      <div class="modal-footer">
-        <button id="btn-review-close-footer" class="btn btn-secondary btn-sm" type="button">Back to Summary</button>
-      </div>
+    <div class="modal-footer">
+      <button id="btn-cancel-timer" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+      <button id="btn-apply-timer" class="btn btn-primary btn-sm" type="button">Save Settings</button>
     </div>
   </div>
+</div>
+
+<!-- Add New Topic Mini Popup Modal -->
+<div id="topic-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="topic-modal-title">
+  <div class="modal-card topic-modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">🏷️</span>
+        <h2 id="topic-modal-title" class="modal-title">Add New Topic</h2>
+      </div>
+      <button id="btn-close-topic-modal" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 12px;">Create a new topic or category for your quiz questions:</p>
+      <div class="form-group">
+        <label for="input-topic-name">Topic Name <span class="req">*</span></label>
+        <input id="input-topic-name" class="input-field" type="text" placeholder="e.g. React, Python, Docker..." maxlength="30" autocomplete="off">
+        <div id="topic-modal-error" class="form-alert error hidden" style="margin-top: 8px;"></div>
+      </div>
+    </div>
+    <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end;">
+      <button id="btn-cancel-topic" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+      <button id="btn-save-topic" class="btn btn-primary btn-sm" type="button">Add Topic</button>
+    </div>
+  </div>
+</div>
+
+<!-- Post-Quiz Review / Answer Breakdown Modal -->
+<div id="review-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
+  <div class="modal-card review-modal-card">
+    <div class="modal-header">
+      <div class="modal-title-wrap">
+        <span class="modal-icon" aria-hidden="true">📋</span>
+        <h2 id="review-modal-title" class="modal-title">Answer Breakdown</h2>
+      </div>
+      <button id="btn-close-review" class="modal-close-btn" type="button" aria-label="Close review modal">✕</button>
+    </div>
+    <div class="modal-body review-modal-body">
+      <div id="review-list" class="review-list" aria-label="Detailed answers review"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-review-close-footer" class="btn btn-secondary btn-sm" type="button">Back to Summary</button>
+    </div>
+  </div>
+</div>
+
 
   <script src="script.js"></script>
 </body>
 </html>
-

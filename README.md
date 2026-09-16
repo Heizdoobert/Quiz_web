@@ -48,7 +48,15 @@ Zero frameworks. Zero runtime dependencies. Zero build step.
 
 ```text
 .
-├── index.html            # Semantic HTML layout and component structure
+├── index.html            # Compiled, production-ready semantic HTML layout
+├── template.html         # Clean, lightweight source template (~75 lines)
+├── build.js              # Fast, zero-dependency sub-HTML component compiler
+├── components/           # Modular sub-HTML component partials:
+│   ├── header.html       # Brand header, timer, category pills, progress
+│   ├── question-form.html# Custom question builder section & collapsible form
+│   ├── quiz-card.html    # Active question card, welcome overlay, 3D flip card
+│   ├── scoreboard.html   # Stats, streaks, question history, leaderboard & ads
+│   └── modals.html       # Intro guide, timer config, topic, & review modals
 ├── style.css             # Modern dark-theme styling, CSS variables, and layout
 ├── script.js             # State machine, question dataset, and DOM rendering
 ├── README.md             # Project documentation and ad integration guide

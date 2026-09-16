@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary SEO Meta Tags -->
+  <title>Quick Quiz</title>
+  <meta name="title" content="Quick Quiz">
+  <meta name="description" content="Quick Quiz - Test and sharpen your skills with fast, interactive web quizzes. Features customizable time-lapse timers, 3D flip card answers, study mood aesthetic, and real-time score tracking.">
+  <meta name="keywords" content="quick quiz, web quiz, coding quiz, javascript quiz, html css trivia, study mood clock, developer quiz, practice programming">
+  <meta name="author" content="Quick Quiz">
+  <meta name="robots" content="index, follow">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="canonical" href="https://heizdoobert.github.io/Quiz_web/">
+
+  <!-- Open Graph / Facebook / LinkedIn / Discord -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://heizdoobert.github.io/Quiz_web/">
+  <meta property="og:title" content="Quick Quiz">
+  <meta property="og:description" content="Quick Quiz - Test and sharpen your skills with fast, interactive web quizzes. Features customizable time-lapse timers, 3D flip card answers, and real-time score tracking.">
+  <meta property="og:site_name" content="Quick Quiz">
+  <meta property="og:locale" content="en_US">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://heizdoobert.github.io/Quiz_web/">
+  <meta name="twitter:title" content="Quick Quiz">
+  <meta name="twitter:description" content="Quick Quiz - Test and sharpen your skills with fast, interactive web quizzes. Features customizable time-lapse timers, 3D flip card answers, and real-time score tracking.">
+
+  <!-- JSON-LD Structured Data for Search Engines -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Quick Quiz",
+    "url": "https://heizdoobert.github.io/Quiz_web/",
+    "applicationCategory": "EducationalApplication",
+    "genre": "Quiz",
+    "browserRequirements": "Requires JavaScript. Requires HTML5.",
+    "operatingSystem": "All modern browsers",
+    "description": "Quick Quiz is an interactive, responsive single-page web application to test, learn, and practice skills with instant feedback and customizable timers.",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Full-screen Canvas for Native Confetti Particle Bursts -->
+  <canvas id="confetti-canvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
+  <div class="app-layout">
+    <!-- Component 1: Header / Timer & Progress -->
+    <!-- @include components/header.html -->
+
+    <!-- Main Content Area: Question Card + Scoreboard -->
+    <div class="main-content-grid">
+      <div class="quiz-main-column">
+        <!-- @include components/question-form.html -->
+        <!-- @include components/quiz-card.html -->
+      </div>
+
+      <div class="sidebar-column">
+        <!-- @include components/scoreboard.html -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modals (Intro, Timer Settings, Topic Management, Review) -->
+  <!-- @include components/modals.html -->
+
+  <script src="script.js"></script>
+</body>
+</html>
