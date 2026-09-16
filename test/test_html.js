@@ -41,6 +41,7 @@ assert.ok(html.includes('id="feedback-container" class="feedback-card hidden" ar
 // Check affiliate ad zone
 assert.ok(html.includes('id="affiliate-zone"'), 'Affiliate ad zone must exist');
 assert.ok(html.includes('class="ad-card"'), 'Ad card styling class must exist');
+assert.ok(html.includes('https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde'), 'Ad link must point to designated partner URL');
 
 // Check custom question builder elements
 assert.ok(html.includes('id="custom-question-section"'), 'Custom question section must exist');
