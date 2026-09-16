@@ -24,6 +24,7 @@ const {
   handleRestart,
   selectOption,
   restartQuiz,
+  loadSampleQuestions,
   QUESTIONS,
   state
 } = require(path.resolve(__dirname, '../script.js'));
@@ -32,17 +33,7 @@ assert.strictEqual(typeof renderHeader, 'function');
 assert.strictEqual(typeof renderQuestion, 'function');
 assert.strictEqual(typeof renderScoreboard, 'function');
 assert.strictEqual(typeof renderAll, 'function');
-
-// 1. Bounds check on selectOption(index)
-restartQuiz();
-assert.strictEqual(selectOption(-1), null, 'Negative index must return null');
-assert.strictEqual(selectOption(4), null, 'Index >= options.length must return null');
-assert.strictEqual(selectOption(99), null, 'Large index must return null');
-assert.strictEqual(selectOption('0'), null, 'Non-number index must return null');
-assert.strictEqual(selectOption(NaN), null, 'NaN index must return null');
-assert.strictEqual(selectOption(1.5), null, 'Non-integer index must return null');
-assert.strictEqual(state.isAnswered, false, 'State should not be answered');
-assert.strictEqual(state.answers.length, 0, 'No answer should be recorded');
+assert.strictEqual(typeof loadSampleQuestions, 'function');
 
 // 2. Simulated DOM tests
 class MockElement {
@@ -174,7 +165,32 @@ global.document = {
   addEventListener: () => {}
 };
 
-// Test renderHeader & aria-valuenow
+// 1. Verify blank state initially
+assert.strictEqual(QUESTIONS.length, 0, 'QUESTIONS should start blank');
+restartQuiz();
+renderHeader();
+assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 0 of 0 (Add a question to start)');
+assert.strictEqual(getOrCreateElement('progress-bar-fill').style.width, '0%');
+renderQuestion();
+assert.ok(getOrCreateElement('quiz-card').innerHTML.includes('welcome-overlay'), 'Quiz card must show welcome overlay when empty');
+assert.ok(getOrCreateElement('quiz-card').innerHTML.includes('btn-welcome-add'), 'Must have btn-welcome-add button');
+
+// Populate questions for quiz gameplay tests
+loadSampleQuestions();
+assert.strictEqual(QUESTIONS.length, 6, 'loadSampleQuestions should populate 6 sample questions');
+
+// 2. Bounds check on selectOption(index) with active questions
+restartQuiz();
+assert.strictEqual(selectOption(-1), null, 'Negative index must return null');
+assert.strictEqual(selectOption(4), null, 'Index >= options.length must return null');
+assert.strictEqual(selectOption(99), null, 'Large index must return null');
+assert.strictEqual(selectOption('0'), null, 'Non-number index must return null');
+assert.strictEqual(selectOption(NaN), null, 'NaN index must return null');
+assert.strictEqual(selectOption(1.5), null, 'Non-integer index must return null');
+assert.strictEqual(state.isAnswered, false, 'State should not be answered');
+assert.strictEqual(state.answers.length, 0, 'No answer should be recorded');
+
+// 3. Test renderHeader & aria-valuenow with active questions
 restartQuiz();
 state.elapsedSeconds = 65;
 renderHeader();

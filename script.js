@@ -100,10 +100,24 @@ const MiniStore = {
   }
 };
 
-// Active questions array (defaults to a clone of DEFAULT_QUESTIONS)
-const QUESTIONS = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+// Active questions array (starts blank initially)
+const QUESTIONS = [];
+
+
+function loadSampleQuestions() {
+  QUESTIONS.length = 0;
+  DEFAULT_QUESTIONS.forEach(q => QUESTIONS.push(JSON.parse(JSON.stringify(q))));
+  MiniStore.save(QUESTIONS);
+  restartQuiz();
+  if (typeof document !== 'undefined') {
+    if (typeof renderAll === 'function') renderAll();
+    if (typeof updateQuestionCountBadge === 'function') updateQuestionCountBadge();
+  }
+}
+
 
 function addCustomQuestion(data) {
+
   if (!data || typeof data.question !== 'string' || data.question.trim().length === 0) {
     return null;
   }
@@ -164,9 +178,9 @@ function calcAccuracy(answers) {
 }
 
 function selectOption(index) {
-  if (state.isAnswered || state.isFinished) return null;
+  if (state.isAnswered || state.isFinished || QUESTIONS.length === 0) return null;
   const currentQ = QUESTIONS[state.currentIndex];
-  if (typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= currentQ.options.length) {
+  if (!currentQ || typeof index !== 'number' || !Number.isInteger(index) || index < 0 || index >= currentQ.options.length) {
     return null;
   }
   const isCorrect = (index === currentQ.correctIndex);
@@ -216,7 +230,9 @@ function restartQuiz() {
 // --- DOM Rendering Functions ---
 
 function renderHeader() {
+  if (typeof document === 'undefined') return;
   const timerDisplay = document.getElementById('timer-display');
+
   const progressText = document.getElementById('progress-text');
   const progressBarFill = document.getElementById('progress-bar-fill');
   const progressTrack = document.querySelector ? document.querySelector('.progress-track') : null;
@@ -226,14 +242,18 @@ function renderHeader() {
   }
 
   const total = QUESTIONS.length;
-  const currentNum = Math.min(state.currentIndex + 1, total);
+  const currentNum = total > 0 ? Math.min(state.currentIndex + 1, total) : 0;
 
   if (progressText) {
-    progressText.textContent = state.isFinished ? 'Quiz Complete!' : `Question ${currentNum} of ${total}`;
+    if (total === 0) {
+      progressText.textContent = 'Question 0 of 0 (Add a question to start)';
+    } else {
+      progressText.textContent = state.isFinished ? 'Quiz Complete!' : `Question ${currentNum} of ${total}`;
+    }
   }
 
   if (progressBarFill) {
-    const pct = state.isFinished ? 100 : Math.round((currentNum / total) * 100);
+    const pct = total === 0 ? 0 : (state.isFinished ? 100 : Math.round((currentNum / total) * 100));
     progressBarFill.style.width = `${pct}%`;
   }
 
@@ -246,6 +266,52 @@ function renderHeader() {
 function renderQuestion() {
   const questionCard = document.getElementById('quiz-card');
   if (!questionCard) return;
+
+  if (QUESTIONS.length === 0) {
+    questionCard.innerHTML = `
+      <div id="welcome-overlay" class="welcome-overlay">
+        <div class="welcome-icon" aria-hidden="true">🎯</div>
+        <h2 class="welcome-heading">Welcome to Quiz Web</h2>
+        <p class="welcome-desc">No quiz questions yet. Click below to add your first question or load sample web trivia to begin!</p>
+        <div class="welcome-actions">
+          <button id="btn-welcome-add" class="btn btn-primary" type="button">➕ Add New Quiz</button>
+          <button id="btn-welcome-sample" class="btn btn-secondary" type="button">⚡ Load Sample Questions</button>
+          <button id="btn-welcome-intro" class="btn btn-secondary" type="button">📖 How to Play</button>
+        </div>
+      </div>
+    `;
+
+    const btnAdd = document.getElementById('btn-welcome-add');
+    if (btnAdd) {
+      btnAdd.addEventListener('click', () => {
+        const formSection = document.getElementById('custom-question-section');
+        const toggleBtn = document.getElementById('toggle-add-form-btn');
+        if (formSection) formSection.classList.add('expanded');
+        if (toggleBtn) {
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          toggleBtn.textContent = '✖ Close Question Form';
+        }
+        const qInput = document.getElementById('new-q-text');
+        if (qInput) qInput.focus();
+      });
+    }
+
+    const btnSample = document.getElementById('btn-welcome-sample');
+    if (btnSample) {
+      btnSample.addEventListener('click', () => {
+        loadSampleQuestions();
+      });
+    }
+
+    const btnIntro = document.getElementById('btn-welcome-intro');
+    if (btnIntro) {
+      btnIntro.addEventListener('click', () => {
+        openIntroModal();
+      });
+    }
+    return;
+  }
+
 
   if (state.isFinished) {
     const accuracy = calcAccuracy(state.answers);
@@ -324,6 +390,7 @@ function renderQuestion() {
 }
 
 function renderScoreboard() {
+  if (typeof document === 'undefined') return;
   const scoreDisplay = document.getElementById('score-display');
   const streakDisplay = document.getElementById('streak-display');
   const bestStreakDisplay = document.getElementById('best-streak-display');
@@ -352,10 +419,12 @@ function renderScoreboard() {
 }
 
 function renderAll() {
+  if (typeof document === 'undefined') return;
   renderHeader();
   renderQuestion();
   renderScoreboard();
 }
+
 
 function handleOptionClick(idx) {
   if (state.isAnswered) return;
@@ -545,6 +614,124 @@ function initCustomQuestionForm() {
   }
 }
 
+let currentIntroStep = 1;
+
+function openIntroModal() {
+  const modal = document.getElementById('intro-modal');
+  if (modal) {
+    modal.classList.remove('hidden');
+    currentIntroStep = 1;
+    showIntroStep(1);
+  }
+}
+
+function closeIntroModal() {
+  const modal = document.getElementById('intro-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+function showIntroStep(step) {
+  currentIntroStep = step;
+  const steps = [1, 2, 3];
+  steps.forEach(s => {
+    const el = document.getElementById(`intro-step-${s}`);
+    if (el) {
+      if (s === step) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    }
+  });
+
+  const dots = document.querySelectorAll ? document.querySelectorAll('.step-dot') : [];
+  dots.forEach(dot => {
+    const s = parseInt(dot.dataset.step, 10);
+    if (s === step) {
+      dot.classList.add('active');
+    } else {
+      dot.classList.remove('active');
+    }
+  });
+
+  const prevBtn = document.getElementById('btn-intro-prev');
+  const nextBtn = document.getElementById('btn-intro-next');
+
+  if (prevBtn) {
+    if (step === 1) {
+      prevBtn.classList.add('hidden');
+    } else {
+      prevBtn.classList.remove('hidden');
+    }
+  }
+
+  if (nextBtn) {
+    if (step === 3) {
+      nextBtn.textContent = 'Got It, Let’s Create! 🚀';
+    } else {
+      nextBtn.textContent = 'Next Step →';
+    }
+  }
+}
+
+function initIntroModal() {
+  const modal = document.getElementById('intro-modal');
+  if (!modal) return;
+
+  const closeBtn = document.getElementById('btn-intro-close');
+  if (closeBtn) closeBtn.addEventListener('click', closeIntroModal);
+
+  const prevBtn = document.getElementById('btn-intro-prev');
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      if (currentIntroStep > 1) {
+        showIntroStep(currentIntroStep - 1);
+      }
+    });
+  }
+
+  const nextBtn = document.getElementById('btn-intro-next');
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      if (currentIntroStep < 3) {
+        showIntroStep(currentIntroStep + 1);
+      } else {
+        closeIntroModal();
+        const qInput = document.getElementById('new-q-text');
+        const formSection = document.getElementById('custom-question-section');
+        const toggleBtn = document.getElementById('toggle-add-form-btn');
+        if (formSection) formSection.classList.add('expanded');
+        if (toggleBtn) {
+          toggleBtn.setAttribute('aria-expanded', 'true');
+          toggleBtn.textContent = '✖ Close Question Form';
+        }
+        if (qInput) qInput.focus();
+      }
+    });
+  }
+
+  const dots = document.querySelectorAll ? document.querySelectorAll('.step-dot') : [];
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const s = parseInt(dot.dataset.step, 10);
+      showIntroStep(s);
+    });
+  });
+
+  // Header guide button
+  const headerGuideBtn = document.getElementById('btn-header-guide');
+  if (headerGuideBtn) {
+    headerGuideBtn.addEventListener('click', openIntroModal);
+  }
+
+  // Show intro modal on initial load if questions are blank
+  if (QUESTIONS.length === 0) {
+    openIntroModal();
+  }
+}
+
 function initApp() {
   // Clear any existing stored data on page reload as requested
   MiniStore.clear();
@@ -552,6 +739,7 @@ function initApp() {
   MiniStore.save(QUESTIONS);
 
   initCustomQuestionForm();
+  initIntroModal();
   startTimer();
   renderAll();
 }
@@ -566,7 +754,11 @@ if (typeof module !== 'undefined' && module.exports) {
     QUESTIONS,
     MAX_QUESTIONS,
     MiniStore,
+    loadSampleQuestions,
     addCustomQuestion,
+    openIntroModal,
+    closeIntroModal,
+    showIntroStep,
     state,
     formatTime,
     calcAccuracy,
@@ -584,5 +776,6 @@ if (typeof module !== 'undefined' && module.exports) {
     initApp
   };
 }
+
 
 

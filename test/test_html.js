@@ -48,8 +48,15 @@ assert.ok(html.includes('id="toggle-add-form-btn"'), 'Toggle add question button
 assert.ok(html.includes('id="add-question-form"'), 'Add question form must exist');
 assert.ok(html.includes('id="new-q-text"'), 'Question text input must exist');
 assert.ok(html.includes('id="btn-add-question"'), 'Add question button must exist');
-assert.ok(html.includes('id="btn-add-start-quiz"'), 'Add and start quiz button must exist');
+// Check intro popup modal and welcome overlay elements
+assert.ok(html.includes('id="intro-modal"'), 'Intro modal must exist');
+assert.ok(html.includes('id="btn-intro-next"'), 'Intro modal next button must exist');
+assert.ok(html.includes('id="btn-intro-prev"'), 'Intro modal prev button must exist');
+assert.ok(html.includes('id="btn-intro-close"'), 'Intro modal close button must exist');
+assert.ok(html.includes('id="welcome-overlay"'), 'Welcome overlay must exist');
+assert.ok(html.includes('id="btn-welcome-add"'), 'Welcome add quiz button must exist');
 
 console.log('All HTML structure tests passed!');
+
 
 

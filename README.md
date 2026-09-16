@@ -12,6 +12,15 @@ Zero frameworks. Zero runtime dependencies. Zero build step.
   - **Header / Timer**: Live elapsed timer (`MM:SS`), question progress tracker (`Question X of Y`), and an accessible animated progress bar.
   - **Active Question Card**: 4 multiple-choice options, instant color-coded feedback (emerald for correct, crimson for incorrect), contextual explanations, and keyboard navigation.
   - **Live Scoreboard**: Real-time points (+100 per correct answer), current & best streak counter with flame indicator, dynamic accuracy percentage, and a scrollable per-question history log.
+- **Blank Start & Welcome Overlay**:
+  - Loads with a pristine blank question bank (`QUESTIONS = []`), allowing users to create their own custom quiz or populate 6 sample web dev trivia questions with one click.
+  - Displays a transparent glassmorphism `#welcome-overlay` on `#quiz-card` with "Add New Quiz", "Load Sample Questions", and "How to Play" action buttons.
+- **3-Step Interactive Onboarding Guide**:
+  - Modal walkthrough (`#intro-modal`) guiding users through quiz creation and gameplay:
+    - **Step 1: Create Your Quiz**: Add up to 50 custom multiple-choice questions with 4 options and answer keys.
+    - **Step 2: Lightweight Mini-DB**: Saves in browser session storage & cookies, automatically clearing upon page reload for a fresh slate.
+    - **Step 3: Play & Track Progress**: Real-time timer, streak multipliers, accuracy stats, and instant answer explanations.
+  - Step dots indicator and keyboard-accessible navigation controls.
 - **Custom Question Creator (Up to 50 Questions)**:
   - Users can easily add their own questions and options directly in the browser via a collapsible, smoothly animated form (`#custom-question-section`).
   - Supports up to 50 questions with instantaneous validation and radio-button answer keys.

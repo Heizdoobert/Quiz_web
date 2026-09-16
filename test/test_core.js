@@ -1,6 +1,8 @@
 const assert = require('assert');
 const {
+  DEFAULT_QUESTIONS,
   QUESTIONS,
+  loadSampleQuestions,
   state,
   calcAccuracy,
   formatTime,
@@ -9,9 +11,9 @@ const {
   restartQuiz
 } = require('../script.js');
 
-// 1. Verify QUESTIONS array
-assert.ok(Array.isArray(QUESTIONS) && QUESTIONS.length >= 6, 'Must have at least 6 questions');
-QUESTIONS.forEach((q, idx) => {
+// 1. Verify DEFAULT_QUESTIONS template array
+assert.ok(Array.isArray(DEFAULT_QUESTIONS) && DEFAULT_QUESTIONS.length >= 6, 'Must have at least 6 sample questions');
+DEFAULT_QUESTIONS.forEach((q, idx) => {
   assert.strictEqual(typeof q.id, 'number', `Question ${idx} must have numeric id`);
   assert.ok(typeof q.question === 'string' && q.question.length > 0, `Question ${idx} must have text`);
   assert.strictEqual(q.options.length, 4, `Question ${idx} must have 4 options`);
@@ -19,20 +21,28 @@ QUESTIONS.forEach((q, idx) => {
   assert.ok(typeof q.explanation === 'string' && q.explanation.length > 0, `Question ${idx} must have explanation`);
 });
 
-// 2. Test formatTime
+// 2. Verify initial QUESTIONS array starts blank (0 questions)
+assert.ok(Array.isArray(QUESTIONS) && QUESTIONS.length === 0, 'QUESTIONS must start blank initially');
+
+// 3. Test loadSampleQuestions
+loadSampleQuestions();
+assert.strictEqual(QUESTIONS.length, DEFAULT_QUESTIONS.length, 'loadSampleQuestions should populate QUESTIONS');
+
+// 4. Test formatTime
 assert.strictEqual(formatTime(0), '00:00');
 assert.strictEqual(formatTime(65), '01:05');
 assert.strictEqual(formatTime(3600), '60:00');
 
-// 3. Test calcAccuracy
+// 5. Test calcAccuracy
 assert.strictEqual(calcAccuracy([]), 0);
 assert.strictEqual(calcAccuracy([{ isCorrect: true }, { isCorrect: false }]), 50);
 assert.strictEqual(calcAccuracy([{ isCorrect: true }, { isCorrect: true }]), 100);
 
-// 4. Test selectOption - correct answer
+// 6. Test selectOption - correct answer
 restartQuiz();
 const q0 = QUESTIONS[0];
 const correctRes = selectOption(q0.correctIndex);
+
 assert.strictEqual(correctRes.isCorrect, true);
 assert.strictEqual(state.score, 100);
 assert.strictEqual(state.streak, 1);

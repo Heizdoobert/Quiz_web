@@ -46,8 +46,14 @@ assert.ok(css.includes('.ad-badge'), 'CSS must style .ad-badge');
 assert.ok(css.includes('.custom-question-card'), 'CSS must style .custom-question-card');
 assert.ok(css.includes('backdrop-filter: blur'), 'CSS must include backdrop-filter blur for glassmorphism transparency');
 assert.ok(css.includes('transition:'), 'CSS must include smooth transitions');
-assert.ok(css.includes('.form-collapsible'), 'CSS must style .form-collapsible');
+// Check modal and welcome overlay styles
+assert.ok(css.includes('.modal-overlay'), 'CSS must style .modal-overlay');
+assert.ok(css.includes('.modal-card'), 'CSS must style .modal-card');
+assert.ok(css.includes('.step-indicator'), 'CSS must style .step-indicator');
+assert.ok(css.includes('.step-dot'), 'CSS must style .step-dot');
+assert.ok(css.includes('.welcome-overlay'), 'CSS must style .welcome-overlay');
 
 console.log('All CSS styling tests passed!');
+
 
 
