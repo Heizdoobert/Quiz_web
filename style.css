@@ -503,6 +503,12 @@ body {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--color-text-main);
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+}
+
+.form-group:focus-within label {
+  color: #60a5fa;
 }
 
 .req {
@@ -548,6 +554,9 @@ select.input-field {
   border: 1px solid rgba(96, 165, 250, 0.3);
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 select.input-field:hover {
@@ -558,6 +567,7 @@ select.input-field:hover {
 select.input-field:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3), 0 0 16px rgba(59, 130, 246, 0.25);
+  outline: none;
 }
 
 select.input-field option {
@@ -565,6 +575,8 @@ select.input-field option {
   color: #f8fafc;
   padding: 12px;
   font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
 }
 
 .options-inputs-header {
@@ -1124,6 +1136,30 @@ select.input-field option {
   gap: 8px;
   margin-bottom: 16px;
   text-align: left;
+}
+
+.timer-mode-group label,
+.timer-duration-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  letter-spacing: 0.025em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.25s cubic-bezier(0.4, 0, 0.2, 1), text-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.timer-mode-group:hover label,
+.timer-duration-group:hover label,
+.timer-mode-group:focus-within label,
+.timer-duration-group:focus-within label {
+  color: #60a5fa;
+  text-shadow: 0 0 10px rgba(96, 165, 250, 0.35);
 }
 
 .timer-presets {

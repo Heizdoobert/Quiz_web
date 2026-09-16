@@ -76,10 +76,11 @@ assert.ok(css.includes('align-items: flex-start'), 'Option buttons must align it
 assert.ok(css.includes('-webkit-font-smoothing: antialiased'), 'CSS must specify antialiased font smoothing');
 assert.ok(css.includes('scrollbar-width: thin'), 'CSS must style back face with thin scrollbar');
 
-// Check custom select dropdown styling
+// Check custom select dropdown and label styling
 assert.ok(css.includes('select.input-field'), 'CSS must style select.input-field specifically');
 assert.ok(css.includes('appearance: none'), 'Select must have appearance: none for custom arrow');
 assert.ok(css.includes('select.input-field option'), 'Option elements must be styled for dark mode theme');
+assert.ok(css.includes('.timer-mode-group label'), 'CSS must smoothly style dropdown timer mode label');
 
 console.log('All CSS styling tests passed!');
 
