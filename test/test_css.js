@@ -132,6 +132,7 @@ assert.ok(css.includes('100dvh'), 'CSS must specify modern 100dvh for viewport h
 assert.ok(css.includes('.ad-skyscraper'), 'CSS must style .ad-skyscraper side banners');
 assert.ok(css.includes('floatAdRocket'), 'CSS must define floatAdRocket keyframes');
 assert.ok(css.includes('gemGlowPulse'), 'CSS must define gemGlowPulse keyframes');
+assert.ok(css.includes('.ad-gif-img'), 'CSS must style .ad-gif-img banner');
 
 console.log('All CSS styling tests passed!');
 

@@ -1320,6 +1320,22 @@ select.input-field option {
   margin: 10px 0;
 }
 
+.ad-gif-img {
+  width: 78px;
+  height: 78px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+  border: 1.5px solid rgba(96, 165, 250, 0.4);
+  transition: transform 0.25s ease;
+  display: block;
+}
+
+.ad-skyscraper-card:hover .ad-gif-img {
+  transform: scale(1.08);
+  border-color: rgba(96, 165, 250, 0.8);
+}
+
 .ad-gem-wrap,
 .ad-rocket-wrap {
   position: relative;

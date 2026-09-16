@@ -138,6 +138,10 @@ assert.ok(fs.existsSync('build.js'), 'build.js must exist to compile components 
 assert.ok(html.includes('id="ad-skyscraper-left"'), 'Left skyscraper ad tower must exist in index.html');
 assert.ok(html.includes('id="ad-skyscraper-right"'), 'Right skyscraper ad tower must exist in index.html');
 
+// Check Left Skyscraper Partner URL and .gif image display
+assert.ok(html.includes('https://www.profitableratecpmnetwork.com/rfa1ikxf?key=13b07c8c53c5de5684d5df4e66496006'), 'Left skyscraper must link to the specified ad URL');
+assert.ok(html.includes('.gif'), 'Left skyscraper must display a .gif image');
+
 console.log('All HTML structure and SEO tests passed!');
 
 
