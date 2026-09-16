@@ -65,6 +65,17 @@ assert.ok(css.includes('.flip-card-back'), 'CSS must style .flip-card-back');
 assert.ok(css.includes('.timer-warning'), 'CSS must style .timer-warning');
 assert.ok(css.includes('.preset-pill'), 'CSS must style .preset-pill');
 
+// Check study-mood clock styling
+assert.ok(css.includes('tabular-nums'), 'Clock must use tabular-nums for fixed-width digits');
+assert.ok(css.includes('monospace'), 'Clock must use monospace font family for study mood aesthetic');
+
+// Check fluid typography and smooth text fitting
+assert.ok(css.includes('clamp('), 'CSS must use fluid clamp() scaling for text fitting');
+assert.ok(css.includes('word-break: break-word') || css.includes('overflow-wrap: break-word'), 'CSS must prevent text overflow with break-word');
+assert.ok(css.includes('align-items: flex-start'), 'Option buttons must align items to flex-start for multi-line text');
+assert.ok(css.includes('-webkit-font-smoothing: antialiased'), 'CSS must specify antialiased font smoothing');
+assert.ok(css.includes('scrollbar-width: thin'), 'CSS must style back face with thin scrollbar');
+
 console.log('All CSS styling tests passed!');
 
 
