@@ -9,8 +9,8 @@ Zero frameworks. Zero runtime dependencies. Zero build step.
 ## Features
 
 - **3-Component Unified Interface**:
-  - **Header / Timer**: Live elapsed timer (`MM:SS`), question progress tracker (`Question X of Y`), and an accessible animated progress bar.
-  - **Active Question Card**: 4 multiple-choice options, instant color-coded feedback (emerald for correct, crimson for incorrect), contextual explanations, and keyboard navigation.
+  - **Configurable Clock & Time Lapse**: Choose between **Per-Question Countdown** (default 30s; presets for 15s, 30s, 60s, 2m, or custom), **Total Quiz Countdown**, or classic **Stopwatch**. Includes low-time visual warning pulses (< 5s) and automatic timeout handling.
+  - **3D Flip Card Question Presentation (Zero Scrolling)**: Questions are displayed on 3D perspective flip cards. The front displays the question and options; answering smoothly flips the card 180° to reveal the outcome, correct answer, explanation, and next button on the back—completely eliminating the need to scroll down!
   - **Live Scoreboard**: Real-time points (+100 per correct answer), current & best streak counter with flame indicator, dynamic accuracy percentage, and a scrollable per-question history log.
 - **Blank Start & Welcome Overlay**:
   - Loads with a pristine blank question bank (`QUESTIONS = []`), allowing users to create their own custom quiz or populate 6 sample web dev trivia questions with one click.

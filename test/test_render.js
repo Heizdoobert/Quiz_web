@@ -25,6 +25,8 @@ const {
   selectOption,
   restartQuiz,
   loadSampleQuestions,
+  flipCard,
+  setTimerConfig,
   QUESTIONS,
   state
 } = require(path.resolve(__dirname, '../script.js'));
@@ -34,6 +36,7 @@ assert.strictEqual(typeof renderQuestion, 'function');
 assert.strictEqual(typeof renderScoreboard, 'function');
 assert.strictEqual(typeof renderAll, 'function');
 assert.strictEqual(typeof loadSampleQuestions, 'function');
+assert.strictEqual(typeof flipCard, 'function');
 
 // 2. Simulated DOM tests
 class MockElement {
@@ -137,8 +140,8 @@ function getOrCreateElement(id, tagName = 'div') {
 const ids = [
   'quiz-header', 'timer-display', 'progress-text', 'progress-bar-fill',
   'quiz-card', 'options-container', 'feedback-container', 'feedback-result',
-  'feedback-explanation', 'next-btn', 'score-display', 'streak-display',
-  'best-streak-display', 'accuracy-display', 'history-list', 'progress-track'
+  'feedback-explanation', 'feedback-correct-answer', 'next-btn', 'score-display', 'streak-display',
+  'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -192,6 +195,7 @@ assert.strictEqual(state.answers.length, 0, 'No answer should be recorded');
 
 // 3. Test renderHeader & aria-valuenow with active questions
 restartQuiz();
+setTimerConfig('stopwatch');
 state.elapsedSeconds = 65;
 renderHeader();
 assert.strictEqual(getOrCreateElement('timer-display').textContent, '01:05');
@@ -237,6 +241,8 @@ assert.strictEqual(state.score, 100);
 assert.ok(optContainer.children[correctIdx].classList.contains('correct'));
 assert.strictEqual(getOrCreateElement('feedback-container').classList.contains('hidden'), false);
 assert.strictEqual(getOrCreateElement('next-btn').classList.contains('hidden'), false);
+assert.strictEqual(getOrCreateElement('flip-card-inner').classList.contains('is-flipped'), true, 'Card must flip to reveal answer');
+assert.ok(getOrCreateElement('feedback-correct-answer').textContent.includes('<link>'), 'Feedback must show correct answer on flip side');
 
 // Test renderScoreboard
 renderScoreboard();
@@ -250,9 +256,17 @@ assert.strictEqual(historyList.children.length, 1);
 handleNextClick();
 assert.strictEqual(state.currentIndex, 1);
 assert.strictEqual(state.isAnswered, false);
+assert.strictEqual(getOrCreateElement('flip-card-inner').classList.contains('is-flipped'), false, 'Card must flip back to front on next question');
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 2 of 6');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '2', 'aria-valuenow should be 2 on Q2');
 assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS.length), 'aria-valuemax should match QUESTIONS.length on Q2');
+
+// Test timer warning class rendering when time is <= 5s
+setTimerConfig('per-question', 30);
+state.remainingSeconds = 4;
+renderHeader();
+assert.strictEqual(getOrCreateElement('timer-display').textContent, '00:04');
+assert.strictEqual(getOrCreateElement('timer-display').classList.contains('timer-warning'), true, 'Timer must show warning class when <= 5s');
 
 // Verify Question 4 options (which contain <section>, <div>, <article>, <main>)
 state.currentIndex = 3;

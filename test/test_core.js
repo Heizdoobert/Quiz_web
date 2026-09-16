@@ -143,5 +143,37 @@ const overLimitQ = addCustomQuestion({
 assert.strictEqual(overLimitQ, null, 'Adding beyond 50 questions must return null / be rejected');
 assert.strictEqual(QUESTIONS.length, 50, 'Max questions cap must stay at 50');
 
+// 13. Test Timer Configuration & Countdown Logic
+const { setTimerConfig, tickTimer, handleTimeout } = require('../script.js');
+assert.strictEqual(typeof setTimerConfig, 'function', 'setTimerConfig must be a function');
+assert.strictEqual(typeof tickTimer, 'function', 'tickTimer must be a function');
+assert.strictEqual(typeof handleTimeout, 'function', 'handleTimeout must be a function');
+
+// Default timer state: 'per-question', 30s limit, 30s remaining
+restartQuiz();
+assert.strictEqual(state.timerMode, 'per-question', 'Default mode should be per-question');
+assert.strictEqual(state.timerLimit, 30, 'Default timerLimit should be 30s');
+assert.strictEqual(state.remainingSeconds, 30, 'Default remainingSeconds should be 30s');
+
+// Test setTimerConfig
+setTimerConfig('stopwatch');
+assert.strictEqual(state.timerMode, 'stopwatch');
+setTimerConfig('per-question', 15);
+assert.strictEqual(state.timerMode, 'per-question');
+assert.strictEqual(state.timerLimit, 15);
+assert.strictEqual(state.remainingSeconds, 15);
+
+// Test tickTimer in countdown mode
+tickTimer();
+assert.strictEqual(state.remainingSeconds, 14, 'Countdown should decrement remainingSeconds');
+
+// Fast-forward to 0s in per-question mode
+state.remainingSeconds = 1;
+tickTimer();
+assert.strictEqual(state.remainingSeconds, 0);
+assert.strictEqual(state.isAnswered, true, 'Timeout should mark question as answered');
+assert.strictEqual(state.streak, 0, 'Timeout should reset streak to 0');
+assert.strictEqual(state.answers.length > 0 && state.answers[state.answers.length - 1].isTimeout, true, 'Answer record should mark isTimeout: true');
+
 console.log('All Core State Machine tests passed!');
 

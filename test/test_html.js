@@ -56,6 +56,19 @@ assert.ok(html.includes('id="btn-intro-close"'), 'Intro modal close button must 
 assert.ok(html.includes('id="welcome-overlay"'), 'Welcome overlay must exist');
 assert.ok(html.includes('id="btn-welcome-add"'), 'Welcome add quiz button must exist');
 
+// Check timer settings button and modal elements
+assert.ok(html.includes('id="btn-timer-settings"'), 'Timer settings button must exist');
+assert.ok(html.includes('id="timer-settings-modal"'), 'Timer settings modal must exist');
+assert.ok(html.includes('id="timer-mode-select"'), 'Timer mode select must exist');
+assert.ok(html.includes('id="timer-limit-input"'), 'Timer limit input must exist');
+assert.ok(html.includes('id="btn-apply-timer"'), 'Apply timer button must exist');
+
+// Check 3D flip card structure
+assert.ok(html.includes('id="flip-card-inner"'), 'Flip card inner container must exist');
+assert.ok(html.includes('class="flip-card-front"'), 'Flip card front face must exist');
+assert.ok(html.includes('class="flip-card-back"'), 'Flip card back face must exist');
+assert.ok(html.includes('id="feedback-correct-answer"'), 'Feedback correct answer container must exist');
+
 console.log('All HTML structure tests passed!');
 
 

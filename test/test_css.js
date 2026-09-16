@@ -53,6 +53,18 @@ assert.ok(css.includes('.step-indicator'), 'CSS must style .step-indicator');
 assert.ok(css.includes('.step-dot'), 'CSS must style .step-dot');
 assert.ok(css.includes('.welcome-overlay'), 'CSS must style .welcome-overlay');
 
+// Check 3D flip card styling
+assert.ok(css.includes('.flip-card'), 'CSS must style .flip-card');
+assert.ok(css.includes('.flip-card-inner'), 'CSS must style .flip-card-inner');
+assert.ok(css.includes('perspective: 1000px'), 'CSS must set perspective for 3D flip card');
+assert.ok(css.includes('transform-style: preserve-3d'), 'CSS must set transform-style: preserve-3d');
+assert.ok(css.includes('backface-visibility: hidden'), 'CSS must set backface-visibility: hidden');
+assert.ok(css.includes('.is-flipped'), 'CSS must style .is-flipped state');
+assert.ok(css.includes('.flip-card-front'), 'CSS must style .flip-card-front');
+assert.ok(css.includes('.flip-card-back'), 'CSS must style .flip-card-back');
+assert.ok(css.includes('.timer-warning'), 'CSS must style .timer-warning');
+assert.ok(css.includes('.preset-pill'), 'CSS must style .preset-pill');
+
 console.log('All CSS styling tests passed!');
 
 

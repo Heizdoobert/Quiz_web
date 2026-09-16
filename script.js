@@ -162,7 +162,10 @@ const state = {
   isAnswered: false,
   elapsedSeconds: 0,
   timerIntervalId: null,
-  isFinished: false
+  isFinished: false,
+  timerMode: 'per-question', // 'per-question' | 'total' | 'stopwatch'
+  timerLimit: 30,           // seconds for per-question or total
+  remainingSeconds: 30
 };
 
 function formatTime(seconds) {
@@ -175,6 +178,90 @@ function calcAccuracy(answers) {
   if (!answers || answers.length === 0) return 0;
   const correctCount = answers.filter(a => a.isCorrect).length;
   return Math.round((correctCount / answers.length) * 100);
+}
+
+function setTimerConfig(mode, limit) {
+  if (mode === 'per-question' || mode === 'total' || mode === 'stopwatch') {
+    state.timerMode = mode;
+  }
+  if (typeof limit === 'number' && limit > 0) {
+    state.timerLimit = limit;
+  }
+  if (state.timerMode === 'per-question' || state.timerMode === 'total') {
+    state.remainingSeconds = state.timerLimit;
+  }
+  if (typeof renderHeader === 'function' && typeof document !== 'undefined') {
+    renderHeader();
+  }
+}
+
+function handleTimeout() {
+  if (state.isAnswered || state.isFinished || QUESTIONS.length === 0) return null;
+  const currentQ = QUESTIONS[state.currentIndex];
+  state.streak = 0;
+  const record = { questionId: currentQ ? currentQ.id : null, selectedIndex: -1, isCorrect: false, isTimeout: true };
+  state.answers.push(record);
+  state.isAnswered = true;
+
+  if (typeof document !== 'undefined') {
+    const feedbackResult = document.getElementById('feedback-result');
+    const feedbackExplanation = document.getElementById('feedback-explanation');
+    const correctAnsDisplay = document.getElementById('feedback-correct-answer');
+    const nextBtn = document.getElementById('next-btn');
+
+    if (feedbackResult) {
+      feedbackResult.className = 'feedback-result incorrect';
+      feedbackResult.textContent = "⏰ Time's Up!";
+    }
+    if (feedbackExplanation && currentQ) {
+      feedbackExplanation.textContent = currentQ.explanation || 'No explanation provided.';
+    }
+    if (correctAnsDisplay && currentQ) {
+      correctAnsDisplay.textContent = `Correct answer: ${currentQ.options[currentQ.correctIndex]}`;
+    }
+    if (nextBtn) {
+      nextBtn.classList.remove('hidden');
+      nextBtn.focus();
+    }
+    if (typeof flipCard === 'function') {
+      flipCard(true);
+    }
+    renderScoreboard();
+  }
+  return record;
+}
+
+function tickTimer() {
+  if (state.isFinished || QUESTIONS.length === 0) return;
+
+  if (state.timerMode === 'stopwatch') {
+    state.elapsedSeconds += 1;
+  } else if (state.timerMode === 'per-question') {
+    if (state.remainingSeconds > 0 && !state.isAnswered) {
+      state.remainingSeconds -= 1;
+      if (state.remainingSeconds === 0) {
+        handleTimeout();
+      }
+    }
+  } else if (state.timerMode === 'total') {
+    if (state.remainingSeconds > 0) {
+      state.remainingSeconds -= 1;
+      if (state.remainingSeconds === 0) {
+        state.isFinished = true;
+        if (state.timerIntervalId) {
+          clearInterval(state.timerIntervalId);
+          state.timerIntervalId = null;
+        }
+        if (typeof renderAll === 'function') {
+          renderAll();
+        }
+      }
+    }
+  }
+
+  if (typeof renderHeader === 'function' && typeof document !== 'undefined') {
+    renderHeader();
+  }
 }
 
 function selectOption(index) {
@@ -203,6 +290,9 @@ function nextQuestion() {
   if (state.currentIndex < QUESTIONS.length - 1) {
     state.currentIndex += 1;
     state.isAnswered = false;
+    if (state.timerMode === 'per-question') {
+      state.remainingSeconds = state.timerLimit;
+    }
   } else {
     state.isFinished = true;
     if (state.timerIntervalId) {
@@ -221,6 +311,7 @@ function restartQuiz() {
   state.isAnswered = false;
   state.elapsedSeconds = 0;
   state.isFinished = false;
+  state.remainingSeconds = state.timerLimit;
   if (state.timerIntervalId) {
     clearInterval(state.timerIntervalId);
     state.timerIntervalId = null;
@@ -238,7 +329,19 @@ function renderHeader() {
   const progressTrack = document.querySelector ? document.querySelector('.progress-track') : null;
 
   if (timerDisplay) {
-    timerDisplay.textContent = formatTime(state.elapsedSeconds);
+    if (state.timerMode === 'stopwatch') {
+      timerDisplay.textContent = formatTime(state.elapsedSeconds);
+      if (timerDisplay.classList) timerDisplay.classList.remove('timer-warning');
+    } else {
+      timerDisplay.textContent = formatTime(state.remainingSeconds);
+      if (timerDisplay.classList) {
+        if (state.remainingSeconds <= 5 && !state.isAnswered && !state.isFinished && QUESTIONS.length > 0) {
+          timerDisplay.classList.add('timer-warning');
+        } else {
+          timerDisplay.classList.remove('timer-warning');
+        }
+      }
+    }
   }
 
   const total = QUESTIONS.length;
@@ -350,16 +453,26 @@ function renderQuestion() {
   const currentQ = QUESTIONS[state.currentIndex];
   questionCard.innerHTML = `
     <div class="card-inner">
-      <h2 id="question-text" class="question-heading"></h2>
-      <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
-      <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
-        <div id="feedback-result" class="feedback-result"></div>
-        <p id="feedback-explanation" class="feedback-explanation"></p>
-      </div>
-      <div class="action-footer">
-        <button id="next-btn" class="btn btn-primary hidden" type="button">
-          ${state.currentIndex === QUESTIONS.length - 1 ? 'Finish Quiz' : 'Next Question →'}
-        </button>
+      <div id="flip-card-inner" class="flip-card-inner">
+        <!-- Front Face: Question Prompt and Options -->
+        <div class="flip-card-front">
+          <h2 id="question-text" class="question-heading"></h2>
+          <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
+        </div>
+
+        <!-- Back Face: Answer Feedback & Next Button (No Scrolling Required) -->
+        <div class="flip-card-back">
+          <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
+            <div id="feedback-result" class="feedback-result"></div>
+            <div id="feedback-correct-answer" class="feedback-correct-answer"></div>
+            <p id="feedback-explanation" class="feedback-explanation"></p>
+          </div>
+          <div class="action-footer">
+            <button id="next-btn" class="btn btn-primary hidden" type="button">
+              ${state.currentIndex === QUESTIONS.length - 1 ? 'Finish Quiz' : 'Next Question →'}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `;
@@ -386,6 +499,18 @@ function renderQuestion() {
   const nextBtn = document.getElementById('next-btn');
   if (nextBtn) {
     nextBtn.addEventListener('click', handleNextClick);
+  }
+}
+
+function flipCard(isFlipped) {
+  if (typeof document === 'undefined') return;
+  const cardInner = document.getElementById('flip-card-inner');
+  if (cardInner && cardInner.classList) {
+    if (isFlipped) {
+      cardInner.classList.add('is-flipped');
+    } else {
+      cardInner.classList.remove('is-flipped');
+    }
   }
 }
 
@@ -425,7 +550,6 @@ function renderAll() {
   renderScoreboard();
 }
 
-
 function handleOptionClick(idx) {
   if (state.isAnswered) return;
   const res = selectOption(idx);
@@ -447,6 +571,7 @@ function handleOptionClick(idx) {
   const feedbackContainer = document.getElementById('feedback-container');
   const feedbackResult = document.getElementById('feedback-result');
   const feedbackExplanation = document.getElementById('feedback-explanation');
+  const correctAnsDisplay = document.getElementById('feedback-correct-answer');
   const nextBtn = document.getElementById('next-btn');
 
   if (feedbackContainer && feedbackResult && feedbackExplanation) {
@@ -456,20 +581,27 @@ function handleOptionClick(idx) {
     feedbackExplanation.textContent = currentQ.explanation;
   }
 
+  if (correctAnsDisplay) {
+    correctAnsDisplay.textContent = `Correct answer: ${currentQ.options[currentQ.correctIndex]}`;
+  }
+
   if (nextBtn) {
     nextBtn.classList.remove('hidden');
     nextBtn.focus();
   }
 
+  flipCard(true);
   renderScoreboard();
 }
 
 function handleNextClick() {
+  flipCard(false);
   nextQuestion();
   renderAll();
 }
 
 function handleRestart() {
+  flipCard(false);
   restartQuiz();
   startTimer();
   renderAll();
@@ -477,13 +609,7 @@ function handleRestart() {
 
 function startTimer() {
   if (state.timerIntervalId) clearInterval(state.timerIntervalId);
-  state.timerIntervalId = setInterval(() => {
-    state.elapsedSeconds += 1;
-    const timerDisplay = document.getElementById('timer-display');
-    if (timerDisplay) {
-      timerDisplay.textContent = formatTime(state.elapsedSeconds);
-    }
-  }, 1000);
+  state.timerIntervalId = setInterval(tickTimer, 1000);
 }
 
 function updateQuestionCountBadge() {
@@ -732,6 +858,97 @@ function initIntroModal() {
   }
 }
 
+function openTimerSettingsModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('timer-settings-modal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+
+  const modeSelect = document.getElementById('timer-mode-select');
+  if (modeSelect) modeSelect.value = state.timerMode;
+
+  const limitInput = document.getElementById('timer-limit-input');
+  if (limitInput) limitInput.value = state.timerLimit;
+
+  updateTimerDurationVisibility();
+  updateActivePresetPill(state.timerLimit);
+}
+
+function closeTimerSettingsModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('timer-settings-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function updateTimerDurationVisibility() {
+  if (typeof document === 'undefined') return;
+  const modeSelect = document.getElementById('timer-mode-select');
+  const durationGroup = document.getElementById('timer-duration-group');
+  if (!modeSelect || !durationGroup) return;
+  if (modeSelect.value === 'stopwatch') {
+    durationGroup.classList.add('hidden');
+  } else {
+    durationGroup.classList.remove('hidden');
+  }
+}
+
+function updateActivePresetPill(seconds) {
+  if (typeof document === 'undefined') return;
+  const pills = document.querySelectorAll ? document.querySelectorAll('.preset-pill') : [];
+  pills.forEach(pill => {
+    const s = parseInt(pill.dataset.seconds, 10);
+    if (s === seconds) {
+      pill.classList.add('active');
+    } else {
+      pill.classList.remove('active');
+    }
+  });
+}
+
+function applyTimerSettings() {
+  if (typeof document === 'undefined') return;
+  const modeSelect = document.getElementById('timer-mode-select');
+  const limitInput = document.getElementById('timer-limit-input');
+  const mode = modeSelect ? modeSelect.value : 'per-question';
+  const limit = limitInput ? parseInt(limitInput.value, 10) : 30;
+
+  setTimerConfig(mode, limit > 0 ? limit : 30);
+  closeTimerSettingsModal();
+  restartQuiz();
+  startTimer();
+  renderAll();
+}
+
+function initTimerSettings() {
+  if (typeof document === 'undefined') return;
+  const btnSettings = document.getElementById('btn-timer-settings');
+  if (btnSettings) btnSettings.addEventListener('click', openTimerSettingsModal);
+
+  const btnClose = document.getElementById('btn-close-timer');
+  if (btnClose) btnClose.addEventListener('click', closeTimerSettingsModal);
+
+  const btnCancel = document.getElementById('btn-cancel-timer');
+  if (btnCancel) btnCancel.addEventListener('click', closeTimerSettingsModal);
+
+  const btnApply = document.getElementById('btn-apply-timer');
+  if (btnApply) btnApply.addEventListener('click', applyTimerSettings);
+
+  const modeSelect = document.getElementById('timer-mode-select');
+  if (modeSelect) {
+    modeSelect.addEventListener('change', updateTimerDurationVisibility);
+  }
+
+  const pills = document.querySelectorAll ? document.querySelectorAll('.preset-pill') : [];
+  pills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const s = parseInt(pill.dataset.seconds, 10);
+      const limitInput = document.getElementById('timer-limit-input');
+      if (limitInput) limitInput.value = s;
+      updateActivePresetPill(s);
+    });
+  });
+}
+
 function initApp() {
   // Clear any existing stored data on page reload as requested
   MiniStore.clear();
@@ -740,6 +957,7 @@ function initApp() {
 
   initCustomQuestionForm();
   initIntroModal();
+  initTimerSettings();
   startTimer();
   renderAll();
 }
@@ -759,6 +977,10 @@ if (typeof module !== 'undefined' && module.exports) {
     openIntroModal,
     closeIntroModal,
     showIntroStep,
+    openTimerSettingsModal,
+    closeTimerSettingsModal,
+    applyTimerSettings,
+    flipCard,
     state,
     formatTime,
     calcAccuracy,
@@ -772,6 +994,9 @@ if (typeof module !== 'undefined' && module.exports) {
     handleOptionClick,
     handleNextClick,
     handleRestart,
+    setTimerConfig,
+    tickTimer,
+    handleTimeout,
     startTimer,
     initApp
   };
