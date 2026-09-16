@@ -90,6 +90,10 @@ assert.ok(css.includes('[data-theme="light"] .stat-card'), 'CSS must style stat-
 assert.ok(css.includes('[data-theme="light"] .stat-value.highlight'), 'CSS must adjust stat-value highlight for light mode');
 assert.ok(css.includes('.cat-clapping-wrapper'), 'CSS must style .cat-clapping-wrapper');
 assert.ok(css.includes('catClapLeft'), 'CSS must define catClapLeft animation');
+assert.ok(css.includes('.kbd-hint'), 'CSS must style keyboard shortcut badges');
+assert.ok(css.includes('cardSlideIn'), 'CSS must define cardSlideIn transition animation');
+assert.ok(css.includes('.leaderboard-section'), 'CSS must style leaderboard section');
+assert.ok(css.includes('.leaderboard-item'), 'CSS must style individual leaderboard rows');
 
 console.log('All CSS styling tests passed!');
 

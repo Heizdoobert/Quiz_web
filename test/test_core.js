@@ -176,5 +176,42 @@ assert.strictEqual(state.isAnswered, true, 'Timeout should mark question as answ
 assert.strictEqual(state.streak, 0, 'Timeout should reset streak to 0');
 assert.strictEqual(state.answers.length > 0 && state.answers[state.answers.length - 1].isTimeout, true, 'Answer record should mark isTimeout: true');
 
+// 14. Test Leaderboard and Rank determination
+const { getRank, saveLeaderboardRecord, getLeaderboard, clearLeaderboard } = require('../script.js');
+assert.strictEqual(typeof getRank, 'function', 'getRank must be a function');
+assert.strictEqual(typeof saveLeaderboardRecord, 'function', 'saveLeaderboardRecord must be a function');
+assert.strictEqual(typeof getLeaderboard, 'function', 'getLeaderboard must be a function');
+assert.strictEqual(typeof clearLeaderboard, 'function', 'clearLeaderboard must be a function');
+
+// Test getRank tiers
+assert.strictEqual(getRank(600, 100).tier, 'Master');
+assert.strictEqual(getRank(600, 90).tier, 'Master');
+assert.strictEqual(getRank(400, 80).tier, 'Pro');
+assert.strictEqual(getRank(400, 70).tier, 'Pro');
+assert.strictEqual(getRank(200, 50).tier, 'Novice');
+
+// Test saving and sorting leaderboard records
+clearLeaderboard();
+assert.deepStrictEqual(getLeaderboard(), []);
+
+saveLeaderboardRecord({ score: 300, accuracy: 70, timeSpent: 45, streak: 3, date: '2026-09-16' });
+saveLeaderboardRecord({ score: 600, accuracy: 100, timeSpent: 30, streak: 6, date: '2026-09-16' });
+saveLeaderboardRecord({ score: 600, accuracy: 100, timeSpent: 25, streak: 6, date: '2026-09-16' });
+saveLeaderboardRecord({ score: 100, accuracy: 50, timeSpent: 60, streak: 1, date: '2026-09-16' });
+
+const records = getLeaderboard();
+assert.strictEqual(records.length, 4);
+// Rank 1: score 600 with lower timeSpent (25s)
+assert.strictEqual(records[0].score, 600);
+assert.strictEqual(records[0].timeSpent, 25);
+assert.strictEqual(records[0].rank.tier, 'Master');
+// Rank 2: score 600 with timeSpent 30s
+assert.strictEqual(records[1].score, 600);
+assert.strictEqual(records[1].timeSpent, 30);
+// Rank 3: score 300
+assert.strictEqual(records[2].score, 300);
+// Rank 4: score 100
+assert.strictEqual(records[3].score, 100);
+
 console.log('All Core State Machine tests passed!');
 

@@ -85,6 +85,10 @@ assert.ok(fs.existsSync('sitemap.xml'), 'sitemap.xml must exist for search engin
 assert.ok(html.includes('<title>Quick Quiz</title>'), 'Title must be Quick Quiz');
 assert.ok(html.includes('<h1 class="brand-title">Quick Quiz</h1>'), 'Brand title must be Quick Quiz');
 assert.ok(html.includes('id="btn-theme-toggle"'), 'Theme toggle button must exist in index.html');
+assert.ok(html.includes('id="btn-sound-toggle"'), 'Sound toggle button must exist in index.html');
+assert.ok(html.includes('id="quiz-leaderboard"'), 'Leaderboard component must exist in index.html');
+assert.ok(html.includes('id="leaderboard-list"'), 'Leaderboard list must exist in index.html');
+assert.ok(html.includes('id="btn-clear-leaderboard"'), 'Clear leaderboard button must exist in index.html');
 
 console.log('All HTML structure and SEO tests passed!');
 

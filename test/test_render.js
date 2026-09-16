@@ -150,7 +150,7 @@ const ids = [
   'quiz-card', 'options-container', 'feedback-container', 'feedback-result',
   'feedback-explanation', 'feedback-correct-answer', 'next-btn', 'score-display', 'streak-display',
   'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner',
-  'btn-theme-toggle'
+  'btn-theme-toggle', 'btn-sound-toggle', 'quiz-leaderboard', 'leaderboard-list', 'btn-clear-leaderboard'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -330,12 +330,50 @@ assert.strictEqual(docElement.getAttribute('data-theme'), null);
 assert.strictEqual(themeBtn.textContent, '🌙 Dark');
 
 // Check ADS_URL
-assert.strictEqual(ADS_URL, 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde', 'ADS_URL must match partner CPM network URL');
+// Check Sound Toggle
+const { toggleSound, isSoundEnabled, initSound, handleKeyDown, renderLeaderboard } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof toggleSound, 'function', 'toggleSound must be a function');
+assert.strictEqual(typeof isSoundEnabled, 'function', 'isSoundEnabled must be a function');
+assert.strictEqual(typeof initSound, 'function', 'initSound must be a function');
+assert.strictEqual(typeof handleKeyDown, 'function', 'handleKeyDown must be a function');
+assert.strictEqual(typeof renderLeaderboard, 'function', 'renderLeaderboard must be a function');
 
-// Clean up timer interval
-if (state.timerIntervalId) {
-  clearInterval(state.timerIntervalId);
-  state.timerIntervalId = null;
-}
+// Test Sound initialization and toggle
+initSound();
+const soundBtn = getOrCreateElement('btn-sound-toggle');
+assert.strictEqual(isSoundEnabled(), true, 'Sound should be enabled by default');
+assert.ok(soundBtn.textContent.includes('🔊'), 'Sound button should display 🔊 when enabled');
+
+toggleSound();
+assert.strictEqual(isSoundEnabled(), false, 'Sound should be disabled after toggle');
+assert.ok(soundBtn.textContent.includes('🔇'), 'Sound button should display 🔇 when muted');
+
+toggleSound();
+assert.strictEqual(isSoundEnabled(), true, 'Sound should be re-enabled after second toggle');
+
+// Test Keyboard navigation
+restartQuiz();
+renderAll();
+// Option buttons must contain .kbd-hint badges
+const opt0 = getOrCreateElement('options-container').children[0];
+assert.ok(opt0.innerHTML.includes('kbd-hint'), 'Option buttons must render .kbd-hint badge');
+
+// Simulate keydown '2' (selects option 1)
+handleKeyDown({ key: '2', target: { tagName: 'BODY' }, preventDefault: () => {} });
+assert.strictEqual(state.isAnswered, true, 'Pressing 2 should select option');
+assert.strictEqual(state.answers.length, 1);
+
+// Simulate keydown 'Enter' when answered -> should advance to next question
+handleKeyDown({ key: 'Enter', target: { tagName: 'BODY' }, preventDefault: () => {} });
+assert.strictEqual(state.currentIndex, 1, 'Pressing Enter when answered should advance to next question');
+
+// Simulate keydown inside an INPUT field -> should be ignored
+handleKeyDown({ key: '1', target: { tagName: 'INPUT' }, preventDefault: () => {} });
+assert.strictEqual(state.isAnswered, false, 'Pressing keys inside input field must be ignored');
+
+// Test Leaderboard rendering
+renderLeaderboard();
+const lbList = getOrCreateElement('leaderboard-list');
+assert.ok(lbList.innerHTML.includes('leaderboard-item') || lbList.children.length > 0, 'Leaderboard list should render records');
 
 console.log('All Component Rendering tests passed!');

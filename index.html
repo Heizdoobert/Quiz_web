@@ -58,6 +58,7 @@
         <h1 class="brand-title">Quick Quiz</h1>
         <div class="header-actions">
           <button id="btn-theme-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">🌙 Dark</button>
+          <button id="btn-sound-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle sound effects" title="Toggle sound effects">🔊 Sound</button>
           <button id="btn-header-guide" class="btn btn-secondary btn-sm" type="button">📖 How to Play</button>
           <div class="timer-badge">
             <span class="timer-icon" aria-hidden="true">⏱</span>
@@ -226,6 +227,17 @@
             <h3 class="history-title">Question History</h3>
             <ul id="history-list" class="history-list" aria-label="Answered questions history"></ul>
           </div>
+
+          <!-- Leaderboard Section -->
+          <div id="quiz-leaderboard" class="leaderboard-section">
+            <div class="leaderboard-header">
+              <h3 class="leaderboard-title">🏆 Top Records</h3>
+              <button id="btn-clear-leaderboard" class="btn-text-subtle" type="button" title="Clear saved leaderboard records">Reset</button>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list" aria-label="Top quiz scores">
+              <p class="leaderboard-empty">No records yet. Complete a quiz to rank!</p>
+            </div>
+          </div>
         </aside>
 
         <!-- Affiliate / Ad Banner Zone -->
@@ -280,7 +292,7 @@
           <div class="step-badge">Step 3 of 3</div>
           <div class="step-illustration" aria-hidden="true">🎯</div>
           <h3 class="step-title">3. Play & Track Your Score</h3>
-          <p class="step-desc">Click <strong>"Add & Start Quiz"</strong> to play! Enjoy instant color feedback, streak tracking, accuracy stats, and celebratory summary.</p>
+          <p class="step-desc">Click <strong>"Add & Start Quiz"</strong> to play! Use keys <strong>1–4</strong> or <strong>A–D</strong> to answer, press <strong>Enter/Space</strong> to advance, enjoy audio effects, and compete for top ranks on the Leaderboard!</p>
         </div>
 
         <!-- Step Indicator Dots -->

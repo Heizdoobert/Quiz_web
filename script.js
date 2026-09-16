@@ -46,6 +46,193 @@ const DEFAULT_QUESTIONS = [
 const MAX_QUESTIONS = 50;
 const ADS_URL = 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde';
 
+// Leaderboard Storage & Rank Logic
+let inMemoryLeaderboard = [];
+const LEADERBOARD_KEY = 'quick_quiz_leaderboard';
+
+function getRank(score, accuracy) {
+  if (accuracy >= 90) {
+    return { tier: 'Master', medal: '🥇', label: 'Master' };
+  } else if (accuracy >= 70) {
+    return { tier: 'Pro', medal: '🥈', label: 'Pro' };
+  } else {
+    return { tier: 'Novice', medal: '🥉', label: 'Novice' };
+  }
+}
+
+function getLeaderboard() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const data = window.localStorage.getItem(LEADERBOARD_KEY);
+      if (data) return JSON.parse(data);
+    } catch (e) {
+      console.warn('Could not read leaderboard from localStorage', e);
+    }
+  }
+  return inMemoryLeaderboard;
+}
+
+function saveLeaderboardRecord(record) {
+  const rank = getRank(record.score, record.accuracy);
+  const newEntry = {
+    date: record.date || new Date().toISOString().split('T')[0],
+    score: typeof record.score === 'number' ? record.score : 0,
+    accuracy: typeof record.accuracy === 'number' ? record.accuracy : 0,
+    timeSpent: typeof record.timeSpent === 'number' ? record.timeSpent : 0,
+    streak: typeof record.streak === 'number' ? record.streak : 0,
+    rank
+  };
+  const list = getLeaderboard().slice();
+  list.push(newEntry);
+  list.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.timeSpent - b.timeSpent;
+  });
+  const topRecords = list.slice(0, 5);
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(topRecords));
+    } catch (e) {
+      console.warn('Could not save leaderboard to localStorage', e);
+    }
+  }
+  inMemoryLeaderboard = topRecords;
+  return topRecords;
+}
+
+function clearLeaderboard() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.removeItem(LEADERBOARD_KEY);
+    } catch (e) {
+      console.warn('Could not clear leaderboard from localStorage', e);
+    }
+  }
+  inMemoryLeaderboard = [];
+  return [];
+}
+
+// ==========================================================================
+// Web Audio API Synthesizer (0 external files)
+// ==========================================================================
+let audioCtx = null;
+let soundEnabled = true;
+const SOUND_STORAGE_KEY = 'quick_quiz_sound_enabled';
+
+function isSoundEnabled() {
+  return soundEnabled;
+}
+
+function initAudioContext() {
+  if (audioCtx) return;
+  const AudioContextClass = (typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext));
+  if (AudioContextClass) {
+    try {
+      audioCtx = new AudioContextClass();
+    } catch (e) {
+      console.warn('AudioContext not supported or blocked', e);
+    }
+  }
+}
+
+function playTone(freq, duration = 0.15, type = 'sine', gainVal = 0.1) {
+  if (!soundEnabled) return;
+  initAudioContext();
+  if (!audioCtx) return;
+  try {
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+    const osc = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gainNode.gain.setValueAtTime(gainVal, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+    osc.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  } catch (e) {
+    // Audio errors silently ignored
+  }
+}
+
+function playCorrectSound() {
+  if (!soundEnabled) return;
+  playTone(523.25, 0.1, 'sine', 0.1); // C5
+  setTimeout(() => playTone(659.25, 0.18, 'triangle', 0.1), 90); // E5
+}
+
+function playIncorrectSound() {
+  if (!soundEnabled) return;
+  playTone(220, 0.15, 'sawtooth', 0.08); // A3
+  setTimeout(() => playTone(164.81, 0.22, 'sawtooth', 0.08), 110); // E3
+}
+
+function playStreakSound() {
+  if (!soundEnabled) return;
+  const notes = [587.33, 739.99, 880.00, 1174.66]; // D5, F#5, A5, D6
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.16, 'triangle', 0.12), i * 70);
+  });
+}
+
+function playCompletionFanfare() {
+  if (!soundEnabled) return;
+  const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.22, 'sine', 0.14), i * 90);
+  });
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(SOUND_STORAGE_KEY, String(soundEnabled));
+    } catch (e) {}
+  }
+  updateSoundButtonUI();
+  return soundEnabled;
+}
+
+function updateSoundButtonUI() {
+  if (typeof document === 'undefined') return;
+  const btn = document.getElementById('btn-sound-toggle');
+  if (btn) {
+    btn.textContent = soundEnabled ? '🔊 Sound' : '🔇 Muted';
+    btn.setAttribute('aria-pressed', String(soundEnabled));
+    if (soundEnabled) {
+      btn.classList.remove('muted');
+    } else {
+      btn.classList.add('muted');
+    }
+  }
+}
+
+function initSound() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const stored = window.localStorage.getItem(SOUND_STORAGE_KEY);
+      if (stored !== null) {
+        soundEnabled = stored === 'true';
+      }
+    } catch (e) {}
+  }
+  updateSoundButtonUI();
+  if (typeof document !== 'undefined') {
+    const btn = document.getElementById('btn-sound-toggle');
+    if (btn && !btn._hasClickListener) {
+      btn._hasClickListener = true;
+      btn.addEventListener('click', () => {
+        initAudioContext();
+        toggleSound();
+      });
+    }
+  }
+}
+
 // Mini JSON-like DB storage using sessionStorage and session cookie
 const MiniStore = {
   sessionKey: 'quiz_mini_db',
@@ -205,6 +392,7 @@ function handleTimeout() {
   const record = { questionId: currentQ ? currentQ.id : null, selectedIndex: -1, isCorrect: false, isTimeout: true };
   state.answers.push(record);
   state.isAnswered = true;
+  playIncorrectSound();
 
   if (typeof document !== 'undefined') {
     const feedbackResult = document.getElementById('feedback-result');
@@ -314,6 +502,7 @@ function restartQuiz() {
   state.isAnswered = false;
   state.elapsedSeconds = 0;
   state.isFinished = false;
+  state.leaderboardSaved = false;
   state.remainingSeconds = state.timerLimit;
   if (state.timerIntervalId) {
     clearInterval(state.timerIntervalId);
@@ -421,6 +610,19 @@ function renderQuestion() {
 
   if (state.isFinished) {
     const accuracy = calcAccuracy(state.answers);
+    if (!state.leaderboardSaved) {
+      state.leaderboardSaved = true;
+      saveLeaderboardRecord({
+        score: state.score,
+        accuracy: accuracy,
+        timeSpent: state.elapsedSeconds,
+        streak: state.bestStreak,
+        date: new Date().toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+      });
+    }
+    renderLeaderboard();
+    playCompletionFanfare();
+
     questionCard.innerHTML = `
       <div class="completion-summary">
         <div class="cat-clapping-wrapper" aria-label="Cat clapping celebration animation">
@@ -472,7 +674,7 @@ function renderQuestion() {
 
   const currentQ = QUESTIONS[state.currentIndex];
   questionCard.innerHTML = `
-    <div class="card-inner">
+    <div class="card-inner card-slide-in">
       <div id="flip-card-inner" class="flip-card-inner">
         <!-- Front Face: Question Prompt and Options -->
         <div class="flip-card-front">
@@ -501,13 +703,14 @@ function renderQuestion() {
 
   const optionsContainer = document.getElementById('options-container');
   const badges = ['A', 'B', 'C', 'D'];
+  const kbdHints = ['1', '2', '3', '4'];
 
   currentQ.options.forEach((optText, idx) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'option-btn';
     btn.dataset.index = idx;
-    btn.innerHTML = `<span class="badge">${badges[idx]}</span> <span class="option-text"></span>`;
+    btn.innerHTML = `<span class="badge">${badges[idx]}</span> <span class="option-text"></span> <span class="kbd-hint">[${kbdHints[idx]}]</span>`;
     const textSpan = btn.querySelector ? btn.querySelector('.option-text') : null;
     if (textSpan) {
       textSpan.textContent = optText;
@@ -531,6 +734,42 @@ function flipCard(isFlipped) {
     } else {
       cardInner.classList.remove('is-flipped');
     }
+  }
+}
+
+function renderLeaderboard() {
+  if (typeof document === 'undefined') return;
+  const listContainer = document.getElementById('leaderboard-list');
+  if (!listContainer) return;
+  const records = getLeaderboard();
+  if (!records || records.length === 0) {
+    listContainer.innerHTML = '<p class="leaderboard-empty">No records yet. Complete a quiz to rank!</p>';
+    return;
+  }
+  listContainer.innerHTML = '';
+  records.forEach((rec, idx) => {
+    const item = document.createElement('div');
+    item.className = 'leaderboard-item';
+    item.innerHTML = `
+      <div style="display: flex; align-items: center;">
+        <span class="leaderboard-rank">${rec.rank ? rec.rank.medal : '🏅'}</span>
+        <div class="leaderboard-info">
+          <span class="leaderboard-score-line">#${idx + 1} • ${rec.score} pts</span>
+          <span class="leaderboard-meta">${rec.accuracy}% acc • ${formatTime(rec.timeSpent)} • ${rec.date}</span>
+        </div>
+      </div>
+      <span class="leaderboard-tier-badge">${rec.rank ? rec.rank.label : 'Ranked'}</span>
+    `;
+    listContainer.appendChild(item);
+  });
+
+  const clearBtn = document.getElementById('btn-clear-leaderboard');
+  if (clearBtn && !clearBtn._hasClickListener) {
+    clearBtn._hasClickListener = true;
+    clearBtn.addEventListener('click', () => {
+      clearLeaderboard();
+      renderLeaderboard();
+    });
   }
 }
 
@@ -561,6 +800,52 @@ function renderScoreboard() {
       historyList.appendChild(li);
     });
   }
+
+  renderLeaderboard();
+}
+
+function handleKeyDown(e) {
+  if (!e || !e.key) return;
+  // Ignore keystrokes when user is typing into an input field or modal textarea
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT')) {
+    return;
+  }
+
+  // Ignore if modal dialogs are active
+  if (typeof document !== 'undefined') {
+    const introModal = document.getElementById('intro-modal');
+    if (introModal && !introModal.classList.contains('hidden')) return;
+    const timerModal = document.getElementById('timer-settings-modal');
+    if (timerModal && !timerModal.classList.contains('hidden')) return;
+  }
+
+  const key = e.key;
+
+  // Answer hotkeys: 1-4 or A-D
+  let optIndex = -1;
+  if (key === '1' || key.toLowerCase() === 'a') optIndex = 0;
+  else if (key === '2' || key.toLowerCase() === 'b') optIndex = 1;
+  else if (key === '3' || key.toLowerCase() === 'c') optIndex = 2;
+  else if (key === '4' || key.toLowerCase() === 'd') optIndex = 3;
+
+  if (optIndex !== -1) {
+    if (!state.isFinished && !state.isAnswered && QUESTIONS.length > 0) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      handleOptionClick(optIndex);
+    }
+    return;
+  }
+
+  // Advance or restart: Enter or Space
+  if (key === 'Enter' || key === ' ') {
+    if (state.isFinished) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      handleRestart();
+    } else if (state.isAnswered) {
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      handleNextClick();
+    }
+  }
 }
 
 function renderAll() {
@@ -574,6 +859,15 @@ function handleOptionClick(idx) {
   if (state.isAnswered) return;
   const res = selectOption(idx);
   if (!res) return;
+
+  if (res.isCorrect) {
+    playCorrectSound();
+    if (state.streak >= 3) {
+      playStreakSound();
+    }
+  } else {
+    playIncorrectSound();
+  }
 
   const currentQ = QUESTIONS[state.currentIndex];
   const optionButtons = document.querySelectorAll('.option-btn');
@@ -1054,11 +1348,16 @@ function initApp() {
   MiniStore.save(QUESTIONS);
 
   initTheme();
+  initSound();
   initCustomQuestionForm();
   initIntroModal();
   initTimerSettings();
   startTimer();
   renderAll();
+
+  if (typeof window !== 'undefined') {
+    window.addEventListener('keydown', handleKeyDown);
+  }
 }
 
 if (typeof document !== 'undefined') {
@@ -1089,10 +1388,12 @@ if (typeof module !== 'undefined' && module.exports) {
     renderHeader,
     renderQuestion,
     renderScoreboard,
+    renderLeaderboard,
     renderAll,
     handleOptionClick,
     handleNextClick,
     handleRestart,
+    handleKeyDown,
     setTimerConfig,
     tickTimer,
     handleTimeout,
@@ -1101,7 +1402,14 @@ if (typeof module !== 'undefined' && module.exports) {
     applyTheme,
     toggleTheme,
     initTheme,
+    toggleSound,
+    isSoundEnabled,
+    initSound,
     ADS_URL,
+    getRank,
+    getLeaderboard,
+    saveLeaderboardRecord,
+    clearLeaderboard,
     initApp
   };
 }
