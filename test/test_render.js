@@ -150,7 +150,9 @@ const ids = [
   'quiz-card', 'options-container', 'feedback-container', 'feedback-result',
   'feedback-explanation', 'feedback-correct-answer', 'next-btn', 'score-display', 'streak-display',
   'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner',
-  'btn-theme-toggle', 'btn-sound-toggle', 'quiz-leaderboard', 'leaderboard-list', 'btn-clear-leaderboard'
+  'btn-theme-toggle', 'btn-sound-toggle', 'quiz-leaderboard', 'leaderboard-list', 'btn-clear-leaderboard',
+  'confetti-canvas', 'category-filters', 'lifelines-toolbar', 'btn-lifeline-5050', 'btn-lifeline-skip',
+  'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -375,5 +377,58 @@ assert.strictEqual(state.isAnswered, false, 'Pressing keys inside input field mu
 renderLeaderboard();
 const lbList = getOrCreateElement('leaderboard-list');
 assert.ok(lbList.innerHTML.includes('leaderboard-item') || lbList.children.length > 0, 'Leaderboard list should render records');
+
+// 16. Test Confetti, Lifelines, Category Filters, and Review Modal
+const {
+  triggerConfetti,
+  handleFiftyFifty,
+  handleSkip,
+  handleCategoryFilter,
+  openReviewModal,
+  closeReviewModal
+} = require(path.resolve(__dirname, '../script.js'));
+
+assert.strictEqual(typeof triggerConfetti, 'function', 'triggerConfetti must be a function');
+assert.strictEqual(typeof handleFiftyFifty, 'function', 'handleFiftyFifty must be a function');
+assert.strictEqual(typeof handleSkip, 'function', 'handleSkip must be a function');
+assert.strictEqual(typeof handleCategoryFilter, 'function', 'handleCategoryFilter must be a function');
+assert.strictEqual(typeof openReviewModal, 'function', 'openReviewModal must be a function');
+assert.strictEqual(typeof closeReviewModal, 'function', 'closeReviewModal must be a function');
+
+// Test triggerConfetti does not throw in headless / node environment
+assert.doesNotThrow(() => triggerConfetti());
+
+// Test 50:50 Lifeline DOM handling
+restartQuiz();
+renderAll();
+const btn5050 = getOrCreateElement('btn-lifeline-5050');
+handleFiftyFifty();
+assert.strictEqual(btn5050.disabled, true, '50:50 button should be disabled after use');
+const testOptContainer = getOrCreateElement('options-container');
+const eliminatedCount = testOptContainer.children.filter(btn => btn.classList.contains('eliminated')).length;
+assert.strictEqual(eliminatedCount, 2, '2 options should have .eliminated class');
+
+// Test Skip Lifeline DOM handling
+const btnSkip = getOrCreateElement('btn-lifeline-skip');
+const idxBeforeSkip = state.currentIndex;
+handleSkip();
+assert.strictEqual(btnSkip.disabled, true, 'Skip button should be disabled after use');
+assert.strictEqual(state.currentIndex, idxBeforeSkip + 1, 'Skip should advance to next question');
+
+// Test Category Filtering
+handleCategoryFilter('CSS');
+assert.strictEqual(state.activeCategory, 'CSS');
+assert.strictEqual(state.currentIndex, 0);
+
+// Test Review Modal
+selectOption(0);
+openReviewModal();
+const reviewModal = getOrCreateElement('review-modal');
+assert.strictEqual(reviewModal.classList.contains('hidden'), false, 'openReviewModal should show modal');
+const reviewList = getOrCreateElement('review-list');
+assert.ok(reviewList.children.length > 0, 'review-list should render answered questions');
+
+closeReviewModal();
+assert.strictEqual(reviewModal.classList.contains('hidden'), true, 'closeReviewModal should hide modal');
 
 console.log('All Component Rendering tests passed!');

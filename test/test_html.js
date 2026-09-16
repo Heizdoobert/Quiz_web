@@ -90,6 +90,15 @@ assert.ok(html.includes('id="quiz-leaderboard"'), 'Leaderboard component must ex
 assert.ok(html.includes('id="leaderboard-list"'), 'Leaderboard list must exist in index.html');
 assert.ok(html.includes('id="btn-clear-leaderboard"'), 'Clear leaderboard button must exist in index.html');
 
+// Check Confetti Canvas, Categories, Lifelines, and Review Modal
+assert.ok(html.includes('id="confetti-canvas"'), 'Canvas element for confetti animation must exist');
+assert.ok(html.includes('id="category-filters"'), 'Category filters bar must exist in index.html');
+assert.ok(html.includes('id="lifelines-toolbar"'), 'Lifelines toolbar must exist in index.html');
+assert.ok(html.includes('id="btn-lifeline-5050"'), '50:50 Lifeline button must exist in index.html');
+assert.ok(html.includes('id="btn-lifeline-skip"'), 'Skip Lifeline button must exist in index.html');
+assert.ok(html.includes('id="review-modal"'), 'Review answers modal must exist in index.html');
+assert.ok(html.includes('id="review-list"'), 'Review answers list must exist in index.html');
+
 console.log('All HTML structure and SEO tests passed!');
 
 

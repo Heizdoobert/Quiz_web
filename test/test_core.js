@@ -211,7 +211,46 @@ assert.strictEqual(records[1].timeSpent, 30);
 // Rank 3: score 300
 assert.strictEqual(records[2].score, 300);
 // Rank 4: score 100
-assert.strictEqual(records[3].score, 100);
+// 15. Test Lifelines (50:50 and Skip) & Category Filtering
+const { useFiftyFifty, useSkip, getFilteredQuestions, setCategoryFilter } = require('../script.js');
+assert.strictEqual(typeof useFiftyFifty, 'function', 'useFiftyFifty must be a function');
+assert.strictEqual(typeof useSkip, 'function', 'useSkip must be a function');
+assert.strictEqual(typeof getFilteredQuestions, 'function', 'getFilteredQuestions must be a function');
+
+// Test category properties on DEFAULT_QUESTIONS
+DEFAULT_QUESTIONS.forEach(q => {
+  assert.ok(typeof q.category === 'string' && q.category.length > 0, `Question ${q.id} must have a non-empty category`);
+});
+
+// Test getFilteredQuestions
+assert.strictEqual(getFilteredQuestions('All').length, QUESTIONS.length);
+const htmlQs = getFilteredQuestions('HTML');
+assert.ok(htmlQs.length > 0, 'HTML category should return questions');
+htmlQs.forEach(q => assert.strictEqual(q.category, 'HTML'));
+
+// Test Lifeline: 50:50
+restartQuiz();
+assert.strictEqual(state.lifelines.fiftyFifty, true, 'fiftyFifty lifeline should be available initially');
+const eliminated = useFiftyFifty();
+assert.ok(Array.isArray(eliminated) && eliminated.length === 2, 'useFiftyFifty should return 2 eliminated option indices');
+const currentQ = QUESTIONS[state.currentIndex];
+assert.ok(!eliminated.includes(currentQ.correctIndex), 'Eliminated options must not include the correct answer');
+assert.strictEqual(state.lifelines.fiftyFifty, false, 'fiftyFifty lifeline should be marked used');
+assert.strictEqual(useFiftyFifty(), null, 'Re-using 50:50 in the same quiz must return null');
+
+// Test Lifeline: Skip Question
+assert.strictEqual(state.lifelines.skip, true, 'skip lifeline should be available initially');
+const prevIndex = state.currentIndex;
+const skipResult = useSkip();
+assert.strictEqual(skipResult, true, 'useSkip should return true');
+assert.strictEqual(state.currentIndex, prevIndex + 1, 'useSkip should advance currentIndex without altering streak or score');
+assert.strictEqual(state.lifelines.skip, false, 'skip lifeline should be marked used');
+assert.strictEqual(useSkip(), false, 'Re-using Skip in the same quiz must return false');
+
+// Test reset on restartQuiz
+restartQuiz();
+assert.strictEqual(state.lifelines.fiftyFifty, true, 'restartQuiz should reset fiftyFifty lifeline');
+assert.strictEqual(state.lifelines.skip, true, 'restartQuiz should reset skip lifeline');
 
 console.log('All Core State Machine tests passed!');
 

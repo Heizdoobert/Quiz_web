@@ -95,6 +95,15 @@ assert.ok(css.includes('cardSlideIn'), 'CSS must define cardSlideIn transition a
 assert.ok(css.includes('.leaderboard-section'), 'CSS must style leaderboard section');
 assert.ok(css.includes('.leaderboard-item'), 'CSS must style individual leaderboard rows');
 
+// Check Confetti Canvas, Categories, Lifelines, and Review Modal styles
+assert.ok(css.includes('.confetti-canvas'), 'CSS must style confetti-canvas');
+assert.ok(css.includes('.category-filters'), 'CSS must style category filters container');
+assert.ok(css.includes('.category-pill'), 'CSS must style category pill buttons');
+assert.ok(css.includes('.lifelines-toolbar'), 'CSS must style lifelines toolbar');
+assert.ok(css.includes('.btn-lifeline'), 'CSS must style lifeline action buttons');
+assert.ok(css.includes('.option-btn.eliminated'), 'CSS must style 50:50 eliminated option buttons');
+assert.ok(css.includes('.review-item'), 'CSS must style review breakdown items');
+
 console.log('All CSS styling tests passed!');
 
 

@@ -1,6 +1,7 @@
 const DEFAULT_QUESTIONS = [
   {
     id: 1,
+    category: "HTML",
     question: "Which HTML element is used to link an external CSS file?",
     options: ["<link>", "<style>", "<css>", "<stylesheet>"],
     correctIndex: 0,
@@ -8,6 +9,7 @@ const DEFAULT_QUESTIONS = [
   },
   {
     id: 2,
+    category: "CSS",
     question: "Which CSS property controls the spacing between lines of text?",
     options: ["letter-spacing", "line-height", "word-spacing", "text-indent"],
     correctIndex: 1,
@@ -15,6 +17,7 @@ const DEFAULT_QUESTIONS = [
   },
   {
     id: 3,
+    category: "JavaScript",
     question: "What does the '===' operator check in JavaScript?",
     options: ["Value only", "Type only", "Both value and type without coercion", "Memory reference only"],
     correctIndex: 2,
@@ -22,6 +25,7 @@ const DEFAULT_QUESTIONS = [
   },
   {
     id: 4,
+    category: "HTML",
     question: "Which HTML5 element is best suited for independent, reusable content like blog posts?",
     options: ["<section>", "<div>", "<article>", "<main>"],
     correctIndex: 2,
@@ -29,6 +33,7 @@ const DEFAULT_QUESTIONS = [
   },
   {
     id: 5,
+    category: "CSS",
     question: "In CSS Flexbox, which property aligns items along the cross-axis?",
     options: ["justify-content", "align-items", "flex-direction", "align-content"],
     correctIndex: 1,
@@ -36,6 +41,7 @@ const DEFAULT_QUESTIONS = [
   },
   {
     id: 6,
+    category: "JavaScript",
     question: "Which array method creates a new array with all elements that pass a test function?",
     options: ["map()", "filter()", "reduce()", "forEach()"],
     correctIndex: 1,
@@ -351,9 +357,13 @@ const state = {
   elapsedSeconds: 0,
   timerIntervalId: null,
   isFinished: false,
+  leaderboardSaved: false,
   timerMode: 'per-question', // 'per-question' | 'total' | 'stopwatch'
   timerLimit: 30,           // seconds for per-question or total
-  remainingSeconds: 30
+  remainingSeconds: 30,
+  lifelines: { fiftyFifty: true, skip: true },
+  eliminatedOptions: [],
+  activeCategory: 'All'
 };
 
 function formatTime(seconds) {
@@ -478,6 +488,7 @@ function selectOption(index) {
 }
 
 function nextQuestion() {
+  state.eliminatedOptions = [];
   if (state.currentIndex < QUESTIONS.length - 1) {
     state.currentIndex += 1;
     state.isAnswered = false;
@@ -504,9 +515,249 @@ function restartQuiz() {
   state.isFinished = false;
   state.leaderboardSaved = false;
   state.remainingSeconds = state.timerLimit;
+  state.eliminatedOptions = [];
+  state.lifelines = { fiftyFifty: true, skip: true };
   if (state.timerIntervalId) {
     clearInterval(state.timerIntervalId);
     state.timerIntervalId = null;
+  }
+}
+
+function useFiftyFifty() {
+  if (!state.lifelines.fiftyFifty || state.isAnswered || state.isFinished || QUESTIONS.length === 0) {
+    return null;
+  }
+  const currentQ = QUESTIONS[state.currentIndex];
+  if (!currentQ) return null;
+  const wrongIndices = [0, 1, 2, 3].filter(idx => idx !== currentQ.correctIndex);
+  const eliminated = wrongIndices.slice(0, 2);
+  state.lifelines.fiftyFifty = false;
+  state.eliminatedOptions = eliminated;
+  return eliminated;
+}
+
+function useSkip() {
+  if (!state.lifelines.skip || state.isAnswered || state.isFinished || QUESTIONS.length === 0) {
+    return false;
+  }
+  state.lifelines.skip = false;
+  nextQuestion();
+  return true;
+}
+
+function getFilteredQuestions(category) {
+  const cat = category || state.activeCategory || 'All';
+  if (!cat || cat.toLowerCase() === 'all') {
+    return QUESTIONS;
+  }
+  return QUESTIONS.filter(q => (q.category || 'General').toLowerCase() === cat.toLowerCase());
+}
+
+function setCategoryFilter(category) {
+  state.activeCategory = category || 'All';
+  restartQuiz();
+  return getFilteredQuestions(category);
+}
+
+// ==========================================================================
+// Native Canvas Confetti Particle System (0 external dependencies)
+// ==========================================================================
+let confettiAnimationId = null;
+let confettiParticles = [];
+
+function triggerConfetti(particleCount = 70) {
+  if (typeof document === 'undefined') return;
+  const canvas = document.getElementById('confetti-canvas');
+  if (!canvas || !canvas.getContext) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  canvas.width = (typeof window !== 'undefined' && window.innerWidth) || 800;
+  canvas.height = (typeof window !== 'undefined' && window.innerHeight) || 600;
+
+  const colors = ['#f43f5e', '#ec4899', '#d946ef', '#a855f7', '#8b5cf6', '#6366f1', '#3b82f6', '#0ea5e9', '#10b981', '#f59e0b'];
+
+  for (let i = 0; i < particleCount; i++) {
+    confettiParticles.push({
+      x: canvas.width / 2 + (Math.random() - 0.5) * 200,
+      y: canvas.height / 3 + (Math.random() - 0.5) * 50,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 1) * 16 - 4,
+      size: Math.random() * 9 + 4,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      alpha: 1,
+      decay: Math.random() * 0.015 + 0.012,
+      rotation: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 12
+    });
+  }
+
+  if (!confettiAnimationId && typeof requestAnimationFrame === 'function') {
+    function animateConfetti() {
+      if (!ctx) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let i = confettiParticles.length - 1; i >= 0; i--) {
+        const p = confettiParticles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.38; // gravity
+        p.rotation += p.vRot;
+        p.alpha -= p.decay;
+
+        if (p.alpha <= 0 || p.y > canvas.height) {
+          confettiParticles.splice(i, 1);
+          continue;
+        }
+
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((p.rotation * Math.PI) / 180);
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = Math.max(0, p.alpha);
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        ctx.restore();
+      }
+
+      if (confettiParticles.length > 0) {
+        confettiAnimationId = requestAnimationFrame(animateConfetti);
+      } else {
+        if (typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(confettiAnimationId);
+        }
+        confettiAnimationId = null;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    animateConfetti();
+  }
+}
+
+// ==========================================================================
+// Lifelines & Power-Ups Handlers
+// ==========================================================================
+function updateLifelinesUI() {
+  if (typeof document === 'undefined') return;
+  const btn5050 = document.getElementById('btn-lifeline-5050');
+  const btnSkip = document.getElementById('btn-lifeline-skip');
+  if (btn5050) {
+    btn5050.disabled = !state.lifelines.fiftyFifty;
+  }
+  if (btnSkip) {
+    btnSkip.disabled = !state.lifelines.skip;
+  }
+}
+
+function handleFiftyFifty() {
+  const eliminated = useFiftyFifty();
+  if (!eliminated) return;
+  updateLifelinesUI();
+  if (typeof document !== 'undefined') {
+    const optionButtons = document.querySelectorAll('.option-btn');
+    optionButtons.forEach(btn => {
+      const idx = parseInt(btn.dataset.index, 10);
+      if (eliminated.includes(idx)) {
+        btn.classList.add('eliminated');
+        btn.disabled = true;
+      }
+    });
+  }
+}
+
+function handleSkip() {
+  const success = useSkip();
+  if (!success) return;
+  updateLifelinesUI();
+  renderAll();
+}
+
+// ==========================================================================
+// Category Filtering Handlers
+// ==========================================================================
+function handleCategoryFilter(category) {
+  setCategoryFilter(category);
+  if (typeof document !== 'undefined') {
+    const pills = document.querySelectorAll('.category-pill');
+    pills.forEach(pill => {
+      if (pill.dataset && pill.dataset.category) {
+        if (pill.dataset.category.toLowerCase() === state.activeCategory.toLowerCase()) {
+          pill.classList.add('active');
+        } else {
+          pill.classList.remove('active');
+        }
+      }
+    });
+  }
+  renderAll();
+}
+
+function initCategoryFilters() {
+  if (typeof document === 'undefined') return;
+  const filterContainer = document.getElementById('category-filters');
+  if (filterContainer && !filterContainer._hasClickListener) {
+    filterContainer._hasClickListener = true;
+    filterContainer.addEventListener('click', (e) => {
+      const pill = e.target.closest ? e.target.closest('.category-pill') : e.target;
+      if (pill && pill.dataset && pill.dataset.category) {
+        handleCategoryFilter(pill.dataset.category);
+      }
+    });
+  }
+}
+
+// ==========================================================================
+// Post-Quiz Review / Answer Breakdown Modal Handlers
+// ==========================================================================
+function openReviewModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('review-modal');
+  const reviewList = document.getElementById('review-list');
+  if (!modal || !reviewList) return;
+
+  reviewList.innerHTML = '';
+  const currentQs = QUESTIONS;
+
+  state.answers.forEach((ans, idx) => {
+    const q = currentQs.find(item => item.id === ans.questionId) || currentQs[idx] || { question: `Question ${idx + 1}`, options: [], correctIndex: 0, explanation: '' };
+    const item = document.createElement('div');
+    item.className = `review-item ${ans.isCorrect ? 'is-correct' : 'is-incorrect'}`;
+    const badgeText = ans.isTimeout ? '⏰ Timed Out' : (ans.isCorrect ? '✓ Correct' : '✗ Incorrect');
+    const badgeClass = ans.isCorrect ? 'correct' : 'incorrect';
+    const chosenText = (ans.selectedIndex >= 0 && q.options && q.options[ans.selectedIndex]) ? q.options[ans.selectedIndex] : 'None / Skipped';
+    const correctText = (q.options && q.options[q.correctIndex]) ? q.options[q.correctIndex] : 'N/A';
+
+    item.innerHTML = `
+      <div class="review-meta-row">
+        <span class="category-card-badge">${q.category || 'Web Dev'}</span>
+        <span class="review-badge ${badgeClass}">${badgeText}</span>
+      </div>
+      <h3 class="review-q-title">Q${idx + 1}: ${q.question}</h3>
+      <p style="font-size: 0.82rem; margin: 4px 0 2px;">Your Answer: <strong>${chosenText}</strong></p>
+      ${!ans.isCorrect ? `<p style="font-size: 0.82rem; margin: 0 0 4px; color: var(--color-success);">Correct Answer: <strong>${correctText}</strong></p>` : ''}
+      <p class="review-explanation"><strong>Explanation:</strong> ${q.explanation || 'No explanation available.'}</p>
+    `;
+    reviewList.appendChild(item);
+  });
+
+  modal.classList.remove('hidden');
+}
+
+function closeReviewModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('review-modal');
+  if (modal) modal.classList.add('hidden');
+}
+
+function initReviewModal() {
+  if (typeof document === 'undefined') return;
+  const closeBtn = document.getElementById('btn-close-review');
+  const footerCloseBtn = document.getElementById('btn-review-close-footer');
+  if (closeBtn && !closeBtn._hasClickListener) {
+    closeBtn._hasClickListener = true;
+    closeBtn.addEventListener('click', closeReviewModal);
+  }
+  if (footerCloseBtn && !footerCloseBtn._hasClickListener) {
+    footerCloseBtn._hasClickListener = true;
+    footerCloseBtn.addEventListener('click', closeReviewModal);
   }
 }
 
@@ -622,6 +873,7 @@ function renderQuestion() {
     }
     renderLeaderboard();
     playCompletionFanfare();
+    triggerConfetti(85);
 
     questionCard.innerHTML = `
       <div class="completion-summary">
@@ -662,12 +914,19 @@ function renderQuestion() {
             <span class="stat-value">${formatTime(state.elapsedSeconds)}</span>
           </div>
         </div>
-        <button id="restart-btn" class="btn btn-primary" type="button">Play Again</button>
+        <div class="completion-actions" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
+          <button id="restart-btn" class="btn btn-primary" type="button">Play Again</button>
+          <button id="btn-review-answers" class="btn btn-secondary" type="button">📋 Review Answers</button>
+        </div>
       </div>
     `;
     const restartBtn = document.getElementById('restart-btn');
     if (restartBtn) {
       restartBtn.addEventListener('click', handleRestart);
+    }
+    const reviewBtn = document.getElementById('btn-review-answers');
+    if (reviewBtn) {
+      reviewBtn.addEventListener('click', openReviewModal);
     }
     return;
   }
@@ -678,6 +937,14 @@ function renderQuestion() {
       <div id="flip-card-inner" class="flip-card-inner">
         <!-- Front Face: Question Prompt and Options -->
         <div class="flip-card-front">
+          <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <span class="category-card-badge">${currentQ.category || 'Web Dev'}</span>
+            <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
+              <span class="lifelines-label">Power-Ups:</span>
+              <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
+              <button id="btn-lifeline-skip" class="btn-lifeline" type="button" title="Skip this question without penalty (Once per quiz)">⏭️ Skip</button>
+            </div>
+          </div>
           <h2 id="question-text" class="question-heading"></h2>
           <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
         </div>
@@ -710,6 +977,10 @@ function renderQuestion() {
     btn.type = 'button';
     btn.className = 'option-btn';
     btn.dataset.index = idx;
+    if (state.eliminatedOptions && state.eliminatedOptions.includes(idx)) {
+      btn.classList.add('eliminated');
+      btn.disabled = true;
+    }
     btn.innerHTML = `<span class="badge">${badges[idx]}</span> <span class="option-text"></span> <span class="kbd-hint">[${kbdHints[idx]}]</span>`;
     const textSpan = btn.querySelector ? btn.querySelector('.option-text') : null;
     if (textSpan) {
@@ -718,6 +989,16 @@ function renderQuestion() {
     btn.addEventListener('click', () => handleOptionClick(idx));
     optionsContainer.appendChild(btn);
   });
+
+  updateLifelinesUI();
+  const btn5050 = document.getElementById('btn-lifeline-5050');
+  if (btn5050) {
+    btn5050.addEventListener('click', handleFiftyFifty);
+  }
+  const btnSkip = document.getElementById('btn-lifeline-skip');
+  if (btnSkip) {
+    btnSkip.addEventListener('click', handleSkip);
+  }
 
   const nextBtn = document.getElementById('next-btn');
   if (nextBtn) {
@@ -864,6 +1145,7 @@ function handleOptionClick(idx) {
     playCorrectSound();
     if (state.streak >= 3) {
       playStreakSound();
+      triggerConfetti(35);
     }
   } else {
     playIncorrectSound();
@@ -1352,6 +1634,8 @@ function initApp() {
   initCustomQuestionForm();
   initIntroModal();
   initTimerSettings();
+  initCategoryFilters();
+  initReviewModal();
   startTimer();
   renderAll();
 
@@ -1410,6 +1694,17 @@ if (typeof module !== 'undefined' && module.exports) {
     getLeaderboard,
     saveLeaderboardRecord,
     clearLeaderboard,
+    useFiftyFifty,
+    useSkip,
+    getFilteredQuestions,
+    setCategoryFilter,
+    triggerConfetti,
+    handleFiftyFifty,
+    handleSkip,
+    updateLifelinesUI,
+    handleCategoryFilter,
+    openReviewModal,
+    closeReviewModal,
     initApp
   };
 }
