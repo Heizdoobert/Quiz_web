@@ -74,9 +74,19 @@
       <!-- Topic & Category Filter Pills -->
       <div id="category-filters" class="category-filters" role="tablist" aria-label="Question Categories">
         <button class="category-pill active" data-category="All" type="button">All Topics</button>
-        <button class="category-pill" data-category="HTML" type="button">HTML</button>
-        <button class="category-pill" data-category="CSS" type="button">CSS</button>
-        <button class="category-pill" data-category="JavaScript" type="button">JavaScript</button>
+        <div class="category-pill-wrap">
+          <button class="category-pill" data-category="HTML" type="button">HTML</button>
+          <button class="btn-topic-delete" data-topic="HTML" type="button" title="Delete topic HTML" aria-label="Delete topic HTML">✕</button>
+        </div>
+        <div class="category-pill-wrap">
+          <button class="category-pill" data-category="CSS" type="button">CSS</button>
+          <button class="btn-topic-delete" data-topic="CSS" type="button" title="Delete topic CSS" aria-label="Delete topic CSS">✕</button>
+        </div>
+        <div class="category-pill-wrap">
+          <button class="category-pill" data-category="JavaScript" type="button">JavaScript</button>
+          <button class="btn-topic-delete" data-topic="JavaScript" type="button" title="Delete topic JavaScript" aria-label="Delete topic JavaScript">✕</button>
+        </div>
+        <button id="btn-add-topic-pill" class="category-pill add-topic-pill" type="button" title="Add a new topic">➕ Topic</button>
       </div>
 
       <div class="header-progress">
@@ -165,6 +175,16 @@
                   <option value="2">Option C</option>
                   <option value="3">Option D</option>
                 </select>
+              </div>
+
+              <div class="form-group">
+                <label for="new-q-cat">Topic / Category <span class="hint-text">(e.g. HTML, CSS, JavaScript, or create a new topic)</span></label>
+                <input id="new-q-cat" list="topics-datalist" class="input-field" type="text" placeholder="Select existing or type a new topic...">
+                <datalist id="topics-datalist">
+                  <option value="HTML"></option>
+                  <option value="CSS"></option>
+                  <option value="JavaScript"></option>
+                </datalist>
               </div>
 
               <div class="form-group">

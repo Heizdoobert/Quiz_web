@@ -1869,6 +1869,69 @@ select.input-field option {
   color: #ffffff;
 }
 
+/* Category Pill Wrap with Mini Delete Button */
+.category-pill-wrap {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.category-pill-wrap .category-pill {
+  padding-right: 22px;
+}
+
+.btn-topic-delete {
+  position: absolute;
+  right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  font-size: 9px;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--color-text-muted);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.btn-topic-delete:hover {
+  background: #ef4444;
+  color: #ffffff;
+  transform: scale(1.15);
+}
+
+[data-theme="light"] .btn-topic-delete {
+  background: rgba(15, 23, 42, 0.12);
+  color: #64748b;
+}
+
+[data-theme="light"] .btn-topic-delete:hover {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+.add-topic-pill {
+  border-style: dashed;
+  border-color: rgba(59, 130, 246, 0.4);
+  color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.05);
+  font-weight: 600;
+}
+
+.add-topic-pill:hover {
+  border-color: var(--color-primary);
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--color-primary);
+}
+
 /* Question Category Badge on Active Card */
 .category-card-badge {
   display: inline-block;

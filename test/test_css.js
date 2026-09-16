@@ -109,6 +109,11 @@ assert.ok(css.includes('.correct-answer-group'), 'CSS must style correct answer 
 assert.ok(css.includes('.btn-refresh-page'), 'CSS must style fresh reload button on completion screen');
 assert.ok(css.includes('.btn-reset-quiz'), 'CSS must style reset quiz button on completion screen');
 
+// Check Dynamic User-Managed Topics and Mini Delete Button
+assert.ok(css.includes('.category-pill-wrap'), 'CSS must style category pill wrap container');
+assert.ok(css.includes('.btn-topic-delete'), 'CSS must style mini topic delete close button');
+assert.ok(css.includes('.add-topic-pill'), 'CSS must style add topic button');
+
 console.log('All CSS styling tests passed!');
 
 

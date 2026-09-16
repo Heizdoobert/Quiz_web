@@ -336,6 +336,9 @@ function addCustomQuestion(data) {
     question: data.question.trim(),
     options: data.options.map(o => o.trim()),
     correctIndex: data.correctIndex,
+    category: (data.category && typeof data.category === 'string' && data.category.trim().length > 0)
+      ? data.category.trim()
+      : 'General',
     explanation: data.explanation && typeof data.explanation === 'string' && data.explanation.trim().length > 0
       ? data.explanation.trim()
       : `Correct answer: ${data.options[data.correctIndex].trim()}`
@@ -363,7 +366,8 @@ const state = {
   remainingSeconds: 30,
   lifelines: { fiftyFifty: true, skip: true },
   eliminatedOptions: [],
-  activeCategory: 'All'
+  activeCategory: 'All',
+  topics: ['HTML', 'CSS', 'JavaScript']
 };
 
 function formatTime(seconds) {
@@ -560,6 +564,134 @@ function setCategoryFilter(category) {
 }
 
 // ==========================================================================
+// Dynamic User-Managed Topics
+// ==========================================================================
+const DEFAULT_TOPICS = ['HTML', 'CSS', 'JavaScript'];
+const TOPICS_STORAGE_KEY = 'quiz_topics';
+
+function getStoredTopics() {
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      const saved = window.localStorage.getItem(TOPICS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+  }
+  return [...DEFAULT_TOPICS];
+}
+
+function getTopics() {
+  if (!state.topics || !Array.isArray(state.topics)) {
+    state.topics = getStoredTopics();
+  }
+  return state.topics;
+}
+
+function addTopic(topicName) {
+  if (!topicName || typeof topicName !== 'string') return false;
+  const trimmed = topicName.trim();
+  if (!trimmed) return false;
+  if (trimmed.toLowerCase() === 'all') return false;
+
+  const topics = getTopics();
+  if (topics.some(t => t.toLowerCase() === trimmed.toLowerCase())) {
+    return false; // duplicate
+  }
+
+  topics.push(trimmed);
+  state.topics = topics;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(TOPICS_STORAGE_KEY, JSON.stringify(topics));
+    } catch (e) {}
+  }
+  renderCategoryFilters();
+  updateTopicsDatalist();
+  return true;
+}
+
+function deleteTopic(topicName) {
+  if (!topicName || typeof topicName !== 'string') return false;
+  const trimmed = topicName.trim();
+  const topics = getTopics();
+  const idx = topics.findIndex(t => t.toLowerCase() === trimmed.toLowerCase());
+  if (idx === -1) return false;
+
+  topics.splice(idx, 1);
+  state.topics = topics;
+  if (typeof window !== 'undefined' && window.localStorage) {
+    try {
+      window.localStorage.setItem(TOPICS_STORAGE_KEY, JSON.stringify(topics));
+    } catch (e) {}
+  }
+
+  // Reassign any questions under this topic to 'General'
+  let modified = false;
+  QUESTIONS.forEach(q => {
+    if (q.category && q.category.toLowerCase() === trimmed.toLowerCase()) {
+      q.category = 'General';
+      modified = true;
+    }
+  });
+  if (modified) {
+    MiniStore.save(QUESTIONS);
+  }
+
+  // If deleted topic was active, reset to 'All'
+  if (state.activeCategory && state.activeCategory.toLowerCase() === trimmed.toLowerCase()) {
+    setCategoryFilter('All');
+  }
+
+  renderCategoryFilters();
+  updateTopicsDatalist();
+  return true;
+}
+
+function updateTopicsDatalist() {
+  if (typeof document === 'undefined') return;
+  const datalist = document.getElementById('topics-datalist');
+  if (!datalist) return;
+  datalist.innerHTML = '';
+  const topics = getTopics();
+  topics.forEach(top => {
+    const opt = document.createElement('option');
+    opt.value = top;
+    datalist.appendChild(opt);
+  });
+}
+
+function renderCategoryFilters() {
+  if (typeof document === 'undefined') return;
+  const container = document.getElementById('category-filters');
+  if (!container) return;
+
+  const topics = getTopics();
+  const active = state.activeCategory || 'All';
+
+  let html = `
+    <button class="category-pill ${active.toLowerCase() === 'all' ? 'active' : ''}" data-category="All" type="button">All Topics</button>
+  `;
+
+  topics.forEach(topic => {
+    const isActive = active.toLowerCase() === topic.toLowerCase();
+    html += `
+      <div class="category-pill-wrap">
+        <button class="category-pill ${isActive ? 'active' : ''}" data-category="${topic}" type="button">${topic}</button>
+        <button class="btn-topic-delete" data-topic="${topic}" type="button" title="Delete topic ${topic}" aria-label="Delete topic ${topic}">✕</button>
+      </div>
+    `;
+  });
+
+  html += `
+    <button id="btn-add-topic-pill" class="category-pill add-topic-pill" type="button" title="Add a new topic">➕ Topic</button>
+  `;
+
+  container.innerHTML = html;
+}
+
+// ==========================================================================
 // Native Canvas Confetti Particle System (0 external dependencies)
 // ==========================================================================
 let confettiAnimationId = null;
@@ -693,9 +825,36 @@ function handleCategoryFilter(category) {
 function initCategoryFilters() {
   if (typeof document === 'undefined') return;
   const filterContainer = document.getElementById('category-filters');
-  if (filterContainer && !filterContainer._hasClickListener) {
+  if (!filterContainer) return;
+
+  renderCategoryFilters();
+
+  if (!filterContainer._hasClickListener) {
     filterContainer._hasClickListener = true;
     filterContainer.addEventListener('click', (e) => {
+      // Check if delete button clicked
+      const delBtn = e.target.closest ? e.target.closest('.btn-topic-delete') : null;
+      if (delBtn && delBtn.dataset && delBtn.dataset.topic) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        deleteTopic(delBtn.dataset.topic);
+        return;
+      }
+
+      // Check if Add Topic button clicked
+      const addBtn = e.target.closest ? e.target.closest('#btn-add-topic-pill') : null;
+      if (addBtn) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        let name = null;
+        if (typeof window !== 'undefined' && typeof window.prompt === 'function') {
+          name = window.prompt('Enter new topic name:');
+        }
+        if (name && name.trim()) {
+          addTopic(name.trim());
+        }
+        return;
+      }
+
+      // Check if category pill clicked
       const pill = e.target.closest ? e.target.closest('.category-pill') : e.target;
       if (pill && pill.dataset && pill.dataset.category) {
         handleCategoryFilter(pill.dataset.category);
@@ -1255,6 +1414,7 @@ function initCustomQuestionForm() {
   }
 
   updateQuestionCountBadge();
+  updateTopicsDatalist();
 
   if (form) {
     const correctSelect = document.getElementById('correct-opt-select');
@@ -1307,6 +1467,14 @@ function initCustomQuestionForm() {
         }
       }
 
+      const qCatInput = document.getElementById('new-q-cat');
+      let category = (qCatInput && typeof qCatInput.value === 'string') ? qCatInput.value.trim() : '';
+      if (!category) {
+        category = 'General';
+      } else {
+        addTopic(category);
+      }
+
       const explanation = expInput ? expInput.value.trim() : '';
 
       if (!qText) {
@@ -1332,6 +1500,7 @@ function initCustomQuestionForm() {
         question: qText,
         options,
         correctIndex,
+        category,
         explanation
       });
 
@@ -1354,6 +1523,9 @@ function initCustomQuestionForm() {
       }
 
       form.reset();
+      if (qCatInput) {
+        qCatInput.value = '';
+      }
       if (correctSelect) {
         correctSelect.value = '0';
       }
@@ -1763,6 +1935,10 @@ if (typeof module !== 'undefined' && module.exports) {
     handleCategoryFilter,
     openReviewModal,
     closeReviewModal,
+    getTopics,
+    addTopic,
+    deleteTopic,
+    renderCategoryFilters,
     initCustomQuestionForm,
     initApp
   };

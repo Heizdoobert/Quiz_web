@@ -64,6 +64,7 @@ class MockElement {
     this._innerHTML = '';
     this.listeners = {};
     this.disabled = false;
+    this.value = '';
   }
   setAttribute(name, value) {
     this.attributes[name] = String(value);
@@ -92,7 +93,18 @@ class MockElement {
   }
   focus() {}
   appendChild(child) {
+    child.parentNode = this;
     this.children.push(child);
+  }
+  closest(selector) {
+    let curr = this;
+    while (curr) {
+      if (selector.startsWith('.') && curr.classList.contains(selector.slice(1))) return curr;
+      if (selector.startsWith('#') && curr.id === selector.slice(1)) return curr;
+      if (curr.tagName && curr.tagName.toLowerCase() === selector.toLowerCase()) return curr;
+      curr = curr.parentNode;
+    }
+    return null;
   }
   querySelectorAll(selector) {
     const results = [];
@@ -144,7 +156,7 @@ class MockElement {
     });
 
     // Parse simple child spans or elements
-    const tagMatches = [...val.matchAll(/<([a-z0-9]+)([^>]*)>(.*?)<\/\1>/gi)];
+    const tagMatches = [...val.matchAll(/<([a-z0-9]+)([^>]*)>(.*?)<\/\1>/gis)];
     tagMatches.forEach(m => {
       const tag = m[1];
       const attrs = m[2];
@@ -154,7 +166,15 @@ class MockElement {
       if (classMatch) {
         classMatch[1].split(/\s+/).forEach(c => el.classList.add(c));
       }
-      el.textContent = content;
+      const dataMatches = [...attrs.matchAll(/data-([a-z0-9_-]+)="([^"]*)"/gi)];
+      dataMatches.forEach(dm => {
+        el.dataset[dm[1]] = dm[2];
+      });
+      if (content.includes('<')) {
+        el.innerHTML = content;
+      } else {
+        el.textContent = content;
+      }
       this.children.push(el);
     });
   }
@@ -177,7 +197,8 @@ const ids = [
   'btn-theme-toggle', 'btn-sound-toggle', 'quiz-leaderboard', 'leaderboard-list', 'btn-clear-leaderboard',
   'confetti-canvas', 'category-filters', 'lifelines-toolbar', 'btn-lifeline-5050', 'btn-lifeline-skip',
   'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers',
-  'btn-refresh-page', 'btn-reset-quiz', 'correct-opt-select'
+  'btn-refresh-page', 'btn-reset-quiz', 'correct-opt-select',
+  'new-q-cat', 'topics-datalist', 'btn-add-topic-pill'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -546,5 +567,41 @@ assert.strictEqual(QUESTIONS.length, countBefore + 1, 'Custom question should be
 const added = QUESTIONS[QUESTIONS.length - 1];
 assert.strictEqual(added.question, 'What does DOM stand for?');
 assert.strictEqual(added.correctIndex, 3, 'Added question should have correctIndex matching selected option 3');
+
+// 19. Test Dynamic Topic Management (Rendering, Add Topic, Delete Topic via mini button)
+const { getTopics, addTopic, deleteTopic, renderCategoryFilters } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof getTopics, 'function', 'getTopics must be a function');
+assert.strictEqual(typeof addTopic, 'function', 'addTopic must be a function');
+assert.strictEqual(typeof deleteTopic, 'function', 'deleteTopic must be a function');
+assert.strictEqual(typeof renderCategoryFilters, 'function', 'renderCategoryFilters must be a function');
+
+// Render topics into #category-filters
+renderCategoryFilters();
+const filtersContainer = getOrCreateElement('category-filters');
+assert.ok(filtersContainer.innerHTML.includes('category-pill-wrap'), 'Filters container should render .category-pill-wrap');
+assert.ok(filtersContainer.innerHTML.includes('btn-topic-delete'), 'Filters container should render mini delete buttons');
+assert.ok(filtersContainer.innerHTML.includes('btn-add-topic-pill'), 'Filters container should render add topic button');
+
+// Test deleting a topic via deleteTopic
+const topicsBeforeDel = getTopics().slice();
+assert.ok(topicsBeforeDel.includes('CSS'), 'Topics should include CSS initially');
+deleteTopic('CSS');
+assert.ok(!getTopics().includes('CSS'), 'CSS topic should be removed');
+renderCategoryFilters();
+assert.ok(!filtersContainer.innerHTML.includes('data-topic="CSS"'), 'Category filters should no longer render CSS pill after deletion');
+
+// Test adding a custom question with a new topic adds it to topics
+const qCatInput = getOrCreateElement('new-q-cat', 'input');
+qCatInput.value = 'TypeScript';
+qInput.value = 'What is TypeScript?';
+testOpt0.value = 'A typed superset of JavaScript';
+testOpt1.value = 'A database engine';
+testOpt2.value = 'A CSS preprocessor';
+testOpt3.value = 'An operating system';
+btnAddQ.click();
+
+assert.ok(getTopics().includes('TypeScript'), 'Adding question with new topic should register topic in getTopics');
+const tsQ = QUESTIONS[QUESTIONS.length - 1];
+assert.strictEqual(tsQ.category, 'TypeScript', 'Added question should have category TypeScript');
 
 console.log('All Component Rendering tests passed!');

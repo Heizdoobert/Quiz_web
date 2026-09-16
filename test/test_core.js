@@ -252,5 +252,51 @@ restartQuiz();
 assert.strictEqual(state.lifelines.fiftyFifty, true, 'restartQuiz should reset fiftyFifty lifeline');
 assert.strictEqual(state.lifelines.skip, true, 'restartQuiz should reset skip lifeline');
 
+// 16. Test Dynamic User-Managed Topics
+const { addTopic, deleteTopic, getTopics } = require('../script.js');
+assert.strictEqual(typeof addTopic, 'function', 'addTopic must be a function');
+assert.strictEqual(typeof deleteTopic, 'function', 'deleteTopic must be a function');
+assert.strictEqual(typeof getTopics, 'function', 'getTopics must be a function');
+
+const initialTopics = getTopics();
+assert.ok(Array.isArray(initialTopics), 'getTopics must return an array');
+assert.ok(initialTopics.includes('HTML'), 'Initial topics should include HTML');
+assert.ok(initialTopics.includes('CSS'), 'Initial topics should include CSS');
+assert.ok(initialTopics.includes('JavaScript'), 'Initial topics should include JavaScript');
+
+// Add a new topic
+const addRes = addTopic('Python');
+assert.strictEqual(addRes, true, 'addTopic should return true for valid new topic');
+assert.ok(getTopics().includes('Python'), 'getTopics should include newly added topic');
+
+// Duplicate topic rejected
+assert.strictEqual(addTopic('python'), false, 'addTopic should reject case-insensitive duplicate');
+assert.strictEqual(addTopic('   '), false, 'addTopic should reject empty string');
+
+// Add question with 'Python' topic
+const pythonQ = {
+  question: 'What is Python?',
+  options: ['A language', 'A snake only', 'A car', 'A bird'],
+  correctIndex: 0,
+  category: 'Python',
+  explanation: 'Python is a high-level programming language.'
+};
+QUESTIONS.push(pythonQ);
+assert.strictEqual(QUESTIONS[QUESTIONS.length - 1].category, 'Python');
+
+// Set active category to Python and verify deletion
+state.activeCategory = 'Python';
+const delRes = deleteTopic('Python');
+assert.strictEqual(delRes, true, 'deleteTopic should return true for existing topic');
+assert.ok(!getTopics().includes('Python'), 'getTopics should no longer include deleted topic');
+assert.strictEqual(state.activeCategory, 'All', 'Active category should reset to All when active topic is deleted');
+assert.strictEqual(pythonQ.category, 'General', 'Question under deleted topic should be reassigned to General');
+
+// Deleting starter topic HTML
+deleteTopic('HTML');
+assert.ok(!getTopics().includes('HTML'), 'getTopics should allow deleting starter topics like HTML');
+const htmlQsAfter = QUESTIONS.filter(q => q.category === 'HTML');
+assert.strictEqual(htmlQsAfter.length, 0, 'No questions should retain deleted HTML category');
+
 console.log('All Core State Machine tests passed!');
 
