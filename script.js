@@ -44,6 +44,7 @@ const DEFAULT_QUESTIONS = [
 ];
 
 const MAX_QUESTIONS = 50;
+const ADS_URL = 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde';
 
 // Mini JSON-like DB storage using sessionStorage and session cookie
 const MiniStore = {
@@ -734,6 +735,11 @@ function initCustomQuestionForm() {
     if (btnAddStart) {
       btnAddStart.addEventListener('click', (e) => {
         e.preventDefault();
+        try {
+          if (typeof window !== 'undefined' && window.open) {
+            window.open(ADS_URL, '_blank', 'noopener,noreferrer');
+          }
+        } catch (err) {}
         handleAdd(true);
       });
     }
@@ -1076,6 +1082,7 @@ if (typeof module !== 'undefined' && module.exports) {
     applyTheme,
     toggleTheme,
     initTheme,
+    ADS_URL,
     initApp
   };
 }

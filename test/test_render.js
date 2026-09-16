@@ -31,6 +31,7 @@ const {
   applyTheme,
   toggleTheme,
   initTheme,
+  ADS_URL,
   QUESTIONS,
   state
 } = require(path.resolve(__dirname, '../script.js'));
@@ -326,6 +327,9 @@ const t2 = toggleTheme();
 assert.strictEqual(t2, 'dark');
 assert.strictEqual(docElement.getAttribute('data-theme'), null);
 assert.strictEqual(themeBtn.textContent, '🌙 Dark');
+
+// Check ADS_URL
+assert.strictEqual(ADS_URL, 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde', 'ADS_URL must match partner CPM network URL');
 
 // Clean up timer interval
 if (state.timerIntervalId) {
