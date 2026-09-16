@@ -29,9 +29,10 @@ loadSampleQuestions();
 assert.strictEqual(QUESTIONS.length, DEFAULT_QUESTIONS.length, 'loadSampleQuestions should populate QUESTIONS');
 
 // 4. Test formatTime
-assert.strictEqual(formatTime(0), '00:00');
-assert.strictEqual(formatTime(65), '01:05');
-assert.strictEqual(formatTime(3600), '60:00');
+assert.strictEqual(formatTime(0), '00:00:00');
+assert.strictEqual(formatTime(65), '00:01:05');
+assert.strictEqual(formatTime(3600), '01:00:00');
+assert.strictEqual(formatTime(3665), '01:01:05');
 
 // 5. Test calcAccuracy
 assert.strictEqual(calcAccuracy([]), 0);

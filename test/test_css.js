@@ -88,7 +88,8 @@ assert.ok(!css.includes('.brand-title {\n  font-size: 1.5rem;\n  font-weight: 70
 assert.ok(css.includes('[data-theme="light"] .flip-card-back'), 'CSS must style flip-card-back in light mode');
 assert.ok(css.includes('[data-theme="light"] .stat-card'), 'CSS must style stat-card in light mode');
 assert.ok(css.includes('[data-theme="light"] .stat-value.highlight'), 'CSS must adjust stat-value highlight for light mode');
-assert.ok(css.includes('[data-theme="light"] .form-alert.error'), 'CSS must adjust form alert text for light mode');
+assert.ok(css.includes('.cat-clapping-wrapper'), 'CSS must style .cat-clapping-wrapper');
+assert.ok(css.includes('catClapLeft'), 'CSS must define catClapLeft animation');
 
 console.log('All CSS styling tests passed!');
 

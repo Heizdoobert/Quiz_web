@@ -170,9 +170,11 @@ const state = {
 };
 
 function formatTime(seconds) {
-  const mins = Math.floor(seconds / 60);
-  const secs = seconds % 60;
-  return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  const s = Math.max(0, Math.floor(seconds || 0));
+  const hrs = Math.floor(s / 3600);
+  const mins = Math.floor((s % 3600) / 60);
+  const secs = s % 60;
+  return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 function calcAccuracy(answers) {
@@ -421,8 +423,25 @@ function renderQuestion() {
     const accuracy = calcAccuracy(state.answers);
     questionCard.innerHTML = `
       <div class="completion-summary">
-        <div class="completion-icon" aria-hidden="true">🏆</div>
-        <h2>Quiz Completed!</h2>
+        <div class="cat-clapping-wrapper" aria-label="Cat clapping celebration animation">
+          <div class="confetti-sparkles" aria-hidden="true">
+            <span class="sparkle s1">✨</span>
+            <span class="sparkle s2">🎉</span>
+            <span class="sparkle s3">🎊</span>
+            <span class="sparkle s4">⭐</span>
+          </div>
+          <div class="cat-stage">
+            <div class="cat-head-wrap">
+              <span class="cat-avatar" aria-hidden="true">🐱</span>
+            </div>
+            <div class="cat-paws-stage" aria-hidden="true">
+              <span class="cat-paw paw-left">🐾</span>
+              <span class="cat-clap-burst">👏</span>
+              <span class="cat-paw paw-right">🐾</span>
+            </div>
+          </div>
+        </div>
+        <h2 class="completion-heading">🎉 Congratulations! Quiz Completed!</h2>
         <div class="completion-stats">
           <div class="stat-card">
             <span class="stat-label">Final Score</span>

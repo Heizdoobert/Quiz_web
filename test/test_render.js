@@ -210,7 +210,7 @@ restartQuiz();
 setTimerConfig('stopwatch');
 state.elapsedSeconds = 65;
 renderHeader();
-assert.strictEqual(getOrCreateElement('timer-display').textContent, '01:05');
+assert.strictEqual(getOrCreateElement('timer-display').textContent, '00:01:05');
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
 assert.strictEqual(getOrCreateElement('progress-bar-fill').style.width, '17%');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should be 1 on Q1');
@@ -277,7 +277,7 @@ assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS
 setTimerConfig('per-question', 30);
 state.remainingSeconds = 4;
 renderHeader();
-assert.strictEqual(getOrCreateElement('timer-display').textContent, '00:04');
+assert.strictEqual(getOrCreateElement('timer-display').textContent, '00:00:04');
 assert.strictEqual(getOrCreateElement('timer-display').classList.contains('timer-warning'), true, 'Timer must show warning class when <= 5s');
 
 // Verify Question 4 options (which contain <section>, <div>, <article>, <main>)
@@ -300,6 +300,7 @@ renderAll();
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Quiz Complete!');
 assert.strictEqual(getOrCreateElement('progress-bar-fill').style.width, '100%');
 assert.ok(getOrCreateElement('quiz-card').innerHTML.includes('completion-summary'));
+assert.ok(getOrCreateElement('quiz-card').innerHTML.includes('cat-clapping-wrapper'), 'Completion screen must render cat-clapping-wrapper');
 
 // Test handleRestart
 handleRestart();
