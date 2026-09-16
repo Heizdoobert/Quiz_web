@@ -29,20 +29,101 @@
 
     <!-- Main Content Area: Question Card + Scoreboard -->
     <div class="main-content-grid">
-      <!-- Component 2: Active Question Card -->
-      <main id="quiz-card" class="quiz-card">
-        <div class="card-inner">
-          <h2 id="question-text" class="question-heading">Loading question...</h2>
-          <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
-          <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
-            <div id="feedback-result" class="feedback-result"></div>
-            <p id="feedback-explanation" class="feedback-explanation"></p>
+      <div class="quiz-main-column">
+        <!-- Custom Question Creator (Collapsible, Transparent Glassmorphism) -->
+        <section id="custom-question-section" class="custom-question-card" aria-label="Add Custom Question">
+          <div class="custom-header-bar">
+            <div class="custom-title-wrap">
+              <span class="custom-icon" aria-hidden="true">✏️</span>
+              <h2 class="custom-heading">Custom Questions</h2>
+              <span id="question-count-badge" class="count-badge">(6/50 questions)</span>
+            </div>
+            <button id="toggle-add-form-btn" class="btn btn-secondary btn-sm" type="button" aria-expanded="false" aria-controls="add-question-form">
+              ➕ Add Custom Question
+            </button>
           </div>
-          <div class="action-footer">
-            <button id="next-btn" class="btn btn-primary hidden" type="button">Next Question →</button>
+
+          <div class="form-collapsible">
+            <form id="add-question-form" class="custom-form" novalidate>
+              <div id="form-alert-msg" class="form-alert hidden" role="alert"></div>
+
+              <div class="form-group">
+                <label for="new-q-text">Question Prompt <span class="req">*</span></label>
+                <input id="new-q-text" class="input-field" type="text" placeholder="e.g. What does CSS stand for?" required>
+              </div>
+
+              <div class="options-inputs-header">
+                <span>Answer Options <span class="req">*</span></span>
+                <span class="hint-text">Select the radio button for the correct answer</span>
+              </div>
+
+              <div class="options-inputs-grid">
+                <div class="option-input-row">
+                  <label class="radio-label">
+                    <input type="radio" name="correct-opt" value="0" checked aria-label="Option A is correct">
+                    <span class="custom-radio"></span>
+                    <span class="opt-tag">A</span>
+                  </label>
+                  <input id="new-opt-0" class="input-field" type="text" placeholder="Option A" required>
+                </div>
+
+                <div class="option-input-row">
+                  <label class="radio-label">
+                    <input type="radio" name="correct-opt" value="1" aria-label="Option B is correct">
+                    <span class="custom-radio"></span>
+                    <span class="opt-tag">B</span>
+                  </label>
+                  <input id="new-opt-1" class="input-field" type="text" placeholder="Option B" required>
+                </div>
+
+                <div class="option-input-row">
+                  <label class="radio-label">
+                    <input type="radio" name="correct-opt" value="2" aria-label="Option C is correct">
+                    <span class="custom-radio"></span>
+                    <span class="opt-tag">C</span>
+                  </label>
+                  <input id="new-opt-2" class="input-field" type="text" placeholder="Option C" required>
+                </div>
+
+                <div class="option-input-row">
+                  <label class="radio-label">
+                    <input type="radio" name="correct-opt" value="3" aria-label="Option D is correct">
+                    <span class="custom-radio"></span>
+                    <span class="opt-tag">D</span>
+                  </label>
+                  <input id="new-opt-3" class="input-field" type="text" placeholder="Option D" required>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="new-q-exp">Explanation <span class="hint-text">(optional)</span></label>
+                <input id="new-q-exp" class="input-field" type="text" placeholder="e.g. CSS stands for Cascading Style Sheets.">
+              </div>
+
+              <div class="form-actions">
+                <button id="btn-add-question" class="btn btn-secondary" type="button">Add Question</button>
+                <button id="btn-add-start-quiz" class="btn btn-primary" type="button">Add & Start Quiz 🚀</button>
+              </div>
+            </form>
           </div>
-        </div>
-      </main>
+        </section>
+
+        <!-- Component 2: Active Question Card -->
+        <main id="quiz-card" class="quiz-card">
+          <div class="card-inner">
+            <h2 id="question-text" class="question-heading">Loading question...</h2>
+            <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>
+            <div id="feedback-container" class="feedback-card hidden" aria-live="polite">
+              <div id="feedback-result" class="feedback-result"></div>
+              <p id="feedback-explanation" class="feedback-explanation"></p>
+            </div>
+            <div class="action-footer">
+              <button id="next-btn" class="btn btn-primary hidden" type="button">Next Question →</button>
+            </div>
+          </div>
+        </main>
+      </div>
+
 
       <div class="sidebar-column">
         <!-- Component 3: Scoreboard / Stats & History -->

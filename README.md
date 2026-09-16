@@ -12,6 +12,16 @@ Zero frameworks. Zero runtime dependencies. Zero build step.
   - **Header / Timer**: Live elapsed timer (`MM:SS`), question progress tracker (`Question X of Y`), and an accessible animated progress bar.
   - **Active Question Card**: 4 multiple-choice options, instant color-coded feedback (emerald for correct, crimson for incorrect), contextual explanations, and keyboard navigation.
   - **Live Scoreboard**: Real-time points (+100 per correct answer), current & best streak counter with flame indicator, dynamic accuracy percentage, and a scrollable per-question history log.
+- **Custom Question Creator (Up to 50 Questions)**:
+  - Users can easily add their own questions and options directly in the browser via a collapsible, smoothly animated form (`#custom-question-section`).
+  - Supports up to 50 questions with instantaneous validation and radio-button answer keys.
+  - Option to "Add Question" to the current pool or "Add & Start Quiz" to jump straight into the customized quiz.
+- **Mini JSON DB Storage (`sessionStorage` + Session Cookie)**:
+  - Custom questions are serialized into a lightweight JSON database stored in both `sessionStorage` and browser session cookies.
+  - **Auto-Clear on Reload**: Refreshing or reloading the page automatically wipes custom session data, restoring the pristine default question bank.
+- **Transparent Glassmorphism & Smooth Animation**:
+  - Semi-transparent cards with `backdrop-filter: blur(12px)` and subtle glowing borders.
+  - Fluid cubic-bezier transitions on form expansion, hover states, button clicks, and feedback alerts.
 - **Affiliate & Ad-Ready Zone**:
   - Dedicated, unobtrusively styled slot (`#affiliate-zone`) in the sidebar column for sponsored content, affiliate recommendations, or ad network scripts.
 - **Accessible & Compliant**:
@@ -21,6 +31,7 @@ Zero frameworks. Zero runtime dependencies. Zero build step.
 - **Responsive Layout**:
   - Built with CSS Grid and Flexbox.
   - Seamlessly adapts between a 2-column desktop dashboard and a stacked single-column mobile view (< 768px).
+
 
 ---
 

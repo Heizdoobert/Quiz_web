@@ -1,4 +1,4 @@
-const QUESTIONS = [
+const DEFAULT_QUESTIONS = [
   {
     id: 1,
     question: "Which HTML element is used to link an external CSS file?",
@@ -42,6 +42,102 @@ const QUESTIONS = [
     explanation: "The filter() method produces a shallow copy of portions of a given array filtered down to elements that pass the test."
   }
 ];
+
+const MAX_QUESTIONS = 50;
+
+// Mini JSON-like DB storage using sessionStorage and session cookie
+const MiniStore = {
+  sessionKey: 'quiz_mini_db',
+  cookieName: 'quiz_mini_session',
+
+  getCookie(name) {
+    if (typeof document === 'undefined') return null;
+    const match = document.cookie.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[3]) : null;
+  },
+
+  setCookie(name, value) {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+  },
+
+  deleteCookie(name) {
+    if (typeof document === 'undefined') return;
+    document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  },
+
+  clear() {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(this.sessionKey);
+    }
+    this.deleteCookie(this.cookieName);
+  },
+
+  save(data) {
+    const json = JSON.stringify(data);
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(this.sessionKey, json);
+    }
+    this.setCookie(this.cookieName, json);
+  },
+
+  load() {
+    let raw = null;
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      raw = window.sessionStorage.getItem(this.sessionKey);
+    }
+    if (!raw) {
+      raw = this.getCookie(this.cookieName);
+    }
+    if (raw) {
+      try {
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  }
+};
+
+// Active questions array (defaults to a clone of DEFAULT_QUESTIONS)
+const QUESTIONS = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+
+function addCustomQuestion(data) {
+  if (!data || typeof data.question !== 'string' || data.question.trim().length === 0) {
+    return null;
+  }
+  if (!Array.isArray(data.options) || data.options.length !== 4) {
+    return null;
+  }
+  for (const opt of data.options) {
+    if (typeof opt !== 'string' || opt.trim().length === 0) {
+      return null;
+    }
+  }
+  if (typeof data.correctIndex !== 'number' || !Number.isInteger(data.correctIndex) || data.correctIndex < 0 || data.correctIndex >= 4) {
+    return null;
+  }
+  if (QUESTIONS.length >= MAX_QUESTIONS) {
+    return null;
+  }
+
+  const newId = QUESTIONS.length > 0 ? Math.max(...QUESTIONS.map(q => q.id)) + 1 : 1;
+  const newQuestion = {
+    id: newId,
+    question: data.question.trim(),
+    options: data.options.map(o => o.trim()),
+    correctIndex: data.correctIndex,
+    explanation: data.explanation && typeof data.explanation === 'string' && data.explanation.trim().length > 0
+      ? data.explanation.trim()
+      : `Correct answer: ${data.options[data.correctIndex].trim()}`
+  };
+
+  QUESTIONS.push(newQuestion);
+  MiniStore.save(QUESTIONS);
+  return newQuestion;
+}
+
 
 const state = {
   currentIndex: 0,
@@ -321,7 +417,141 @@ function startTimer() {
   }, 1000);
 }
 
+function updateQuestionCountBadge() {
+  const badge = document.getElementById('question-count-badge');
+  if (badge) {
+    badge.textContent = `(${QUESTIONS.length}/${MAX_QUESTIONS} questions)`;
+  }
+  const addBtn = document.getElementById('btn-add-question');
+  const addStartBtn = document.getElementById('btn-add-start-quiz');
+  if (QUESTIONS.length >= MAX_QUESTIONS) {
+    if (addBtn) addBtn.disabled = true;
+    if (addStartBtn) addStartBtn.disabled = true;
+    const alertBox = document.getElementById('form-alert-msg');
+    if (alertBox) {
+      alertBox.textContent = `Maximum limit of ${MAX_QUESTIONS} questions reached.`;
+      alertBox.classList.remove('hidden');
+    }
+  }
+}
+
+function initCustomQuestionForm() {
+  const toggleBtn = document.getElementById('toggle-add-form-btn');
+  const formSection = document.getElementById('custom-question-section');
+  const form = document.getElementById('add-question-form');
+
+  if (toggleBtn && formSection) {
+    toggleBtn.addEventListener('click', () => {
+      const isExpanded = formSection.classList.toggle('expanded');
+      toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+      toggleBtn.textContent = isExpanded ? '✖ Close Question Form' : '➕ Add Custom Question';
+    });
+  }
+
+  updateQuestionCountBadge();
+
+  if (form) {
+    const handleAdd = (startNow) => {
+      const qTextInput = document.getElementById('new-q-text');
+      const opt0 = document.getElementById('new-opt-0');
+      const opt1 = document.getElementById('new-opt-1');
+      const opt2 = document.getElementById('new-opt-2');
+      const opt3 = document.getElementById('new-opt-3');
+      const correctRadio = document.querySelector('input[name="correct-opt"]:checked');
+      const expInput = document.getElementById('new-q-exp');
+      const alertBox = document.getElementById('form-alert-msg');
+
+      if (!qTextInput || !opt0 || !opt1 || !opt2 || !opt3 || !correctRadio) return;
+
+      const qText = qTextInput.value.trim();
+      const options = [opt0.value.trim(), opt1.value.trim(), opt2.value.trim(), opt3.value.trim()];
+      const correctIndex = parseInt(correctRadio.value, 10);
+      const explanation = expInput ? expInput.value.trim() : '';
+
+      if (!qText) {
+        if (alertBox) {
+          alertBox.textContent = 'Please enter a question.';
+          alertBox.className = 'form-alert error';
+          alertBox.classList.remove('hidden');
+        }
+        qTextInput.focus();
+        return;
+      }
+
+      if (options.some(o => o.length === 0)) {
+        if (alertBox) {
+          alertBox.textContent = 'Please fill in all 4 options.';
+          alertBox.className = 'form-alert error';
+          alertBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      const result = addCustomQuestion({
+        question: qText,
+        options,
+        correctIndex,
+        explanation
+      });
+
+      if (!result) {
+        if (alertBox) {
+          alertBox.textContent = `Cannot add question. Max limit of ${MAX_QUESTIONS} reached.`;
+          alertBox.className = 'form-alert error';
+          alertBox.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (alertBox) {
+        alertBox.textContent = '✓ Question added to quiz!';
+        alertBox.className = 'form-alert success';
+        alertBox.classList.remove('hidden');
+        setTimeout(() => {
+          if (alertBox) alertBox.classList.add('hidden');
+        }, 2500);
+      }
+
+      form.reset();
+      updateQuestionCountBadge();
+
+      if (startNow) {
+        if (formSection && toggleBtn) {
+          formSection.classList.remove('expanded');
+          toggleBtn.setAttribute('aria-expanded', 'false');
+          toggleBtn.textContent = '➕ Add Custom Question';
+        }
+        handleRestart();
+      } else {
+        renderHeader();
+      }
+    };
+
+    const btnAdd = document.getElementById('btn-add-question');
+    if (btnAdd) {
+      btnAdd.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleAdd(false);
+      });
+    }
+
+    const btnAddStart = document.getElementById('btn-add-start-quiz');
+    if (btnAddStart) {
+      btnAddStart.addEventListener('click', (e) => {
+        e.preventDefault();
+        handleAdd(true);
+      });
+    }
+  }
+}
+
 function initApp() {
+  // Clear any existing stored data on page reload as requested
+  MiniStore.clear();
+  // Save fresh questions into session storage and cookie
+  MiniStore.save(QUESTIONS);
+
+  initCustomQuestionForm();
   startTimer();
   renderAll();
 }
@@ -332,7 +562,11 @@ if (typeof document !== 'undefined') {
 
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = {
+    DEFAULT_QUESTIONS,
     QUESTIONS,
+    MAX_QUESTIONS,
+    MiniStore,
+    addCustomQuestion,
     state,
     formatTime,
     calcAccuracy,
@@ -350,4 +584,5 @@ if (typeof module !== 'undefined' && module.exports) {
     initApp
   };
 }
+
 

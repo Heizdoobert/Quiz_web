@@ -42,5 +42,12 @@ assert.ok(css.includes('@media'), 'CSS must include media queries for responsive
 assert.ok(css.includes('.ad-card'), 'CSS must style .ad-card');
 assert.ok(css.includes('.ad-badge'), 'CSS must style .ad-badge');
 
+// Check custom question card, glassmorphism, and smooth animation classes
+assert.ok(css.includes('.custom-question-card'), 'CSS must style .custom-question-card');
+assert.ok(css.includes('backdrop-filter: blur'), 'CSS must include backdrop-filter blur for glassmorphism transparency');
+assert.ok(css.includes('transition:'), 'CSS must include smooth transitions');
+assert.ok(css.includes('.form-collapsible'), 'CSS must style .form-collapsible');
+
 console.log('All CSS styling tests passed!');
+
 

@@ -90,4 +90,48 @@ assert.strictEqual(state.timerIntervalId, null);
 assert.strictEqual(clearedId, 99999);
 global.clearInterval = origClearInterval;
 
+// 12. Test MiniStore and addCustomQuestion (up to 50 questions)
+const { MiniStore, addCustomQuestion } = require('../script.js');
+assert.ok(MiniStore, 'MiniStore must be exported');
+assert.strictEqual(typeof addCustomQuestion, 'function', 'addCustomQuestion must be a function');
+
+// Test adding a custom question
+const initialCount = QUESTIONS.length;
+const newQ = {
+  question: "What does HTML stand for?",
+  options: ["Hyper Text Markup Language", "High Tech Multi Language", "Hyperlink Text Mode Layout", "Home Tool Markup Language"],
+  correctIndex: 0,
+  explanation: "HTML stands for HyperText Markup Language."
+};
+const added = addCustomQuestion(newQ);
+assert.ok(added, 'Valid question should be added');
+assert.strictEqual(QUESTIONS.length, initialCount + 1);
+assert.strictEqual(QUESTIONS[QUESTIONS.length - 1].question, "What does HTML stand for?");
+
+// Test rejection of invalid question
+assert.strictEqual(addCustomQuestion({ question: "", options: ["A", "B", "C", "D"], correctIndex: 0 }), null, 'Empty question must be rejected');
+assert.strictEqual(addCustomQuestion({ question: "Valid?", options: ["A", "B"], correctIndex: 0 }), null, 'Must require 4 options');
+assert.strictEqual(addCustomQuestion({ question: "Valid?", options: ["A", "B", "C", "D"], correctIndex: 5 }), null, 'correctIndex out of bounds must be rejected');
+
+// Test 50 questions cap limit
+while (QUESTIONS.length < 50) {
+  addCustomQuestion({
+    question: `Question ${QUESTIONS.length + 1}`,
+    options: ["Option 1", "Option 2", "Option 3", "Option 4"],
+    correctIndex: 0,
+    explanation: "Sample explanation"
+  });
+}
+assert.strictEqual(QUESTIONS.length, 50, 'Questions count should reach 50');
+
+// Attempting 51st question must be rejected
+const overLimitQ = addCustomQuestion({
+  question: "51st Question?",
+  options: ["A", "B", "C", "D"],
+  correctIndex: 0
+});
+assert.strictEqual(overLimitQ, null, 'Adding beyond 50 questions must return null / be rejected');
+assert.strictEqual(QUESTIONS.length, 50, 'Max questions cap must stay at 50');
+
 console.log('All Core State Machine tests passed!');
+
