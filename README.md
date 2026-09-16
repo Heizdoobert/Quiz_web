@@ -1,6 +1,6 @@
-# Web Dev Quiz
+# Quick Quiz
 
-A modern, responsive, single-page web development trivia application built with vanilla HTML5, CSS3, and modern JavaScript. It features real-time scoring, live streak tracking, instant answer feedback with explanations, and a designated zone for affiliate links or advertisement banners.
+A modern, responsive, single-page web quiz application built with vanilla HTML5, CSS3, and modern JavaScript. It features real-time scoring, live streak tracking, instant answer feedback with explanations, and a designated zone for affiliate links or advertisement banners.
 
 Zero frameworks. Zero runtime dependencies. Zero build step.
 

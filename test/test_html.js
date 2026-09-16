@@ -82,6 +82,8 @@ assert.ok(html.includes('name="twitter:card"'), 'Twitter card meta tag must exis
 assert.ok(html.includes('application/ld+json'), 'Schema.org JSON-LD structured data must exist');
 assert.ok(fs.existsSync('robots.txt'), 'robots.txt must exist for search engines');
 assert.ok(fs.existsSync('sitemap.xml'), 'sitemap.xml must exist for search engines');
+assert.ok(html.includes('<title>Quick Quiz</title>'), 'Title must be Quick Quiz');
+assert.ok(html.includes('<h1 class="brand-title">Quick Quiz</h1>'), 'Brand title must be Quick Quiz');
 
 console.log('All HTML structure and SEO tests passed!');
 
