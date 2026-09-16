@@ -1049,6 +1049,15 @@ function renderHeader() {
         }
       }
     }
+
+    const cardBadge = (typeof document !== 'undefined' && document.getElementById ? document.getElementById('card-timer-badge') : null) || (timerDisplay.closest ? timerDisplay.closest('.card-timer-badge') : (timerDisplay.parentNode && timerDisplay.parentNode.classList && timerDisplay.parentNode.classList.contains('card-timer-badge') ? timerDisplay.parentNode : null));
+    if (cardBadge && cardBadge.classList) {
+      if (state.timerMode !== 'stopwatch' && state.remainingSeconds <= 5 && !state.isAnswered && !state.isFinished && QUESTIONS.length > 0) {
+        cardBadge.classList.add('timer-urgent');
+      } else {
+        cardBadge.classList.remove('timer-urgent');
+      }
+    }
   }
 
   const total = QUESTIONS.length;
@@ -1208,6 +1217,11 @@ function renderQuestion() {
         <div class="flip-card-front">
           <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
             <span class="category-card-badge">${currentQ.category || 'Web Dev'}</span>
+            <div id="card-timer-badge" class="card-timer-badge ${state.timerMode !== 'stopwatch' && state.remainingSeconds <= 5 && !state.isAnswered ? 'timer-urgent' : ''}">
+              <span class="timer-icon" aria-hidden="true">⏱</span>
+              <span id="timer-display" class="timer-text">${formatTime(state.timerMode === 'stopwatch' ? state.elapsedSeconds : state.remainingSeconds)}</span>
+              <button id="btn-card-timer-settings" class="btn-card-timer-settings" type="button" title="Timer Settings" aria-label="Timer Settings">⚙️</button>
+            </div>
             <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
               <span class="lifelines-label">Power-Ups:</span>
               <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
@@ -1267,6 +1281,11 @@ function renderQuestion() {
   const btnSkip = document.getElementById('btn-lifeline-skip');
   if (btnSkip) {
     btnSkip.addEventListener('click', handleSkip);
+  }
+
+  const cardTimerSettingsBtn = document.getElementById('btn-card-timer-settings');
+  if (cardTimerSettingsBtn) {
+    cardTimerSettingsBtn.addEventListener('click', openTimerSettingsModal);
   }
 
   const nextBtn = document.getElementById('next-btn');

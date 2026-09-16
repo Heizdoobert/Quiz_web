@@ -199,7 +199,8 @@ const ids = [
   'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers',
   'btn-refresh-page', 'btn-reset-quiz', 'correct-opt-select',
   'new-q-cat', 'topics-datalist', 'btn-add-topic-pill',
-  'topic-modal', 'input-topic-name', 'topic-modal-error', 'btn-save-topic', 'btn-cancel-topic', 'btn-close-topic-modal'
+  'topic-modal', 'input-topic-name', 'topic-modal-error', 'btn-save-topic', 'btn-cancel-topic', 'btn-close-topic-modal',
+  'btn-card-timer-settings', 'card-timer-badge'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -218,6 +219,9 @@ global.document = {
   querySelector: (selector) => {
     if (selector === '.progress-track') {
       return elementsById.get('progress-track') || null;
+    }
+    if (selector === '.card-timer-badge' || selector === '#card-timer-badge') {
+      return elementsById.get('card-timer-badge') || null;
     }
     return null;
   },
@@ -655,5 +659,29 @@ assert.strictEqual(topicModal.classList.contains('hidden'), true, 'Cancel button
 openTopicModal();
 btnCloseTopicModal.click();
 assert.strictEqual(topicModal.classList.contains('hidden'), true, 'Close (✕) button should close topic-modal');
+
+// 21. Test Card Timer Badge & Urgency in Active Question Card
+state.isFinished = false;
+state.isAnswered = false;
+state.currentIndex = 0;
+renderQuestion();
+const qCard = getOrCreateElement('quiz-card');
+assert.ok(qCard.innerHTML.includes('card-timer-badge'), 'quiz-card must render .card-timer-badge');
+assert.ok(qCard.innerHTML.includes('btn-card-timer-settings'), 'quiz-card must render #btn-card-timer-settings');
+
+// Test urgent low-time styling when remainingSeconds <= 5
+state.remainingSeconds = 4;
+state.timerMode = 'per-question';
+renderHeader();
+const cardTimerBadge = getOrCreateElement('card-timer-badge');
+assert.ok(cardTimerBadge, 'card-timer-badge must exist in qCard');
+assert.strictEqual(cardTimerBadge.classList.contains('timer-urgent'), true, 'card-timer-badge must have .timer-urgent when remainingSeconds <= 5');
+
+// Test timer settings button inside question card
+const timerModal = getOrCreateElement('timer-settings-modal');
+timerModal.classList.add('hidden');
+const cardTimerBtn = getOrCreateElement('btn-card-timer-settings');
+cardTimerBtn.click();
+assert.strictEqual(timerModal.classList.contains('hidden'), false, 'Clicking settings button in card timer badge should open timer modal');
 
 console.log('All Component Rendering tests passed!');

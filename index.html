@@ -63,10 +63,6 @@
           <button id="btn-theme-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle theme" title="Toggle dark/light theme">🌙 Dark</button>
           <button id="btn-sound-toggle" class="btn btn-secondary btn-sm" type="button" aria-label="Toggle sound effects" title="Toggle sound effects">🔊 Sound</button>
           <button id="btn-header-guide" class="btn btn-secondary btn-sm" type="button">📖 How to Play</button>
-          <div class="timer-badge">
-            <span class="timer-icon" aria-hidden="true">⏱</span>
-            <span id="timer-display" class="timer-text">00:00:30</span>
-          </div>
           <button id="btn-timer-settings" class="btn btn-secondary btn-sm" type="button" aria-label="Timer Settings" title="Timer Settings">⏱️ Set Time</button>
         </div>
       </div>
@@ -219,10 +215,18 @@
             <div id="flip-card-inner" class="flip-card-inner">
               <!-- Front Face: Question Prompt and Options -->
               <div class="flip-card-front">
-                <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
-                  <span class="lifelines-label">Power-Ups:</span>
-                  <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
-                  <button id="btn-lifeline-skip" class="btn-lifeline" type="button" title="Skip this question without penalty (Once per quiz)">⏭️ Skip</button>
+                <div class="card-meta-bar" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                  <span class="category-card-badge">Web Dev</span>
+                  <div id="card-timer-badge" class="card-timer-badge">
+                    <span class="timer-icon" aria-hidden="true">⏱</span>
+                    <span id="timer-display" class="timer-text">00:00:30</span>
+                    <button id="btn-card-timer-settings" class="btn-card-timer-settings" type="button" title="Timer Settings" aria-label="Timer Settings">⚙️</button>
+                  </div>
+                  <div id="lifelines-toolbar" class="lifelines-toolbar" aria-label="Quiz Lifelines">
+                    <span class="lifelines-label">Power-Ups:</span>
+                    <button id="btn-lifeline-5050" class="btn-lifeline" type="button" title="Eliminate 2 wrong answers (Once per quiz)">✂️ 50:50</button>
+                    <button id="btn-lifeline-skip" class="btn-lifeline" type="button" title="Skip this question without penalty (Once per quiz)">⏭️ Skip</button>
+                  </div>
                 </div>
                 <h2 id="question-text" class="question-heading">Loading question...</h2>
                 <div id="options-container" class="options-grid" role="group" aria-label="Answer options"></div>

@@ -115,6 +115,10 @@ assert.ok(css.includes('.btn-topic-delete'), 'CSS must style mini topic delete c
 assert.ok(css.includes('.add-topic-pill'), 'CSS must style add topic button');
 assert.ok(css.includes('.topic-modal-card'), 'CSS must style topic-modal-card mini popup');
 
+// Check Prominent Card Timer Badge & Urgent Low-Time State
+assert.ok(css.includes('.card-timer-badge'), 'CSS must style card-timer-badge within active question card');
+assert.ok(css.includes('.timer-urgent'), 'CSS must style urgent low-time alert state on timer badge');
+
 console.log('All CSS styling tests passed!');
 
 

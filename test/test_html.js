@@ -34,6 +34,8 @@ requiredIds.forEach(id => {
   assert.ok(html.includes(`id="${id}"`), `Element with id="${id}" must exist in index.html`);
 });
 
+assert.ok(html.includes('class="card-timer-badge"'), 'Card timer badge must exist in question card');
+
 // Check accessibility attributes: quiz-card should not have aria-live, feedback-container should
 assert.ok(!html.includes('id="quiz-card" class="quiz-card" aria-live'), 'quiz-card must not have aria-live attribute');
 assert.ok(html.includes('id="feedback-container" class="feedback-card hidden" aria-live="polite"'), 'feedback-container must have aria-live="polite"');
