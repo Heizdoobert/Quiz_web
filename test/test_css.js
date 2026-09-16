@@ -124,6 +124,10 @@ assert.ok(css.includes('.cat-crying-wrapper'), 'CSS must style cat-crying-wrappe
 assert.ok(css.includes('catSadShake'), 'CSS must define catSadShake keyframes');
 assert.ok(css.includes('.rain-drop'), 'CSS must style falling rain-drop elements');
 
+// Check 80% Wide Viewport (20% blank space) & Responsive Fit
+assert.ok(css.includes('width: 80%') || css.includes('width: 80vw'), 'CSS must specify 80% width for PC layout (20% blank space)');
+assert.ok(css.includes('100dvh'), 'CSS must specify modern 100dvh for viewport height fit');
+
 console.log('All CSS styling tests passed!');
 
 
