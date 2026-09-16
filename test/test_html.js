@@ -48,6 +48,7 @@ assert.ok(html.includes('id="custom-question-section"'), 'Custom question sectio
 assert.ok(html.includes('id="toggle-add-form-btn"'), 'Toggle add question button must exist');
 assert.ok(html.includes('id="add-question-form"'), 'Add question form must exist');
 assert.ok(html.includes('id="new-q-text"'), 'Question text input must exist');
+assert.ok(html.includes('id="correct-opt-select"'), 'Correct answer dropdown selector must exist in custom question form');
 assert.ok(html.includes('id="btn-add-question"'), 'Add question button must exist');
 // Check intro popup modal and welcome overlay elements
 assert.ok(html.includes('id="intro-modal"'), 'Intro modal must exist');

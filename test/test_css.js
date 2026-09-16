@@ -104,6 +104,11 @@ assert.ok(css.includes('.btn-lifeline'), 'CSS must style lifeline action buttons
 assert.ok(css.includes('.option-btn.eliminated'), 'CSS must style 50:50 eliminated option buttons');
 assert.ok(css.includes('.review-item'), 'CSS must style review breakdown items');
 
+// Check Correct Answer Setting & Fresh/Reset completion buttons
+assert.ok(css.includes('.correct-answer-group'), 'CSS must style correct answer dropdown group in question creator');
+assert.ok(css.includes('.btn-refresh-page'), 'CSS must style fresh reload button on completion screen');
+assert.ok(css.includes('.btn-reset-quiz'), 'CSS must style reset quiz button on completion screen');
+
 console.log('All CSS styling tests passed!');
 
 

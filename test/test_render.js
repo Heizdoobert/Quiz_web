@@ -78,30 +78,54 @@ class MockElement {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(fn);
   }
+  dispatchEvent(event) {
+    const type = typeof event === 'string' ? event : event.type;
+    if (this.listeners[type]) {
+      this.listeners[type].forEach(fn => fn(event));
+    }
+  }
   click() {
     if (this.listeners['click']) {
-      this.listeners['click'].forEach(fn => fn());
+      const evt = { preventDefault: () => {} };
+      this.listeners['click'].forEach(fn => fn(evt));
     }
   }
   focus() {}
   appendChild(child) {
     this.children.push(child);
   }
+  querySelectorAll(selector) {
+    const results = [];
+    const matchesSelector = (el, sel) => {
+      if (sel.startsWith('.') && el.classList.contains(sel.slice(1))) return true;
+      if (sel.startsWith('#') && el.id === sel.slice(1)) return true;
+      if (el.tagName.toLowerCase() === sel.toLowerCase()) return true;
+      if (sel.includes('[') || sel.includes(':checked')) {
+        const tag = sel.match(/^([a-z0-9]+)/i);
+        if (tag && el.tagName.toLowerCase() !== tag[1].toLowerCase()) return false;
+        const nameM = sel.match(/\[name="([^"]+)"\]/);
+        if (nameM && (!el.attributes || el.attributes['name'] !== nameM[1])) return false;
+        const valM = sel.match(/\[value="([^"]+)"\]/);
+        if (valM && (!el.attributes || el.attributes['value'] !== valM[1])) return false;
+        if (sel.includes(':checked') && !el.checked) return false;
+        return true;
+      }
+      return false;
+    };
+    const walk = (node) => {
+      for (const child of node.children) {
+        if (matchesSelector(child, selector)) {
+          results.push(child);
+        }
+        walk(child);
+      }
+    };
+    walk(this);
+    return results;
+  }
   querySelector(selector) {
-    for (const child of this.children) {
-      if (selector.startsWith('.') && child.classList.contains(selector.slice(1))) {
-        return child;
-      }
-      if (selector.startsWith('#') && child.id === selector.slice(1)) {
-        return child;
-      }
-      if (child.tagName.toLowerCase() === selector.toLowerCase()) {
-        return child;
-      }
-      const found = child.querySelector(selector);
-      if (found) return found;
-    }
-    return null;
+    const all = this.querySelectorAll(selector);
+    return all.length > 0 ? all[0] : null;
   }
   get innerHTML() {
     return this._innerHTML;
@@ -152,7 +176,8 @@ const ids = [
   'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner',
   'btn-theme-toggle', 'btn-sound-toggle', 'quiz-leaderboard', 'leaderboard-list', 'btn-clear-leaderboard',
   'confetti-canvas', 'category-filters', 'lifelines-toolbar', 'btn-lifeline-5050', 'btn-lifeline-skip',
-  'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers'
+  'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers',
+  'btn-refresh-page', 'btn-reset-quiz', 'correct-opt-select'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -430,5 +455,96 @@ assert.ok(reviewList.children.length > 0, 'review-list should render answered qu
 
 closeReviewModal();
 assert.strictEqual(reviewModal.classList.contains('hidden'), true, 'closeReviewModal should hide modal');
+
+// 17. Test Fresh Reload and Reset Quiz on Completion Screen
+const { handleRefreshPage } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof handleRefreshPage, 'function', 'handleRefreshPage must be a function');
+
+// Finish quiz and verify completion screen contains both Fresh and Reset buttons
+state.currentIndex = QUESTIONS.length - 1;
+state.isFinished = true;
+renderQuestion();
+const completionCard = getOrCreateElement('quiz-card');
+assert.ok(completionCard.innerHTML.includes('id="btn-refresh-page"'), 'Completion screen must render Fresh Reload button (#btn-refresh-page)');
+assert.ok(completionCard.innerHTML.includes('id="btn-reset-quiz"') || completionCard.innerHTML.includes('id="restart-btn"'), 'Completion screen must render Reset Quiz button');
+
+// Verify user cannot re-question or answer after finish
+const answersLenBefore = state.answers.length;
+handleOptionClick(0);
+assert.strictEqual(state.answers.length, answersLenBefore, 'User cannot answer questions when quiz is finished');
+
+// Verify handleRefreshPage triggers window.location.reload
+let reloaded = false;
+global.window = global.window || {};
+global.window.location = {
+  reload: () => { reloaded = true; }
+};
+handleRefreshPage();
+assert.strictEqual(reloaded, true, 'handleRefreshPage should call window.location.reload()');
+
+// 18. Test Custom Question Form with Correct Answer Select Dropdown
+const { initCustomQuestionForm } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof initCustomQuestionForm, 'function', 'initCustomQuestionForm must be a function');
+
+const formSection = getOrCreateElement('custom-question-section');
+const addForm = getOrCreateElement('add-question-form', 'form');
+const correctSelect = getOrCreateElement('correct-opt-select', 'select');
+correctSelect.value = '0';
+
+// Setup radio buttons inside form
+const radios = [];
+for (let i = 0; i < 4; i++) {
+  const radio = new MockElement('input');
+  radio.setAttribute('name', 'correct-opt');
+  radio.setAttribute('value', String(i));
+  radio.value = String(i);
+  radio.checked = (i === 0);
+  radios.push(radio);
+  addForm.appendChild(radio);
+}
+
+// Add text inputs
+const qInput = getOrCreateElement('new-q-text', 'input');
+const testOpt0 = getOrCreateElement('new-opt-0', 'input');
+const testOpt1 = getOrCreateElement('new-opt-1', 'input');
+const testOpt2 = getOrCreateElement('new-opt-2', 'input');
+const testOpt3 = getOrCreateElement('new-opt-3', 'input');
+const btnAddQ = getOrCreateElement('btn-add-question', 'button');
+
+addForm.appendChild(correctSelect);
+addForm.reset = function() {
+  correctSelect.value = '0';
+  radios.forEach((r, idx) => { r.checked = (idx === 0); });
+  qInput.value = '';
+  testOpt0.value = ''; testOpt1.value = ''; testOpt2.value = ''; testOpt3.value = '';
+};
+
+initCustomQuestionForm();
+
+// Test select dropdown changes -> sync to radio
+correctSelect.value = '2';
+correctSelect.dispatchEvent('change');
+assert.strictEqual(radios[2].checked, true, 'Changing select dropdown should check corresponding radio button');
+
+// Test radio changes -> sync to select dropdown
+radios[1].checked = true;
+radios[1].dispatchEvent('change');
+assert.strictEqual(correctSelect.value, '1', 'Checking radio button should update select dropdown value');
+
+// Test submitting custom question with correctIndex from select dropdown
+correctSelect.value = '3';
+radios[3].checked = true;
+qInput.value = 'What does DOM stand for?';
+testOpt0.value = 'Document Object Model';
+testOpt1.value = 'Data Object Mode';
+testOpt2.value = 'Digital Order Map';
+testOpt3.value = 'Direct Object Method';
+
+const countBefore = QUESTIONS.length;
+btnAddQ.click();
+assert.strictEqual(QUESTIONS.length, countBefore + 1, 'Custom question should be added to QUESTIONS');
+const added = QUESTIONS[QUESTIONS.length - 1];
+assert.strictEqual(added.question, 'What does DOM stand for?');
+assert.strictEqual(added.correctIndex, 3, 'Added question should have correctIndex matching selected option 3');
 
 console.log('All Component Rendering tests passed!');

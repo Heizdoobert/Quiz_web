@@ -2046,3 +2046,82 @@ select.input-field option {
   line-height: 1.4;
 }
 
+/* ==========================================================================
+   Correct Answer Selector Group in Custom Question Builder
+   ========================================================================== */
+.correct-answer-group {
+  padding: 10px 14px;
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--border-radius-sm, 6px);
+  margin: 12px 0;
+}
+
+.correct-answer-group label {
+  color: #10b981;
+  font-weight: 700;
+}
+
+[data-theme="light"] .correct-answer-group {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+[data-theme="light"] .correct-answer-group label {
+  color: #047857;
+}
+
+/* ==========================================================================
+   Completion Screen Action Buttons (Fresh Reload & Reset Quiz)
+   ========================================================================== */
+.btn-refresh-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.btn-refresh-page:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.45);
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+}
+
+.btn-reset-quiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-main);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-weight: 600;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset-quiz:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+[data-theme="light"] .btn-reset-quiz {
+  background: rgba(15, 23, 42, 0.06);
+  border-color: rgba(15, 23, 42, 0.18);
+  color: var(--color-text-main);
+}
+
+[data-theme="light"] .btn-reset-quiz:hover {
+  background: rgba(15, 23, 42, 0.12);
+}
+

@@ -914,15 +914,20 @@ function renderQuestion() {
             <span class="stat-value">${formatTime(state.elapsedSeconds)}</span>
           </div>
         </div>
-        <div class="completion-actions" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px;">
-          <button id="restart-btn" class="btn btn-primary" type="button">Play Again</button>
-          <button id="btn-review-answers" class="btn btn-secondary" type="button">📋 Review Answers</button>
+        <div class="completion-actions" style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 16px;">
+          <button id="btn-refresh-page" class="btn btn-refresh-page" type="button" title="Reload page to start 100% fresh">🔄 Refresh Page</button>
+          <button id="btn-reset-quiz" class="btn btn-reset-quiz" type="button" title="Reset quiz questions and score in-place">🔁 Reset Quiz</button>
+          <button id="btn-review-answers" class="btn btn-secondary" type="button" title="Review questions and explanations">📋 Review Answers</button>
         </div>
       </div>
     `;
-    const restartBtn = document.getElementById('restart-btn');
-    if (restartBtn) {
-      restartBtn.addEventListener('click', handleRestart);
+    const refreshBtn = document.getElementById('btn-refresh-page');
+    if (refreshBtn) {
+      refreshBtn.addEventListener('click', handleRefreshPage);
+    }
+    const resetBtn = document.getElementById('btn-reset-quiz') || document.getElementById('restart-btn');
+    if (resetBtn) {
+      resetBtn.addEventListener('click', handleRestart);
     }
     const reviewBtn = document.getElementById('btn-review-answers');
     if (reviewBtn) {
@@ -1137,7 +1142,7 @@ function renderAll() {
 }
 
 function handleOptionClick(idx) {
-  if (state.isAnswered) return;
+  if (state.isAnswered || state.isFinished) return;
   const res = selectOption(idx);
   if (!res) return;
 
@@ -1203,6 +1208,16 @@ function handleRestart() {
   renderAll();
 }
 
+function handleRefreshPage() {
+  if (typeof window !== 'undefined' && window.location && typeof window.location.reload === 'function') {
+    window.location.reload();
+  } else {
+    MiniStore.clear();
+    restartQuiz();
+    renderAll();
+  }
+}
+
 function startTimer() {
   if (state.timerIntervalId) clearInterval(state.timerIntervalId);
   state.timerIntervalId = setInterval(tickTimer, 1000);
@@ -1242,21 +1257,56 @@ function initCustomQuestionForm() {
   updateQuestionCountBadge();
 
   if (form) {
+    const correctSelect = document.getElementById('correct-opt-select');
+    const radioInputs = form.querySelectorAll('input[name="correct-opt"]');
+
+    // Sync select dropdown -> radio inputs
+    if (correctSelect) {
+      correctSelect.addEventListener('change', () => {
+        const val = correctSelect.value;
+        const targetRadio = form.querySelector(`input[name="correct-opt"][value="${val}"]`);
+        if (targetRadio) {
+          targetRadio.checked = true;
+        }
+      });
+    }
+
+    // Sync radio inputs -> select dropdown
+    if (radioInputs && radioInputs.length > 0) {
+      radioInputs.forEach(radio => {
+        radio.addEventListener('change', () => {
+          if (radio.checked && correctSelect) {
+            correctSelect.value = radio.value;
+          }
+        });
+      });
+    }
+
     const handleAdd = (startNow) => {
       const qTextInput = document.getElementById('new-q-text');
       const opt0 = document.getElementById('new-opt-0');
       const opt1 = document.getElementById('new-opt-1');
       const opt2 = document.getElementById('new-opt-2');
       const opt3 = document.getElementById('new-opt-3');
-      const correctRadio = document.querySelector('input[name="correct-opt"]:checked');
       const expInput = document.getElementById('new-q-exp');
       const alertBox = document.getElementById('form-alert-msg');
 
-      if (!qTextInput || !opt0 || !opt1 || !opt2 || !opt3 || !correctRadio) return;
+      if (!qTextInput || !opt0 || !opt1 || !opt2 || !opt3) return;
 
       const qText = qTextInput.value.trim();
       const options = [opt0.value.trim(), opt1.value.trim(), opt2.value.trim(), opt3.value.trim()];
-      const correctIndex = parseInt(correctRadio.value, 10);
+
+      // Get correctIndex from select dropdown or checked radio
+      let correctIndex = 0;
+      if (correctSelect && correctSelect.value !== '') {
+        correctIndex = parseInt(correctSelect.value, 10);
+      } else {
+        const correctRadio = form.querySelector('input[name="correct-opt"]:checked');
+        if (correctRadio) {
+          correctIndex = parseInt(correctRadio.value, 10);
+        }
+      }
+
       const explanation = expInput ? expInput.value.trim() : '';
 
       if (!qText) {
@@ -1304,6 +1354,13 @@ function initCustomQuestionForm() {
       }
 
       form.reset();
+      if (correctSelect) {
+        correctSelect.value = '0';
+      }
+      const defaultRadio = form.querySelector('input[name="correct-opt"][value="0"]');
+      if (defaultRadio) {
+        defaultRadio.checked = true;
+      }
       updateQuestionCountBadge();
 
       if (startNow) {
@@ -1321,7 +1378,7 @@ function initCustomQuestionForm() {
     const btnAdd = document.getElementById('btn-add-question');
     if (btnAdd) {
       btnAdd.addEventListener('click', (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
         handleAdd(false);
       });
     }
@@ -1329,7 +1386,7 @@ function initCustomQuestionForm() {
     const btnAddStart = document.getElementById('btn-add-start-quiz');
     if (btnAddStart) {
       btnAddStart.addEventListener('click', (e) => {
-        e.preventDefault();
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
         try {
           if (typeof window !== 'undefined' && window.open) {
             window.open(ADS_URL, '_blank', 'noopener,noreferrer');
@@ -1677,6 +1734,7 @@ if (typeof module !== 'undefined' && module.exports) {
     handleOptionClick,
     handleNextClick,
     handleRestart,
+    handleRefreshPage,
     handleKeyDown,
     setTimerConfig,
     tickTimer,
@@ -1705,6 +1763,7 @@ if (typeof module !== 'undefined' && module.exports) {
     handleCategoryFilter,
     openReviewModal,
     closeReviewModal,
+    initCustomQuestionForm,
     initApp
   };
 }
