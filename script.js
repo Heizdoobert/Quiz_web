@@ -844,13 +844,7 @@ function initCategoryFilters() {
       const addBtn = e.target.closest ? e.target.closest('#btn-add-topic-pill') : null;
       if (addBtn) {
         if (typeof e.stopPropagation === 'function') e.stopPropagation();
-        let name = null;
-        if (typeof window !== 'undefined' && typeof window.prompt === 'function') {
-          name = window.prompt('Enter new topic name:');
-        }
-        if (name && name.trim()) {
-          addTopic(name.trim());
-        }
+        openTopicModal();
         return;
       }
 
@@ -858,6 +852,117 @@ function initCategoryFilters() {
       const pill = e.target.closest ? e.target.closest('.category-pill') : e.target;
       if (pill && pill.dataset && pill.dataset.category) {
         handleCategoryFilter(pill.dataset.category);
+      }
+    });
+  }
+}
+
+// ==========================================================================
+// Add Topic Mini Popup Modal Handlers
+// ==========================================================================
+function openTopicModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('topic-modal');
+  const input = document.getElementById('input-topic-name');
+  const errorBox = document.getElementById('topic-modal-error');
+  if (modal) {
+    modal.classList.remove('hidden');
+    if (input) {
+      input.value = '';
+      if (typeof input.focus === 'function') input.focus();
+    }
+    if (errorBox) {
+      errorBox.classList.add('hidden');
+      errorBox.textContent = '';
+    }
+  }
+}
+
+function closeTopicModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('topic-modal');
+  if (modal) {
+    modal.classList.add('hidden');
+  }
+}
+
+function initTopicModal() {
+  if (typeof document === 'undefined') return;
+  const modal = document.getElementById('topic-modal');
+  const input = document.getElementById('input-topic-name');
+  const errorBox = document.getElementById('topic-modal-error');
+  const btnSave = document.getElementById('btn-save-topic');
+  const btnCancel = document.getElementById('btn-cancel-topic');
+  const btnClose = document.getElementById('btn-close-topic-modal');
+
+  const handleSave = () => {
+    if (!input) return;
+    const name = (input.value || '').trim();
+    if (!name) {
+      if (errorBox) {
+        errorBox.textContent = 'Please enter a topic name.';
+        errorBox.classList.remove('hidden');
+      }
+      if (typeof input.focus === 'function') input.focus();
+      return;
+    }
+
+    if (name.toLowerCase() === 'all') {
+      if (errorBox) {
+        errorBox.textContent = '"All" is a reserved topic name.';
+        errorBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const topics = getTopics();
+    if (topics.some(t => t.toLowerCase() === name.toLowerCase())) {
+      if (errorBox) {
+        errorBox.textContent = `Topic "${name}" already exists.`;
+        errorBox.classList.remove('hidden');
+      }
+      return;
+    }
+
+    const added = addTopic(name);
+    if (added) {
+      closeTopicModal();
+    }
+  };
+
+  if (btnSave && !btnSave._hasListener) {
+    btnSave._hasListener = true;
+    btnSave.addEventListener('click', handleSave);
+  }
+
+  if (btnCancel && !btnCancel._hasListener) {
+    btnCancel._hasListener = true;
+    btnCancel.addEventListener('click', closeTopicModal);
+  }
+
+  if (btnClose && !btnClose._hasListener) {
+    btnClose._hasListener = true;
+    btnClose.addEventListener('click', closeTopicModal);
+  }
+
+  if (input && !input._hasListener) {
+    input._hasListener = true;
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        handleSave();
+      } else if (e.key === 'Escape') {
+        if (e && typeof e.preventDefault === 'function') e.preventDefault();
+        closeTopicModal();
+      }
+    });
+  }
+
+  if (modal && !modal._hasBackdropListener) {
+    modal._hasBackdropListener = true;
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        closeTopicModal();
       }
     });
   }
@@ -1262,6 +1367,10 @@ function handleKeyDown(e) {
     if (introModal && !introModal.classList.contains('hidden')) return;
     const timerModal = document.getElementById('timer-settings-modal');
     if (timerModal && !timerModal.classList.contains('hidden')) return;
+    const reviewModal = document.getElementById('review-modal');
+    if (reviewModal && !reviewModal.classList.contains('hidden')) return;
+    const topicModal = document.getElementById('topic-modal');
+    if (topicModal && !topicModal.classList.contains('hidden')) return;
   }
 
   const key = e.key;
@@ -1864,6 +1973,7 @@ function initApp() {
   initIntroModal();
   initTimerSettings();
   initCategoryFilters();
+  initTopicModal();
   initReviewModal();
   startTimer();
   renderAll();
@@ -1939,6 +2049,9 @@ if (typeof module !== 'undefined' && module.exports) {
     addTopic,
     deleteTopic,
     renderCategoryFilters,
+    openTopicModal,
+    closeTopicModal,
+    initTopicModal,
     initCustomQuestionForm,
     initApp
   };

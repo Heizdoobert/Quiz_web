@@ -198,9 +198,13 @@ const ids = [
   'confetti-canvas', 'category-filters', 'lifelines-toolbar', 'btn-lifeline-5050', 'btn-lifeline-skip',
   'review-modal', 'btn-close-review', 'review-list', 'btn-review-answers',
   'btn-refresh-page', 'btn-reset-quiz', 'correct-opt-select',
-  'new-q-cat', 'topics-datalist', 'btn-add-topic-pill'
+  'new-q-cat', 'topics-datalist', 'btn-add-topic-pill',
+  'topic-modal', 'input-topic-name', 'topic-modal-error', 'btn-save-topic', 'btn-cancel-topic', 'btn-close-topic-modal'
 ];
 ids.forEach(id => getOrCreateElement(id));
+
+getOrCreateElement('topic-modal').classList.add('hidden');
+getOrCreateElement('review-modal').classList.add('hidden');
 
 const progressTrack = getOrCreateElement('progress-track');
 progressTrack.classList.add('progress-track');
@@ -603,5 +607,53 @@ btnAddQ.click();
 assert.ok(getTopics().includes('TypeScript'), 'Adding question with new topic should register topic in getTopics');
 const tsQ = QUESTIONS[QUESTIONS.length - 1];
 assert.strictEqual(tsQ.category, 'TypeScript', 'Added question should have category TypeScript');
+
+// 20. Test Topic Input Mini Popup Modal (openTopicModal, closeTopicModal, initTopicModal)
+const { openTopicModal, closeTopicModal, initTopicModal } = require(path.resolve(__dirname, '../script.js'));
+assert.strictEqual(typeof openTopicModal, 'function', 'openTopicModal must be a function');
+assert.strictEqual(typeof closeTopicModal, 'function', 'closeTopicModal must be a function');
+
+const topicModal = getOrCreateElement('topic-modal');
+const inputTopic = getOrCreateElement('input-topic-name', 'input');
+const topicErr = getOrCreateElement('topic-modal-error');
+const btnSaveTopic = getOrCreateElement('btn-save-topic', 'button');
+const btnCancelTopic = getOrCreateElement('btn-cancel-topic', 'button');
+const btnCloseTopicModal = getOrCreateElement('btn-close-topic-modal', 'button');
+
+topicModal.classList.add('hidden');
+initTopicModal();
+
+// Test opening modal
+openTopicModal();
+assert.strictEqual(topicModal.classList.contains('hidden'), false, 'openTopicModal should reveal topic-modal');
+assert.strictEqual(inputTopic.value, '', 'openTopicModal should clear input field');
+assert.strictEqual(topicErr.classList.contains('hidden'), true, 'openTopicModal should hide error message');
+
+// Test submitting empty topic shows validation error
+inputTopic.value = '   ';
+btnSaveTopic.click();
+assert.strictEqual(topicErr.classList.contains('hidden'), false, 'Empty topic should show validation error');
+assert.strictEqual(topicModal.classList.contains('hidden'), false, 'Modal should remain open on error');
+
+// Test submitting duplicate topic shows error
+inputTopic.value = 'JavaScript';
+btnSaveTopic.click();
+assert.strictEqual(topicErr.classList.contains('hidden'), false, 'Duplicate topic should show error');
+
+// Test submitting valid new topic adds it and closes modal
+inputTopic.value = 'NodeJS';
+btnSaveTopic.click();
+assert.strictEqual(topicModal.classList.contains('hidden'), true, 'Modal should close on successful topic addition');
+assert.ok(getTopics().includes('NodeJS'), 'Newly added topic NodeJS should be in getTopics()');
+
+// Test close buttons
+openTopicModal();
+assert.strictEqual(topicModal.classList.contains('hidden'), false);
+btnCancelTopic.click();
+assert.strictEqual(topicModal.classList.contains('hidden'), true, 'Cancel button should close topic-modal');
+
+openTopicModal();
+btnCloseTopicModal.click();
+assert.strictEqual(topicModal.classList.contains('hidden'), true, 'Close (✕) button should close topic-modal');
 
 console.log('All Component Rendering tests passed!');

@@ -393,6 +393,31 @@
     </div>
   </div>
 
+  <!-- Add New Topic Mini Popup Modal -->
+  <div id="topic-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="topic-modal-title">
+    <div class="modal-card topic-modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="modal-icon" aria-hidden="true">🏷️</span>
+          <h2 id="topic-modal-title" class="modal-title">Add New Topic</h2>
+        </div>
+        <button id="btn-close-topic-modal" class="modal-close-btn" type="button" aria-label="Close modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-desc" style="font-size: 0.85rem; color: var(--color-text-muted); margin-bottom: 12px;">Create a new topic or category for your quiz questions:</p>
+        <div class="form-group">
+          <label for="input-topic-name">Topic Name <span class="req">*</span></label>
+          <input id="input-topic-name" class="input-field" type="text" placeholder="e.g. React, Python, Docker..." maxlength="30" autocomplete="off">
+          <div id="topic-modal-error" class="form-alert error hidden" style="margin-top: 8px;"></div>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end;">
+        <button id="btn-cancel-topic" class="btn btn-secondary btn-sm" type="button">Cancel</button>
+        <button id="btn-save-topic" class="btn btn-primary btn-sm" type="button">Add Topic</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Post-Quiz Review / Answer Breakdown Modal -->
   <div id="review-modal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="review-modal-title">
     <div class="modal-card review-modal-card">

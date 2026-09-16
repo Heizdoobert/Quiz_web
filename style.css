@@ -2048,6 +2048,15 @@ select.input-field option {
   gap: 12px;
 }
 
+/* ==========================================================================
+   Add Topic Mini Popup Modal
+   ========================================================================== */
+.topic-modal-card {
+  max-width: 400px;
+  width: 92%;
+  animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 .review-item {
   padding: 12px 14px;
   border-radius: 8px;

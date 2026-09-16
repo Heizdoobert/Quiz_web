@@ -113,6 +113,7 @@ assert.ok(css.includes('.btn-reset-quiz'), 'CSS must style reset quiz button on 
 assert.ok(css.includes('.category-pill-wrap'), 'CSS must style category pill wrap container');
 assert.ok(css.includes('.btn-topic-delete'), 'CSS must style mini topic delete close button');
 assert.ok(css.includes('.add-topic-pill'), 'CSS must style add topic button');
+assert.ok(css.includes('.topic-modal-card'), 'CSS must style topic-modal-card mini popup');
 
 console.log('All CSS styling tests passed!');
 

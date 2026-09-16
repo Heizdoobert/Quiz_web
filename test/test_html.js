@@ -67,6 +67,12 @@ assert.ok(html.includes('id="timer-mode-select"'), 'Timer mode select must exist
 assert.ok(html.includes('id="timer-limit-input"'), 'Timer limit input must exist');
 assert.ok(html.includes('id="btn-apply-timer"'), 'Apply timer button must exist');
 
+// Check topic input popup modal elements
+assert.ok(html.includes('id="topic-modal"'), 'Topic input modal must exist');
+assert.ok(html.includes('id="input-topic-name"'), 'Topic name input must exist in modal');
+assert.ok(html.includes('id="btn-save-topic"'), 'Save topic button must exist in modal');
+assert.ok(html.includes('id="btn-close-topic-modal"'), 'Close topic modal button must exist');
+
 // Check 3D flip card structure
 assert.ok(html.includes('id="flip-card-inner"'), 'Flip card inner container must exist');
 assert.ok(html.includes('class="flip-card-front"'), 'Flip card front face must exist');
