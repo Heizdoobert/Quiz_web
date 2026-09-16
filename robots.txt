@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://heizdoobert.github.io/Quiz_web/sitemap.xml

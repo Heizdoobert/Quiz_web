@@ -70,7 +70,20 @@ assert.ok(html.includes('class="flip-card-front"'), 'Flip card front face must e
 assert.ok(html.includes('class="flip-card-back"'), 'Flip card back face must exist');
 assert.ok(html.includes('id="feedback-correct-answer"'), 'Feedback correct answer container must exist');
 
-console.log('All HTML structure tests passed!');
+// Check SEO meta tags and structured data
+assert.ok(html.includes('<meta name="description"'), 'Meta description must exist for SEO');
+assert.ok(html.includes('<meta name="keywords"'), 'Meta keywords must exist for SEO');
+assert.ok(html.includes('<meta name="robots" content="index, follow">'), 'Robots meta tag must allow indexing and crawling');
+assert.ok(html.includes('<link rel="canonical"'), 'Canonical URL link must exist');
+assert.ok(html.includes('property="og:title"'), 'Open Graph title must exist');
+assert.ok(html.includes('property="og:description"'), 'Open Graph description must exist');
+assert.ok(html.includes('property="og:type" content="website"'), 'Open Graph type must be website');
+assert.ok(html.includes('name="twitter:card"'), 'Twitter card meta tag must exist');
+assert.ok(html.includes('application/ld+json'), 'Schema.org JSON-LD structured data must exist');
+assert.ok(fs.existsSync('robots.txt'), 'robots.txt must exist for search engines');
+assert.ok(fs.existsSync('sitemap.xml'), 'sitemap.xml must exist for search engines');
+
+console.log('All HTML structure and SEO tests passed!');
 
 
 
