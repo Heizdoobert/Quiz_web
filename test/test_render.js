@@ -27,6 +27,10 @@ const {
   loadSampleQuestions,
   flipCard,
   setTimerConfig,
+  getStoredTheme,
+  applyTheme,
+  toggleTheme,
+  initTheme,
   QUESTIONS,
   state
 } = require(path.resolve(__dirname, '../script.js'));
@@ -65,6 +69,9 @@ class MockElement {
   }
   getAttribute(name) {
     return this.attributes[name] !== undefined ? this.attributes[name] : null;
+  }
+  removeAttribute(name) {
+    delete this.attributes[name];
   }
   addEventListener(event, fn) {
     if (!this.listeners[event]) this.listeners[event] = [];
@@ -141,7 +148,8 @@ const ids = [
   'quiz-header', 'timer-display', 'progress-text', 'progress-bar-fill',
   'quiz-card', 'options-container', 'feedback-container', 'feedback-result',
   'feedback-explanation', 'feedback-correct-answer', 'next-btn', 'score-display', 'streak-display',
-  'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner'
+  'best-streak-display', 'accuracy-display', 'history-list', 'progress-track', 'flip-card-inner',
+  'btn-theme-toggle'
 ];
 ids.forEach(id => getOrCreateElement(id));
 
@@ -149,7 +157,10 @@ const progressTrack = getOrCreateElement('progress-track');
 progressTrack.classList.add('progress-track');
 progressTrack.setAttribute('aria-valuenow', '1');
 
+const docElement = new MockElement('html');
+
 global.document = {
+  documentElement: docElement,
   getElementById: (id) => elementsById.get(id) || null,
   querySelector: (selector) => {
     if (selector === '.progress-track') {
@@ -297,6 +308,24 @@ assert.strictEqual(state.isFinished, false);
 assert.strictEqual(getOrCreateElement('progress-text').textContent, 'Question 1 of 6');
 assert.strictEqual(progressTrack.getAttribute('aria-valuenow'), '1', 'aria-valuenow should reset to 1');
 assert.strictEqual(progressTrack.getAttribute('aria-valuemax'), String(QUESTIONS.length), 'aria-valuemax should reset to QUESTIONS.length');
+
+// Test Dark & Light theme toggling
+initTheme();
+const themeBtn = getOrCreateElement('btn-theme-toggle');
+assert.strictEqual(docElement.getAttribute('data-theme'), null, 'Default theme should not set data-theme=light');
+assert.strictEqual(themeBtn.textContent, '🌙 Dark');
+
+// Toggle to light mode
+const t1 = toggleTheme();
+assert.strictEqual(t1, 'light');
+assert.strictEqual(docElement.getAttribute('data-theme'), 'light');
+assert.strictEqual(themeBtn.textContent, '☀️ Light');
+
+// Toggle back to dark mode
+const t2 = toggleTheme();
+assert.strictEqual(t2, 'dark');
+assert.strictEqual(docElement.getAttribute('data-theme'), null);
+assert.strictEqual(themeBtn.textContent, '🌙 Dark');
 
 // Clean up timer interval
 if (state.timerIntervalId) {

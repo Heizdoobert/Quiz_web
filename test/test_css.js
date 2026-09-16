@@ -82,6 +82,9 @@ assert.ok(css.includes('appearance: none'), 'Select must have appearance: none f
 assert.ok(css.includes('select.input-field option'), 'Option elements must be styled for dark mode theme');
 assert.ok(css.includes('.timer-mode-group label'), 'CSS must smoothly style dropdown timer mode label');
 
+// Check Dark and Light mode theme support
+assert.ok(css.includes('[data-theme="light"]'), 'CSS must define [data-theme="light"] theme rules');
+
 console.log('All CSS styling tests passed!');
 
 

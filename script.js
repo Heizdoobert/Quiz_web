@@ -963,12 +963,72 @@ function initTimerSettings() {
   }
 }
 
+function getStoredTheme() {
+  try {
+    if (typeof localStorage !== 'undefined') {
+      const saved = localStorage.getItem('quiz-theme');
+      if (saved === 'light' || saved === 'dark') return saved;
+    }
+  } catch (e) {}
+  if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+    return 'light';
+  }
+  return 'dark';
+}
+
+function applyTheme(theme) {
+  if (typeof document === 'undefined') return;
+  const root = document.documentElement;
+  if (root) {
+    if (theme === 'light') {
+      root.setAttribute('data-theme', 'light');
+    } else {
+      if (root.removeAttribute) root.removeAttribute('data-theme');
+    }
+  }
+  try {
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem('quiz-theme', theme);
+    }
+  } catch (e) {}
+
+  const btn = document.getElementById('btn-theme-toggle');
+  if (btn) {
+    if (theme === 'light') {
+      btn.textContent = '☀️ Light';
+      btn.setAttribute('aria-label', 'Switch to Dark Mode');
+      btn.title = 'Switch to Dark Mode';
+    } else {
+      btn.textContent = '🌙 Dark';
+      btn.setAttribute('aria-label', 'Switch to Light Mode');
+      btn.title = 'Switch to Light Mode';
+    }
+  }
+}
+
+function toggleTheme() {
+  const isLight = typeof document !== 'undefined' && document.documentElement && document.documentElement.getAttribute && document.documentElement.getAttribute('data-theme') === 'light';
+  const next = isLight ? 'dark' : 'light';
+  applyTheme(next);
+  return next;
+}
+
+function initTheme() {
+  const theme = getStoredTheme();
+  applyTheme(theme);
+  const btn = document.getElementById('btn-theme-toggle');
+  if (btn) {
+    btn.addEventListener('click', toggleTheme);
+  }
+}
+
 function initApp() {
   // Clear any existing stored data on page reload as requested
   MiniStore.clear();
   // Save fresh questions into session storage and cookie
   MiniStore.save(QUESTIONS);
 
+  initTheme();
   initCustomQuestionForm();
   initIntroModal();
   initTimerSettings();
@@ -1012,6 +1072,10 @@ if (typeof module !== 'undefined' && module.exports) {
     tickTimer,
     handleTimeout,
     startTimer,
+    getStoredTheme,
+    applyTheme,
+    toggleTheme,
+    initTheme,
     initApp
   };
 }

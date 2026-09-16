@@ -84,6 +84,7 @@ assert.ok(fs.existsSync('robots.txt'), 'robots.txt must exist for search engines
 assert.ok(fs.existsSync('sitemap.xml'), 'sitemap.xml must exist for search engines');
 assert.ok(html.includes('<title>Quick Quiz</title>'), 'Title must be Quick Quiz');
 assert.ok(html.includes('<h1 class="brand-title">Quick Quiz</h1>'), 'Brand title must be Quick Quiz');
+assert.ok(html.includes('id="btn-theme-toggle"'), 'Theme toggle button must exist in index.html');
 
 console.log('All HTML structure and SEO tests passed!');
 
