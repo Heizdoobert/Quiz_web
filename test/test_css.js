@@ -119,6 +119,11 @@ assert.ok(css.includes('.topic-modal-card'), 'CSS must style topic-modal-card mi
 assert.ok(css.includes('.card-timer-badge'), 'CSS must style card-timer-badge within active question card');
 assert.ok(css.includes('.timer-urgent'), 'CSS must style urgent low-time alert state on timer badge');
 
+// Check 50% Fail Test Sad Cat Animation & Styling
+assert.ok(css.includes('.cat-crying-wrapper'), 'CSS must style cat-crying-wrapper failure animation container');
+assert.ok(css.includes('catSadShake'), 'CSS must define catSadShake keyframes');
+assert.ok(css.includes('.rain-drop'), 'CSS must style falling rain-drop elements');
+
 console.log('All CSS styling tests passed!');
 
 

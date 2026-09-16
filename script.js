@@ -192,6 +192,14 @@ function playCompletionFanfare() {
   });
 }
 
+function playDefeatSound() {
+  if (!soundEnabled) return;
+  const notes = [440.00, 392.00, 349.23, 311.13]; // A4, G4, F4, Eb4 (descending minor tone)
+  notes.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, 0.28, 'sawtooth', 0.12), i * 110);
+  });
+}
+
 function toggleSound() {
   soundEnabled = !soundEnabled;
   if (typeof window !== 'undefined' && window.localStorage) {
@@ -1134,6 +1142,8 @@ function renderQuestion() {
 
   if (state.isFinished) {
     const accuracy = calcAccuracy(state.answers);
+    const isPassed = accuracy > 50;
+
     if (!state.leaderboardSaved) {
       state.leaderboardSaved = true;
       saveLeaderboardRecord({
@@ -1145,11 +1155,15 @@ function renderQuestion() {
       });
     }
     renderLeaderboard();
-    playCompletionFanfare();
-    triggerConfetti(85);
 
-    questionCard.innerHTML = `
-      <div class="completion-summary">
+    if (isPassed) {
+      playCompletionFanfare();
+      triggerConfetti(85);
+    } else {
+      playDefeatSound();
+    }
+
+    const animationMarkup = isPassed ? `
         <div class="cat-clapping-wrapper" aria-label="Cat clapping celebration animation">
           <div class="confetti-sparkles" aria-hidden="true">
             <span class="sparkle s1">✨</span>
@@ -1169,12 +1183,35 @@ function renderQuestion() {
           </div>
         </div>
         <h2 class="completion-heading">🎉 Congratulations! Quiz Completed!</h2>
+    ` : `
+        <div class="cat-crying-wrapper" aria-label="Cat crying fail test animation">
+          <div class="rain-cloud-stage" aria-hidden="true">
+            <span class="rain-cloud-icon">🌧️</span>
+            <span class="rain-drop d1">💧</span>
+            <span class="rain-drop d2">💧</span>
+            <span class="rain-drop d3">💧</span>
+            <span class="rain-drop d4">💧</span>
+          </div>
+          <div class="cat-sad-stage">
+            <div class="cat-head-wrap">
+              <span class="cat-sad-avatar" aria-hidden="true">😿</span>
+            </div>
+            <div class="cat-tear-stream" aria-hidden="true">💧</div>
+          </div>
+        </div>
+        <h2 class="completion-heading fail">💔 Test Failed (Score ≤ 50%)</h2>
+        <p class="completion-subtext">Don't give up! Review your answers or practice again to master these questions.</p>
+    `;
+
+    questionCard.innerHTML = `
+      <div class="completion-summary">
+        ${animationMarkup}
         <div class="completion-stats">
           <div class="stat-card">
             <span class="stat-label">Final Score</span>
             <span class="stat-value highlight">${state.score} pts</span>
           </div>
-          <div class="stat-card">
+          <div class="stat-card ${!isPassed ? 'stat-fail' : ''}">
             <span class="stat-label">Accuracy</span>
             <span class="stat-value">${accuracy}%</span>
           </div>
@@ -2048,6 +2085,8 @@ if (typeof module !== 'undefined' && module.exports) {
     toggleSound,
     isSoundEnabled,
     initSound,
+    playCompletionFanfare,
+    playDefeatSound,
     ADS_URL,
     getRank,
     getLeaderboard,

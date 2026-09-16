@@ -684,4 +684,24 @@ const cardTimerBtn = getOrCreateElement('btn-card-timer-settings');
 cardTimerBtn.click();
 assert.strictEqual(timerModal.classList.contains('hidden'), false, 'Clicking settings button in card timer badge should open timer modal');
 
+// 22. Test 50% Fail Test Sad Cat Animation vs Celebratory Animation
+state.isFinished = true;
+// Case A: 50% accuracy (e.g. 1 correct out of 2) -> Fail test
+state.answers = [
+  { questionIndex: 0, selectedIndex: 0, isCorrect: true },
+  { questionIndex: 1, selectedIndex: 1, isCorrect: false }
+];
+renderQuestion();
+assert.ok(qCard.innerHTML.includes('cat-crying-wrapper'), 'Fail test (50% accuracy) must render .cat-crying-wrapper');
+assert.ok(qCard.innerHTML.includes('Test Failed'), 'Fail test must render failure heading');
+
+// Case B: 100% accuracy -> Passing celebration
+state.answers = [
+  { questionIndex: 0, selectedIndex: 0, isCorrect: true },
+  { questionIndex: 1, selectedIndex: 1, isCorrect: true }
+];
+renderQuestion();
+assert.ok(qCard.innerHTML.includes('cat-clapping-wrapper'), 'Pass test (> 50% accuracy) must render .cat-clapping-wrapper');
+assert.ok(qCard.innerHTML.includes('Congratulations'), 'Pass test must render Congratulations heading');
+
 console.log('All Component Rendering tests passed!');
