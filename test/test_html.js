@@ -118,19 +118,25 @@ assert.ok(templateHtml.includes('<!-- @include components/question-form.html -->
 assert.ok(templateHtml.includes('<!-- @include components/quiz-card.html -->'), 'template.html must include quiz-card component');
 assert.ok(templateHtml.includes('<!-- @include components/scoreboard.html -->'), 'template.html must include scoreboard component');
 assert.ok(templateHtml.includes('<!-- @include components/modals.html -->'), 'template.html must include modals component');
+assert.ok(templateHtml.includes('<!-- @include components/skyscraper-ads.html -->'), 'template.html must include skyscraper-ads component');
 
 const requiredComponents = [
   'components/header.html',
   'components/question-form.html',
   'components/quiz-card.html',
   'components/scoreboard.html',
-  'components/modals.html'
+  'components/modals.html',
+  'components/skyscraper-ads.html'
 ];
 requiredComponents.forEach(comp => {
   assert.ok(fs.existsSync(comp), `Sub-HTML component file ${comp} must exist`);
 });
 
 assert.ok(fs.existsSync('build.js'), 'build.js must exist to compile components into index.html');
+
+// Check Dual Skyscraper Towers in 20% Margin Gutters
+assert.ok(html.includes('id="ad-skyscraper-left"'), 'Left skyscraper ad tower must exist in index.html');
+assert.ok(html.includes('id="ad-skyscraper-right"'), 'Right skyscraper ad tower must exist in index.html');
 
 console.log('All HTML structure and SEO tests passed!');
 

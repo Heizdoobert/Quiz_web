@@ -128,6 +128,11 @@ assert.ok(css.includes('.rain-drop'), 'CSS must style falling rain-drop elements
 assert.ok(css.includes('width: 80%') || css.includes('width: 80vw'), 'CSS must specify 80% width for PC layout (20% blank space)');
 assert.ok(css.includes('100dvh'), 'CSS must specify modern 100dvh for viewport height fit');
 
+// Check Dual Skyscraper Towers & GIF-style CSS Keyframes
+assert.ok(css.includes('.ad-skyscraper'), 'CSS must style .ad-skyscraper side banners');
+assert.ok(css.includes('floatAdRocket'), 'CSS must define floatAdRocket keyframes');
+assert.ok(css.includes('gemGlowPulse'), 'CSS must define gemGlowPulse keyframes');
+
 console.log('All CSS styling tests passed!');
 
 
