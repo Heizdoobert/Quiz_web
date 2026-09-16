@@ -84,6 +84,11 @@ assert.ok(css.includes('.timer-mode-group label'), 'CSS must smoothly style drop
 
 // Check Dark and Light mode theme support
 assert.ok(css.includes('[data-theme="light"]'), 'CSS must define [data-theme="light"] theme rules');
+assert.ok(!css.includes('.brand-title {\n  font-size: 1.5rem;\n  font-weight: 700;\n  letter-spacing: -0.025em;\n  color: #fff;'), 'brand-title must not have hardcoded white text');
+assert.ok(css.includes('[data-theme="light"] .flip-card-back'), 'CSS must style flip-card-back in light mode');
+assert.ok(css.includes('[data-theme="light"] .stat-card'), 'CSS must style stat-card in light mode');
+assert.ok(css.includes('[data-theme="light"] .stat-value.highlight'), 'CSS must adjust stat-value highlight for light mode');
+assert.ok(css.includes('[data-theme="light"] .form-alert.error'), 'CSS must adjust form alert text for light mode');
 
 console.log('All CSS styling tests passed!');
 
