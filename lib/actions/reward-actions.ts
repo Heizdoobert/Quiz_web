@@ -5,9 +5,7 @@ import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getUserStats } from '@/lib/actions/quiz-actions';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
-import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
-import { baseSepolia } from 'viem/chains';
 import crypto from 'crypto';
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
@@ -119,7 +117,8 @@ export async function generateTokenVoucher(
 
     const normalized = walletAddress.toLowerCase();
     const nonce = crypto.randomUUID();
-    const nonceUint = BigInt('0x' + nonce.replace(/-/g, '').slice(0, 16));
+    const nonceUint = BigInt('0x' + nonce.replace(/-/g, ''));
+    const nonceStr = nonceUint.toString();
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
 
     const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
@@ -153,14 +152,14 @@ export async function generateTokenVoucher(
       wallet_address: normalized,
       claim_type: 'token',
       amount: claimable.toString(),
-      nonce,
+      nonce: nonceStr,
       status: 'pending',
     });
 
     return {
       recipient: normalized,
       amount: claimable.toString(),
-      nonce: nonceUint.toString(),
+      nonce: nonceStr,
       deadline: deadline.toString(),
       signature,
       contractAddress: QUIZ_TOKEN_ADDRESS,
@@ -188,7 +187,8 @@ export async function generateBadgeVoucher(
 
     const normalized = walletAddress.toLowerCase();
     const nonce = crypto.randomUUID();
-    const nonceUint = BigInt('0x' + nonce.replace(/-/g, '').slice(0, 16));
+    const nonceUint = BigInt('0x' + nonce.replace(/-/g, ''));
+    const nonceStr = nonceUint.toString();
     const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
 
     const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
@@ -222,7 +222,7 @@ export async function generateBadgeVoucher(
       wallet_address: normalized,
       claim_type: 'badge',
       badge_type: badgeType,
-      nonce,
+      nonce: nonceStr,
       status: 'pending',
     });
 
@@ -230,7 +230,7 @@ export async function generateBadgeVoucher(
       recipient: normalized,
       amount: '0',
       badgeType,
-      nonce: nonceUint.toString(),
+      nonce: nonceStr,
       deadline: deadline.toString(),
       signature,
       contractAddress: QUIZ_BADGE_ADDRESS,
@@ -250,14 +250,17 @@ export async function confirmRewardClaim(
     if (!walletAddress || !nonce || !txHash) return { success: false };
     const normalized = walletAddress.toLowerCase();
 
-    const { error } = await supabase
+    const { data, error } = await supabase
       .from('reward_claims')
       .update({ status: 'claimed', tx_hash: txHash })
       .eq('wallet_address', normalized)
       .eq('nonce', nonce)
-      .eq('status', 'pending');
+      .eq('status', 'pending')
+      .select('id');
 
-    return { success: !error };
+    if (error || !data || data.length === 0) return { success: false };
+
+    return { success: true };
   } catch (err) {
     console.error('confirmRewardClaim error:', err);
     return { success: false };
