@@ -20,8 +20,23 @@ export default function TimerSettingsModal({
 }: TimerSettingsModalProps) {
   const [mode, setMode] = useState(currentMode);
   const [duration, setDuration] = useState(currentDuration);
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
+
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
+    if (isOpen) {
+      setMode(currentMode);
+      setDuration(currentDuration);
+    }
+  }
 
   const presets = [15, 30, 60, 120];
+
+  const handleCancel = () => {
+    setMode(currentMode);
+    setDuration(currentDuration);
+    onClose();
+  };
 
   const handleSave = () => {
     onSave(mode, duration);
@@ -31,13 +46,13 @@ export default function TimerSettingsModal({
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleCancel}
       title="Timer & Clock Settings"
       icon="⏱️"
       footer={
         <>
           <button
-            onClick={onClose}
+            onClick={handleCancel}
             className="px-4 py-2 text-sm font-medium rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
           >
             Cancel
