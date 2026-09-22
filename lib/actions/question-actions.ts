@@ -91,3 +91,19 @@ export async function getQuestionCount(): Promise<number> {
     return 0;
   }
 }
+
+export async function get5050EliminatedIndices(questionId: string): Promise<number[]> {
+  try {
+    const { data } = await supabase
+      .from('questions')
+      .select('correct_index')
+      .eq('id', questionId)
+      .single();
+    if (!data) return [0, 1];
+    const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
+    return wrong.sort(() => 0.5 - Math.random()).slice(0, 2);
+  } catch {
+    return [0, 1];
+  }
+}
+

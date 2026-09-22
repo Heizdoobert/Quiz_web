@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAccount } from 'wagmi';
 import {
   AnswerSubmissionResult,
@@ -9,7 +9,10 @@ import {
   UserStats,
 } from '@/lib/types';
 import { getOrCreateUser } from '@/lib/actions/user-actions';
-import { fetchRandomQuestion } from '@/lib/actions/question-actions';
+import {
+  fetchRandomQuestion,
+  get5050EliminatedIndices,
+} from '@/lib/actions/question-actions';
 import { getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import {
   getGlobalLeaderboard,
@@ -49,6 +52,11 @@ export default function QuizLayout() {
   const [timerMode, setTimerMode] = useState<'per-question' | 'total' | 'stopwatch'>('per-question');
   const [timerDuration, setTimerDuration] = useState(30);
   const [timeLeft, setTimeLeft] = useState(30);
+  const timeLeftRef = useRef(timeLeft);
+
+  useEffect(() => {
+    timeLeftRef.current = timeLeft;
+  }, [timeLeft]);
 
   // Powerups (once per quiz session)
   const [fiftyFiftyUsed, setFiftyFiftyUsed] = useState(false);
@@ -72,26 +80,36 @@ export default function QuizLayout() {
     setStats(userStats);
   }, [address]);
 
-  const loadLeaderboards = useCallback(async () => {
-    setLeaderboardLoading(true);
-    const global = await getGlobalLeaderboard(10);
-    setGlobalLeaderboard(global);
-    if (selectedGroupId) {
-      const group = await getGroupLeaderboard(selectedGroupId, 10);
-      setGroupLeaderboard(group);
-    }
-    setLeaderboardLoading(false);
-  }, [selectedGroupId]);
+  const loadLeaderboards = useCallback(
+    async (overrideGroupId?: string) => {
+      const gid = overrideGroupId ?? selectedGroupId;
+      setLeaderboardLoading(true);
+      const global = await getGlobalLeaderboard(10);
+      setGlobalLeaderboard(global);
+      if (gid) {
+        const group = await getGroupLeaderboard(gid, 10);
+        setGroupLeaderboard(group);
+      }
+      setLeaderboardLoading(false);
+    },
+    [selectedGroupId]
+  );
 
-  const loadNextQuestion = useCallback(async () => {
-    setIsFlipped(false);
-    setResult(null);
-    setEliminatedIndices([]);
-    setTimeLeft(timerDuration);
+  const loadNextQuestion = useCallback(
+    async (overrideAnsweredIds?: string[]) => {
+      setIsFlipped(false);
+      setResult(null);
+      setEliminatedIndices([]);
+      setTimeLeft(timerDuration);
 
-    const q = await fetchRandomQuestion(answeredIds);
-    setCurrentQuestion(q);
-  }, [answeredIds, timerDuration]);
+      const idsToExclude = Array.isArray(overrideAnsweredIds)
+        ? overrideAnsweredIds
+        : answeredIds;
+      const q = await fetchRandomQuestion(idsToExclude);
+      setCurrentQuestion(q);
+    },
+    [answeredIds, timerDuration]
+  );
 
   const handleAnswerSubmit = useCallback(
     async (answerIndex: number) => {
@@ -163,32 +181,31 @@ export default function QuizLayout() {
 
     if (timerMode === 'per-question') {
       const interval = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(interval);
-            handleAnswerSubmit(-1); // Timeout treated as wrong
-            return 0;
-          }
-          return prev - 1;
-        });
+        if (timeLeftRef.current <= 1) {
+          clearInterval(interval);
+          setTimeLeft(0);
+          handleAnswerSubmit(-1); // Timeout treated as wrong
+        } else {
+          setTimeLeft((prev) => prev - 1);
+        }
       }, 1000);
       return () => clearInterval(interval);
     }
   }, [currentQuestion, isFlipped, isSubmitting, timerMode, handleAnswerSubmit]);
 
-  const handle5050 = () => {
+  const handle5050 = async () => {
     if (fiftyFiftyUsed || !currentQuestion) return;
     setFiftyFiftyUsed(true);
-    // Pick 2 random indices to eliminate
-    const indices = [0, 1, 2, 3];
-    const shuffled = indices.sort(() => 0.5 - Math.random());
-    setEliminatedIndices(shuffled.slice(0, 2));
+    const eliminated = await get5050EliminatedIndices(currentQuestion.id);
+    setEliminatedIndices(eliminated);
   };
 
   const handleSkip = () => {
-    if (skipUsed) return;
+    if (skipUsed || !currentQuestion) return;
     setSkipUsed(true);
-    loadNextQuestion();
+    const updatedIds = [...answeredIds, currentQuestion.id];
+    setAnsweredIds(updatedIds);
+    loadNextQuestion(updatedIds);
   };
 
   return (
@@ -284,7 +301,7 @@ export default function QuizLayout() {
         walletAddress={address || null}
         onSelectGroup={(groupId) => {
           setSelectedGroupId(groupId);
-          loadLeaderboards();
+          loadLeaderboards(groupId);
         }}
       />
       <ReviewModal
