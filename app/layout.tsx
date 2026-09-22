@@ -1,19 +1,22 @@
-import type { Metadata } from "next";
-import "./globals.css";
+import type { Metadata } from 'next';
+import './globals.css';
+import { Providers } from '@/components/Providers';
 
 export const metadata: Metadata = {
-  title: "Quick Quiz",
-  description: "Web3 Trivia",
+  title: 'Quick Quiz',
+  description: 'Web3 Trivia',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html lang="en">
-      <body>{children}</body>
+    <html lang="en" className="dark">
+      <body className="bg-slate-900 text-white min-h-screen">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
