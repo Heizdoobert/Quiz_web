@@ -41,25 +41,32 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
     }
 
     setLoading(true);
-    const res = await createQuestion({
-      prompt,
-      options,
-      correctIndex,
-      category,
-      explanation,
-      createdBy: walletAddress || undefined,
-    });
-    setLoading(false);
+    try {
+      const res = await createQuestion({
+        prompt,
+        options,
+        correctIndex,
+        category,
+        explanation,
+        createdBy: walletAddress || undefined,
+      });
 
-    if (!res.success) {
-      setFeedback({ type: 'error', message: res.error || 'Failed to add question.' });
-    } else {
-      setFeedback({ type: 'success', message: 'Question added successfully! 🎉' });
-      setPrompt('');
-      setOptions(['', '', '', '']);
-      setExplanation('');
-      setCorrectIndex(0);
-      if (onQuestionAdded) onQuestionAdded();
+      if (!res.success) {
+        setFeedback({ type: 'error', message: res.error || 'Failed to add question.' });
+      } else {
+        setFeedback({ type: 'success', message: 'Question added successfully! 🎉' });
+        setPrompt('');
+        setOptions(['', '', '', '']);
+        setExplanation('');
+        setCorrectIndex(0);
+        if (onQuestionAdded) onQuestionAdded();
+      }
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'An unexpected error occurred while adding the question.';
+      setFeedback({ type: 'error', message });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,7 +76,9 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-slate-750 transition-colors"
+        aria-expanded={isOpen}
+        aria-controls="question-form-body"
+        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-slate-700/60 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
@@ -94,7 +103,11 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
       {/* Collapsible Form Body */}
       {isOpen && (
-        <form onSubmit={handleSubmit} className="p-6 pt-2 border-t border-slate-700/60 space-y-4">
+        <form
+          id="question-form-body"
+          onSubmit={handleSubmit}
+          className="p-6 pt-2 border-t border-slate-700/60 space-y-4"
+        >
           {feedback && (
             <div
               className={`p-3 rounded-lg text-xs font-medium ${
