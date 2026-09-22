@@ -44,7 +44,11 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
   const { switchChain } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
 
-  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({
+  const {
+    isSuccess: txConfirmed,
+    isError: txReceiptError,
+    error: receiptError,
+  } = useWaitForTransactionReceipt({
     hash: txHash as `0x${string}` | undefined,
   });
 
@@ -67,20 +71,48 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
     }
   }, [isOpen, walletAddress, loadRewards]);
 
+  // Handle reverted transactions
+  useEffect(() => {
+    if (txReceiptError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setClaimStep('error');
+      setClaimError(receiptError?.message || 'Transaction reverted on-chain');
+      setMintingBadge(null);
+      setCurrentNonce(null);
+    }
+  }, [txReceiptError, receiptError]);
+
   // Confirm on-chain after tx is mined
   useEffect(() => {
     if (txConfirmed && currentNonce && walletAddress && txHash) {
-      confirmRewardClaim(walletAddress, currentNonce, txHash).then(() => {
-        setClaimStep('done');
-        loadRewards(); // Refresh
-      });
+      confirmRewardClaim(walletAddress, currentNonce, txHash)
+        .then((res) => {
+          if (res?.success) {
+            setClaimStep('done');
+            loadRewards(); // Refresh
+          } else {
+            setClaimStep('error');
+            setClaimError('Failed to confirm reward claim with backend');
+            setMintingBadge(null);
+          }
+          setCurrentNonce(null);
+        })
+        .catch((err) => {
+          console.error('Claim confirmation failed:', err);
+          setClaimStep('error');
+          setClaimError('Failed to confirm reward claim');
+          setMintingBadge(null);
+          setCurrentNonce(null);
+        });
     }
   }, [txConfirmed, currentNonce, walletAddress, txHash, loadRewards]);
 
-  const isWrongChain = chainId !== TARGET_CHAIN_ID;
+  const isWrongChain = Boolean(walletAddress) && chainId !== TARGET_CHAIN_ID;
 
   const handleClaimTokens = async () => {
     if (!walletAddress || isWrongChain) return;
+    setTxHash(null);
+    setCurrentNonce(null);
     setClaimStep('signing');
     setClaimError(null);
 
@@ -118,6 +150,8 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
   const handleMintBadge = async (badgeType: number) => {
     if (!walletAddress || isWrongChain) return;
+    setTxHash(null);
+    setCurrentNonce(null);
     setMintingBadge(badgeType);
     setClaimStep('signing');
     setClaimError(null);
@@ -232,7 +266,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
           <p className="text-xs text-slate-500 text-center">Earn 10 $QUIZ for every correct answer</p>
 
-          {claimStep === 'done' && explorerUrl ? (
+          {claimStep === 'done' && explorerUrl && mintingBadge === null ? (
             <div className="p-3 bg-green-900/30 border border-green-700/50 rounded-lg text-center">
               <p className="text-green-400 font-medium mb-1">🎉 Tokens claimed!</p>
               <a
