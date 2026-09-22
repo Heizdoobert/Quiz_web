@@ -1,7 +1,12 @@
+import Header from '@/components/Header';
+
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <h1 className="text-4xl font-bold">Quick Quiz</h1>
+    <main className="max-w-7xl mx-auto">
+      <Header />
+      <div className="p-4">
+        <p>Welcome to Web3 Quick Quiz</p>
+      </div>
     </main>
   );
 }
