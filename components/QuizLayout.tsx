@@ -28,11 +28,19 @@ import TimerSettingsModal from './modals/TimerSettingsModal';
 import GroupModal from './modals/GroupModal';
 import ReviewModal, { HistoryItem } from './modals/ReviewModal';
 
-export default function QuizLayout() {
+interface QuizLayoutProps {
+  initialQuestion?: ClientQuestion | null;
+  initialLeaderboard?: LeaderboardEntry[];
+}
+
+export default function QuizLayout({
+  initialQuestion = null,
+  initialLeaderboard = [],
+}: QuizLayoutProps = {}) {
   const { address, isConnected } = useAccount();
 
   // Quiz state
-  const [currentQuestion, setCurrentQuestion] = useState<ClientQuestion | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<ClientQuestion | null>(initialQuestion);
   const [answeredIds, setAnsweredIds] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -64,7 +72,7 @@ export default function QuizLayout() {
   const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
 
   // Leaderboard data
-  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
   const [groupLeaderboard, setGroupLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
@@ -168,12 +176,24 @@ export default function QuizLayout() {
     }
   }, [isConnected, address, refreshStats]);
 
-  // Load initial question and leaderboards
+  // Only fetch initial question and leaderboards if not supplied via SSR
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    loadNextQuestion();
-    loadLeaderboards();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    let ignore = false;
+    async function initData() {
+      if (!initialQuestion) {
+        const q = await fetchRandomQuestion();
+        if (!ignore) setCurrentQuestion(q);
+      }
+      if (initialLeaderboard.length === 0) {
+        const global = await getGlobalLeaderboard(10);
+        if (!ignore) setGlobalLeaderboard(global);
+      }
+    }
+    initData();
+    return () => {
+      ignore = true;
+    };
+  }, [initialQuestion, initialLeaderboard.length]);
 
   // Timer Countdown effect
   useEffect(() => {

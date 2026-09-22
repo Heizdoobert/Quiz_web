@@ -1,10 +1,16 @@
 import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Quick Quiz',
-  description: 'Web3 Trivia',
+  title: 'Quick Quiz | Web3 Interactive Trivia',
+  description: 'Play, contribute, and compete on Web3 trivia leaderboards.',
 };
 
 export default function RootLayout({
@@ -14,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className="bg-slate-900 text-white min-h-screen">
+      <body className={`${inter.className} bg-slate-900 text-white min-h-screen antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>
