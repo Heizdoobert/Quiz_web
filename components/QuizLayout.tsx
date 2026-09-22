@@ -27,6 +27,9 @@ import IntroModal from './modals/IntroModal';
 import TimerSettingsModal from './modals/TimerSettingsModal';
 import GroupModal from './modals/GroupModal';
 import ReviewModal, { HistoryItem } from './modals/ReviewModal';
+import RewardsModal from './modals/RewardsModal';
+import { getClaimableRewards } from '@/lib/actions/reward-actions';
+import { ClaimableRewards } from '@/lib/types';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -79,13 +82,22 @@ export default function QuizLayout({
 
   // Modals
   const [activeModal, setActiveModal] = useState<
-    'intro' | 'timer' | 'group' | 'review' | null
+    'intro' | 'timer' | 'group' | 'review' | 'rewards' | null
   >(null);
+
+  // Rewards
+  const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
 
   const refreshStats = useCallback(async () => {
     if (!address) return;
     const userStats = await getUserStats(address);
     setStats(userStats);
+  }, [address]);
+
+  const refreshRewards = useCallback(async () => {
+    if (!address) return;
+    const data = await getClaimableRewards(address);
+    setClaimableRewards(data);
   }, [address]);
 
   const loadLeaderboards = useCallback(
@@ -163,8 +175,9 @@ export default function QuizLayout({
 
       // Refresh leaderboards
       loadLeaderboards();
+      refreshRewards();
     },
-    [currentQuestion, isSubmitting, isFlipped, address, loadLeaderboards]
+    [currentQuestion, isSubmitting, isFlipped, address, loadLeaderboards, refreshRewards]
   );
 
   // Initial user sync & stats fetch
@@ -172,9 +185,10 @@ export default function QuizLayout({
     if (isConnected && address) {
       getOrCreateUser(address).then(() => {
         refreshStats();
+        refreshRewards();
       });
     }
-  }, [isConnected, address, refreshStats]);
+  }, [isConnected, address, refreshStats, refreshRewards]);
 
   // Only fetch initial question and leaderboards if not supplied via SSR
   useEffect(() => {
@@ -247,6 +261,8 @@ export default function QuizLayout({
                 stats={stats}
                 history={history}
                 onOpenReview={() => setActiveModal('review')}
+                claimableTokens={claimableRewards?.claimableTokens}
+                onOpenRewards={() => setActiveModal('rewards')}
               />
             </div>
 
@@ -328,6 +344,11 @@ export default function QuizLayout({
         isOpen={activeModal === 'review'}
         onClose={() => setActiveModal(null)}
         history={history}
+      />
+      <RewardsModal
+        isOpen={activeModal === 'rewards'}
+        onClose={() => setActiveModal(null)}
+        walletAddress={address || null}
       />
     </div>
   );
