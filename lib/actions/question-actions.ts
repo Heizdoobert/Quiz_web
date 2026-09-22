@@ -101,7 +101,17 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
       .single();
     if (!data) return [0, 1];
     const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
-    return wrong.sort(() => 0.5 - Math.random()).slice(0, 2);
+
+    // Deterministic selection based on questionId hash so repeat calls return the exact same 2 wrong answers
+    let hash = 0;
+    for (let i = 0; i < questionId.length; i++) {
+      hash = (hash * 31 + questionId.charCodeAt(i)) >>> 0;
+    }
+    const firstIndex = hash % wrong.length;
+    const first = wrong[firstIndex];
+    const remaining = wrong.filter((_, i) => i !== firstIndex);
+    const second = remaining[(hash >>> 4) % remaining.length];
+    return [first, second].sort((a, b) => a - b);
   } catch {
     return [0, 1];
   }

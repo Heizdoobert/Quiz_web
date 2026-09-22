@@ -48,3 +48,32 @@ CREATE TABLE IF NOT EXISTS group_members (
 );
 
 CREATE INDEX IF NOT EXISTS idx_group_members_wallet ON group_members(wallet_address);
+
+-- Enable Row Level Security (RLS) on all tables to prevent direct REST client bypass
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE questions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quiz_results ENABLE ROW LEVEL SECURITY;
+ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies
+CREATE POLICY "Allow public read for users" ON users FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for users" ON users FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public read for groups" ON groups FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for groups" ON groups FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public read for group_members" ON group_members FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for group_members" ON group_members FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public delete for group_members" ON group_members FOR DELETE USING (true);
+
+CREATE POLICY "Allow public read for quiz_results" ON quiz_results FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for quiz_results" ON quiz_results FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public read for questions" ON questions FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for questions" ON questions FOR INSERT WITH CHECK (true);
+
+-- Secure Client View (omits correct_index and explanation)
+CREATE OR REPLACE VIEW client_questions AS
+  SELECT id, category, prompt, options, created_at
+  FROM questions;

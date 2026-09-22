@@ -24,13 +24,15 @@ export async function submitAnswer(params: {
 
     const isCorrect = params.answerIndex === qData.correct_index;
 
-    // Log the result
-    await supabase.from('quiz_results').insert({
-      wallet_address: normalizedWallet,
-      question_id: params.questionId,
-      answer_index: params.answerIndex,
-      is_correct: isCorrect,
-    });
+    // Log the result only if a valid wallet is connected (prevents corrupting leaderboard with dummy address)
+    if (normalizedWallet && normalizedWallet !== '0x0000000000000000000000000000000000000000') {
+      await supabase.from('quiz_results').insert({
+        wallet_address: normalizedWallet,
+        question_id: params.questionId,
+        answer_index: params.answerIndex,
+        is_correct: isCorrect,
+      });
+    }
 
     return {
       isCorrect,
