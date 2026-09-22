@@ -60,3 +60,35 @@ export interface AnswerSubmissionResult {
   correctIndex: number;
   explanation: string | null;
 }
+
+export interface ClaimableRewards {
+  claimableTokens: string;
+  eligibleBadges: number[];
+  alreadyClaimedBadges: number[];
+  totalEarned: string;
+  totalClaimed: string;
+}
+
+export interface RewardVoucher {
+  recipient: string;
+  amount: string;
+  badgeType?: number;
+  nonce: string;
+  deadline: string;
+  signature: string;
+  contractAddress: string;
+}
+
+export const BADGE_NAMES: Record<number, string> = {
+  0: 'Leaderboard Champion',
+  1: 'Streak Fire',
+  2: 'Century Quizzer',
+  3: 'Perfect Round',
+};
+
+export const BADGE_ICONS: Record<number, string> = {
+  0: '🏆',
+  1: '🔥',
+  2: '💯',
+  3: '⭐',
+};

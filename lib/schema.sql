@@ -77,3 +77,23 @@ CREATE POLICY "Allow public insert for questions" ON questions FOR INSERT WITH C
 CREATE OR REPLACE VIEW client_questions AS
   SELECT id, category, prompt, options, created_at
   FROM questions;
+
+-- Reward claims tracking table
+CREATE TABLE IF NOT EXISTS reward_claims (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    wallet_address TEXT NOT NULL,
+    claim_type TEXT NOT NULL CHECK (claim_type IN ('token', 'badge')),
+    amount BIGINT,
+    badge_type INTEGER,
+    nonce TEXT NOT NULL,
+    tx_hash TEXT,
+    status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'claimed', 'expired')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(wallet_address, nonce)
+);
+
+CREATE INDEX IF NOT EXISTS idx_reward_claims_wallet ON reward_claims(wallet_address);
+ALTER TABLE reward_claims ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for reward_claims" ON reward_claims FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for reward_claims" ON reward_claims FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update for reward_claims" ON reward_claims FOR UPDATE USING (true);
