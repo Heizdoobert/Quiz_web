@@ -15,6 +15,7 @@ interface QuestionFrontProps {
   skipUsed: boolean;
   eliminatedIndices: number[];
   isSubmitting: boolean;
+  isFlipped?: boolean;
 }
 
 export default function QuestionFront({
@@ -28,11 +29,15 @@ export default function QuestionFront({
   skipUsed,
   eliminatedIndices,
   isSubmitting,
+  isFlipped = false,
 }: QuestionFrontProps) {
   // Keyboard navigation: 1-4 or A-D
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isSubmitting) return;
+      if (isFlipped || isSubmitting) return;
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+
       const key = e.key.toUpperCase();
       let index = -1;
       if (key === '1' || key === 'A') index = 0;
@@ -46,7 +51,7 @@ export default function QuestionFront({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmitting, eliminatedIndices, onSelectAnswer]);
+  }, [isFlipped, isSubmitting, eliminatedIndices, onSelectAnswer]);
 
   return (
     <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl">
@@ -74,6 +79,7 @@ export default function QuestionFront({
             onClick={onOpenTimerSettings}
             className="text-slate-400 hover:text-white ml-1 transition-colors"
             title="Timer Settings"
+            aria-label="Timer Settings"
           >
             <Settings2 className="w-3.5 h-3.5" />
           </button>
@@ -122,7 +128,7 @@ export default function QuestionFront({
               className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all group ${
                 isEliminated
                   ? 'opacity-25 bg-slate-900 border-slate-800 cursor-not-allowed'
-                  : 'bg-slate-900/70 border-slate-700 hover:border-blue-500 hover:bg-slate-750 hover:shadow-md cursor-pointer'
+                  : 'bg-slate-900/70 border-slate-700 hover:border-blue-500 hover:bg-slate-700/60 hover:shadow-md cursor-pointer'
               }`}
             >
               <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-colors shrink-0">

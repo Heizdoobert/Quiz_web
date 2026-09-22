@@ -79,7 +79,12 @@ export default function QuizCard({
         }`}
       >
         {/* Front Face */}
-        <div className="absolute inset-0 w-full h-full backface-hidden">
+        <div
+          className={`absolute inset-0 w-full h-full backface-hidden ${
+            isFlipped ? 'pointer-events-none' : ''
+          }`}
+          aria-hidden={isFlipped}
+        >
           <QuestionFront
             question={question}
             timeLeft={timeLeft}
@@ -91,11 +96,17 @@ export default function QuizCard({
             skipUsed={skipUsed}
             eliminatedIndices={eliminatedIndices}
             isSubmitting={isSubmitting}
+            isFlipped={isFlipped}
           />
         </div>
 
         {/* Back Face */}
-        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180">
+        <div
+          className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 ${
+            !isFlipped ? 'pointer-events-none' : ''
+          }`}
+          aria-hidden={!isFlipped}
+        >
           {result && (
             <AnswerBack
               question={question}

@@ -16,6 +16,9 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
   // Advance to next question on Enter or Space
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
+
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         onNext();
