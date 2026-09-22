@@ -8,9 +8,9 @@ export async function submitAnswer(params: {
   answerIndex: number;
   walletAddress: string;
 }): Promise<AnswerSubmissionResult> {
-  const normalizedWallet = params.walletAddress.toLowerCase();
-
   try {
+    const rawWallet = params?.walletAddress || '0x0000000000000000000000000000000000000000';
+    const normalizedWallet = rawWallet.toLowerCase();
     const { data: qData, error: qError } = await supabase
       .from('questions')
       .select('correct_index, explanation')
@@ -44,8 +44,11 @@ export async function submitAnswer(params: {
 }
 
 export async function getUserStats(walletAddress: string): Promise<UserStats> {
-  const normalized = walletAddress.toLowerCase();
   try {
+    if (!walletAddress) {
+      return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
+    }
+    const normalized = walletAddress.toLowerCase();
     const { data, error } = await supabase
       .from('quiz_results')
       .select('is_correct, answered_at')
@@ -97,8 +100,9 @@ export async function getQuestionHistory(
   walletAddress: string,
   limit: number = 10
 ): Promise<QuizResult[]> {
-  const normalized = walletAddress.toLowerCase();
   try {
+    if (!walletAddress) return [];
+    const normalized = walletAddress.toLowerCase();
     const { data, error } = await supabase
       .from('quiz_results')
       .select('*')

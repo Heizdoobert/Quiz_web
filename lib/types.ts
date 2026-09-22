@@ -11,7 +11,7 @@ export interface Question {
   options: string[];
   correct_index: number;
   explanation: string | null;
-  created_by: string;
+  created_by: string | null;
   created_at: string;
 }
 

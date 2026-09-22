@@ -8,12 +8,15 @@ export async function createGroup(params: {
   description?: string;
   ownerWallet: string;
 }): Promise<{ success: boolean; group?: Group; error?: string }> {
-  const normalized = params.ownerWallet.toLowerCase();
   try {
+    if (!params?.ownerWallet) {
+      return { success: false, error: 'Owner wallet required.' };
+    }
     if (!params.name?.trim()) {
       return { success: false, error: 'Group name is required.' };
     }
 
+    const normalized = params.ownerWallet.toLowerCase();
     const { data: group, error } = await supabase
       .from('groups')
       .insert({
@@ -45,8 +48,11 @@ export async function joinGroup(
   groupId: string,
   walletAddress: string
 ): Promise<{ success: boolean; error?: string }> {
-  const normalized = walletAddress.toLowerCase();
   try {
+    if (!walletAddress || !groupId) {
+      return { success: false, error: 'Wallet and group required.' };
+    }
+    const normalized = walletAddress.toLowerCase();
     const { error } = await supabase.from('group_members').insert({
       group_id: groupId,
       wallet_address: normalized,
@@ -63,8 +69,11 @@ export async function leaveGroup(
   groupId: string,
   walletAddress: string
 ): Promise<{ success: boolean; error?: string }> {
-  const normalized = walletAddress.toLowerCase();
   try {
+    if (!walletAddress || !groupId) {
+      return { success: false, error: 'Wallet and group required.' };
+    }
+    const normalized = walletAddress.toLowerCase();
     const { error } = await supabase
       .from('group_members')
       .delete()
@@ -79,8 +88,9 @@ export async function leaveGroup(
 }
 
 export async function getUserGroups(walletAddress: string): Promise<Group[]> {
-  const normalized = walletAddress.toLowerCase();
   try {
+    if (!walletAddress) return [];
+    const normalized = walletAddress.toLowerCase();
     const { data, error } = await supabase
       .from('group_members')
       .select('group_id, groups(*)')
