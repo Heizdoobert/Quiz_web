@@ -18,40 +18,49 @@ quick-quiz/
 │   ├── not-found.tsx              # Custom 404 page
 │   └── globals.css                # Tailwind CSS v4 and 3D card perspective utilities
 ├── components/                    # UI Component Library
-│   ├── Header.tsx                 # Web3 ConnectButton + animated Rewards button
+│   ├── Header.tsx                 # Web3 ConnectButton + animated Rewards button + Audio toggle
 │   ├── Providers.tsx              # RainbowKit, Wagmi, React Query providers (Base Sepolia + EVM)
-│   ├── QuizLayout.tsx             # Central state manager and responsive 3-column grid
-│   ├── QuizCard.tsx               # 3D Flip Card wrapper with keyboard navigation & confetti
-│   ├── QuestionFront.tsx          # Card front with timer, power-ups (50:50, Skip), and options
-│   ├── AnswerBack.tsx             # Card back with result feedback, explanation, and next action
-│   ├── QuestionForm.tsx           # Collapsible custom question submission accordion
+│   ├── QuizLayout.tsx             # Central UI grid coordinating Sidebar, QuizCard, Leaderboards
+│   ├── QuizCard.tsx               # 3D Flip Card wrapper with Confetti & Keyboard Nav
+│   ├── QuestionFront.tsx          # Card front with Sponsor Gate, Timer, 50:50/Skip, and Options
+│   ├── AnswerBack.tsx             # Card back with Result feedback, Explanation, and Dispute button
+│   ├── QuestionForm.tsx           # Community question submission accordion with heuristic audit
 │   ├── Sidebar.tsx                # Left column coordinating stats, history, and rewards summary
 │   ├── StatsPanel.tsx             # Live score, streak counter, accuracy, and claimable tokens
 │   ├── HistoryList.tsx            # Recent question answer history with outcome pills
-│   ├── LeaderboardPanel.tsx       # Tabbed leaderboard (Global Top 10 + Group Rankings)
-│   ├── GlobalLeaderboard.tsx      # Global player ranking table
-│   ├── GroupLeaderboard.tsx       # Guild/group ranking table with member selector
+│   ├── LeaderboardPanel.tsx       # Tabbed leaderboard (Global Top 10 + Group Rankings with pagination)
+│   ├── CategoryBar.tsx            # Topic selector (All, DeFi, NFT & Gaming, Layer 1 & Infra)
 │   ├── AdZone.tsx                 # Responsive ad placement (skyscrapers on desktop, banners on mobile)
+│   ├── StickyBannerAd.tsx         # Fixed bottom banner ad zone
 │   ├── Modal.tsx                  # Accessible Framer Motion portal base modal
 │   └── modals/
 │       ├── IntroModal.tsx         # How to play guide
 │       ├── TimerSettingsModal.tsx # Countdown mode and duration configuration
 │       ├── GroupModal.tsx         # Group creation and joining interface
 │       ├── ReviewModal.tsx        # Comprehensive question review modal
-│       └── RewardsModal.tsx       # Dual-tab $QUIZ token claiming & NFT badge minting
+│       ├── RewardsModal.tsx       # Dual-tab $QUIZ token claiming & NFT badge minting
+│       ├── ProfileModal.tsx       # Web3 identity, player rank tiers, and NFT trophy cabinet
+│       └── DisputeModal.tsx       # Community question dispute reporting modal
+├── hooks/                         # Clean Architecture Custom Hooks
+│   ├── use-quiz-logic.ts          # Core game loop, timer countdown, and sponsor gate state
+│   ├── use-question-form.ts       # Form validation and heuristic question verification
+│   ├── use-dispute-modal.ts       # Question dispute submission and state
+│   ├── use-group-modal.ts         # Group management and membership
+│   └── use-rewards-modal.ts       # Web3 contract write actions and claim flow
 ├── lib/
 │   ├── actions/                   # Next.js Server Actions (Mutation & Data Fetching)
 │   │   ├── question-actions.ts    # Question fetching & deterministic 50:50 elimination
 │   │   ├── quiz-actions.ts        # Anti-cheat answer verification & stats calculation
-│   │   ├── leaderboard-actions.ts # Global and group leaderboard aggregation
+│   │   ├── leaderboard-actions.ts # Global and group leaderboard aggregation with pagination
 │   │   ├── user-actions.ts        # User registration and profile management
 │   │   ├── group-actions.ts       # Group creation, joining, and membership queries
 │   │   └── reward-actions.ts      # EIP-712 cryptographic voucher signing & claim verification
 │   ├── contracts/                 # Contract ABIs & Address Configuration
-│   │   ├── addresses.ts           # Deployed contract addresses with environment fallbacks
+│   │   ├── addresses.ts           # Live Base Sepolia deployed contract addresses
 │   │   ├── QuizTokenABI.ts        # Typed ERC-20 QuizToken ABI (as const)
 │   │   └── QuizBadgeNFTABI.ts     # Typed ERC-721 QuizBadgeNFT ABI (as const)
-│   ├── schema.sql                 # PostgreSQL DDL with RLS policies and secure views
+│   ├── audio.ts                   # Web Audio API Synthesizer (Flip, Tick, Correct, Wrong, Powerup)
+│   ├── schema.sql                 # PostgreSQL DDL with RLS policies, seed trivia, and dispute tables
 │   ├── supabase.ts                # Supabase client singleton with build-time fallback
 │   └── types.ts                   # Domain TypeScript interfaces and badge definitions
 └── contracts/                     # Hardhat Smart Contract Workspace
@@ -62,7 +71,7 @@ quick-quiz/
     │   ├── QuizToken.test.ts      # 8 unit tests (replay, deadline, tampering, rotation)
     │   └── QuizBadgeNFT.test.ts   # 8 unit tests (duplicate badge, replay, URI, bounds)
     ├── scripts/
-    │   ├── deploy.ts              # Deployment script for Base Sepolia and local Anvil
+    │   ├── deploy.ts              # Deployment script for Base Sepolia and local networks
     │   └── sync-abi.ts            # ABI extraction script syncing to lib/contracts/
     └── hardhat.config.ts          # Solidity 0.8.24 compiler with Cancun EVM & optimizer
 ```
@@ -71,29 +80,31 @@ quick-quiz/
 
 ## Key Features
 
-### 1. Web3 Wallet Authentication
-- Integrated with **RainbowKit v2** and **Wagmi v2**.
-- Multi-chain support: **Base Sepolia (primary for rewards)**, Base, Arbitrum, Polygon, Optimism, Ethereum Mainnet.
-- Network switching prompt when connected to an unsupported network during reward claims.
+### 1. Web3 Wallet Authentication & Live Contracts
+- Integrated with **RainbowKit v2** and **Wagmi v2** (Project ID configured).
+- Deployed on **Base Sepolia (Chain ID: 84532)**:
+  - **QuizToken ($QUIZ)**: `0x76444237b7d382703d20CFFF4Af19f429CFbdE33`
+  - **QuizBadgeNFT (QBADGE)**: `0x6629cE07d7c4093ccb0a7bEdDDBe6cF41f9A93F9`
+  - **Deployer / Signer**: `0xEAa6c3b72E09b7B9a7656C1140761823D024aC28`
 
-### 2. Anti-Cheat Security & Row Level Security (RLS)
-- **Data Isolation**: Question `correct_index` and `explanation` are strictly withheld from client-side bundles prior to submission.
-- **Server Verification**: Answers are evaluated in `'use server'` actions (`submitAnswer`).
-- **Deterministic 50:50**: Power-up elimination uses a deterministic string hash of `questionId` so malicious users cannot deduce all wrong answers by spamming the endpoint.
-- **Database RLS**: Supabase tables (`users`, `questions`, `quiz_results`, `groups`, `group_members`, `reward_claims`) enforce Row Level Security policies.
+### 2. Pre-Quiz Sponsor / Affiliate Gate (Guaranteed Monetization)
+- **Zero Reload Experience**: Before starting a question, users click a prominent "Start Quiz / Unlock Sponsor" button.
+- **New Tab Redirection**: Opens the configured sponsor/affiliate URL (`NEXT_PUBLIC_SPONSOR_AD_URL`) in a new browser tab without reloading the main quiz window.
+- **Timer Protection**: The 30s countdown timer remains safely paused at maximum until the user unlocks the question.
 
-### 3. On-Chain Token & NFT Rewards
-- **$QUIZ Token (ERC-20)**: Players earn 10 $QUIZ tokens per verified correct answer. Claims are signed off-chain by the server and minted on-chain on Base Sepolia.
-- **Achievement Badges (ERC-721)**: Milestone NFT badges:
-  - 🏆 **Leaderboard Champion**: Reaching Top 3 globally.
-  - 🔥 **Streak Fire**: Achieving a 10+ correct answer streak.
-  - 💯 **Century Quizzer**: Answering 100+ total trivia questions.
-  - ⭐ **Perfect Round**: Flawless quiz sessions.
-- **EIP-712 Cryptographic Signatures**: The server signs a typed structured data voucher with `REWARD_SIGNER_PRIVATE_KEY`. Zero gas cost for the backend; the user submits the transaction and pays fractional-cent L2 gas on Base Sepolia.
+### 3. Anti-Cheat Security & Community Dispute Engine
+- **Server Verification**: Answers evaluated strictly in `'use server'` actions (`submitAnswer`). Correct indices never leak to the client.
+- **Deterministic 50:50**: Power-up elimination uses a deterministic hash so malicious users cannot deduce wrong answers by spamming.
+- **Community Dispute System**: Players can flag controversial or incorrect questions. Questions receiving ≥3 disputes are automatically quarantined from the public pool.
 
-### 4. Responsive Monetization Ad Zones
-- **Skyscraper Slots**: Fixed sticky skyscraper sidebars (160×600) on desktop displays (`≥1280px`).
-- **Horizontal Banners**: Fluid responsive banners (728×90 / 320×50) positioned above and below the quiz arena for tablets and smartphones.
+### 4. Web Audio API Synthesizer
+- Built-in zero-dependency procedural audio engine (`lib/audio.ts`) with sound effects for Card Flip, Countdown Tick, Correct Answer, Wrong Answer, and Powerups.
+- Mute/Unmute state persisted in user storage.
+
+### 5. On-Chain Token & NFT Rewards
+- **$QUIZ Token (ERC-20)**: Players earn 10 $QUIZ tokens per verified correct answer. Claims are signed off-chain via **EIP-712** vouchers.
+- **Achievement Badges (ERC-721)**: Milestone NFT badges (Leaderboard Champion, Streak Fire, Century Quizzer, Perfect Round).
+- **Zero Gas Cost for Host**: The user submits the transaction and pays fractional-cent L2 gas (~$0.001) on Base Sepolia.
 
 ---
 
@@ -105,24 +116,33 @@ Create a `.env` (or `.env.local`) file in the project root:
 # ==========================================
 # 1. Supabase Database Configuration
 # ==========================================
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+NEXT_PUBLIC_SUPABASE_URL=https://xtzxpsoqvptmakplifsk.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_URL=https://xtzxpsoqvptmakplifsk.supabase.co
+SUPABASE_PUBLISHABLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+SUPABASE_SECRET_KEY=sbp_...
 
 # ==========================================
 # 2. Web3 / RainbowKit Configuration
 # ==========================================
-NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
+NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=9154b31ebedb68f2c7a64cade158238e
 
 # ==========================================
-# 3. On-Chain Rewards (Base Sepolia)
+# 3. On-Chain Rewards (Base Sepolia Chain ID 84532)
 # ==========================================
 # Server-only private key used to sign EIP-712 claim vouchers (NEVER prefix with NEXT_PUBLIC_)
 REWARD_SIGNER_PRIVATE_KEY=0x_your_server_reward_signer_private_key
 
-# Deployed contract addresses (populated after contract deployment)
-NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS=0x_deployed_quiz_token_address
-NEXT_PUBLIC_QUIZ_BADGE_ADDRESS=0x_deployed_quiz_badge_address
+# Live Deployed Contract Addresses on Base Sepolia
+NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS=0x76444237b7d382703d20CFFF4Af19f429CFbdE33
+NEXT_PUBLIC_QUIZ_BADGE_ADDRESS=0x6629cE07d7c4093ccb0a7bEdDDBe6cF41f9A93F9
 NEXT_PUBLIC_CHAIN_ID=84532
+
+# ==========================================
+# 4. Pre-Quiz Sponsor / Affiliate Monetization
+# ==========================================
+# Opens sponsor or affiliate link in a new tab without reloading before unlocking the quiz question
+NEXT_PUBLIC_SPONSOR_AD_URL=https://coinzilla.com
 ```
 
 ---
@@ -194,6 +214,20 @@ npm run lint
 ```bash
 npm run build
 npm run start
+```
+
+### Docker Container Deployment
+The application includes automated Docker containerization:
+```bash
+# Build and run web container in background
+npm run docker:up
+
+# Or manually via Docker Compose
+docker compose build web
+docker compose up -d web
+
+# View container logs
+docker compose logs -f web
 ```
 
 ---

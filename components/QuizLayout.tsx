@@ -62,6 +62,8 @@ export default function QuizLayout({
     handleSelectGroup,
     handleSaveTimerSettings,
     handleCloseRewards,
+    isUnlocked,
+    handleUnlock,
   } = useQuizLogic({ initialQuestion, initialLeaderboard });
 
   return (
@@ -120,6 +122,8 @@ export default function QuizLayout({
                   form?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 onOpenDispute={() => openModal('dispute')}
+                isUnlocked={isUnlocked}
+                onUnlock={handleUnlock}
               />
 
               <div id="custom-form" className="w-full mt-4">
