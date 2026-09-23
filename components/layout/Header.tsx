@@ -3,7 +3,7 @@
 import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Gift, Zap, Volume2, VolumeX, User } from 'lucide-react';
-import { useSoundToggle } from '@/hooks/use-sound-toggle';
+import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
 
 interface HeaderProps {
   onOpenRewards?: () => void;

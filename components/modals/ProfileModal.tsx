@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Modal from '../Modal';
-import { useProfileModal } from '@/hooks/use-profile-modal';
+import { useProfileModal } from '@/hooks/modals/use-profile-modal';
 import { UserStats, ClaimableRewards, BADGE_NAMES, BADGE_ICONS } from '@/lib/types';
 import {
   User,

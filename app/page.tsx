@@ -1,4 +1,4 @@
-import QuizLayout from '@/components/QuizLayout';
+import QuizLayout from '@/components/quiz/QuizLayout';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 
