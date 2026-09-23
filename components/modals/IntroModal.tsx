@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
+import { useIntroModal } from '@/hooks/use-intro-modal';
 import { Lightbulb, FileEdit, Boxes, Trophy, ArrowRight, ArrowLeft, Rocket } from 'lucide-react';
 
 interface IntroModalProps {
@@ -11,19 +12,7 @@ interface IntroModalProps {
 }
 
 export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
-  const [step, setStep] = useState(1);
-
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-    else {
-      setStep(1);
-      onClose();
-    }
-  };
-
-  const handleBack = () => {
-    if (step > 1) setStep(step - 1);
-  };
+  const { step, setStep, handleNext, handleBack } = useIntroModal({ onClose });
 
   return (
     <Modal

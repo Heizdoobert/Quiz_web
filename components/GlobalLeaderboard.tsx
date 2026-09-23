@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { LeaderboardEntry } from '@/lib/types';
+import { usePagination } from '@/hooks/use-pagination';
 import { Trophy, Medal, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GlobalLeaderboardProps {
@@ -12,7 +13,10 @@ interface GlobalLeaderboardProps {
 const PAGE_SIZE = 5;
 
 export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboardProps) {
-  const [currentPage, setCurrentPage] = useState(1);
+  const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } = usePagination(
+    entries,
+    PAGE_SIZE
+  );
 
   if (loading) {
     return <p className="text-xs text-slate-400 text-center py-6">Loading leaderboard...</p>;
@@ -25,10 +29,6 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
       </div>
     );
   }
-
-  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
-  const pagedEntries = entries.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
   return (
     <div className="space-y-3">
@@ -81,7 +81,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
           <button
             type="button"
             disabled={safePage <= 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onClick={goToPrevPage}
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#25284D] hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
             aria-label="Previous Page"
           >
@@ -96,7 +96,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
           <button
             type="button"
             disabled={safePage >= totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            onClick={goToNextPage}
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#25284D] hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
             aria-label="Next Page"
           >
