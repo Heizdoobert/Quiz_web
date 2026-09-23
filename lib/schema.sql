@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS questions (
   correct_index INT NOT NULL CHECK (correct_index >= 0 AND correct_index <= 3),
   explanation TEXT,
   created_by TEXT REFERENCES users(wallet_address) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'verified' CHECK (status IN ('verified', 'pending', 'quarantined', 'rejected')),
+  dispute_count INT NOT NULL DEFAULT 0,
+  verified_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -97,6 +100,21 @@ ALTER TABLE reward_claims ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for reward_claims" ON reward_claims FOR SELECT USING (true);
 CREATE POLICY "Allow public insert for reward_claims" ON reward_claims FOR INSERT WITH CHECK (true);
 CREATE POLICY "Allow public update for reward_claims" ON reward_claims FOR UPDATE USING (true);
+
+-- Question Disputes Table (Community Challenge & Transparency Engine)
+CREATE TABLE IF NOT EXISTS question_disputes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
+  reporter_wallet TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(question_id, reporter_wallet)
+);
+
+CREATE INDEX IF NOT EXISTS idx_question_disputes_qid ON question_disputes(question_id);
+ALTER TABLE question_disputes ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read for question_disputes" ON question_disputes FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for question_disputes" ON question_disputes FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
 -- Initial Question Seed Data (Curated Trivia Bank)

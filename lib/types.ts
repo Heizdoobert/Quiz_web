@@ -12,6 +12,8 @@ export interface Question {
   correct_index: number;
   explanation: string | null;
   created_by: string | null;
+  status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
+  dispute_count?: number;
   created_at: string;
 }
 
@@ -20,6 +22,16 @@ export interface ClientQuestion {
   category: string;
   prompt: string;
   options: string[];
+  status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
+  created_by?: string | null;
+}
+
+export interface QuestionDispute {
+  id: string;
+  question_id: string;
+  reporter_wallet: string;
+  reason: string;
+  created_at: string;
 }
 
 export interface QuizResult {
