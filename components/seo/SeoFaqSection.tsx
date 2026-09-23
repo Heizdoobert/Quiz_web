@@ -19,7 +19,7 @@ export default function SeoFaqSection() {
     >
       {/* Platform Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
+        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#00FFCC]/10 text-[#00FFCC] shrink-0">
             <Coins className="w-5 h-5" />
           </div>
@@ -29,7 +29,7 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
+        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
             <Award className="w-5 h-5" />
           </div>
@@ -39,7 +39,7 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
+        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#3071FF]/10 text-[#3071FF] shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
@@ -76,7 +76,7 @@ export default function SeoFaqSection() {
           return (
             <div
               key={idx}
-              className="border border-[#2D305A] bg-[#0A1128]/80 rounded-xl overflow-hidden transition-colors hover:border-[#6C5CE7]/60"
+              className="glass glass-border border border-transparent rounded-2xl overflow-hidden transition-colors hover:border-[#6C5CE7]/60"
             >
               <button
                 type="button"

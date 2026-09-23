@@ -47,13 +47,13 @@ export default function StickyBannerAd({
             ${isBottom ? 'bottom-0' : 'top-0'}
             /* Height constraints */
             min-h-[50px] sm:min-h-[60px]
-            bg-[#0A1128]/95 backdrop-blur-md
+            glass
             ${isBottom ? 'border-t' : 'border-b'} border-[#2D305A]
             shadow-[0_-8px_24px_rgba(0,0,0,0.5)]
             pb-[env(safe-area-inset-bottom)]
           `}
         >
-          <div className="max-w-6xl mx-auto h-full px-3 sm:px-6 flex items-center justify-between gap-3 min-h-[50px] sm:min-h-[60px]">
+          <div className="max-w-6xl mx-auto h-full px-4 sm:px-8 flex items-center justify-between gap-3 min-h-[50px] sm:min-h-[60px]">
             {/* Left: Ad Identifier & Sponsor */}
             <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
               <span
@@ -91,7 +91,7 @@ export default function StickyBannerAd({
                 onClick={handleDismiss}
                 aria-label="Dismiss advertisement"
                 className="
-                  relative -mr-1 p-2 sm:p-2.5 rounded-xl
+                  relative -mr-1 p-2.5 sm:p-3 rounded-xl
                   text-slate-400 hover:text-slate-100 hover:bg-[#1A1B35]
                   border border-transparent hover:border-[#2D305A]
                   transition-colors cursor-pointer active:scale-90
