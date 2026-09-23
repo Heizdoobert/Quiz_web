@@ -32,6 +32,7 @@ import ReviewModal, { HistoryItem } from './modals/ReviewModal';
 import RewardsModal from './modals/RewardsModal';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { ClaimableRewards } from '@/lib/types';
+import { soundEngine } from '@/lib/audio';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -85,7 +86,7 @@ export default function QuizLayout({
 
   // Modals
   const [activeModal, setActiveModal] = useState<
-    'intro' | 'timer' | 'group' | 'review' | 'rewards' | null
+    'intro' | 'timer' | 'group' | 'review' | 'rewards' | 'profile' | null
   >(null);
 
   // Rewards
@@ -124,6 +125,7 @@ export default function QuizLayout({
       setResult(null);
       setEliminatedIndices([]);
       setTimeLeft(timerDuration);
+      soundEngine.playFlip();
 
       const idsToExclude = Array.isArray(overrideAnsweredIds)
         ? overrideAnsweredIds
@@ -148,6 +150,12 @@ export default function QuizLayout({
       setResult(res);
       setIsFlipped(true);
       setIsSubmitting(false);
+
+      if (res.isCorrect) {
+        soundEngine.playCorrect();
+      } else {
+        soundEngine.playWrong();
+      }
 
       // Record to history and answered IDs
       setAnsweredIds((prev) => [...prev, currentQuestion.id]);
@@ -223,7 +231,13 @@ export default function QuizLayout({
           setTimeLeft(0);
           handleAnswerSubmit(-1); // Timeout treated as wrong
         } else {
-          setTimeLeft((prev) => prev - 1);
+          setTimeLeft((prev) => {
+            const nextTime = prev - 1;
+            if (nextTime <= 5 && nextTime > 0) {
+              soundEngine.playTick();
+            }
+            return nextTime;
+          });
         }
       }, 1000);
       return () => clearInterval(interval);
@@ -233,6 +247,7 @@ export default function QuizLayout({
   const handle5050 = async () => {
     if (fiftyFiftyUsed || !currentQuestion) return;
     setFiftyFiftyUsed(true);
+    soundEngine.playPowerup();
     const eliminated = await get5050EliminatedIndices(currentQuestion.id);
     setEliminatedIndices(eliminated);
   };
@@ -240,6 +255,7 @@ export default function QuizLayout({
   const handleSkip = () => {
     if (skipUsed || !currentQuestion) return;
     setSkipUsed(true);
+    soundEngine.playPowerup();
     const updatedIds = [...answeredIds, currentQuestion.id];
     setAnsweredIds(updatedIds);
     loadNextQuestion(updatedIds);
@@ -249,6 +265,7 @@ export default function QuizLayout({
     <>
       <Header
         onOpenRewards={() => setActiveModal('rewards')}
+        onOpenProfile={() => setActiveModal('profile')}
         hasClaimable={BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) || (claimableRewards?.eligibleBadges?.length ?? 0) > 0}
         isConnected={isConnected}
       />
