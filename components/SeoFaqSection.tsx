@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, Award, Coins, ShieldCheck, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FAQ_DATA } from '@/lib/seo-data';
 
 export default function SeoFaqSection() {
@@ -18,7 +19,7 @@ export default function SeoFaqSection() {
     >
       {/* Platform Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        <div className="bg-[#111A3A]/70 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#00FFCC]/10 text-[#00FFCC] shrink-0">
             <Coins className="w-5 h-5" />
           </div>
@@ -28,8 +29,8 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="bg-[#111A3A]/70 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-purple-500/10 text-purple-400 shrink-0">
+        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
+          <div className="p-2.5 rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
             <Award className="w-5 h-5" />
           </div>
           <div>
@@ -38,8 +39,8 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="bg-[#111A3A]/70 border border-slate-800 rounded-xl p-4 flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-blue-500/10 text-blue-400 shrink-0">
+        <div className="bg-[#1A1B35]/70 border border-[#2D305A] rounded-xl p-4 flex items-start gap-3">
+          <div className="p-2.5 rounded-lg bg-[#3071FF]/10 text-[#3071FF] shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
           <div>
@@ -55,7 +56,7 @@ export default function SeoFaqSection() {
           <Zap className="w-3.5 h-3.5" />
           Web3 Knowledge Arena
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white font-orbitron">
+        <h2 className="text-2xl md:text-3xl font-bold text-white font-heading">
           Master Crypto Trivia. Earn On-Chain Rewards.
         </h2>
         <p className="text-sm text-slate-400 max-w-2xl mx-auto mt-2 leading-relaxed">
@@ -75,13 +76,14 @@ export default function SeoFaqSection() {
           return (
             <div
               key={idx}
-              className="border border-slate-800/80 bg-[#0F1836]/60 rounded-xl overflow-hidden transition-colors hover:border-slate-700"
+              className="border border-[#2D305A] bg-[#0A1128]/80 rounded-xl overflow-hidden transition-colors hover:border-[#6C5CE7]/60"
             >
               <button
                 type="button"
                 onClick={() => toggleFaq(idx)}
-                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-sm font-medium text-slate-200 hover:text-white"
+                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-sm font-medium text-slate-200 hover:text-white focus-visible:outline-none focus-visible:bg-[#1A1B35]"
                 aria-expanded={isOpen}
+                aria-controls={`faq-answer-${idx}`}
               >
                 <span>{faq.question}</span>
                 <ChevronDown
@@ -90,11 +92,22 @@ export default function SeoFaqSection() {
                   }`}
                 />
               </button>
-              {isOpen && (
-                <div className="px-5 pb-4 text-xs text-slate-400 leading-relaxed border-t border-slate-800/40 pt-3">
-                  {faq.answer}
-                </div>
-              )}
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div
+                    id={`faq-answer-${idx}`}
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <div className="px-5 pb-4 text-xs text-slate-400 leading-relaxed border-t border-[#2D305A] pt-3">
+                      {faq.answer}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}

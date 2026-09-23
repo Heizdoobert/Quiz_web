@@ -133,14 +133,14 @@ export default function QuestionFront({
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-[#0A1128]/85 border border-[#00FFCC]/40 rounded-2xl shadow-[0_0_35px_rgba(0,255,204,0.15)] text-center backdrop-blur-md my-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD166]/15 border border-[#FFD166]/40 text-[#FFD166] text-xs font-bold font-heading uppercase tracking-wider mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Mở khóa câu hỏi • Nhận thưởng $QUIZ</span>
+            <span>Unlock Question • Earn $QUIZ</span>
           </div>
 
           <h3 className="text-base sm:text-lg font-bold font-heading text-white mb-2">
-            Sẵn sàng thử thách trí tuệ Web3?
+            Ready for the Web3 Challenge?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mb-6 leading-relaxed">
-            Bấm nút dưới đây để <span className="text-[#00FFCC] font-bold">mở tab đối tác tài trợ</span> và kích hoạt đồng hồ đếm ngược trả lời!
+            Click the button below to <span className="text-[#00FFCC] font-bold">open our sponsor tab</span> and activate the countdown timer!
           </p>
 
           <motion.button
@@ -152,12 +152,12 @@ export default function QuestionFront({
             className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-[#00FFCC] via-[#3071FF] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] shadow-[0_0_30px_rgba(0,255,204,0.45)] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           >
             <Rocket className="w-5 h-5 text-[#0A1128]" />
-            <span>BẮT ĐẦU TRẢ LỜI NGAY</span>
+            <span>START ANSWERING</span>
             <ExternalLink className="w-4 h-4 text-[#0A1128] opacity-80" />
           </motion.button>
 
           <span className="text-[11px] text-slate-400 mt-3 font-medium">
-            🛡️ Mở tab mới • Trang quiz không bị tải lại • Đảm bảo 100% lượt tài trợ
+            🛡️ Opens in new tab • No page reload • 100% sponsor guarantee
           </span>
         </div>
       ) : (

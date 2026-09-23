@@ -130,7 +130,6 @@ export function useQuizLogic({
       setIsFlipped(false);
       setResult(null);
       setEliminatedIndices([]);
-      setIsUnlocked(false);
       setTimeLeft(timerDuration);
       soundEngine.playFlip();
 
