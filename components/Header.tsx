@@ -1,7 +1,7 @@
 'use client';
 
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Gift } from 'lucide-react';
+import { Gift, Zap } from 'lucide-react';
 
 interface HeaderProps {
   onOpenRewards?: () => void;
@@ -13,8 +13,10 @@ export default function Header({ onOpenRewards, hasClaimable, isConnected }: Hea
   return (
     <header className="flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] bg-[#1A1B35]/90 backdrop-blur-md sticky top-0 z-30 shadow-lg">
       <div className="flex items-center gap-2.5">
-        <span className="text-2xl animate-pulse">⚡</span>
-        <h1 className="text-2xl font-black tracking-tight bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
+        <div className="p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_12px_rgba(0,255,204,0.2)]">
+          <Zap className="w-5 h-5 animate-pulse" />
+        </div>
+        <h1 className="text-2xl font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
           Quick Quiz
         </h1>
       </div>
@@ -22,7 +24,7 @@ export default function Header({ onOpenRewards, hasClaimable, isConnected }: Hea
         {isConnected && onOpenRewards && (
           <button
             onClick={onOpenRewards}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#FFD166] font-semibold text-xs transition-all shadow-[0_0_15px_rgba(255,209,102,0.12)] hover:scale-105 cursor-pointer"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#FFD166] font-bold font-heading text-xs transition-all shadow-[0_0_15px_rgba(255,209,102,0.12)] hover:scale-105 cursor-pointer"
             aria-label="Rewards"
           >
             <Gift className="w-4 h-4 text-[#FFD166]" />

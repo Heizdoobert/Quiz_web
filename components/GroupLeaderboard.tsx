@@ -40,14 +40,14 @@ export default function GroupLeaderboard({
           className="flex items-center justify-between p-3 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#6C5CE7]/60 text-xs transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#6C5CE7]">#{entry.rank}</span>
+            <span className="font-heading font-bold text-[#6C5CE7]">#{entry.rank}</span>
             <span className="font-bold text-slate-200">
               {entry.display_name || entry.wallet_address.slice(0, 10)}
             </span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
-            <span className="font-black text-[#00FFCC]">{entry.score} pts</span>
+            <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
           </div>
         </div>
       ))}

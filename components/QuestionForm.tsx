@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { createQuestion } from '@/lib/actions/question-actions';
 import { ChevronDown, ChevronUp, Plus, Sparkles } from 'lucide-react';
 
@@ -54,7 +55,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
       if (!res.success) {
         setFeedback({ type: 'error', message: res.error || 'Failed to add question.' });
       } else {
-        setFeedback({ type: 'success', message: 'Question added successfully! 🎉' });
+        setFeedback({ type: 'success', message: 'Question added successfully!' });
         setPrompt('');
         setOptions(['', '', '', '']);
         setExplanation('');
@@ -85,12 +86,12 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
             <Plus className="w-5 h-5" />
           </span>
           <div>
-            <h3 className="font-extrabold text-white text-base">Add Custom Question</h3>
+            <h3 className="font-black font-heading text-white text-base">Add Custom Question</h3>
             <p className="text-xs text-slate-400">Contribute new trivia to the global database</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold px-3 py-1 bg-[#25284D] text-[#00FFCC] border border-[#3A3E70] rounded-full">
+          <span className="text-xs font-bold font-heading px-3 py-1 bg-[#25284D] text-[#00FFCC] border border-[#3A3E70] rounded-full">
             {isOpen ? 'Close' : 'Expand'}
           </span>
           {isOpen ? (
@@ -220,14 +221,17 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] hover:scale-105 transition-all cursor-pointer"
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black font-heading text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer"
             >
               <Sparkles className="w-4 h-4 text-[#0A1128]" />
               {loading ? 'Saving Question...' : 'Submit Question'}
-            </button>
+            </motion.button>
           </div>
         </form>
       )}

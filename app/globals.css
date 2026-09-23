@@ -19,6 +19,8 @@
 }
 
 @theme {
+  --font-heading: var(--font-orbitron), sans-serif;
+  --font-sans: var(--font-exo2), system-ui, sans-serif;
   --color-deep-space: #0A1128;
   --color-cyber-violet: #1A1B35;
   --color-cyber-violet-light: #25284D;
@@ -35,8 +37,13 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: inherit;
+  font-family: var(--font-exo2), system-ui, sans-serif;
   overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-orbitron), sans-serif;
+  letter-spacing: 0.02em;
 }
 
 /* 3D Flip Card Utilities */
@@ -73,4 +80,13 @@ body {
 }
 .gradient-victory {
   background: linear-gradient(135deg, #FFD166 0%, #FF4757 100%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

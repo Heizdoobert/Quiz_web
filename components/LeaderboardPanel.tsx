@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
 import GlobalLeaderboard from './GlobalLeaderboard';
 import GroupLeaderboard from './GroupLeaderboard';
-import { Shield } from 'lucide-react';
+import { Shield, Trophy, Users } from 'lucide-react';
 
 interface LeaderboardPanelProps {
   globalEntries: LeaderboardEntry[];
@@ -32,23 +32,23 @@ export default function LeaderboardPanel({
         <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('global')}
-            className={`text-xs font-black pb-1.5 border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer ${
               activeTab === 'global'
                 ? 'border-[#FFD166] text-[#FFD166] shadow-[0_4px_12px_rgba(255,209,102,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            🏆 Global Top
+            <Trophy className="w-3.5 h-3.5" /> Global Top
           </button>
           <button
             onClick={() => setActiveTab('group')}
-            className={`text-xs font-black pb-1.5 border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer ${
               activeTab === 'group'
                 ? 'border-[#6C5CE7] text-[#6C5CE7] shadow-[0_4px_12px_rgba(108,92,231,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
-            🛡️ Group Guild
+            <Users className="w-3.5 h-3.5" /> Group Guild
           </button>
         </div>
 

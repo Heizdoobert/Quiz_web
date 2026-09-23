@@ -7,7 +7,6 @@ import {
   ClaimableRewards,
   RewardVoucher,
   BADGE_NAMES,
-  BADGE_ICONS,
 } from '@/lib/types';
 import {
   getClaimableRewards,
@@ -18,7 +17,15 @@ import {
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
-import { Gift, Coins, Award, ExternalLink, Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Gift, Coins, Award, ExternalLink, Loader2, Trophy, Flame, Sparkles, Check, Lock, Target } from 'lucide-react';
+
+const BADGE_COMPONENTS: Record<number, React.ReactNode> = {
+  0: <Trophy className="w-8 h-8 text-[#FFD166] mx-auto" />,
+  1: <Flame className="w-8 h-8 text-[#FF4757] mx-auto" />,
+  2: <Award className="w-8 h-8 text-[#00FFCC] mx-auto" />,
+  3: <Sparkles className="w-8 h-8 text-[#6C5CE7] mx-auto" />,
+};
 
 interface RewardsModalProps {
   isOpen: boolean;
@@ -252,15 +259,15 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
           <div className="grid grid-cols-3 gap-3">
             <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
               <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Earned</p>
-              <p className="text-lg font-black text-[#00FFCC]">{formatTokens(rewards.totalEarned)}</p>
+              <p className="text-lg font-black text-[#00FFCC] font-heading">{formatTokens(rewards.totalEarned)}</p>
             </div>
             <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
               <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Claimed</p>
-              <p className="text-lg font-bold text-slate-300">{formatTokens(rewards.totalClaimed)}</p>
+              <p className="text-lg font-bold text-slate-300 font-heading">{formatTokens(rewards.totalClaimed)}</p>
             </div>
             <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
               <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Available</p>
-              <p className="text-lg font-black text-[#FFD166]">{formatTokens(rewards.claimableTokens)}</p>
+              <p className="text-lg font-black text-[#FFD166] font-heading">{formatTokens(rewards.claimableTokens)}</p>
             </div>
           </div>
 
@@ -270,7 +277,10 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
           {claimStep === 'done' && explorerUrl && mintingBadge === null ? (
             <div className="p-3 bg-[#00FFCC]/15 border border-[#00FFCC]/40 rounded-xl text-center">
-              <p className="text-[#00FFCC] font-bold mb-1">🎉 Tokens claimed successfully!</p>
+              <p className="text-[#00FFCC] font-bold mb-1 inline-flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#00FFCC]" /> Tokens claimed successfully!
+              </p>
+              <br />
               <a
                 href={explorerUrl}
                 target="_blank"
@@ -286,14 +296,18 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
             </div>
           ) : null}
 
-          <button
+          <motion.button
+            type="button"
             onClick={handleClaimTokens}
             disabled={
               isWrongChain ||
               BigInt(rewards.claimableTokens || '0') <= BigInt(0) ||
               (claimStep !== 'idle' && claimStep !== 'done' && claimStep !== 'error')
             }
-            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
+            whileHover={{ scale: 1.015 }}
+            whileTap={{ scale: 0.985 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading"
           >
             {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
@@ -305,7 +319,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
                 : claimStep === 'submitting'
                   ? 'Confirm in wallet...'
                   : 'Confirming on-chain...'}
-          </button>
+          </motion.button>
         </div>
       ) : (
         /* Badges Tab */
@@ -326,26 +340,36 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
                       : 'bg-[#0A1128]/50 border-[#2D305A]/50 opacity-60'
                 }`}
               >
-                <div className="text-3xl mb-2">{BADGE_ICONS[badgeType]}</div>
+                <div className="mb-2.5 flex justify-center">{BADGE_COMPONENTS[badgeType]}</div>
                 <p className="text-sm font-bold text-white mb-1">{BADGE_NAMES[badgeType]}</p>
                 <p className="text-xs text-slate-400 mb-3">
                   {isClaimed ? (
-                    <span className="text-[#00FFCC] font-semibold">✅ Claimed</span>
+                    <span className="text-[#00FFCC] font-semibold inline-flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" /> Claimed
+                    </span>
                   ) : isEligible ? (
-                    <span className="text-[#FFD166] font-semibold">🎯 Eligible</span>
+                    <span className="text-[#FFD166] font-semibold inline-flex items-center gap-1">
+                      <Target className="w-3.5 h-3.5" /> Eligible
+                    </span>
                   ) : (
-                    '🔒 Locked'
+                    <span className="text-slate-400 inline-flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5" /> Locked
+                    </span>
                   )}
                 </p>
                 {isEligible && !isClaimed && (
-                  <button
+                  <motion.button
+                    type="button"
                     onClick={() => handleMintBadge(badgeType)}
                     disabled={isWrongChain || isMinting}
-                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow"
+                    whileHover={{ scale: isMinting ? 1 : 1.02 }}
+                    whileTap={{ scale: isMinting ? 1 : 0.98 }}
+                    transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow font-heading"
                   >
                     {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-[#0A1128]" /> : null}
                     {isMinting ? 'Minting...' : 'Mint Badge'}
-                  </button>
+                  </motion.button>
                 )}
               </div>
             );
@@ -353,7 +377,10 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
           {claimStep === 'done' && explorerUrl && mintingBadge !== null && (
             <div className="col-span-2 p-3 bg-[#00FFCC]/15 border border-[#00FFCC]/40 rounded-xl text-center">
-              <p className="text-[#00FFCC] font-bold mb-1">🎉 Badge minted successfully!</p>
+              <p className="text-[#00FFCC] font-bold mb-1 inline-flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-[#00FFCC]" /> Badge minted successfully!
+              </p>
+              <br />
               <a
                 href={explorerUrl}
                 target="_blank"

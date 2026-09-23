@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { LeaderboardEntry } from '@/lib/types';
+import { Trophy, Medal } from 'lucide-react';
 
 interface GlobalLeaderboardProps {
   entries: LeaderboardEntry[];
@@ -24,9 +25,10 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
   return (
     <div className="space-y-2">
       {entries.map((entry) => {
-        const medal =
-          entry.rank === 1 ? '🥇' : entry.rank === 2 ? '🥈' : entry.rank === 3 ? '🥉' : `#${entry.rank}`;
         const isTop1 = entry.rank === 1;
+        const isTop2 = entry.rank === 2;
+        const isTop3 = entry.rank === 3;
+
         return (
           <div
             key={entry.wallet_address}
@@ -37,7 +39,17 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <span className="w-6 text-center font-bold text-slate-300">{medal}</span>
+              <span className="w-6 flex items-center justify-center font-heading font-bold text-slate-300">
+                {isTop1 ? (
+                  <Trophy className="w-4 h-4 text-[#FFD166]" />
+                ) : isTop2 ? (
+                  <Medal className="w-4 h-4 text-slate-300" />
+                ) : isTop3 ? (
+                  <Medal className="w-4 h-4 text-[#FF8A65]" />
+                ) : (
+                  <span className="text-[11px] text-slate-400">#{entry.rank}</span>
+                )}
+              </span>
               <div>
                 <span className={`font-bold ${isTop1 ? 'text-[#FFD166]' : 'text-slate-200'}`}>
                   {entry.display_name || entry.wallet_address.slice(0, 10)}
@@ -46,7 +58,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
             </div>
             <div className="flex items-center gap-3">
               <span className="text-slate-400 font-medium">{entry.accuracy}% acc</span>
-              <span className="font-extrabold text-[#00FFCC]">{entry.score} pts</span>
+              <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
             </div>
           </div>
         );

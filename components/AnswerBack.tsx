@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
 
@@ -44,8 +45,8 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
           <XCircle className="w-8 h-8 text-[#FF4757] shrink-0" />
         )}
         <div>
-          <h3 className="text-lg font-bold">
-            {result.isCorrect ? 'Correct! Well Done! 🎉' : 'Incorrect! Keep Going! 💪'}
+          <h3 className="text-lg font-bold font-heading tracking-wide">
+            {result.isCorrect ? 'Correct! Well Done!' : 'Incorrect! Keep Going!'}
           </h3>
           <p className="text-xs font-semibold opacity-90">
             {result.isCorrect ? '+1 Score point & tokens earned' : 'Streak reset to 0'}
@@ -56,17 +57,17 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
       {/* Answer & Explanation Box */}
       <div className="my-6 p-5 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] space-y-3">
         <div>
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+          <span className="text-xs font-bold font-heading text-slate-400 uppercase tracking-wider">
             Correct Answer:
           </span>
-          <p className="text-base font-bold text-[#00FFCC] mt-0.5">
+          <p className="text-base font-bold font-heading text-[#00FFCC] mt-0.5">
             {letters[result.correctIndex]}: {question.options[result.correctIndex]}
           </p>
         </div>
 
         {result.explanation && (
           <div className="pt-3 border-t border-[#1C1E3A]">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <span className="text-xs font-bold font-heading text-slate-400 uppercase tracking-wider">
               Explanation:
             </span>
             <p className="text-xs text-slate-300 mt-1 leading-relaxed">
@@ -78,14 +79,17 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
 
       {/* Next Button Footer */}
       <div className="pt-4 border-t border-[#2D305A] flex justify-end">
-        <button
+        <motion.button
           type="button"
           onClick={onNext}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black rounded-xl text-sm shadow-[0_0_20px_rgba(0,255,204,0.25)] hover:scale-105 transition-all cursor-pointer group"
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.96 }}
+          transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl text-sm shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer group"
         >
           <span>Next Question</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </button>
+        </motion.button>
       </div>
     </div>
   );

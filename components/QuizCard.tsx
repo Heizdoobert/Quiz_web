@@ -6,6 +6,8 @@ import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
 import AnswerBack from './AnswerBack';
 
+import { Rocket, PlusCircle } from 'lucide-react';
+
 interface QuizCardProps {
   question: ClientQuestion | null;
   isFlipped: boolean;
@@ -55,17 +57,17 @@ export default function QuizCard({
   if (!question) {
     return (
       <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 text-center">
-        <div className="text-5xl mb-4">🚀</div>
-        <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
+        <Rocket className="w-12 h-12 text-[#00FFCC] mb-4 animate-bounce" />
+        <h2 className="text-2xl font-bold font-heading text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-300 max-w-md mb-6">
           Be the first to contribute! Add your own custom questions to kick off the trivia session.
         </p>
         <button
           type="button"
           onClick={onAddQuestionClick}
-          className="px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer"
         >
-          ➕ Add First Question
+          <PlusCircle className="w-4 h-4" /> Add First Question
         </button>
       </div>
     );

@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
 import { Group } from '@/lib/types';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
+import { Shield, Users, UserPlus, Plus } from 'lucide-react';
 
 interface GroupModalProps {
   isOpen: boolean;
@@ -95,39 +97,45 @@ export default function GroupModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Groups & Guilds" icon="🛡️" maxWidth="max-w-lg">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Groups & Guilds"
+      icon={<Shield className="w-5 h-5 text-[#6C5CE7]" />}
+      maxWidth="max-w-lg"
+    >
       <div className="space-y-4">
         {/* Navigation Tabs */}
         <div className="flex border-b border-[#2D305A] gap-2">
           <button
             onClick={() => { setTab('my'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
               tab === 'my'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            My Groups ({groups.length})
+            <Users className="w-4 h-4" /> My Groups ({groups.length})
           </button>
           <button
             onClick={() => { setTab('create'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
               tab === 'create'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            Create Group
+            <Plus className="w-4 h-4" /> Create Group
           </button>
           <button
             onClick={() => { setTab('join'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
               tab === 'join'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
-            Join Group
+            <UserPlus className="w-4 h-4" /> Join Group
           </button>
         </div>
 
@@ -219,13 +227,16 @@ export default function GroupModal({
                 className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer"
+              whileHover={{ scale: loading ? 1 : 1.015 }}
+              whileTap={{ scale: loading ? 1 : 0.985 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading"
             >
               {loading ? 'Creating...' : 'Create Group'}
-            </button>
+            </motion.button>
           </form>
         )}
 
@@ -243,13 +254,16 @@ export default function GroupModal({
                 className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm font-mono focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
-            <button
+            <motion.button
               type="submit"
               disabled={loading}
-              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer"
+              whileHover={{ scale: loading ? 1 : 1.015 }}
+              whileTap={{ scale: loading ? 1 : 0.985 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading"
             >
               {loading ? 'Joining...' : 'Join Group'}
-            </button>
+            </motion.button>
           </form>
         )}
       </div>

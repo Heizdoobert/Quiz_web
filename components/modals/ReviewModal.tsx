@@ -1,7 +1,9 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
+import { BarChart3, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
 
 export interface HistoryItem {
   questionId: string;
@@ -24,30 +26,34 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
       isOpen={isOpen}
       onClose={onClose}
       title="Session Breakdown"
-      icon="📋"
+      icon={<BarChart3 className="w-5 h-5 text-[#6C5CE7]" />}
       maxWidth="max-w-lg"
       footer={
-        <button
+        <motion.button
+          type="button"
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ type: 'spring', stiffness: 450, damping: 25 }}
           onClick={onClose}
-          className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-all shadow-md cursor-pointer"
+          className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-all shadow-md cursor-pointer font-heading"
         >
-          Back to Quiz
-        </button>
+          <ArrowLeft className="w-4 h-4" /> Back to Quiz
+        </motion.button>
       }
     >
       <div className="space-y-4">
         <div className="flex justify-between items-center p-3.5 bg-[#0A1128]/70 rounded-xl border border-[#2D305A]">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Answered</span>
-            <p className="text-lg font-bold text-white">{history.length}</p>
+            <p className="text-lg font-bold text-white font-heading">{history.length}</p>
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Correct</span>
-            <p className="text-lg font-black text-[#00FFCC]">{correctCount}</p>
+            <p className="text-lg font-black text-[#00FFCC] font-heading">{correctCount}</p>
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Accuracy</span>
-            <p className="text-lg font-black text-[#6C5CE7]">{accuracy}%</p>
+            <p className="text-lg font-black text-[#6C5CE7] font-heading">{accuracy}%</p>
           </div>
         </div>
 
@@ -64,9 +70,13 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
                     : 'bg-[#FF4757]/10 border-[#FF4757]/30 text-slate-200'
                 }`}
               >
-                <span className="text-lg mt-0.5">{item.isCorrect ? '✅' : '❌'}</span>
+                {item.isCorrect ? (
+                  <CheckCircle2 className="w-5 h-5 text-[#00FFCC] shrink-0 mt-0.5" />
+                ) : (
+                  <XCircle className="w-5 h-5 text-[#FF4757] shrink-0 mt-0.5" />
+                )}
                 <div className="flex-1">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-heading ${
                     item.isCorrect ? 'text-[#00FFCC]' : 'text-[#FF4757]'
                   }`}>
                     Q{idx + 1} • {item.isCorrect ? 'Correct' : 'Missed'}
