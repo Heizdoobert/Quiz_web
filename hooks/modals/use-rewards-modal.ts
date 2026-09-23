@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useSwitchChain, useChainId } from 'wagmi';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSwitchChain, useChainId, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import {
@@ -31,13 +31,27 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const [claimError, setClaimError] = useState<string | null>(null);
   const [currentNonce, setCurrentNonce] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
+  const [eoaTxHash, setEoaTxHash] = useState<`0x${string}` | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [mintingBadge, setMintingBadge] = useState<number | null>(null);
+  const confirmingNonceRef = useRef<string | null>(null);
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
+
+  // EIP-5792 gasless calls
   const { writeContractsAsync } = useWriteContracts();
   const { data: capabilities } = useCapabilities();
+
+  // Traditional EOA calls
+  const { writeContractAsync } = useWriteContract();
+  const {
+    isSuccess: isEoaConfirmed,
+    isError: isEoaReceiptError,
+    error: eoaReceiptError,
+  } = useWaitForTransactionReceipt({
+    hash: eoaTxHash ?? undefined,
+  });
 
   const {
     data: callsStatus,
@@ -90,12 +104,14 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
       setClaimStep('idle');
       setClaimError(null);
       setCallId(null);
+      setEoaTxHash(null);
       setTxHash(null);
       setMintingBadge(null);
+      confirmingNonceRef.current = null;
     }
   }, [isOpen, walletAddress, loadRewards]);
 
-  // Handle failed or reverted call bundle
+  // Handle failed or reverted call bundle (EIP-5792)
   useEffect(() => {
     if (callsStatus?.status === 'failure' || isCallsStatusError) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -107,38 +123,69 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     }
   }, [callsStatus?.status, isCallsStatusError, callsStatusError]);
 
-  // Confirm on-chain after calls bundle is mined
+  // Handle reverted EOA transactions
+  useEffect(() => {
+    if (isEoaReceiptError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setClaimStep('error');
+      setClaimError(eoaReceiptError?.message || 'Transaction reverted on-chain');
+      setMintingBadge(null);
+      setCurrentNonce(null);
+      setEoaTxHash(null);
+    }
+  }, [isEoaReceiptError, eoaReceiptError]);
+
+  // Shared claim confirmation handler
+  const confirmClaim = useCallback(
+    async (nonce: string, txHashString: string) => {
+      if (!walletAddress) return;
+      try {
+        const res = await confirmRewardClaim(walletAddress, nonce, txHashString);
+        if (res?.success) {
+          setTxHash(txHashString);
+          setClaimStep('done');
+          loadRewards();
+        } else {
+          setClaimStep('error');
+          setClaimError('Failed to confirm reward claim with backend');
+          setMintingBadge(null);
+        }
+      } catch (err) {
+        console.error('Claim confirmation failed:', err);
+        setClaimStep('error');
+        setClaimError('Failed to confirm reward claim');
+        setMintingBadge(null);
+      } finally {
+        setCurrentNonce(null);
+        setCallId(null);
+        setEoaTxHash(null);
+      }
+    },
+    [walletAddress, loadRewards]
+  );
+
+  // Confirm on-chain after calls bundle is mined (EIP-5792 gasless path)
   useEffect(() => {
     if (callsStatus?.status === 'success' && currentNonce && walletAddress && callId) {
       const receiptHash = callsStatus.receipts?.[0]?.transactionHash;
-      const finalHash = receiptHash || (callId.startsWith('0x') ? callId : null);
+      if (!receiptHash) return;
 
-      confirmRewardClaim(walletAddress, currentNonce, finalHash || callId)
-        .then((res) => {
-          if (res?.success) {
-            if (finalHash) {
-              setTxHash(finalHash);
-            }
-            setClaimStep('done');
-            loadRewards(); // Refresh
-          } else {
-            setClaimStep('error');
-            setClaimError('Failed to confirm reward claim with backend');
-            setMintingBadge(null);
-          }
-          setCurrentNonce(null);
-          setCallId(null);
-        })
-        .catch((err) => {
-          console.error('Claim confirmation failed:', err);
-          setClaimStep('error');
-          setClaimError('Failed to confirm reward claim');
-          setMintingBadge(null);
-          setCurrentNonce(null);
-          setCallId(null);
-        });
+      if (confirmingNonceRef.current === currentNonce) return;
+      confirmingNonceRef.current = currentNonce;
+
+      confirmClaim(currentNonce, receiptHash);
     }
-  }, [callsStatus, currentNonce, walletAddress, callId, loadRewards]);
+  }, [callsStatus, currentNonce, walletAddress, callId, confirmClaim]);
+
+  // Confirm on-chain after transaction is mined (EOA standard path)
+  useEffect(() => {
+    if (isEoaConfirmed && currentNonce && walletAddress && eoaTxHash) {
+      if (confirmingNonceRef.current === currentNonce) return;
+      confirmingNonceRef.current = currentNonce;
+
+      confirmClaim(currentNonce, eoaTxHash);
+    }
+  }, [isEoaConfirmed, currentNonce, walletAddress, eoaTxHash, confirmClaim]);
 
   const isWrongChain = Boolean(walletAddress) && chainId !== TARGET_CHAIN_ID;
 
@@ -148,7 +195,9 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     if (!walletAddress || isWrongChain) return;
     setTxHash(null);
     setCallId(null);
+    setEoaTxHash(null);
     setCurrentNonce(null);
+    confirmingNonceRef.current = null;
     setClaimStep('signing');
     setClaimError(null);
 
@@ -163,24 +212,40 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('submitting');
 
     try {
-      const result = await writeContractsAsync({
-        contracts: [
-          {
-            address: QUIZ_TOKEN_ADDRESS,
-            abi: QuizTokenABI,
-            functionName: 'claimTokens',
-            args: [
-              voucher.recipient as `0x${string}`,
-              BigInt(voucher.amount),
-              BigInt(voucher.nonce),
-              BigInt(voucher.deadline),
-              voucher.signature as `0x${string}`,
-            ],
-          },
-        ],
-        capabilities: capabilitiesConfig,
-      });
-      setCallId(result.id);
+      if (isGasless) {
+        const result = await writeContractsAsync({
+          contracts: [
+            {
+              address: QUIZ_TOKEN_ADDRESS,
+              abi: QuizTokenABI,
+              functionName: 'claimTokens',
+              args: [
+                voucher.recipient as `0x${string}`,
+                BigInt(voucher.amount),
+                BigInt(voucher.nonce),
+                BigInt(voucher.deadline),
+                voucher.signature as `0x${string}`,
+              ],
+            },
+          ],
+          capabilities: capabilitiesConfig,
+        });
+        setCallId(result.id);
+      } else {
+        const hash = await writeContractAsync({
+          address: QUIZ_TOKEN_ADDRESS,
+          abi: QuizTokenABI,
+          functionName: 'claimTokens',
+          args: [
+            voucher.recipient as `0x${string}`,
+            BigInt(voucher.amount),
+            BigInt(voucher.nonce),
+            BigInt(voucher.deadline),
+            voucher.signature as `0x${string}`,
+          ],
+        });
+        setEoaTxHash(hash);
+      }
       setClaimStep('confirming');
     } catch (err) {
       console.error('Claim tx failed:', err);
@@ -194,7 +259,9 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     if (!walletAddress || isWrongChain) return;
     setTxHash(null);
     setCallId(null);
+    setEoaTxHash(null);
     setCurrentNonce(null);
+    confirmingNonceRef.current = null;
     setMintingBadge(badgeType);
     setClaimStep('signing');
     setClaimError(null);
@@ -211,24 +278,40 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('submitting');
 
     try {
-      const result = await writeContractsAsync({
-        contracts: [
-          {
-            address: QUIZ_BADGE_ADDRESS,
-            abi: QuizBadgeNFTABI,
-            functionName: 'mintBadge',
-            args: [
-              voucher.recipient as `0x${string}`,
-              BigInt(voucher.badgeType ?? 0),
-              BigInt(voucher.nonce),
-              BigInt(voucher.deadline),
-              voucher.signature as `0x${string}`,
-            ],
-          },
-        ],
-        capabilities: capabilitiesConfig,
-      });
-      setCallId(result.id);
+      if (isGasless) {
+        const result = await writeContractsAsync({
+          contracts: [
+            {
+              address: QUIZ_BADGE_ADDRESS,
+              abi: QuizBadgeNFTABI,
+              functionName: 'mintBadge',
+              args: [
+                voucher.recipient as `0x${string}`,
+                BigInt(voucher.badgeType ?? 0),
+                BigInt(voucher.nonce),
+                BigInt(voucher.deadline),
+                voucher.signature as `0x${string}`,
+              ],
+            },
+          ],
+          capabilities: capabilitiesConfig,
+        });
+        setCallId(result.id);
+      } else {
+        const hash = await writeContractAsync({
+          address: QUIZ_BADGE_ADDRESS,
+          abi: QuizBadgeNFTABI,
+          functionName: 'mintBadge',
+          args: [
+            voucher.recipient as `0x${string}`,
+            BigInt(voucher.badgeType ?? 0),
+            BigInt(voucher.nonce),
+            BigInt(voucher.deadline),
+            voucher.signature as `0x${string}`,
+          ],
+        });
+        setEoaTxHash(hash);
+      }
       setClaimStep('confirming');
     } catch (err) {
       console.error('Badge mint tx failed:', err);
@@ -244,9 +327,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     return (wei / (BigInt(10) ** BigInt(18))).toString();
   };
 
-  const receiptTxHash = callsStatus?.receipts?.[0]?.transactionHash;
-  const resolvedTxHash = txHash || receiptTxHash || (callId?.startsWith('0x') ? callId : null);
-  const explorerUrl = resolvedTxHash ? `https://sepolia.basescan.org/tx/${resolvedTxHash}` : null;
+  const explorerUrl = txHash ? `https://sepolia.basescan.org/tx/${txHash}` : null;
 
   return {
     tab,
