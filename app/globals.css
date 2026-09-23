@@ -16,6 +16,7 @@
   --color-cat-defi: #8A2BE2;
   --color-cat-nft: #FF007F;
   --color-cat-l1: #3071FF;
+  --color-elevation-2: #14163A;
 }
 
 @theme {
@@ -32,6 +33,7 @@
   --color-cat-defi: #8A2BE2;
   --color-cat-nft: #FF007F;
   --color-cat-l1: #3071FF;
+  --color-elevation-2: #14163A;
 }
 
 body {
@@ -61,25 +63,41 @@ h1, h2, h3, h4, .font-heading {
   transform: rotateY(180deg);
 }
 
-/* Eye-comfort Soft Glows & Gradients */
-.glow-mint {
-  box-shadow: 0 0 25px rgba(0, 255, 204, 0.18);
-}
-.glow-indigo {
-  box-shadow: 0 0 25px rgba(108, 92, 231, 0.22);
-}
-.glow-gold {
-  box-shadow: 0 0 25px rgba(255, 209, 102, 0.2);
-}
-.glow-coral {
-  box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);
+/* Glassmorphism surfaces (Neo-Crypto Glassmorphism redesign) */
+.glass {
+  background: rgba(20, 22, 58, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.gradient-claim {
-  background: linear-gradient(135deg, #00FFCC 0%, #6C5CE7 100%);
+.glass-border {
+  position: relative;
 }
-.gradient-victory {
-  background: linear-gradient(135deg, #FFD166 0%, #FF4757 100%);
+.glass-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(0, 255, 204, 0.4), rgba(108, 92, 231, 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.glass-edge {
+  position: relative;
+}
+.glass-edge::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 8%;
+  right: 8%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  pointer-events: none;
 }
 
 @keyframes shimmer {
