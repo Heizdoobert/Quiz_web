@@ -46,9 +46,9 @@ export default function DisputeModal({
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <h5 className="font-black text-base text-slate-100">
+            <h4 className="font-black text-base text-slate-100 !font-sans">
               Dispute Recorded
-            </h5>
+            </h4>
             <p className="text-xs text-slate-400 mt-2 leading-relaxed">
               Thank you for protecting the integrity of our Crypto Learn-to-Earn ecosystem.
             </p>

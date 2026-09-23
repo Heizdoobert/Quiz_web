@@ -150,9 +150,9 @@ export default function ProfileModal({
         {/* NFT Trophy Case */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h5 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
+            <h4 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5 !font-sans">
               <Award className="w-4 h-4 text-[#FFD166]" /> NFT Achievement Badges
-            </h5>
+            </h4>
             <span className="text-[11px] text-slate-400 font-mono">
               {(claimableRewards?.alreadyClaimedBadges?.length || 0)} / 4 Minted
             </span>

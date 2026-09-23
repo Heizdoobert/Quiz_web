@@ -66,7 +66,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
             <span className="text-xs font-bold px-2.5 py-1 bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30 rounded-full font-heading">
               Step 1 of 3
             </span>
-            <h5 className="text-lg font-bold text-white">Create Your Questions</h5>
+            <h3 className="text-lg font-bold text-white !font-sans">Create Your Questions</h3>
             <p className="text-sm text-slate-300">
               Click <strong className="text-[#00FFCC]">&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
             </p>
@@ -83,7 +83,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
             <span className="text-xs font-bold px-2.5 py-1 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/40 rounded-full font-heading">
               Step 2 of 3
             </span>
-            <h5 className="text-lg font-bold text-white">Build Your Trivia Pool</h5>
+            <h3 className="text-lg font-bold text-white !font-sans">Build Your Trivia Pool</h3>
             <p className="text-sm text-slate-300">
               Every question you add is stored securely in Supabase. Your questions become playable by everyone in the community!
             </p>
@@ -100,7 +100,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
             <span className="text-xs font-bold px-2.5 py-1 bg-[#FFD166]/20 text-[#FFD166] border border-[#FFD166]/40 rounded-full font-heading">
               Step 3 of 3
             </span>
-            <h5 className="text-lg font-bold text-white">Play & Climb Ranks</h5>
+            <h3 className="text-lg font-bold text-white !font-sans">Play & Climb Ranks</h3>
             <p className="text-sm text-slate-300">
               Use keys <strong className="text-[#00FFCC]">1–4</strong> or <strong className="text-[#00FFCC]">A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
             </p>

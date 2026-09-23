@@ -113,7 +113,7 @@ export default function GroupModal({
                     className="p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
                   >
                     <div>
-                      <h5 className="font-bold text-white text-sm">{g.name}</h5>
+                      <h4 className="font-bold text-white text-sm !font-sans">{g.name}</h4>
                       {g.description && (
                         <p className="text-xs text-slate-400 line-clamp-1">{g.description}</p>
                       )}
