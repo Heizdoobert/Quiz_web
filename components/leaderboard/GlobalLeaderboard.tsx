@@ -49,7 +49,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
               transition={{ delay: index * 0.04 }}
               className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
                 isTopThree
-                  ? 'glass-border border-transparent bg-gradient-to-br from-[--color-crypto-gold]/20 to-[--color-pop-coral]/20'
+                  ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
                   : index % 2 === 0
                     ? 'bg-[color:var(--color-deep-space)] border-[#2D305A] hover:border-[#6C5CE7]/60'
                     : 'bg-[color:var(--color-elevation-2)] border-[#2D305A] hover:border-[#6C5CE7]/60'

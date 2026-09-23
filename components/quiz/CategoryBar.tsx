@@ -56,6 +56,8 @@ export default function CategoryBar({
     >
       {CATEGORIES.map((cat) => {
         const isSelected = selectedCategory === cat.id;
+        const isSelectedMint = isSelected && cat.bgClass === 'bg-neo-mint';
+        const selectedTextClass = isSelectedMint ? 'text-deep-space' : 'text-white';
         const Icon = cat.icon;
 
         return (
@@ -67,12 +69,12 @@ export default function CategoryBar({
             onClick={() => onSelectCategory(cat.id)}
             className={`glass-border flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-bold font-heading whitespace-nowrap transition-all duration-200 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
               isSelected
-                ? `${cat.bgClass} text-white scale-[1.02]`
+                ? `${cat.bgClass} ${selectedTextClass} scale-[1.02]`
                 : 'bg-[#1A1B35]/60 hover:bg-[#1A1B35] text-slate-400 hover:text-slate-200'
             }`}
           >
             <span
-              className={`flex items-center justify-center ${isSelected ? 'text-white' : 'text-slate-400'}`}
+              className={`flex items-center justify-center ${isSelected ? selectedTextClass : 'text-slate-400'}`}
             >
               <Icon className="w-3.5 h-3.5" />
             </span>

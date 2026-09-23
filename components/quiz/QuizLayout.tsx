@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { ClientQuestion, LeaderboardEntry } from '@/lib/types';
 import { useQuizLogic } from '@/hooks/quiz/use-quiz-logic';
 import Header from '../layout/Header';
@@ -89,12 +88,7 @@ export default function QuizLayout({
           {/* 3-Column Responsive Core App Grid */}
           <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Column: Stats & History Sidebar (3 cols) */}
-            <motion.div
-              className="lg:col-span-3 w-full order-2 lg:order-1"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0 * 0.04 }}
-            >
+            <div className="lg:col-span-3 w-full order-2 lg:order-1">
               <Sidebar
                 stats={stats}
                 history={history}
@@ -102,15 +96,10 @@ export default function QuizLayout({
                 claimableTokens={claimableRewards?.claimableTokens}
                 onOpenRewards={() => openModal('rewards')}
               />
-            </motion.div>
+            </div>
 
             {/* Center Column: Quiz Card & Custom Question Form (6 cols) */}
-            <motion.div
-              className="lg:col-span-6 w-full flex flex-col items-center order-1 lg:order-2 space-y-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1 * 0.04 }}
-            >
+            <div className="lg:col-span-6 w-full flex flex-col items-center order-1 lg:order-2 space-y-4">
               <CategoryBar
                 selectedCategory={selectedCategory}
                 onSelectCategory={handleSelectCategory}
@@ -144,22 +133,17 @@ export default function QuizLayout({
                   onQuestionAdded={loadNextQuestion}
                 />
               </div>
-            </motion.div>
+            </div>
 
             {/* Right Column: Leaderboards (3 cols) */}
-            <motion.div
-              className="lg:col-span-3 w-full order-3"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 2 * 0.04 }}
-            >
+            <div className="lg:col-span-3 w-full order-3">
               <LeaderboardPanel
                 globalEntries={globalLeaderboard}
                 groupEntries={groupLeaderboard}
                 loading={leaderboardLoading}
                 onOpenGroupModal={() => openModal('group')}
               />
-            </motion.div>
+            </div>
           </div>
 
           {/* Bottom Banner Ad */}
