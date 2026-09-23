@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Modal from '../Modal';
+import { useProfileModal } from '@/hooks/use-profile-modal';
 import { UserStats, ClaimableRewards, BADGE_NAMES, BADGE_ICONS } from '@/lib/types';
 import {
   User,
@@ -41,27 +42,11 @@ export default function ProfileModal({
   claimableRewards,
   onOpenRewards,
 }: ProfileModalProps) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    if (!address) return;
-    navigator.clipboard.writeText(address);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  // Determine Player Rank Tier
-  const getPlayerTier = (totalAnswered: number, score: number) => {
-    if (totalAnswered >= 50 && score >= 40) return { title: 'Web3 Grandmaster', color: '#00FFCC' };
-    if (totalAnswered >= 25) return { title: 'DeFi Voyager', color: '#6C5CE7' };
-    if (totalAnswered >= 10) return { title: 'Crypto Cadet', color: '#FFD166' };
-    return { title: 'Novice Explorer', color: '#94A3B8' };
-  };
-
-  const tier = getPlayerTier(stats.totalAnswered, stats.score);
-  const formattedAddress = address
-    ? `${address.slice(0, 6)}...${address.slice(-4)}`
-    : 'Not Connected';
+  const { copied, handleCopy, tier, formattedAddress } = useProfileModal({
+    address,
+    totalAnswered: stats.totalAnswered,
+    score: stats.score,
+  });
 
   return (
     <Modal

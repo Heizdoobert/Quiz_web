@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useSyncExternalStore } from 'react';
+import React from 'react';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Gift, Zap, Volume2, VolumeX, User } from 'lucide-react';
-import { soundEngine } from '@/lib/audio';
+import { useSoundToggle } from '@/hooks/use-sound-toggle';
 
 interface HeaderProps {
   onOpenRewards?: () => void;
@@ -18,18 +18,7 @@ export default function Header({
   hasClaimable,
   isConnected,
 }: HeaderProps) {
-  const isMuted = useSyncExternalStore(
-    soundEngine.subscribe,
-    () => soundEngine.isMuted(),
-    () => false
-  );
-
-  const handleToggleSound = () => {
-    const nextMuted = soundEngine.toggleMute();
-    if (!nextMuted) {
-      soundEngine.playTick();
-    }
-  };
+  const { isMuted, handleToggleSound } = useSoundToggle();
 
   return (
     <header className="flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] bg-[#1A1B35]/90 backdrop-blur-md sticky top-0 z-30 shadow-lg">

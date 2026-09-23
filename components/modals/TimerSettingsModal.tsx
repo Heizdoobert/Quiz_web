@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
+import { useTimerSettingsModal } from '@/hooks/use-timer-settings-modal';
 import { Clock } from 'lucide-react';
 
 interface TimerSettingsModalProps {
@@ -20,30 +21,10 @@ export default function TimerSettingsModal({
   currentDuration,
   onSave,
 }: TimerSettingsModalProps) {
-  const [mode, setMode] = useState(currentMode);
-  const [duration, setDuration] = useState(currentDuration);
-  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
-
-  if (isOpen !== prevIsOpen) {
-    setPrevIsOpen(isOpen);
-    if (isOpen) {
-      setMode(currentMode);
-      setDuration(currentDuration);
-    }
-  }
+  const { mode, setMode, duration, setDuration, setValidatedDuration, handleCancel, handleSave } =
+    useTimerSettingsModal({ isOpen, currentMode, currentDuration, onSave, onClose });
 
   const presets = [15, 30, 60, 120];
-
-  const handleCancel = () => {
-    setMode(currentMode);
-    setDuration(currentDuration);
-    onClose();
-  };
-
-  const handleSave = () => {
-    onSave(mode, duration);
-    onClose();
-  };
 
   return (
     <Modal
@@ -116,7 +97,7 @@ export default function TimerSettingsModal({
               min="5"
               max="600"
               value={duration}
-              onChange={(e) => setDuration(Math.max(5, parseInt(e.target.value) || 30))}
+              onChange={(e) => setValidatedDuration(e.target.value)}
               className="w-full px-3.5 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
             />
           </div>
