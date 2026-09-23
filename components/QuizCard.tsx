@@ -46,7 +46,7 @@ export default function QuizCard({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
-        colors: ['#3b82f6', '#10b981', '#f59e0b', '#ec4899'],
+        colors: ['#00FFCC', '#6C5CE7', '#FFD166', '#FF4757'],
       });
     }
   }, [isFlipped, result]);
@@ -54,16 +54,16 @@ export default function QuizCard({
   // Empty state when no question is available
   if (!question) {
     return (
-      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl text-center">
+      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 text-center">
         <div className="text-5xl mb-4">🚀</div>
         <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
-        <p className="text-sm text-slate-400 max-w-md mb-6">
+        <p className="text-sm text-slate-300 max-w-md mb-6">
           Be the first to contribute! Add your own custom questions to kick off the trivia session.
         </p>
         <button
           type="button"
           onClick={onAddQuestionClick}
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl shadow-lg transition-all"
+          className="px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer"
         >
           ➕ Add First Question
         </button>

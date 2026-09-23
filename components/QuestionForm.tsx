@@ -71,26 +71,26 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
   };
 
   return (
-    <section className="w-full bg-slate-800/90 border border-slate-700/80 rounded-2xl shadow-xl overflow-hidden backdrop-blur-sm my-4">
+    <section className="w-full bg-[#1A1B35]/90 border border-[#2D305A] rounded-3xl shadow-xl overflow-hidden backdrop-blur-md my-4">
       {/* Header bar */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-controls="question-form-body"
-        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-slate-700/60 transition-colors"
+        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-[#25284D] transition-colors cursor-pointer"
       >
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+          <span className="p-2 rounded-xl bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30">
             <Plus className="w-5 h-5" />
           </span>
           <div>
-            <h3 className="font-bold text-white text-base">Add Custom Question</h3>
+            <h3 className="font-extrabold text-white text-base">Add Custom Question</h3>
             <p className="text-xs text-slate-400">Contribute new trivia to the global database</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-semibold px-2.5 py-1 bg-slate-700 text-slate-300 rounded-full">
+          <span className="text-xs font-bold px-3 py-1 bg-[#25284D] text-[#00FFCC] border border-[#3A3E70] rounded-full">
             {isOpen ? 'Close' : 'Expand'}
           </span>
           {isOpen ? (
@@ -106,14 +106,14 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
         <form
           id="question-form-body"
           onSubmit={handleSubmit}
-          className="p-6 pt-2 border-t border-slate-700/60 space-y-4"
+          className="p-6 pt-2 border-t border-[#2D305A] space-y-4"
         >
           {feedback && (
             <div
-              className={`p-3 rounded-lg text-xs font-medium ${
+              className={`p-3 rounded-xl text-xs font-bold ${
                 feedback.type === 'error'
-                  ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                  : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                  ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40'
+                  : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/40'
               }`}
             >
               {feedback.message}
@@ -122,8 +122,8 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
           {/* Prompt */}
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-              Question Prompt <span className="text-red-400">*</span>
+            <label className="block text-xs font-bold text-slate-300 mb-1.5">
+              Question Prompt <span className="text-[#FF4757]">*</span>
             </label>
             <input
               type="text"
@@ -132,15 +132,15 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="e.g. What does CSS stand for?"
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-500"
+              className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC] placeholder:text-slate-500"
             />
           </div>
 
           {/* Options with radio button for correct option */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-300">
-                Answer Options <span className="text-red-400">*</span>
+              <label className="text-xs font-bold text-slate-300">
+                Answer Options <span className="text-[#FF4757]">*</span>
               </label>
               <span className="text-[11px] text-slate-400">Radio button selects correct answer</span>
             </div>
@@ -148,10 +148,10 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
               {['A', 'B', 'C', 'D'].map((letter, idx) => (
                 <div
                   key={letter}
-                  className={`flex items-center gap-2 p-2 rounded-lg border transition-all ${
+                  className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all ${
                     correctIndex === idx
-                      ? 'bg-blue-950/40 border-blue-500'
-                      : 'bg-slate-900 border-slate-700 hover:border-slate-600'
+                      ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50 shadow-[0_0_12px_rgba(0,255,204,0.12)]'
+                      : 'bg-[#0A1128] border-[#2D305A] hover:border-[#6C5CE7]/50'
                   }`}
                 >
                   <label className="flex items-center gap-1.5 cursor-pointer">
@@ -160,9 +160,9 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                       name="correct-option"
                       checked={correctIndex === idx}
                       onChange={() => setCorrectIndex(idx)}
-                      className="w-4 h-4 text-blue-600 focus:ring-blue-500 bg-slate-800 border-slate-600 cursor-pointer"
+                      className="w-4 h-4 text-[#00FFCC] accent-[#00FFCC] bg-[#1A1B35] border-[#2D305A] cursor-pointer"
                     />
-                    <span className="font-bold text-xs px-1.5 py-0.5 rounded bg-slate-800 text-slate-300">
+                    <span className="font-black text-xs px-2 py-0.5 rounded-lg bg-[#1A1B35] text-slate-300">
                       {letter}
                     </span>
                   </label>
@@ -183,7 +183,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
           {/* Category & Explanation */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-slate-300 mb-1">
                 Category / Topic
               </label>
               <input
@@ -192,18 +192,19 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 placeholder="Web Dev, Crypto, General..."
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC]"
               />
               <datalist id="topics-list">
                 <option value="Web Dev" />
                 <option value="JavaScript" />
                 <option value="Crypto & Web3" />
-                <option value="Python" />
+                <option value="DeFi" />
+                <option value="NFT & Gaming" />
                 <option value="General" />
               </datalist>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">
+              <label className="block text-xs font-bold text-slate-300 mb-1">
                 Explanation (Optional)
               </label>
               <input
@@ -212,7 +213,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                 value={explanation}
                 onChange={(e) => setExplanation(e.target.value)}
                 placeholder="e.g. Cascading Style Sheets format web pages."
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3.5 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC]"
               />
             </div>
           </div>
@@ -222,9 +223,9 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
             <button
               type="submit"
               disabled={loading}
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg font-semibold text-xs shadow-md transition-all cursor-pointer"
+              className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] hover:scale-105 transition-all cursor-pointer"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 text-[#0A1128]" />
               {loading ? 'Saving Question...' : 'Submit Question'}
             </button>
           </div>

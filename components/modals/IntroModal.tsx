@@ -34,14 +34,14 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
           {step > 1 ? (
             <button
               onClick={handleBack}
-              className="px-4 py-2 text-sm font-medium rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
+              className="px-4 py-2 text-sm font-semibold rounded-xl bg-[#25284D] hover:bg-[#2D305A] text-slate-200 transition-colors cursor-pointer"
             >
               ← Back
             </button>
           ) : <div />}
           <button
             onClick={handleNext}
-            className="px-5 py-2 text-sm font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+            className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-all shadow-md cursor-pointer"
           >
             {step === 3 ? "Let's Go! 🚀" : 'Next Step →'}
           </button>
@@ -52,12 +52,12 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 1 && (
           <div className="text-center py-2 space-y-3">
             <div className="text-4xl mb-2">✍️</div>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-blue-500/20 text-blue-400 rounded-full">
+            <span className="text-xs font-bold px-2.5 py-1 bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30 rounded-full">
               Step 1 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Create Your Questions</h3>
             <p className="text-sm text-slate-300">
-              Click <strong>&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
+              Click <strong className="text-[#00FFCC]">&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
             </p>
           </div>
         )}
@@ -65,7 +65,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 2 && (
           <div className="text-center py-2 space-y-3">
             <div className="text-4xl mb-2">📦</div>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-purple-500/20 text-purple-400 rounded-full">
+            <span className="text-xs font-bold px-2.5 py-1 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/40 rounded-full">
               Step 2 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Build Your Trivia Pool</h3>
@@ -78,12 +78,12 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 3 && (
           <div className="text-center py-2 space-y-3">
             <div className="text-4xl mb-2">🎯</div>
-            <span className="text-xs font-semibold px-2.5 py-1 bg-emerald-500/20 text-emerald-400 rounded-full">
+            <span className="text-xs font-bold px-2.5 py-1 bg-[#FFD166]/20 text-[#FFD166] border border-[#FFD166]/40 rounded-full">
               Step 3 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Play & Climb Ranks</h3>
             <p className="text-sm text-slate-300">
-              Use keys <strong>1–4</strong> or <strong>A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
+              Use keys <strong className="text-[#00FFCC]">1–4</strong> or <strong className="text-[#00FFCC]">A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
             </p>
           </div>
         )}
@@ -94,8 +94,8 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
             <button
               key={s}
               onClick={() => setStep(s)}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
-                step === s ? 'bg-blue-500 w-6' : 'bg-slate-600 hover:bg-slate-500'
+              className={`h-2.5 rounded-full transition-all ${
+                step === s ? 'bg-[#00FFCC] w-6' : 'bg-[#2D305A] hover:bg-[#6C5CE7] w-2.5'
               }`}
               aria-label={`Step ${s}`}
             />

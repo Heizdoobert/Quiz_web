@@ -200,14 +200,14 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
     : null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rewards" icon={<Gift className="w-5 h-5 text-amber-400" />} maxWidth="max-w-lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rewards & Badges" icon={<Gift className="w-5 h-5 text-[#FFD166]" />} maxWidth="max-w-lg">
       {/* Chain warning */}
       {isWrongChain && (
-        <div className="mb-4 p-3 bg-amber-900/30 border border-amber-700/50 rounded-lg text-amber-300 text-sm flex items-center justify-between">
-          <span>Switch to Base Sepolia to claim rewards</span>
+        <div className="mb-4 p-3 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-[#FF4757] text-sm flex items-center justify-between">
+          <span className="font-medium">Switch to Base Sepolia to claim rewards</span>
           <button
             onClick={() => switchChain({ chainId: TARGET_CHAIN_ID })}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-medium transition-colors"
+            className="px-3 py-1 bg-[#FF4757] hover:bg-[#FF4757]/90 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
           >
             Switch
           </button>
@@ -215,23 +215,23 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-4 bg-slate-900/50 rounded-lg p-1">
+      <div className="flex gap-1.5 mb-4 bg-[#0A1128]/80 border border-[#2D305A] rounded-xl p-1.5">
         <button
           onClick={() => setTab('tokens')}
-          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             tab === 'tokens'
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#6C5CE7] text-white shadow-md'
+              : 'text-slate-400 hover:text-[#00FFCC]'
           }`}
         >
           <Coins className="w-4 h-4" /> $QUIZ Tokens
         </button>
         <button
           onClick={() => setTab('badges')}
-          className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
             tab === 'badges'
-              ? 'bg-blue-600 text-white'
-              : 'text-slate-400 hover:text-white'
+              ? 'bg-[#6C5CE7] text-white shadow-md'
+              : 'text-slate-400 hover:text-[#00FFCC]'
           }`}
         >
           <Award className="w-4 h-4" /> Badges
@@ -240,7 +240,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#00FFCC] animate-spin" />
         </div>
       ) : !walletAddress ? (
         <p className="text-slate-400 text-center py-8">Connect your wallet to view rewards</p>
@@ -250,37 +250,39 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
         /* Tokens Tab */
         <div className="space-y-4">
           <div className="grid grid-cols-3 gap-3">
-            <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl text-center">
-              <p className="text-[10px] uppercase text-slate-400 font-semibold">Earned</p>
-              <p className="text-lg font-bold text-green-400">{formatTokens(rewards.totalEarned)}</p>
+            <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
+              <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Earned</p>
+              <p className="text-lg font-black text-[#00FFCC]">{formatTokens(rewards.totalEarned)}</p>
             </div>
-            <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl text-center">
-              <p className="text-[10px] uppercase text-slate-400 font-semibold">Claimed</p>
+            <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
+              <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Claimed</p>
               <p className="text-lg font-bold text-slate-300">{formatTokens(rewards.totalClaimed)}</p>
             </div>
-            <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl text-center">
-              <p className="text-[10px] uppercase text-slate-400 font-semibold">Available</p>
-              <p className="text-lg font-bold text-amber-400">{formatTokens(rewards.claimableTokens)}</p>
+            <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
+              <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Available</p>
+              <p className="text-lg font-black text-[#FFD166]">{formatTokens(rewards.claimableTokens)}</p>
             </div>
           </div>
 
-          <p className="text-xs text-slate-500 text-center">Earn 10 $QUIZ for every correct answer</p>
+          <p className="text-xs text-slate-400 text-center">
+            Earn <span className="text-[#00FFCC] font-bold">10 $QUIZ</span> for every correct answer
+          </p>
 
           {claimStep === 'done' && explorerUrl && mintingBadge === null ? (
-            <div className="p-3 bg-green-900/30 border border-green-700/50 rounded-lg text-center">
-              <p className="text-green-400 font-medium mb-1">🎉 Tokens claimed!</p>
+            <div className="p-3 bg-[#00FFCC]/15 border border-[#00FFCC]/40 rounded-xl text-center">
+              <p className="text-[#00FFCC] font-bold mb-1">🎉 Tokens claimed successfully!</p>
               <a
                 href={explorerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 text-xs inline-flex items-center gap-1"
+                className="text-[#FFD166] hover:underline text-xs inline-flex items-center gap-1 font-semibold"
               >
                 View on BaseScan <ExternalLink className="w-3 h-3" />
               </a>
             </div>
           ) : claimStep === 'error' ? (
-            <div className="p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-center">
-              <p className="text-red-400 text-sm">{claimError}</p>
+            <div className="p-3 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-center">
+              <p className="text-[#FF4757] text-sm font-medium">{claimError}</p>
             </div>
           ) : null}
 
@@ -291,11 +293,11 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
               BigInt(rewards.claimableTokens || '0') <= BigInt(0) ||
               (claimStep !== 'idle' && claimStep !== 'done' && claimStep !== 'error')
             }
-            className="w-full py-3 bg-blue-600 hover:bg-blue-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-semibold rounded-xl transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed"
           >
-            {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin" />}
-            {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin" />}
-            {claimStep === 'confirming' && <Loader2 className="w-4 h-4 animate-spin" />}
+            {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+            {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+            {claimStep === 'confirming' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'idle' || claimStep === 'done' || claimStep === 'error'
               ? `Claim ${formatTokens(rewards.claimableTokens)} $QUIZ`
               : claimStep === 'signing'
@@ -316,26 +318,32 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
             return (
               <div
                 key={badgeType}
-                className={`p-4 rounded-xl border text-center ${
+                className={`p-4 rounded-xl border text-center transition-all ${
                   isClaimed
-                    ? 'bg-green-900/20 border-green-700/50'
+                    ? 'bg-[#00FFCC]/10 border-[#00FFCC]/40'
                     : isEligible
-                      ? 'bg-amber-900/20 border-amber-700/50'
-                      : 'bg-slate-900/50 border-slate-700/50 opacity-60'
+                      ? 'bg-[#FFD166]/10 border-[#FFD166]/40 shadow-sm shadow-[#FFD166]/10'
+                      : 'bg-[#0A1128]/50 border-[#2D305A]/50 opacity-60'
                 }`}
               >
                 <div className="text-3xl mb-2">{BADGE_ICONS[badgeType]}</div>
-                <p className="text-sm font-medium text-white mb-1">{BADGE_NAMES[badgeType]}</p>
+                <p className="text-sm font-bold text-white mb-1">{BADGE_NAMES[badgeType]}</p>
                 <p className="text-xs text-slate-400 mb-3">
-                  {isClaimed ? '✅ Claimed' : isEligible ? '🎯 Eligible' : '🔒 Locked'}
+                  {isClaimed ? (
+                    <span className="text-[#00FFCC] font-semibold">✅ Claimed</span>
+                  ) : isEligible ? (
+                    <span className="text-[#FFD166] font-semibold">🎯 Eligible</span>
+                  ) : (
+                    '🔒 Locked'
+                  )}
                 </p>
                 {isEligible && !isClaimed && (
                   <button
                     onClick={() => handleMintBadge(badgeType)}
                     disabled={isWrongChain || isMinting}
-                    className="w-full py-1.5 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center justify-center gap-1"
+                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow"
                   >
-                    {isMinting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                    {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-[#0A1128]" /> : null}
                     {isMinting ? 'Minting...' : 'Mint Badge'}
                   </button>
                 )}
@@ -344,13 +352,13 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
           })}
 
           {claimStep === 'done' && explorerUrl && mintingBadge !== null && (
-            <div className="col-span-2 p-3 bg-green-900/30 border border-green-700/50 rounded-lg text-center">
-              <p className="text-green-400 font-medium mb-1">🎉 Badge minted!</p>
+            <div className="col-span-2 p-3 bg-[#00FFCC]/15 border border-[#00FFCC]/40 rounded-xl text-center">
+              <p className="text-[#00FFCC] font-bold mb-1">🎉 Badge minted successfully!</p>
               <a
                 href={explorerUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 text-xs inline-flex items-center gap-1"
+                className="text-[#FFD166] hover:underline text-xs inline-flex items-center gap-1 font-semibold"
               >
                 View on BaseScan <ExternalLink className="w-3 h-3" />
               </a>
@@ -358,8 +366,8 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
           )}
 
           {claimStep === 'error' && mintingBadge !== null && (
-            <div className="col-span-2 p-3 bg-red-900/30 border border-red-700/50 rounded-lg text-center">
-              <p className="text-red-400 text-sm">{claimError}</p>
+            <div className="col-span-2 p-3 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-center">
+              <p className="text-[#FF4757] text-sm font-medium">{claimError}</p>
             </div>
           )}
         </div>

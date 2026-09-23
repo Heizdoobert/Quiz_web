@@ -24,7 +24,7 @@ export default function GroupLeaderboard({
         <p className="text-xs text-slate-400">No member activity recorded yet for this group.</p>
         <button
           onClick={onOpenGroupModal}
-          className="px-3 py-1.5 bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white rounded-lg text-xs font-semibold transition-colors"
+          className="px-3.5 py-1.5 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white border border-[#6C5CE7]/40 rounded-xl text-xs font-bold transition-all cursor-pointer"
         >
           Manage Groups
         </button>
@@ -33,21 +33,21 @@ export default function GroupLeaderboard({
   }
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       {entries.map((entry) => (
         <div
           key={entry.wallet_address}
-          className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs"
+          className="flex items-center justify-between p-3 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#6C5CE7]/60 text-xs transition-colors"
         >
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-400">#{entry.rank}</span>
-            <span className="font-semibold text-slate-200">
+            <span className="font-bold text-[#6C5CE7]">#{entry.rank}</span>
+            <span className="font-bold text-slate-200">
               {entry.display_name || entry.wallet_address.slice(0, 10)}
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-slate-400">{entry.accuracy}%</span>
-            <span className="font-bold text-purple-400">{entry.score} pts</span>
+            <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
+            <span className="font-black text-[#00FFCC]">{entry.score} pts</span>
           </div>
         </div>
       ))}

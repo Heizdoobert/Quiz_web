@@ -20,27 +20,27 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
     <div className="space-y-2.5">
       <div className="grid grid-cols-3 gap-2.5">
         {/* Total Score */}
-        <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl flex flex-col items-center justify-center text-center">
-          <Trophy className="w-4 h-4 text-amber-400 mb-1" />
-          <span className="text-[10px] uppercase font-semibold text-slate-400">Score</span>
-          <span className="text-lg font-bold text-white">{stats.score}</span>
-          <span className="text-[10px] text-slate-500">pts</span>
+        <div className="p-3 bg-[#0A1128]/80 border border-[#2D305A] rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#6C5CE7]/50 transition-colors">
+          <Trophy className="w-4 h-4 text-[#FFD166] mb-1" />
+          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</span>
+          <span className="text-lg font-black text-white">{stats.score}</span>
+          <span className="text-[10px] text-slate-500 font-medium">pts</span>
         </div>
 
         {/* Streak */}
-        <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl flex flex-col items-center justify-center text-center">
-          <Flame className="w-4 h-4 text-orange-500 mb-1" />
-          <span className="text-[10px] uppercase font-semibold text-slate-400">Streak</span>
-          <span className="text-lg font-bold text-orange-400">{stats.streak}</span>
-          <span className="text-[10px] text-slate-500">Best: {stats.bestStreak}</span>
+        <div className="p-3 bg-[#0A1128]/80 border border-[#2D305A] rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#FF4757]/50 transition-colors">
+          <Flame className="w-4 h-4 text-[#FF4757] mb-1" />
+          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Streak</span>
+          <span className="text-lg font-black text-[#FFD166]">{stats.streak}</span>
+          <span className="text-[10px] text-slate-500 font-medium">Best: {stats.bestStreak}</span>
         </div>
 
         {/* Accuracy */}
-        <div className="p-3 bg-slate-900/70 border border-slate-700/80 rounded-xl flex flex-col items-center justify-center text-center">
-          <Target className="w-4 h-4 text-blue-400 mb-1" />
-          <span className="text-[10px] uppercase font-semibold text-slate-400">Accuracy</span>
-          <span className="text-lg font-bold text-blue-400">{stats.accuracy}%</span>
-          <span className="text-[10px] text-slate-500">{stats.totalAnswered} total</span>
+        <div className="p-3 bg-[#0A1128]/80 border border-[#2D305A] rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#00FFCC]/50 transition-colors">
+          <Target className="w-4 h-4 text-[#00FFCC] mb-1" />
+          <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</span>
+          <span className="text-lg font-black text-[#00FFCC]">{stats.accuracy}%</span>
+          <span className="text-[10px] text-slate-500 font-medium">{stats.totalAnswered} total</span>
         </div>
       </div>
 
@@ -48,15 +48,19 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
       {onOpenRewards && (
         <button
           onClick={onOpenRewards}
-          className="w-full p-2.5 bg-slate-900/70 border border-slate-700/80 rounded-xl flex items-center justify-between hover:bg-slate-800/70 transition-colors"
+          className="w-full p-2.5 bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#00FFCC]/50 rounded-2xl flex items-center justify-between hover:bg-[#25284D] transition-all cursor-pointer group"
         >
           <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-slate-300">
-              {hasClaimable ? `${formattedClaimable} $QUIZ claimable` : 'No tokens to claim'}
+            <Coins className="w-4 h-4 text-[#FFD166] group-hover:rotate-12 transition-transform" />
+            <span className="text-xs font-semibold text-slate-300">
+              {hasClaimable ? (
+                <span className="text-[#00FFCC] font-bold">{formattedClaimable} $QUIZ claimable</span>
+              ) : (
+                'No tokens to claim'
+              )}
             </span>
           </div>
-          <span className="text-[10px] text-blue-400 font-medium">View Rewards →</span>
+          <span className="text-[10px] text-[#00FFCC] font-bold group-hover:underline">View Rewards →</span>
         </button>
       )}
     </div>

@@ -29,25 +29,25 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
       footer={
         <button
           onClick={onClose}
-          className="px-5 py-2 text-sm font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+          className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-all shadow-md cursor-pointer"
         >
           Back to Quiz
         </button>
       }
     >
       <div className="space-y-4">
-        <div className="flex justify-between items-center p-3 bg-slate-900/60 rounded-xl border border-slate-700/60">
+        <div className="flex justify-between items-center p-3.5 bg-[#0A1128]/70 rounded-xl border border-[#2D305A]">
           <div>
-            <span className="text-xs text-slate-400">Total Answered</span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Answered</span>
             <p className="text-lg font-bold text-white">{history.length}</p>
           </div>
           <div>
-            <span className="text-xs text-slate-400">Correct</span>
-            <p className="text-lg font-bold text-emerald-400">{correctCount}</p>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Correct</span>
+            <p className="text-lg font-black text-[#00FFCC]">{correctCount}</p>
           </div>
           <div>
-            <span className="text-xs text-slate-400">Accuracy</span>
-            <p className="text-lg font-bold text-blue-400">{accuracy}%</p>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Accuracy</span>
+            <p className="text-lg font-black text-[#6C5CE7]">{accuracy}%</p>
           </div>
         </div>
 
@@ -58,18 +58,20 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
             history.map((item, idx) => (
               <div
                 key={`${item.questionId}-${idx}`}
-                className={`p-3 rounded-lg border flex items-start gap-3 ${
+                className={`p-3 rounded-xl border flex items-start gap-3 transition-colors ${
                   item.isCorrect
-                    ? 'bg-emerald-950/20 border-emerald-800/40 text-emerald-200'
-                    : 'bg-red-950/20 border-red-800/40 text-red-200'
+                    ? 'bg-[#00FFCC]/10 border-[#00FFCC]/30 text-slate-200'
+                    : 'bg-[#FF4757]/10 border-[#FF4757]/30 text-slate-200'
                 }`}
               >
                 <span className="text-lg mt-0.5">{item.isCorrect ? '✅' : '❌'}</span>
                 <div className="flex-1">
-                  <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                    Q{idx + 1}
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                    item.isCorrect ? 'text-[#00FFCC]' : 'text-[#FF4757]'
+                  }`}>
+                    Q{idx + 1} • {item.isCorrect ? 'Correct' : 'Missed'}
                   </span>
-                  <p className="text-xs font-medium text-slate-200 line-clamp-2">{item.prompt}</p>
+                  <p className="text-xs font-semibold text-white line-clamp-2 mt-0.5">{item.prompt}</p>
                 </div>
               </div>
             ))

@@ -98,33 +98,33 @@ export default function GroupModal({
     <Modal isOpen={isOpen} onClose={onClose} title="Groups & Guilds" icon="🛡️" maxWidth="max-w-lg">
       <div className="space-y-4">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-700 gap-2">
+        <div className="flex border-b border-[#2D305A] gap-2">
           <button
             onClick={() => { setTab('my'); setMessage(null); }}
-            className={`pb-2 px-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               tab === 'my'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             My Groups ({groups.length})
           </button>
           <button
             onClick={() => { setTab('create'); setMessage(null); }}
-            className={`pb-2 px-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               tab === 'create'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             Create Group
           </button>
           <button
             onClick={() => { setTab('join'); setMessage(null); }}
-            className={`pb-2 px-3 text-sm font-semibold border-b-2 transition-colors ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer ${
               tab === 'join'
-                ? 'border-blue-500 text-blue-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
             Join Group
@@ -134,10 +134,10 @@ export default function GroupModal({
         {/* Message Banner */}
         {message && (
           <div
-            className={`p-3 rounded-lg text-xs font-medium ${
+            className={`p-3 rounded-xl text-xs font-semibold ${
               message.type === 'error'
-                ? 'bg-red-500/20 text-red-300 border border-red-500/30'
-                : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/30'
+                : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30'
             }`}
           >
             {message.text}
@@ -158,10 +158,10 @@ export default function GroupModal({
                 {groups.map((g) => (
                   <div
                     key={g.id}
-                    className="p-3 bg-slate-900/60 rounded-xl border border-slate-700/60 flex items-center justify-between"
+                    className="p-3 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
                   >
                     <div>
-                      <h4 className="font-semibold text-white text-sm">{g.name}</h4>
+                      <h4 className="font-bold text-white text-sm">{g.name}</h4>
                       {g.description && (
                         <p className="text-xs text-slate-400 line-clamp-1">{g.description}</p>
                       )}
@@ -174,14 +174,14 @@ export default function GroupModal({
                             onSelectGroup(g.id);
                             onClose();
                           }}
-                          className="px-2.5 py-1 bg-blue-600/30 hover:bg-blue-600 text-blue-300 hover:text-white rounded text-xs font-medium transition-colors"
+                          className="px-2.5 py-1 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
                         >
                           View Board
                         </button>
                       )}
                       <button
                         onClick={() => handleLeave(g.id)}
-                        className="px-2.5 py-1 bg-red-600/20 hover:bg-red-600 text-red-300 hover:text-white rounded text-xs font-medium transition-colors"
+                        className="px-2.5 py-1 bg-[#FF4757]/15 hover:bg-[#FF4757] text-[#FF4757] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
                       >
                         Leave
                       </button>
@@ -197,7 +197,7 @@ export default function GroupModal({
         {tab === 'create' && (
           <form onSubmit={handleCreate} className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Group Name *</label>
+              <label className="block text-xs font-bold text-white mb-1">Group Name *</label>
               <input
                 type="text"
                 required
@@ -205,24 +205,24 @@ export default function GroupModal({
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="e.g. Web3 Titans"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Description (Optional)</label>
+              <label className="block text-xs font-bold text-white mb-1">Description (Optional)</label>
               <textarea
                 maxLength={200}
                 rows={2}
                 value={groupDesc}
                 onChange={(e) => setGroupDesc(e.target.value)}
                 placeholder="What is this guild about?"
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-lg font-semibold text-sm transition-colors"
+              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer"
             >
               {loading ? 'Creating...' : 'Create Group'}
             </button>
@@ -233,20 +233,20 @@ export default function GroupModal({
         {tab === 'join' && (
           <form onSubmit={handleJoin} className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1">Group ID (UUID) *</label>
+              <label className="block text-xs font-bold text-white mb-1">Group ID (UUID) *</label>
               <input
                 type="text"
                 required
                 value={joinId}
                 onChange={(e) => setJoinId(e.target.value)}
                 placeholder="Paste group UUID here..."
-                className="w-full px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm font-mono focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white rounded-lg font-semibold text-sm transition-colors"
+              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer"
             >
               {loading ? 'Joining...' : 'Join Group'}
             </button>

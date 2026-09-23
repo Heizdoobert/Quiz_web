@@ -25,18 +25,18 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <aside
-      className={`p-5 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xl backdrop-blur-sm space-y-5 ${className}`}
+      className={`p-5 rounded-3xl bg-[#1A1B35]/90 border border-[#2D305A] shadow-2xl backdrop-blur-md space-y-5 ${className}`}
       aria-label="Scoreboard and Stats"
     >
-      <h3 className="text-sm font-bold text-white flex items-center gap-2">
-        <span>📊</span> Live Scoreboard
+      <h3 className="text-sm font-extrabold text-white flex items-center gap-2 tracking-wide">
+        <span className="text-base">📊</span> Live Scoreboard
       </h3>
       <StatsPanel
         stats={stats}
         claimableTokens={claimableTokens}
         onOpenRewards={onOpenRewards}
       />
-      <div className="pt-2 border-t border-slate-700/60">
+      <div className="pt-3 border-t border-[#2D305A]">
         <HistoryList history={history} onOpenReview={onOpenReview} />
       </div>
     </aside>

@@ -14,8 +14,8 @@ export default function Error({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-6 text-center" role="alert">
-      <div className="max-w-md w-full p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl space-y-4">
+    <div className="min-h-screen bg-[#0A1128] text-white flex flex-col items-center justify-center p-6 text-center" role="alert">
+      <div className="max-w-md w-full p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 space-y-4">
         <div className="text-4xl">⚠️</div>
         <h2 className="text-xl font-bold text-white">Something Went Wrong</h2>
         <p className="text-xs text-slate-400">
@@ -26,14 +26,14 @@ export default function Error({ error, reset }: ErrorProps) {
           <button
             type="button"
             onClick={() => reset()}
-            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-xl transition-colors shadow-lg cursor-pointer"
+            className="px-5 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] text-xs font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 cursor-pointer"
           >
             Try Again
           </button>
           <button
             type="button"
             onClick={() => window.location.reload()}
-            className="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
+            className="px-5 py-2.5 bg-[#25284D] hover:bg-[#2D305A] text-slate-200 text-xs font-bold rounded-xl transition-colors cursor-pointer"
           >
             Reload App
           </button>

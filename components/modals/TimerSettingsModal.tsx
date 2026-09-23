@@ -53,13 +53,13 @@ export default function TimerSettingsModal({
         <>
           <button
             onClick={handleCancel}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors"
+            className="px-4 py-2 text-sm font-semibold rounded-xl bg-[#25284D] hover:bg-[#2D305A] text-slate-200 transition-colors cursor-pointer"
           >
             Cancel
           </button>
           <button
             onClick={handleSave}
-            className="px-5 py-2 text-sm font-semibold rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+            className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-all shadow-md cursor-pointer"
           >
             Save Settings
           </button>
@@ -68,11 +68,11 @@ export default function TimerSettingsModal({
     >
       <div className="space-y-5">
         <div>
-          <label className="block text-sm font-semibold text-slate-300 mb-2">Timer Mode</label>
+          <label className="block text-sm font-bold text-white mb-2">Timer Mode</label>
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as 'per-question' | 'total' | 'stopwatch')}
-            className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3.5 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
           >
             <option value="per-question">Per-Question Countdown</option>
             <option value="total">Total Quiz Countdown</option>
@@ -82,7 +82,7 @@ export default function TimerSettingsModal({
 
         {mode !== 'stopwatch' && (
           <div>
-            <label className="block text-sm font-semibold text-slate-300 mb-2">
+            <label className="block text-sm font-bold text-white mb-2">
               Time Limit (Seconds)
             </label>
             <div className="flex gap-2 mb-3">
@@ -91,10 +91,10 @@ export default function TimerSettingsModal({
                   key={p}
                   type="button"
                   onClick={() => setDuration(p)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold border transition-all cursor-pointer ${
                     duration === p
-                      ? 'bg-blue-600 border-blue-500 text-white shadow-sm'
-                      : 'bg-slate-900 border-slate-700 text-slate-300 hover:bg-slate-800'
+                      ? 'bg-[#6C5CE7] border-[#6C5CE7] text-white shadow-sm'
+                      : 'bg-[#0A1128] border-[#2D305A] text-slate-300 hover:bg-[#25284D] hover:border-[#6C5CE7]/50'
                   }`}
                 >
                   {p < 60 ? `${p}s` : `${p / 60}m`}
@@ -107,7 +107,7 @@ export default function TimerSettingsModal({
               max="600"
               value={duration}
               onChange={(e) => setDuration(Math.max(5, parseInt(e.target.value) || 30))}
-              className="w-full px-3.5 py-2.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3.5 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
             />
           </div>
         )}

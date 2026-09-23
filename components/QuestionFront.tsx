@@ -53,20 +53,34 @@ export default function QuestionFront({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isFlipped, isSubmitting, eliminatedIndices, onSelectAnswer]);
 
+function getCategoryBadge(cat: string) {
+  const lower = (cat || '').toLowerCase();
+  if (lower.includes('defi')) {
+    return 'bg-[#8A2BE2]/15 text-[#8A2BE2] border-[#8A2BE2]/40';
+  }
+  if (lower.includes('nft') || lower.includes('game')) {
+    return 'bg-[#FF007F]/15 text-[#FF007F] border-[#FF007F]/40';
+  }
+  if (lower.includes('layer') || lower.includes('web3') || lower.includes('crypto')) {
+    return 'bg-[#3071FF]/15 text-[#3071FF] border-[#3071FF]/40';
+  }
+  return 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/40';
+}
+
   return (
-    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl">
+    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl backdrop-blur-md">
       {/* Top Meta Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-slate-700/60">
-        <span className="px-3 py-1 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-full text-xs font-semibold tracking-wide uppercase">
+      <div className="flex items-center justify-between pb-4 border-b border-[#2D305A]">
+        <span className={`px-3 py-1 border rounded-full text-xs font-bold tracking-wide uppercase ${getCategoryBadge(question.category)}`}>
           {question.category || 'Trivia'}
         </span>
 
         {/* Timer Badge */}
-        <div className="flex items-center gap-1.5 px-3 py-1 bg-slate-900/80 border border-slate-700/80 rounded-full">
-          <Timer className="w-3.5 h-3.5 text-blue-400" />
+        <div className="flex items-center gap-1.5 px-3 py-1 bg-[#0A1128]/80 border border-[#2D305A] rounded-full shadow-inner">
+          <Timer className={`w-3.5 h-3.5 ${timeLeft <= 5 ? 'text-[#FF4757]' : 'text-[#6C5CE7]'}`} />
           <span
             className={`font-mono text-xs font-bold ${
-              timeLeft <= 5 ? 'text-red-400 animate-pulse' : 'text-slate-200'
+              timeLeft <= 5 ? 'text-[#FF4757] animate-pulse font-black' : 'text-slate-200'
             }`}
           >
             {Math.floor(timeLeft / 60)
@@ -77,7 +91,7 @@ export default function QuestionFront({
           <button
             type="button"
             onClick={onOpenTimerSettings}
-            className="text-slate-400 hover:text-white ml-1 transition-colors"
+            className="text-slate-400 hover:text-white ml-1 transition-colors cursor-pointer"
             title="Timer Settings"
             aria-label="Timer Settings"
           >
@@ -91,7 +105,7 @@ export default function QuestionFront({
             type="button"
             disabled={fiftyFiftyUsed || isSubmitting}
             onClick={onUse5050}
-            className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:hover:bg-slate-900/70 transition-all"
+            className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-[#2D305A] bg-[#0A1128]/80 hover:bg-[#25284D] hover:border-[#6C5CE7] hover:text-[#00FFCC] text-slate-300 disabled:opacity-30 disabled:hover:bg-[#0A1128]/80 transition-all cursor-pointer disabled:cursor-not-allowed"
             title="Eliminate 2 wrong options"
           >
             ✂️ 50:50
@@ -100,7 +114,7 @@ export default function QuestionFront({
             type="button"
             disabled={skipUsed || isSubmitting}
             onClick={onUseSkip}
-            className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-700 text-slate-300 disabled:opacity-40 disabled:hover:bg-slate-900/70 transition-all"
+            className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-[#2D305A] bg-[#0A1128]/80 hover:bg-[#25284D] hover:border-[#6C5CE7] hover:text-[#00FFCC] text-slate-300 disabled:opacity-30 disabled:hover:bg-[#0A1128]/80 transition-all cursor-pointer disabled:cursor-not-allowed"
             title="Skip this question"
           >
             ⏭️ Skip
@@ -110,13 +124,13 @@ export default function QuestionFront({
 
       {/* Question Heading */}
       <div className="my-6 text-center">
-        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white leading-relaxed">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white leading-relaxed tracking-wide">
           {question.prompt}
         </h2>
       </div>
 
       {/* Options Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-auto" role="group" aria-label="Answer options">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-auto" role="group" aria-label="Answer options">
         {question.options.map((opt, idx) => {
           const isEliminated = eliminatedIndices.includes(idx);
           const letter = ['A', 'B', 'C', 'D'][idx];
@@ -125,13 +139,13 @@ export default function QuestionFront({
               key={idx}
               disabled={isEliminated || isSubmitting}
               onClick={() => onSelectAnswer(idx)}
-              className={`flex items-center gap-3 p-4 rounded-xl border text-left transition-all group ${
+              className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-all group ${
                 isEliminated
-                  ? 'opacity-25 bg-slate-900 border-slate-800 cursor-not-allowed'
-                  : 'bg-slate-900/70 border-slate-700 hover:border-blue-500 hover:bg-slate-700/60 hover:shadow-md cursor-pointer'
+                  ? 'opacity-20 bg-[#0A1128] border-[#1C1E3A] cursor-not-allowed'
+                  : 'bg-[#131428]/80 border-[#2D305A] hover:border-[#00FFCC] hover:bg-[#222344] hover:shadow-[0_0_20px_rgba(0,255,204,0.14)] cursor-pointer'
               }`}
             >
-              <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-800 border border-slate-700 text-xs font-bold text-slate-300 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-500 transition-colors shrink-0">
+              <span className="w-8 h-8 flex items-center justify-center rounded-xl bg-[#1A1B35] border border-[#2D305A] text-xs font-black text-slate-300 group-hover:bg-[#00FFCC] group-hover:text-[#0A1128] group-hover:border-[#00FFCC] group-hover:shadow-[0_0_10px_#00FFCC] transition-all shrink-0">
                 {letter}
               </span>
               <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">

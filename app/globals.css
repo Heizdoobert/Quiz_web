@@ -3,21 +3,40 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #0f172a;
-  --foreground: #f8fafc;
+  --background: #0A1128;
+  --foreground: #F8FAFC;
+  --color-deep-space: #0A1128;
+  --color-cyber-violet: #1A1B35;
+  --color-cyber-violet-light: #25284D;
+  --color-cyber-border: #2D305A;
+  --color-neo-mint: #00FFCC;
+  --color-electric-indigo: #6C5CE7;
+  --color-crypto-gold: #FFD166;
+  --color-pop-coral: #FF4757;
+  --color-cat-defi: #8A2BE2;
+  --color-cat-nft: #FF007F;
+  --color-cat-l1: #3071FF;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --color-deep-space: #0A1128;
+  --color-cyber-violet: #1A1B35;
+  --color-cyber-violet-light: #25284D;
+  --color-cyber-border: #2D305A;
+  --color-neo-mint: #00FFCC;
+  --color-electric-indigo: #6C5CE7;
+  --color-crypto-gold: #FFD166;
+  --color-pop-coral: #FF4757;
+  --color-cat-defi: #8A2BE2;
+  --color-cat-nft: #FF007F;
+  --color-cat-l1: #3071FF;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: inherit;
+  overflow-x: hidden;
 }
 
 /* 3D Flip Card Utilities */
@@ -35,3 +54,23 @@ body {
   transform: rotateY(180deg);
 }
 
+/* Eye-comfort Soft Glows & Gradients */
+.glow-mint {
+  box-shadow: 0 0 25px rgba(0, 255, 204, 0.18);
+}
+.glow-indigo {
+  box-shadow: 0 0 25px rgba(108, 92, 231, 0.22);
+}
+.glow-gold {
+  box-shadow: 0 0 25px rgba(255, 209, 102, 0.2);
+}
+.glow-coral {
+  box-shadow: 0 0 25px rgba(255, 71, 87, 0.2);
+}
+
+.gradient-claim {
+  background: linear-gradient(135deg, #00FFCC 0%, #6C5CE7 100%);
+}
+.gradient-victory {
+  background: linear-gradient(135deg, #FFD166 0%, #FF4757 100%);
+}

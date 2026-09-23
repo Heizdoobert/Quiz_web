@@ -9,7 +9,7 @@ export default async function Home() {
   ]);
 
   return (
-    <main className="min-h-screen bg-slate-900 text-white flex flex-col">
+    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
       <QuizLayout
         initialQuestion={initialQuestion}
         initialLeaderboard={initialLeaderboard}

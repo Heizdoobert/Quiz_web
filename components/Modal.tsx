@@ -70,17 +70,17 @@ export default function Modal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2 }}
-            className={`relative w-full ${maxWidth} bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10 max-h-[90vh]`}
+            className={`relative w-full ${maxWidth} bg-[#1A1B35] border border-[#2D305A] rounded-2xl shadow-2xl shadow-black/60 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/60 bg-slate-900/40">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D305A] bg-[#0A1128]/70">
               <div className="flex items-center gap-2.5">
                 {icon && <span className="text-xl">{icon}</span>}
-                <h2 className="text-lg font-bold text-white">{title}</h2>
+                <h2 className="text-lg font-bold text-white tracking-wide">{title}</h2>
               </div>
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/60 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-[#00FFCC] hover:bg-[#25284D] transition-colors"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -92,7 +92,7 @@ export default function Modal({
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-slate-700/60 bg-slate-900/40 flex justify-end gap-3">
+              <div className="px-6 py-4 border-t border-[#2D305A] bg-[#0A1128]/70 flex justify-end gap-3">
                 {footer}
               </div>
             )}

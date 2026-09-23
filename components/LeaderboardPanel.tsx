@@ -25,16 +25,16 @@ export default function LeaderboardPanel({
 
   return (
     <section
-      className={`p-5 rounded-2xl bg-slate-800/90 border border-slate-700/80 shadow-xl backdrop-blur-sm space-y-4 ${className}`}
+      className={`p-5 rounded-3xl bg-[#1A1B35]/90 border border-[#2D305A] shadow-2xl backdrop-blur-md space-y-4 ${className}`}
       aria-label="Leaderboards"
     >
-      <div className="flex items-center justify-between border-b border-slate-700 pb-3">
-        <div className="flex gap-2">
+      <div className="flex items-center justify-between border-b border-[#2D305A] pb-3">
+        <div className="flex gap-4">
           <button
             onClick={() => setActiveTab('global')}
-            className={`text-xs font-bold pb-1 border-b-2 transition-colors ${
+            className={`text-xs font-black pb-1.5 border-b-2 transition-all cursor-pointer ${
               activeTab === 'global'
-                ? 'border-blue-500 text-blue-400'
+                ? 'border-[#FFD166] text-[#FFD166] shadow-[0_4px_12px_rgba(255,209,102,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -42,9 +42,9 @@ export default function LeaderboardPanel({
           </button>
           <button
             onClick={() => setActiveTab('group')}
-            className={`text-xs font-bold pb-1 border-b-2 transition-colors ${
+            className={`text-xs font-black pb-1.5 border-b-2 transition-all cursor-pointer ${
               activeTab === 'group'
-                ? 'border-purple-500 text-purple-400'
+                ? 'border-[#6C5CE7] text-[#6C5CE7] shadow-[0_4px_12px_rgba(108,92,231,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
           >
@@ -55,7 +55,7 @@ export default function LeaderboardPanel({
         <button
           type="button"
           onClick={onOpenGroupModal}
-          className="p-1.5 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+          className="p-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#00FFCC] hover:text-white transition-all cursor-pointer shadow-sm"
           title="Create or Join Groups"
         >
           <Shield className="w-3.5 h-3.5" />

@@ -29,43 +29,43 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
   }, [onNext]);
 
   return (
-    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl">
+    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl backdrop-blur-md">
       {/* Top Banner */}
       <div
-        className={`flex items-center gap-3 p-4 rounded-2xl border ${
+        className={`flex items-center gap-3.5 p-4 rounded-2xl border ${
           result.isCorrect
-            ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300'
-            : 'bg-red-950/40 border-red-500/50 text-red-300'
+            ? 'bg-[#00FFCC]/10 border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_20px_rgba(0,255,204,0.15)]'
+            : 'bg-[#FF4757]/10 border-[#FF4757]/40 text-[#FF4757] shadow-[0_0_20px_rgba(255,71,87,0.15)]'
         }`}
       >
         {result.isCorrect ? (
-          <CheckCircle2 className="w-8 h-8 text-emerald-400 shrink-0" />
+          <CheckCircle2 className="w-8 h-8 text-[#00FFCC] shrink-0" />
         ) : (
-          <XCircle className="w-8 h-8 text-red-400 shrink-0" />
+          <XCircle className="w-8 h-8 text-[#FF4757] shrink-0" />
         )}
         <div>
           <h3 className="text-lg font-bold">
-            {result.isCorrect ? 'Correct! Well Done! 🎉' : 'Incorrect! Better Luck Next Time.'}
+            {result.isCorrect ? 'Correct! Well Done! 🎉' : 'Incorrect! Keep Going! 💪'}
           </h3>
-          <p className="text-xs opacity-80">
-            {result.isCorrect ? '+1 Score point added' : 'Streak reset to 0'}
+          <p className="text-xs font-semibold opacity-90">
+            {result.isCorrect ? '+1 Score point & tokens earned' : 'Streak reset to 0'}
           </p>
         </div>
       </div>
 
       {/* Answer & Explanation Box */}
-      <div className="my-6 p-5 rounded-2xl bg-slate-900/80 border border-slate-700/80 space-y-3">
+      <div className="my-6 p-5 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] space-y-3">
         <div>
           <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
             Correct Answer:
           </span>
-          <p className="text-base font-bold text-blue-400 mt-0.5">
+          <p className="text-base font-bold text-[#00FFCC] mt-0.5">
             {letters[result.correctIndex]}: {question.options[result.correctIndex]}
           </p>
         </div>
 
         {result.explanation && (
-          <div className="pt-3 border-t border-slate-800">
+          <div className="pt-3 border-t border-[#1C1E3A]">
             <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Explanation:
             </span>
@@ -77,11 +77,11 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
       </div>
 
       {/* Next Button Footer */}
-      <div className="pt-4 border-t border-slate-700/60 flex justify-end">
+      <div className="pt-4 border-t border-[#2D305A] flex justify-end">
         <button
           type="button"
           onClick={onNext}
-          className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold text-sm shadow-lg hover:shadow-blue-500/25 transition-all cursor-pointer group"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black rounded-xl text-sm shadow-[0_0_20px_rgba(0,255,204,0.25)] hover:scale-105 transition-all cursor-pointer group"
         >
           <span>Next Question</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
