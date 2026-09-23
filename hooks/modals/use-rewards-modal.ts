@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSwitchChain, useChainId } from 'wagmi';
+import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import {
   getClaimableRewards,
@@ -29,20 +30,50 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const [claimStep, setClaimStep] = useState<ClaimStep>('idle');
   const [claimError, setClaimError] = useState<string | null>(null);
   const [currentNonce, setCurrentNonce] = useState<string | null>(null);
+  const [callId, setCallId] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
   const [mintingBadge, setMintingBadge] = useState<number | null>(null);
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  const { writeContractAsync } = useWriteContract();
+  const { writeContractsAsync } = useWriteContracts();
+  const { data: capabilities } = useCapabilities();
 
   const {
-    isSuccess: txConfirmed,
-    isError: txReceiptError,
-    error: receiptError,
-  } = useWaitForTransactionReceipt({
-    hash: txHash as `0x${string}` | undefined,
+    data: callsStatus,
+    isError: isCallsStatusError,
+    error: callsStatusError,
+  } = useCallsStatus({
+    id: callId as string,
+    query: {
+      enabled: Boolean(callId),
+      refetchInterval: (query) =>
+        query.state.data?.status === 'success' || query.state.data?.status === 'failure'
+          ? false
+          : 1000,
+    },
   });
+
+  const chainCapabilities =
+    capabilities?.[chainId] ??
+    (capabilities as Record<string, { paymasterService?: { supported?: boolean } }> | undefined)?.[
+      `0x${chainId.toString(16)}`
+    ];
+  const isPaymasterSupported = Boolean(chainCapabilities?.paymasterService?.supported);
+  const paymasterUrl = process.env.NEXT_PUBLIC_PAYMASTER_URL;
+
+  const capabilitiesConfig = useMemo(() => {
+    if (isPaymasterSupported && paymasterUrl) {
+      return {
+        paymasterService: {
+          url: paymasterUrl,
+        },
+      };
+    }
+    return undefined;
+  }, [isPaymasterSupported, paymasterUrl]);
+
+  const isGasless = Boolean(isPaymasterSupported && paymasterUrl);
 
   const loadRewards = useCallback(async () => {
     if (!walletAddress) return;
@@ -58,28 +89,36 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
       loadRewards();
       setClaimStep('idle');
       setClaimError(null);
+      setCallId(null);
       setTxHash(null);
       setMintingBadge(null);
     }
   }, [isOpen, walletAddress, loadRewards]);
 
-  // Handle reverted transactions
+  // Handle failed or reverted call bundle
   useEffect(() => {
-    if (txReceiptError) {
+    if (callsStatus?.status === 'failure' || isCallsStatusError) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setClaimStep('error');
-      setClaimError(receiptError?.message || 'Transaction reverted on-chain');
+      setClaimError(callsStatusError?.message || 'Transaction reverted or failed on-chain');
       setMintingBadge(null);
       setCurrentNonce(null);
+      setCallId(null);
     }
-  }, [txReceiptError, receiptError]);
+  }, [callsStatus?.status, isCallsStatusError, callsStatusError]);
 
-  // Confirm on-chain after tx is mined
+  // Confirm on-chain after calls bundle is mined
   useEffect(() => {
-    if (txConfirmed && currentNonce && walletAddress && txHash) {
-      confirmRewardClaim(walletAddress, currentNonce, txHash)
+    if (callsStatus?.status === 'success' && currentNonce && walletAddress && callId) {
+      const receiptHash = callsStatus.receipts?.[0]?.transactionHash;
+      const finalHash = receiptHash || (callId.startsWith('0x') ? callId : null);
+
+      confirmRewardClaim(walletAddress, currentNonce, finalHash || callId)
         .then((res) => {
           if (res?.success) {
+            if (finalHash) {
+              setTxHash(finalHash);
+            }
             setClaimStep('done');
             loadRewards(); // Refresh
           } else {
@@ -88,6 +127,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
             setMintingBadge(null);
           }
           setCurrentNonce(null);
+          setCallId(null);
         })
         .catch((err) => {
           console.error('Claim confirmation failed:', err);
@@ -95,9 +135,10 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
           setClaimError('Failed to confirm reward claim');
           setMintingBadge(null);
           setCurrentNonce(null);
+          setCallId(null);
         });
     }
-  }, [txConfirmed, currentNonce, walletAddress, txHash, loadRewards]);
+  }, [callsStatus, currentNonce, walletAddress, callId, loadRewards]);
 
   const isWrongChain = Boolean(walletAddress) && chainId !== TARGET_CHAIN_ID;
 
@@ -106,6 +147,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const handleClaimTokens = async () => {
     if (!walletAddress || isWrongChain) return;
     setTxHash(null);
+    setCallId(null);
     setCurrentNonce(null);
     setClaimStep('signing');
     setClaimError(null);
@@ -121,30 +163,37 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('submitting');
 
     try {
-      const hash = await writeContractAsync({
-        address: QUIZ_TOKEN_ADDRESS,
-        abi: QuizTokenABI,
-        functionName: 'claimTokens',
-        args: [
-          voucher.recipient as `0x${string}`,
-          BigInt(voucher.amount),
-          BigInt(voucher.nonce),
-          BigInt(voucher.deadline),
-          voucher.signature as `0x${string}`,
+      const result = await writeContractsAsync({
+        contracts: [
+          {
+            address: QUIZ_TOKEN_ADDRESS,
+            abi: QuizTokenABI,
+            functionName: 'claimTokens',
+            args: [
+              voucher.recipient as `0x${string}`,
+              BigInt(voucher.amount),
+              BigInt(voucher.nonce),
+              BigInt(voucher.deadline),
+              voucher.signature as `0x${string}`,
+            ],
+          },
         ],
+        capabilities: capabilitiesConfig,
       });
-      setTxHash(hash);
+      setCallId(result.id);
       setClaimStep('confirming');
     } catch (err) {
       console.error('Claim tx failed:', err);
       setClaimError('Transaction failed or was rejected');
       setClaimStep('error');
+      setCurrentNonce(null);
     }
   };
 
   const handleMintBadge = async (badgeType: number) => {
     if (!walletAddress || isWrongChain) return;
     setTxHash(null);
+    setCallId(null);
     setCurrentNonce(null);
     setMintingBadge(badgeType);
     setClaimStep('signing');
@@ -162,25 +211,31 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('submitting');
 
     try {
-      const hash = await writeContractAsync({
-        address: QUIZ_BADGE_ADDRESS,
-        abi: QuizBadgeNFTABI,
-        functionName: 'mintBadge',
-        args: [
-          voucher.recipient as `0x${string}`,
-          BigInt(voucher.badgeType ?? 0),
-          BigInt(voucher.nonce),
-          BigInt(voucher.deadline),
-          voucher.signature as `0x${string}`,
+      const result = await writeContractsAsync({
+        contracts: [
+          {
+            address: QUIZ_BADGE_ADDRESS,
+            abi: QuizBadgeNFTABI,
+            functionName: 'mintBadge',
+            args: [
+              voucher.recipient as `0x${string}`,
+              BigInt(voucher.badgeType ?? 0),
+              BigInt(voucher.nonce),
+              BigInt(voucher.deadline),
+              voucher.signature as `0x${string}`,
+            ],
+          },
         ],
+        capabilities: capabilitiesConfig,
       });
-      setTxHash(hash);
+      setCallId(result.id);
       setClaimStep('confirming');
     } catch (err) {
       console.error('Badge mint tx failed:', err);
       setClaimError('Transaction failed or was rejected');
       setClaimStep('error');
       setMintingBadge(null);
+      setCurrentNonce(null);
     }
   };
 
@@ -189,7 +244,9 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     return (wei / (BigInt(10) ** BigInt(18))).toString();
   };
 
-  const explorerUrl = txHash ? `https://sepolia.basescan.org/tx/${txHash}` : null;
+  const receiptTxHash = callsStatus?.receipts?.[0]?.transactionHash;
+  const resolvedTxHash = txHash || receiptTxHash || (callId?.startsWith('0x') ? callId : null);
+  const explorerUrl = resolvedTxHash ? `https://sepolia.basescan.org/tx/${resolvedTxHash}` : null;
 
   return {
     tab,
@@ -200,6 +257,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     claimError,
     mintingBadge,
     isWrongChain,
+    isGasless,
     handleSwitchChain,
     handleClaimTokens,
     handleMintBadge,

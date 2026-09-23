@@ -30,6 +30,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
     claimError,
     mintingBadge,
     isWrongChain,
+    isGasless,
     handleSwitchChain,
     handleClaimTokens,
     handleMintBadge,
@@ -50,6 +51,19 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
           >
             Switch
           </button>
+        </div>
+      )}
+
+      {/* Gasless / Sponsored badge */}
+      {isGasless && !isWrongChain && (
+        <div className="mb-4 p-2.5 bg-[#00FFCC]/10 border border-[#00FFCC]/30 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-[#00FFCC]" />
+            <span className="text-xs font-bold text-[#00FFCC]">Gasless Transactions Active</span>
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#0A1128] bg-[#00FFCC] px-2 py-0.5 rounded-full">
+            Free Gas
+          </span>
         </div>
       )}
 
@@ -147,7 +161,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
             {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'confirming' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'idle' || claimStep === 'done' || claimStep === 'error'
-              ? `Claim ${formatTokens(rewards.claimableTokens)} $QUIZ`
+              ? `Claim ${formatTokens(rewards.claimableTokens)} $QUIZ${isGasless ? ' (Gasless)' : ''}`
               : claimStep === 'signing'
                 ? 'Generating voucher...'
                 : claimStep === 'submitting'
@@ -202,7 +216,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
                     className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                   >
                     {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-[#0A1128]" /> : null}
-                    {isMinting ? 'Minting...' : 'Mint Badge'}
+                    {isMinting ? 'Minting...' : isGasless ? 'Mint (Gasless)' : 'Mint Badge'}
                   </motion.button>
                 )}
               </div>
