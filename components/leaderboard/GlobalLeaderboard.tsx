@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { LeaderboardEntry } from '@/lib/types';
 import { usePagination } from '@/hooks/shared/use-pagination';
 import { Trophy, Medal, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -34,18 +35,24 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
     <div className="space-y-3">
       {/* Entries List with Min-Height to Prevent Layout Shift */}
       <div className="space-y-2 min-h-[260px]">
-        {pagedEntries.map((entry) => {
+        {pagedEntries.map((entry, index) => {
           const isTop1 = entry.rank === 1;
           const isTop2 = entry.rank === 2;
           const isTop3 = entry.rank === 3;
+          const isTopThree = entry.rank <= 3;
 
           return (
-            <div
+            <motion.div
               key={entry.wallet_address}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.04 }}
               className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
-                isTop1
-                  ? 'bg-[#FFD166]/10 border-[#FFD166]/40 shadow-[0_0_15px_rgba(255,209,102,0.15)]'
-                  : 'bg-[#0A1128]/80 border-[#2D305A] hover:border-[#6C5CE7]/60'
+                isTopThree
+                  ? 'glass-border border-transparent bg-gradient-to-br from-[--color-crypto-gold]/20 to-[--color-pop-coral]/20'
+                  : index % 2 === 0
+                    ? 'bg-[color:var(--color-deep-space)] border-[#2D305A] hover:border-[#6C5CE7]/60'
+                    : 'bg-[color:var(--color-elevation-2)] border-[#2D305A] hover:border-[#6C5CE7]/60'
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -70,7 +77,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
                 <span className="text-slate-400 font-medium">{entry.accuracy}% acc</span>
                 <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

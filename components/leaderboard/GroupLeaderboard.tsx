@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { LeaderboardEntry } from '@/lib/types';
 import { usePagination } from '@/hooks/shared/use-pagination';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -46,10 +47,17 @@ export default function GroupLeaderboard({
     <div className="space-y-3">
       {/* Entries List with Min-Height to Prevent Layout Shift */}
       <div className="space-y-2 min-h-[260px]">
-        {pagedEntries.map((entry) => (
-          <div
+        {pagedEntries.map((entry, index) => (
+          <motion.div
             key={entry.wallet_address}
-            className="flex items-center justify-between p-3 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#6C5CE7]/60 text-xs transition-colors"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04 }}
+            className={`flex items-center justify-between p-3 rounded-2xl border border-[#2D305A] hover:border-[#6C5CE7]/60 text-xs transition-colors ${
+              index % 2 === 0
+                ? 'bg-[color:var(--color-deep-space)]'
+                : 'bg-[color:var(--color-elevation-2)]'
+            }`}
           >
             <div className="flex items-center gap-2">
               <span className="font-heading font-bold text-[#6C5CE7]">#{entry.rank}</span>
@@ -61,7 +69,7 @@ export default function GroupLeaderboard({
               <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
               <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
