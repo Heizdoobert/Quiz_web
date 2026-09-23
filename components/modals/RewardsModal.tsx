@@ -227,7 +227,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
         <button
           type="button"
           onClick={() => setTab('tokens')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
             tab === 'tokens'
               ? 'bg-[#6C5CE7] text-white shadow-md'
               : 'text-slate-400 hover:text-[#00FFCC]'
@@ -238,7 +238,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
         <button
           type="button"
           onClick={() => setTab('badges')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
             tab === 'badges'
               ? 'bg-[#6C5CE7] text-white shadow-md'
               : 'text-slate-400 hover:text-[#00FFCC]'
