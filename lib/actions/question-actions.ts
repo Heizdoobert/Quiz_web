@@ -52,7 +52,8 @@ export async function createQuestion(params: {
 }
 
 export async function fetchRandomQuestion(
-  excludeIds: string[] = []
+  excludeIds: string[] = [],
+  category?: string
 ): Promise<ClientQuestion | null> {
   try {
     let query = supabase.from('questions').select('id, category, prompt, options');
@@ -61,9 +62,37 @@ export async function fetchRandomQuestion(
       query = query.not('id', 'in', `(${excludeIds.join(',')})`);
     }
 
-    const { data, error } = await query.limit(20);
+    if (category && category !== 'All') {
+      query = query.eq('category', category);
+    }
+
+    let { data, error } = await query.limit(20);
+
+    // Graceful fallback if specific category with excludeIds returned no rows
+    if ((error || !data || data.length === 0) && category && category !== 'All') {
+      const fallbackQuery = supabase
+        .from('questions')
+        .select('id, category, prompt, options')
+        .eq('category', category)
+        .limit(20);
+      const fallbackRes = await fallbackQuery;
+      if (!fallbackRes.error && fallbackRes.data && fallbackRes.data.length > 0) {
+        data = fallbackRes.data;
+        error = null;
+      }
+    }
+
+    // Ultimate fallback if still no question found
     if (error || !data || data.length === 0) {
-      return null;
+      const generalQuery = await supabase
+        .from('questions')
+        .select('id, category, prompt, options')
+        .limit(20);
+      if (generalQuery.data && generalQuery.data.length > 0) {
+        data = generalQuery.data;
+      } else {
+        return null;
+      }
     }
 
     const randomIndex = Math.floor(Math.random() * data.length);

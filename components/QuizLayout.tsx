@@ -19,6 +19,7 @@ import {
   getGroupLeaderboard,
 } from '@/lib/actions/leaderboard-actions';
 import Header from './Header';
+import CategoryBar from './CategoryBar';
 import QuizCard from './QuizCard';
 import Sidebar from './Sidebar';
 import LeaderboardPanel from './LeaderboardPanel';
@@ -46,6 +47,7 @@ export default function QuizLayout({
   const { address, isConnected } = useAccount();
 
   // Quiz state
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [currentQuestion, setCurrentQuestion] = useState<ClientQuestion | null>(initialQuestion);
   const [answeredIds, setAnsweredIds] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -130,10 +132,24 @@ export default function QuizLayout({
       const idsToExclude = Array.isArray(overrideAnsweredIds)
         ? overrideAnsweredIds
         : answeredIds;
-      const q = await fetchRandomQuestion(idsToExclude);
+      const q = await fetchRandomQuestion(idsToExclude, selectedCategory);
       setCurrentQuestion(q);
     },
-    [answeredIds, timerDuration]
+    [answeredIds, timerDuration, selectedCategory]
+  );
+
+  const handleSelectCategory = useCallback(
+    async (catId: string) => {
+      setSelectedCategory(catId);
+      setEliminatedIndices([]);
+      setIsFlipped(false);
+      setResult(null);
+      setTimeLeft(timerDuration);
+      soundEngine.playFlip();
+      const q = await fetchRandomQuestion([], catId);
+      setCurrentQuestion(q);
+    },
+    [timerDuration]
   );
 
   const handleAnswerSubmit = useCallback(
@@ -293,7 +309,11 @@ export default function QuizLayout({
             </div>
 
             {/* Center Column: Quiz Card & Custom Question Form (6 cols) */}
-            <div className="lg:col-span-6 w-full flex flex-col items-center order-1 lg:order-2">
+            <div className="lg:col-span-6 w-full flex flex-col items-center order-1 lg:order-2 space-y-4">
+              <CategoryBar
+                selectedCategory={selectedCategory}
+                onSelectCategory={handleSelectCategory}
+              />
               <QuizCard
                 question={currentQuestion}
                 isFlipped={isFlipped}
