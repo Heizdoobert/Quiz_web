@@ -3,15 +3,21 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
-import { ArrowRight, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowRight, CheckCircle2, XCircle, Flag } from 'lucide-react';
 
 interface AnswerBackProps {
   question: ClientQuestion;
   result: AnswerSubmissionResult;
   onNext: () => void;
+  onOpenDispute?: () => void;
 }
 
-export default function AnswerBack({ question, result, onNext }: AnswerBackProps) {
+export default function AnswerBack({
+  question,
+  result,
+  onNext,
+  onOpenDispute,
+}: AnswerBackProps) {
   const letters = ['A', 'B', 'C', 'D'];
 
   // Advance to next question on Enter or Space
@@ -77,8 +83,22 @@ export default function AnswerBack({ question, result, onNext }: AnswerBackProps
         )}
       </div>
 
-      {/* Next Button Footer */}
-      <div className="pt-4 border-t border-[#2D305A] flex justify-end">
+      {/* Next Button & Dispute Footer */}
+      <div className="pt-4 border-t border-[#2D305A] flex items-center justify-between">
+        {onOpenDispute ? (
+          <button
+            type="button"
+            onClick={onOpenDispute}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-[#FF4757] hover:bg-[#FF4757]/10 border border-transparent hover:border-[#FF4757]/30 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FF4757]"
+            title="Challenge or report this question"
+          >
+            <Flag className="w-3.5 h-3.5 text-[#FF4757]/70" />
+            <span className="hidden sm:inline">Dispute Question</span>
+          </button>
+        ) : (
+          <div />
+        )}
+
         <motion.button
           type="button"
           onClick={onNext}

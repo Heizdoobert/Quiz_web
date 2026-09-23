@@ -23,6 +23,7 @@ interface QuizCardProps {
   eliminatedIndices: number[];
   isSubmitting: boolean;
   onAddQuestionClick: () => void;
+  onOpenDispute?: () => void;
 }
 
 export default function QuizCard({
@@ -40,6 +41,7 @@ export default function QuizCard({
   eliminatedIndices,
   isSubmitting,
   onAddQuestionClick,
+  onOpenDispute,
 }: QuizCardProps) {
   // Fire confetti if result is correct
   React.useEffect(() => {
@@ -114,6 +116,7 @@ export default function QuizCard({
               question={question}
               result={result}
               onNext={onNextQuestion}
+              onOpenDispute={onOpenDispute}
             />
           )}
         </div>

@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ClientQuestion } from '@/lib/types';
-import { Timer, Settings2, Sparkles, FastForward, Loader2 } from 'lucide-react';
+import { Timer, Settings2, Sparkles, FastForward, Loader2, Users, ShieldCheck } from 'lucide-react';
 
 interface QuestionFrontProps {
   question: ClientQuestion;
@@ -87,9 +87,28 @@ export default function QuestionFront({
     <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl backdrop-blur-md">
       {/* Top Meta Bar */}
       <div className="flex items-center justify-between pb-4 border-b border-[#2D305A]">
-        <span className={`px-3 py-1 border rounded-full text-xs font-bold font-heading tracking-wider uppercase select-none ${getCategoryBadge(question.category)}`}>
-          {question.category || 'Trivia'}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className={`px-3 py-1 border rounded-full text-xs font-bold font-heading tracking-wider uppercase select-none ${getCategoryBadge(question.category)}`}>
+            {question.category || 'Trivia'}
+          </span>
+          {question.created_by ? (
+            <span
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FFD166]/10 border border-[#FFD166]/30 text-[10px] font-mono text-[#FFD166]"
+              title={`Submitted by community member ${question.created_by}`}
+            >
+              <Users className="w-3 h-3" />
+              <span>{question.created_by.slice(0, 6)}...</span>
+            </span>
+          ) : (
+            <span
+              className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#00FFCC]/10 border border-[#00FFCC]/30 text-[10px] font-heading font-bold text-[#00FFCC]"
+              title="Verified Core Question"
+            >
+              <ShieldCheck className="w-3 h-3" />
+              <span>Verified</span>
+            </span>
+          )}
+        </div>
 
         {/* Timer Badge */}
         <div className="flex items-center gap-1.5 px-3 py-1 bg-[#0A1128]/80 border border-[#2D305A] rounded-full shadow-inner select-none">
