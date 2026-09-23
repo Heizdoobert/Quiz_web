@@ -159,17 +159,45 @@ INSERT INTO questions (category, prompt, options, correct_index, explanation) VA
   'Linus Torvalds created Git in April 2005 to manage the development of the Linux kernel.'
 ),
 (
-  'Web3 & Crypto',
+  'Layer 1 & Infra',
   'What is Base in the Ethereum ecosystem?',
   '["An EVM-compatible Layer 2 rollup built on the OP Stack", "A non-EVM Layer 1 blockchain", "A hardware wallet manufacturer", "A decentralized crypto exchange protocol"]'::jsonb,
   0,
   'Base is a secure, low-cost, builder-friendly Ethereum Layer 2 rollup developed by Coinbase on the open-source OP Stack.'
 ),
 (
-  'Science',
-  'What is the speed of light in a vacuum (approximately)?',
-  '["30,000 km/s", "300,000 km/s", "3,000,000 km/s", "150,000 km/s"]'::jsonb,
-  1,
-  'The speed of light in a vacuum is approximately 299,792 kilometers per second (~300,000 km/s).'
+  'DeFi',
+  'What does AMM stand for in decentralized finance protocols like Uniswap?',
+  '["Automated Market Maker", "Advanced Mining Mechanism", "Autonomous Money Manager", "Asset Management Module"]'::jsonb,
+  0,
+  'An Automated Market Maker (AMM) is a decentralized exchange protocol that uses algorithmic pricing and liquidity pools instead of traditional order books.'
+),
+(
+  'DeFi',
+  'What is Impermanent Loss in decentralized liquidity pools?',
+  '["The difference in value between holding tokens vs depositing them in an AMM liquidity pool", "A permanent exploit or hack of smart contract funds", "Transaction fees lost during failed trades", "Network inflation over long staking periods"]'::jsonb,
+  0,
+  'Impermanent loss occurs when the price ratio of deposited token pairs diverges compared to when they were deposited into a liquidity pool.'
+),
+(
+  'NFT & Gaming',
+  'Which Ethereum standard enables multi-token management for fungible and non-fungible game assets in a single contract?',
+  '["ERC-1155", "ERC-20", "ERC-721", "ERC-4626"]'::jsonb,
+  0,
+  'ERC-1155 is a multi-token standard that allows a single smart contract to manage any combination of fungible, non-fungible, and semi-fungible tokens efficiently.'
+),
+(
+  'NFT & Gaming',
+  'What is a Soulbound Token (SBT) in Web3?',
+  '["A non-transferable token permanently tied to a specific wallet address", "An in-game character that revives upon defeat", "A token with algorithmic deflationary burn", "A staking token with no locking period"]'::jsonb,
+  0,
+  'Soulbound Tokens (SBTs) are permanently bound to a single wallet address and cannot be transferred, making them ideal for credentials, badges, and reputation.'
+),
+(
+  'Layer 1 & Infra',
+  'What is the primary role of a sequencer in an Ethereum Layer 2 rollup?',
+  '["To order, batch, and compress transactions before submitting to Ethereum L1", "To mint new proof-of-work blocks", "To decrypt private keys for instant withdrawals", "To compute zero-knowledge proofs on mobile devices"]'::jsonb,
+  0,
+  'A sequencer collects, orders, and bundles transactions off-chain, then posts state updates and transaction batches back to Ethereum Layer 1 for settlement.'
 );
 
