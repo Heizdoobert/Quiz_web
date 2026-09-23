@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { LeaderboardEntry } from '@/lib/types';
-import { usePagination } from '@/hooks/use-pagination';
+import { usePagination } from '@/hooks/shared/use-pagination';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface GroupLeaderboardProps {

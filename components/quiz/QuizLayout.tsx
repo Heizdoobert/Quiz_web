@@ -2,23 +2,23 @@
 
 import React from 'react';
 import { ClientQuestion, LeaderboardEntry } from '@/lib/types';
-import { useQuizLogic } from '@/hooks/use-quiz-logic';
-import Header from './Header';
+import { useQuizLogic } from '@/hooks/quiz/use-quiz-logic';
+import Header from '../layout/Header';
 import CategoryBar from './CategoryBar';
 import QuizCard from './QuizCard';
-import Sidebar from './Sidebar';
-import LeaderboardPanel from './LeaderboardPanel';
+import Sidebar from '../layout/Sidebar';
+import LeaderboardPanel from '../leaderboard/LeaderboardPanel';
 import QuestionForm from './QuestionForm';
-import AdZone from './AdZone';
-import StickyBannerAd from './StickyBannerAd';
-import IntroModal from './modals/IntroModal';
-import TimerSettingsModal from './modals/TimerSettingsModal';
-import GroupModal from './modals/GroupModal';
-import ReviewModal from './modals/ReviewModal';
-import RewardsModal from './modals/RewardsModal';
-import ProfileModal from './modals/ProfileModal';
-import DisputeModal from './modals/DisputeModal';
-import SeoFaqSection from './SeoFaqSection';
+import AdZone from '../ads/AdZone';
+import StickyBannerAd from '../ads/StickyBannerAd';
+import IntroModal from '../modals/IntroModal';
+import TimerSettingsModal from '../modals/TimerSettingsModal';
+import GroupModal from '../modals/GroupModal';
+import ReviewModal from '../modals/ReviewModal';
+import RewardsModal from '../modals/RewardsModal';
+import ProfileModal from '../modals/ProfileModal';
+import DisputeModal from '../modals/DisputeModal';
+import SeoFaqSection from '../seo/SeoFaqSection';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;

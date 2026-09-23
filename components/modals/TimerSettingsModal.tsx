@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
-import { useTimerSettingsModal } from '@/hooks/use-timer-settings-modal';
+import { useTimerSettingsModal } from '@/hooks/modals/use-timer-settings-modal';
 import { Clock } from 'lucide-react';
 
 interface TimerSettingsModalProps {
