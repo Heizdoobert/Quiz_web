@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
-import { Group } from '@/lib/types';
-import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
+import { useGroupModal } from '@/hooks/use-group-modal';
 import { Shield, Users, UserPlus, Plus, Loader2 } from 'lucide-react';
 
 interface GroupModalProps {
@@ -20,81 +19,23 @@ export default function GroupModal({
   walletAddress,
   onSelectGroup,
 }: GroupModalProps) {
-  const [tab, setTab] = useState<'my' | 'create' | 'join'>('my');
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
-
-  // Form states
-  const [groupName, setGroupName] = useState('');
-  const [groupDesc, setGroupDesc] = useState('');
-  const [joinId, setJoinId] = useState('');
-
-  const loadGroups = useCallback(async () => {
-    if (!walletAddress) return;
-    setLoading(true);
-    const list = await getUserGroups(walletAddress);
-    setGroups(list);
-    setLoading(false);
-  }, [walletAddress]);
-
-  useEffect(() => {
-    if (isOpen && walletAddress) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      loadGroups();
-    }
-  }, [isOpen, walletAddress, loadGroups]);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!walletAddress) {
-      setMessage({ type: 'error', text: 'Please connect your wallet first.' });
-      return;
-    }
-    setLoading(true);
-    setMessage(null);
-    const res = await createGroup({
-      name: groupName,
-      description: groupDesc,
-      ownerWallet: walletAddress,
-    });
-    setLoading(false);
-    if (!res.success) {
-      setMessage({ type: 'error', text: res.error || 'Failed to create group' });
-    } else {
-      setMessage({ type: 'success', text: `Group "${res.group?.name}" created!` });
-      setGroupName('');
-      setGroupDesc('');
-      loadGroups();
-      setTab('my');
-    }
-  };
-
-  const handleJoin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!walletAddress) {
-      setMessage({ type: 'error', text: 'Please connect your wallet first.' });
-      return;
-    }
-    setLoading(true);
-    setMessage(null);
-    const res = await joinGroup(joinId.trim(), walletAddress);
-    setLoading(false);
-    if (!res.success) {
-      setMessage({ type: 'error', text: res.error || 'Failed to join group' });
-    } else {
-      setMessage({ type: 'success', text: 'Successfully joined group!' });
-      setJoinId('');
-      loadGroups();
-      setTab('my');
-    }
-  };
-
-  const handleLeave = async (groupId: string) => {
-    if (!walletAddress) return;
-    await leaveGroup(groupId, walletAddress);
-    loadGroups();
-  };
+  const {
+    tab,
+    selectTab,
+    groups,
+    loading,
+    message,
+    groupName,
+    setGroupName,
+    groupDesc,
+    setGroupDesc,
+    joinId,
+    setJoinId,
+    handleCreate,
+    handleJoin,
+    handleLeave,
+    handleSelectGroup,
+  } = useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup });
 
   return (
     <Modal
@@ -109,7 +50,7 @@ export default function GroupModal({
         <div className="flex border-b border-[#2D305A] gap-2">
           <button
             type="button"
-            onClick={() => { setTab('my'); setMessage(null); }}
+            onClick={() => selectTab('my')}
             className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'my'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
@@ -120,7 +61,7 @@ export default function GroupModal({
           </button>
           <button
             type="button"
-            onClick={() => { setTab('create'); setMessage(null); }}
+            onClick={() => selectTab('create')}
             className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'create'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
@@ -131,7 +72,7 @@ export default function GroupModal({
           </button>
           <button
             type="button"
-            onClick={() => { setTab('join'); setMessage(null); }}
+            onClick={() => selectTab('join')}
             className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'join'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
@@ -182,10 +123,7 @@ export default function GroupModal({
                       {onSelectGroup && (
                         <button
                           type="button"
-                          onClick={() => {
-                            onSelectGroup(g.id);
-                            onClose();
-                          }}
+                          onClick={() => handleSelectGroup(g.id)}
                           className="px-2.5 py-1 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]"
                         >
                           View Board
