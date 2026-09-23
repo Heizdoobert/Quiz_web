@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { LeaderboardEntry } from '@/lib/types';
 
-export async function getGlobalLeaderboard(limit: number = 10): Promise<LeaderboardEntry[]> {
+export async function getGlobalLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
   try {
     const { data, error } = await supabase
       .from('quiz_results')
@@ -42,7 +42,7 @@ export async function getGlobalLeaderboard(limit: number = 10): Promise<Leaderbo
 
 export async function getGroupLeaderboard(
   groupId: string,
-  limit: number = 10
+  limit: number = 50
 ): Promise<LeaderboardEntry[]> {
   try {
     // Get group members

@@ -5,7 +5,7 @@ import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 export default async function Home() {
   const [initialQuestion, initialLeaderboard] = await Promise.all([
     fetchRandomQuestion(),
-    getGlobalLeaderboard(10),
+    getGlobalLeaderboard(50),
   ]);
 
   return (

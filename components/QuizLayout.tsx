@@ -111,10 +111,10 @@ export default function QuizLayout({
     async (overrideGroupId?: string) => {
       const gid = overrideGroupId ?? selectedGroupId;
       setLeaderboardLoading(true);
-      const global = await getGlobalLeaderboard(10);
+      const global = await getGlobalLeaderboard(50);
       setGlobalLeaderboard(global);
       if (gid) {
-        const group = await getGroupLeaderboard(gid, 10);
+        const group = await getGroupLeaderboard(gid, 50);
         setGroupLeaderboard(group);
       }
       setLeaderboardLoading(false);
@@ -227,7 +227,7 @@ export default function QuizLayout({
         if (!ignore) setCurrentQuestion(q);
       }
       if (initialLeaderboard.length === 0) {
-        const global = await getGlobalLeaderboard(10);
+        const global = await getGlobalLeaderboard(50);
         if (!ignore) setGlobalLeaderboard(global);
       }
     }
