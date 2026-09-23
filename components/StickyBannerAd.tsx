@@ -91,8 +91,8 @@ export default function StickyBannerAd({
               relative -mr-1 p-2 sm:p-2.5 rounded-xl
               text-slate-400 hover:text-slate-100 hover:bg-[#1A1B35]
               border border-transparent hover:border-[#2D305A]
-              transition-colors cursor-pointer
-              focus:outline-none focus:ring-1 focus:ring-[#00FFCC]
+              transition-colors cursor-pointer active:scale-90
+              focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]
             "
           >
             <X className="w-4 h-4" />

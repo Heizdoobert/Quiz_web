@@ -76,7 +76,7 @@ export default function CategoryBar({
             }}
             className={`flex items-center gap-2 px-3.5 py-1.5 rounded-full border text-xs font-bold font-heading whitespace-nowrap transition-all duration-200 cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
               isSelected
-                ? 'bg-[#1A1B35] text-white scale-102'
+                ? 'bg-[#1A1B35] text-white scale-[1.02]'
                 : 'bg-[#1A1B35]/60 hover:bg-[#1A1B35] text-slate-400 hover:text-slate-200 border-[#2D305A]'
             }`}
           >

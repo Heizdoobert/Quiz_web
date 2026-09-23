@@ -101,7 +101,7 @@ export default function TimerSettingsModal({
                   key={p}
                   type="button"
                   onClick={() => setDuration(p)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] ${
                     duration === p
                       ? 'bg-[#6C5CE7] border-[#6C5CE7] text-white shadow-sm'
                       : 'bg-[#0A1128] border-[#2D305A] text-slate-300 hover:bg-[#25284D] hover:border-[#6C5CE7]/50'

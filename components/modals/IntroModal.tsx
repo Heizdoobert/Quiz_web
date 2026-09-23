@@ -123,8 +123,9 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
           {[1, 2, 3].map((s) => (
             <button
               key={s}
+              type="button"
               onClick={() => setStep(s)}
-              className={`h-2.5 rounded-full transition-all ${
+              className={`h-2.5 rounded-full transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
                 step === s ? 'bg-[#00FFCC] w-6' : 'bg-[#2D305A] hover:bg-[#6C5CE7] w-2.5'
               }`}
               aria-label={`Step ${s}`}

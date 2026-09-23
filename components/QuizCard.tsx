@@ -71,7 +71,7 @@ export default function QuizCard({
         <button
           type="button"
           onClick={onAddQuestionClick}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 active:scale-95 text-[#0A1128] font-black font-heading rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
         >
           <PlusCircle className="w-4 h-4" /> Add First Question
         </button>
