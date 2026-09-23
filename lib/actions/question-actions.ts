@@ -12,8 +12,9 @@ export async function createQuestion(params: {
   createdBy?: string;
 }): Promise<{ success: boolean; question?: Question; error?: string }> {
   try {
-    if (!params.prompt?.trim()) {
-      return { success: false, error: 'Question prompt is required.' };
+    const trimmedPrompt = params.prompt?.trim() || '';
+    if (trimmedPrompt.length < 15) {
+      return { success: false, error: 'Question prompt must be at least 15 characters long.' };
     }
     if (!Array.isArray(params.options) || params.options.length !== 4) {
       return { success: false, error: 'Exactly 4 options are required.' };
@@ -21,17 +22,34 @@ export async function createQuestion(params: {
     if (params.options.some((opt) => !opt?.trim())) {
       return { success: false, error: 'All 4 options must be filled.' };
     }
+
+    const trimmedOptions = params.options.map((o) => o.trim());
+    const lowerOptions = new Set(trimmedOptions.map((o) => o.toLowerCase()));
+    if (lowerOptions.size !== 4) {
+      return { success: false, error: 'All 4 options must be distinct from one another.' };
+    }
+
     if (params.correctIndex < 0 || params.correctIndex > 3) {
       return { success: false, error: 'Correct option must be between 0 and 3.' };
     }
 
+    const trimmedExplanation = params.explanation?.trim() || '';
+    if (trimmedExplanation.length < 20) {
+      return {
+        success: false,
+        error: 'An educational explanation of at least 20 characters is required to ensure quiz quality.',
+      };
+    }
+
     const newQuestion = {
-      prompt: params.prompt.trim(),
-      options: params.options.map((o) => o.trim()),
+      prompt: trimmedPrompt,
+      options: trimmedOptions,
       correct_index: params.correctIndex,
       category: params.category?.trim() || 'General',
-      explanation: params.explanation?.trim() || null,
+      explanation: trimmedExplanation,
       created_by: params.createdBy?.toLowerCase() || null,
+      status: 'verified',
+      dispute_count: 0,
     };
 
     const { data, error } = await supabase
@@ -56,7 +74,10 @@ export async function fetchRandomQuestion(
   category?: string
 ): Promise<ClientQuestion | null> {
   try {
-    let query = supabase.from('questions').select('id, category, prompt, options');
+    let query = supabase
+      .from('questions')
+      .select('id, category, prompt, options, created_by, status')
+      .neq('status', 'quarantined');
 
     if (excludeIds.length > 0) {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`);
@@ -72,7 +93,8 @@ export async function fetchRandomQuestion(
     if ((error || !data || data.length === 0) && category && category !== 'All') {
       const fallbackQuery = supabase
         .from('questions')
-        .select('id, category, prompt, options')
+        .select('id, category, prompt, options, created_by, status')
+        .neq('status', 'quarantined')
         .eq('category', category)
         .limit(20);
       const fallbackRes = await fallbackQuery;
@@ -86,7 +108,8 @@ export async function fetchRandomQuestion(
     if (error || !data || data.length === 0) {
       const generalQuery = await supabase
         .from('questions')
-        .select('id, category, prompt, options')
+        .select('id, category, prompt, options, created_by, status')
+        .neq('status', 'quarantined')
         .limit(20);
       if (generalQuery.data && generalQuery.data.length > 0) {
         data = generalQuery.data;
@@ -102,10 +125,63 @@ export async function fetchRandomQuestion(
       category: row.category,
       prompt: row.prompt,
       options: Array.isArray(row.options) ? (row.options as string[]) : [],
+      created_by: row.created_by || null,
+      status: row.status || 'verified',
     };
   } catch (err) {
     console.error('fetchRandomQuestion error:', err);
     return null;
+  }
+}
+
+export async function disputeQuestion(params: {
+  questionId: string;
+  reporterWallet: string;
+  reason: string;
+}): Promise<{ success: boolean; quarantined?: boolean; error?: string }> {
+  try {
+    if (!params.questionId || !params.reporterWallet || !params.reason?.trim()) {
+      return { success: false, error: 'Question ID, wallet, and dispute reason are required.' };
+    }
+    const wallet = params.reporterWallet.toLowerCase();
+
+    // Record dispute
+    const { error: disputeErr } = await supabase.from('question_disputes').insert({
+      question_id: params.questionId,
+      reporter_wallet: wallet,
+      reason: params.reason.trim(),
+    });
+
+    if (disputeErr) {
+      if (disputeErr.code === '23505' || disputeErr.message.includes('unique')) {
+        return { success: false, error: 'You have already reported this question.' };
+      }
+      return { success: false, error: disputeErr.message };
+    }
+
+    // Fetch and increment dispute_count
+    const { data: qData } = await supabase
+      .from('questions')
+      .select('dispute_count')
+      .eq('id', params.questionId)
+      .single();
+
+    const currentCount = qData?.dispute_count ?? 0;
+    const nextCount = currentCount + 1;
+    const isQuarantined = nextCount >= 3;
+
+    await supabase
+      .from('questions')
+      .update({
+        dispute_count: nextCount,
+        ...(isQuarantined ? { status: 'quarantined' } : {}),
+      })
+      .eq('id', params.questionId);
+
+    return { success: true, quarantined: isQuarantined };
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Unknown error';
+    return { success: false, error: message };
   }
 }
 
