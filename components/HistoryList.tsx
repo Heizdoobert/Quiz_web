@@ -19,8 +19,9 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
         </h4>
         {history.length > 0 && (
           <button
+            type="button"
             onClick={onOpenReview}
-            className="text-[11px] text-[#00FFCC] hover:underline font-bold font-heading transition-colors cursor-pointer"
+            className="text-[11px] text-[#00FFCC] hover:underline active:opacity-70 font-bold font-heading transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
           >
             Review All →
           </button>

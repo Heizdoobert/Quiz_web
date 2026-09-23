@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Modal from '../Modal';
-import { disputeQuestion } from '@/lib/actions/question-actions';
+import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/use-dispute-modal';
 import { AlertTriangle, Flag, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 
 interface DisputeModalProps {
@@ -12,62 +12,24 @@ interface DisputeModalProps {
   walletAddress?: string | null;
 }
 
-const DISPUTE_REASONS = [
-  { id: 'incorrect_answer', label: 'Designated answer is factually incorrect' },
-  { id: 'ambiguous_options', label: 'Options are misleading or multiple answers are correct' },
-  { id: 'outdated_info', label: 'Outdated crypto protocol or tech information' },
-  { id: 'spam_low_quality', label: 'Spam, promotional content, or poor quality' },
-];
-
 export default function DisputeModal({
   isOpen,
   onClose,
   questionId,
   walletAddress,
 }: DisputeModalProps) {
-  const [selectedReason, setSelectedReason] = useState(DISPUTE_REASONS[0].id);
-  const [details, setDetails] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [isQuarantined, setIsQuarantined] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!questionId) {
-      setError('No active question to dispute.');
-      return;
-    }
-    if (!walletAddress) {
-      setError('Please connect your Web3 wallet to submit a dispute.');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    const fullReason = `${selectedReason}${details.trim() ? `: ${details.trim()}` : ''}`;
-    const res = await disputeQuestion({
-      questionId,
-      reporterWallet: walletAddress,
-      reason: fullReason,
-    });
-
-    setLoading(false);
-    if (res.success) {
-      setSuccess(true);
-      setIsQuarantined(Boolean(res.quarantined));
-    } else {
-      setError(res.error || 'Failed to submit dispute.');
-    }
-  };
-
-  const handleResetAndClose = () => {
-    setSuccess(false);
-    setError(null);
-    setDetails('');
-    onClose();
-  };
+  const {
+    selectedReason,
+    setSelectedReason,
+    details,
+    setDetails,
+    loading,
+    error,
+    success,
+    isQuarantined,
+    handleSubmit,
+    handleResetAndClose,
+  } = useDisputeModal({ onClose, questionId, walletAddress });
 
   return (
     <Modal
@@ -99,7 +61,7 @@ export default function DisputeModal({
           <button
             type="button"
             onClick={handleResetAndClose}
-            className="w-full py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-bold font-heading text-xs transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-bold font-heading text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           >
             Close
           </button>
@@ -161,14 +123,14 @@ export default function DisputeModal({
             <button
               type="button"
               onClick={handleResetAndClose}
-              className="flex-1 py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-400 hover:text-slate-200 font-bold font-heading text-xs transition-all cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-400 hover:text-slate-200 font-bold font-heading text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !walletAddress}
-              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               {loading ? (
                 <>

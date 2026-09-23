@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createQuestion } from '@/lib/actions/question-actions';
+import { useQuestionForm } from '@/hooks/use-question-form';
 import { ChevronDown, ChevronUp, Plus, Sparkles, Loader2 } from 'lucide-react';
 
 interface QuestionFormProps {
@@ -11,65 +11,23 @@ interface QuestionFormProps {
 }
 
 export default function QuestionForm({ walletAddress, onQuestionAdded }: QuestionFormProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [prompt, setPrompt] = useState('');
-  const [options, setOptions] = useState(['', '', '', '']);
-  const [correctIndex, setCorrectIndex] = useState(0);
-  const [category, setCategory] = useState('Web Dev');
-  const [explanation, setExplanation] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(
-    null
-  );
-
-  const handleOptionChange = (idx: number, val: string) => {
-    const updated = [...options];
-    updated[idx] = val;
-    setOptions(updated);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFeedback(null);
-
-    if (!prompt.trim()) {
-      setFeedback({ type: 'error', message: 'Question prompt is required.' });
-      return;
-    }
-    if (options.some((opt) => !opt.trim())) {
-      setFeedback({ type: 'error', message: 'All 4 options must be filled.' });
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const res = await createQuestion({
-        prompt,
-        options,
-        correctIndex,
-        category,
-        explanation,
-        createdBy: walletAddress || undefined,
-      });
-
-      if (!res.success) {
-        setFeedback({ type: 'error', message: res.error || 'Failed to add question.' });
-      } else {
-        setFeedback({ type: 'success', message: 'Question added successfully!' });
-        setPrompt('');
-        setOptions(['', '', '', '']);
-        setExplanation('');
-        setCorrectIndex(0);
-        if (onQuestionAdded) onQuestionAdded();
-      }
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : 'An unexpected error occurred while adding the question.';
-      setFeedback({ type: 'error', message });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const {
+    isOpen,
+    setIsOpen,
+    prompt,
+    setPrompt,
+    options,
+    correctIndex,
+    setCorrectIndex,
+    category,
+    setCategory,
+    explanation,
+    setExplanation,
+    loading,
+    feedback,
+    handleOptionChange,
+    handleSubmit,
+  } = useQuestionForm({ walletAddress, onQuestionAdded });
 
   return (
     <section className="w-full bg-[#1A1B35]/90 border border-[#2D305A] rounded-3xl shadow-xl overflow-hidden backdrop-blur-md my-4">

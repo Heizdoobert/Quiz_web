@@ -5,6 +5,7 @@ import { getDefaultConfig, RainbowKitProvider, darkTheme } from '@rainbow-me/rai
 import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon, optimism, arbitrum, base, baseSepolia } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { MotionConfig } from 'framer-motion';
 import { useState } from 'react';
 
 const projectId =
@@ -22,10 +23,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={darkTheme()}>{children}</RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <MotionConfig reducedMotion="user">
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider theme={darkTheme()}>{children}</RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </MotionConfig>
   );
 }
