@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
@@ -62,7 +63,7 @@ export default function QuizCard({
   // Empty state when no question is available
   if (!question) {
     return (
-      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 text-center">
+      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 glass glass-border glass-edge rounded-3xl shadow-2xl shadow-black/60 text-center">
         <Rocket className="w-12 h-12 text-[#00FFCC] mb-4 animate-bounce" />
         <h2 className="text-2xl font-bold font-heading text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-300 max-w-md mb-6">
@@ -81,10 +82,10 @@ export default function QuizCard({
 
   return (
     <div className="relative w-full min-h-[460px] perspective-1000">
-      <div
-        className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
+      <motion.div
+        className="relative w-full h-full transform-style-3d"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
         {/* Front Face */}
         <div
@@ -126,7 +127,7 @@ export default function QuizCard({
             />
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

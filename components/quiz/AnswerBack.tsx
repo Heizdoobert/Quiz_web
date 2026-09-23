@@ -36,7 +36,7 @@ export default function AnswerBack({
   }, [onNext]);
 
   return (
-    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl backdrop-blur-md">
+    <div className="flex flex-col h-full justify-between p-6 sm:p-8 glass glass-border glass-edge rounded-3xl shadow-2xl">
       {/* Top Banner */}
       <div
         className={`flex items-center gap-3.5 p-4 rounded-2xl border ${

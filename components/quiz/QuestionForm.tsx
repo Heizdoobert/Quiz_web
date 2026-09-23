@@ -30,7 +30,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
   } = useQuestionForm({ walletAddress, onQuestionAdded });
 
   return (
-    <section className="w-full bg-[#1A1B35]/90 border border-[#2D305A] rounded-3xl shadow-xl overflow-hidden backdrop-blur-md my-4">
+    <section className="w-full glass glass-border glass-edge rounded-3xl shadow-xl overflow-hidden my-4">
       {/* Header bar */}
       <button
         type="button"
@@ -191,10 +191,10 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                 <motion.button
                   type="submit"
                   disabled={loading}
-                  whileHover={{ scale: loading ? 1 : 1.03 }}
+                  whileHover={{ scale: loading ? 1 : 1.03, filter: loading ? 'none' : 'brightness(1.1)' }}
                   whileTap={{ scale: loading ? 1 : 0.97 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] rounded-xl font-black font-heading text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] rounded-xl font-black font-heading text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />

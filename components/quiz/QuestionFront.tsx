@@ -48,7 +48,7 @@ export default function QuestionFront({
   });
 
   return (
-    <div className="flex flex-col h-full justify-between p-6 sm:p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl backdrop-blur-md">
+    <div className="flex flex-col h-full justify-between p-6 sm:p-8 glass glass-border glass-edge rounded-3xl shadow-2xl">
       {/* Top Meta Bar */}
       <div className="flex items-center justify-between pb-4 border-b border-[#2D305A]">
         <div className="flex items-center gap-2">
@@ -173,8 +173,8 @@ export default function QuestionFront({
                 type="button"
                 disabled={isEliminated || isSubmitting}
                 onClick={() => handleOptionClick(idx)}
-                whileHover={isEliminated || isSubmitting ? {} : { scale: 1.015 }}
-                whileTap={isEliminated || isSubmitting ? {} : { scale: 0.985 }}
+                whileHover={isEliminated || isSubmitting ? {} : { scale: 1.015, filter: 'brightness(1.1)' }}
+                whileTap={isEliminated || isSubmitting ? {} : { scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 450, damping: 25 }}
                 className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
                   isEliminated
@@ -183,7 +183,7 @@ export default function QuestionFront({
                     ? 'bg-[#222344] border-[#00FFCC] shadow-[0_0_25px_rgba(0,255,204,0.3)] ring-1 ring-[#00FFCC] cursor-wait'
                     : isSubmitting
                     ? 'bg-[#131428]/60 border-[#2D305A]/60 opacity-60 cursor-not-allowed'
-                    : 'bg-[#131428]/80 border-[#2D305A] hover:border-[#00FFCC] hover:bg-[#222344] hover:shadow-[0_0_20px_rgba(0,255,204,0.18)] cursor-pointer'
+                    : 'bg-[#131428]/80 border-[#2D305A] hover:border-[#00FFCC] hover:bg-[#222344] cursor-pointer'
                 }`}
               >
                 <span className={`w-8 h-8 flex items-center justify-center rounded-xl border text-xs font-black font-heading transition-all shrink-0 ${
