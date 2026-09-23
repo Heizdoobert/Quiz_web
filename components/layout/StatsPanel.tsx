@@ -21,7 +21,7 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
     <div className="space-y-2.5">
       <div className="grid grid-cols-3 gap-2.5">
         {/* Total Score */}
-        <div className="p-3 bg-[#0A1128]/80 border border-[#2D305A] rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#6C5CE7]/50 transition-colors">
+        <div className="glass glass-border p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#6C5CE7]/50 transition-colors">
           <Trophy className="w-4 h-4 text-[#FFD166] mb-1" />
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Score</span>
           <span className="text-xl font-black font-heading text-white">{stats.score}</span>
@@ -30,10 +30,10 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
 
         {/* Streak with Dynamic Flame Glow */}
         <div
-          className={`p-3 bg-[#0A1128]/80 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner transition-all ${
+          className={`glass glass-border p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner transition-all ${
             stats.streak >= 3
               ? 'border border-[#FF4757] shadow-[0_0_20px_rgba(255,71,87,0.3)] animate-pulse'
-              : 'border border-[#2D305A] hover:border-[#FF4757]/50'
+              : 'hover:border-[#FF4757]/50'
           }`}
         >
           <Flame className={`w-4 h-4 mb-1 ${stats.streak >= 3 ? 'text-[#FF4757] animate-bounce' : 'text-[#FF4757]'}`} />
@@ -43,7 +43,7 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
         </div>
 
         {/* Accuracy */}
-        <div className="p-3 bg-[#0A1128]/80 border border-[#2D305A] rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#00FFCC]/50 transition-colors">
+        <div className="glass glass-border p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#00FFCC]/50 transition-colors">
           <Target className="w-4 h-4 text-[#00FFCC] mb-1" />
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Accuracy</span>
           <span className="text-xl font-black font-heading text-[#00FFCC]">{stats.accuracy}%</span>
@@ -59,7 +59,7 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="w-full p-2.5 bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#00FFCC]/50 rounded-2xl flex items-center justify-between hover:bg-[#25284D] transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="glass glass-border w-full p-3 rounded-2xl flex items-center justify-between hover:border-[#00FFCC]/50 hover:bg-[#25284D] transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
         >
           <div className="flex items-center gap-2">
             <Coins className="w-4 h-4 text-[#FFD166] group-hover:rotate-12 transition-transform" />

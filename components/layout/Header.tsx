@@ -21,7 +21,7 @@ export default function Header({
   const { isMuted, handleToggleSound } = useSoundToggle();
 
   return (
-    <header className="flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] bg-[#1A1B35]/90 backdrop-blur-md sticky top-0 z-30 shadow-lg">
+    <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] sticky top-0 z-30 shadow-lg">
       <div className="flex items-center gap-2.5">
         <div className="p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_12px_rgba(0,255,204,0.2)]">
           <Zap className="w-5 h-5 animate-pulse" />

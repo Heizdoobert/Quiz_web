@@ -25,7 +25,7 @@ export default function Sidebar({
 }: SidebarProps) {
   return (
     <aside
-      className={`p-5 rounded-3xl bg-[#1A1B35]/90 border border-[#2D305A] shadow-2xl backdrop-blur-md space-y-5 ${className}`}
+      className={`glass glass-border glass-edge p-6 rounded-3xl shadow-2xl space-y-5 ${className}`}
       aria-label="Scoreboard and Stats"
     >
       <h3 className="text-sm font-extrabold text-white flex items-center gap-2 tracking-wide">
