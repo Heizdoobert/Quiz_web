@@ -72,7 +72,7 @@ Vercel là nền tảng tối ưu nhất cho Next.js, có gói **Hobby (Free)** 
 5. Nhấn nút **Deploy**. Sau 2 phút, trang web sẽ có đường dẫn công khai (ví dụ `quick-quiz.vercel.app`).
 6. Vào mục **Settings ➔ Domains** trên Vercel để trỏ tên miền riêng bạn đã mua vào.
 
-*(Hoặc nếu bạn muốn tự chạy trên VPS Linux riêng bằng Docker, chỉ cần thuê VPS Hetzner / DigitalOcean giá ~4$/tháng và dùng lệnh `docker compose up -d web` kèm Nginx).*
+*(Hoặc nếu bạn muốn tự chạy trên VPS Linux riêng bằng Docker, chỉ cần thuê VPS Hetzner / DigitalOcean giá ~4$/tháng và dùng lệnh `npm run docker:up` (tự động rebuild và dọn image cũ) kèm Nginx).*
 
 ---
 
