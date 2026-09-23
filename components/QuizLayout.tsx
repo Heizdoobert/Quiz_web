@@ -31,6 +31,7 @@ import TimerSettingsModal from './modals/TimerSettingsModal';
 import GroupModal from './modals/GroupModal';
 import ReviewModal, { HistoryItem } from './modals/ReviewModal';
 import RewardsModal from './modals/RewardsModal';
+import ProfileModal from './modals/ProfileModal';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { ClaimableRewards } from '@/lib/types';
 import { soundEngine } from '@/lib/audio';
@@ -398,6 +399,14 @@ export default function QuizLayout({
           refreshRewards();
         }}
         walletAddress={address || null}
+      />
+      <ProfileModal
+        isOpen={activeModal === 'profile'}
+        onClose={() => setActiveModal(null)}
+        address={address}
+        stats={stats}
+        claimableRewards={claimableRewards}
+        onOpenRewards={() => setActiveModal('rewards')}
       />
     </div>
 
