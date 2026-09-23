@@ -178,29 +178,42 @@ Khi token có giá trị tiền thật, bạn cần bảo vệ hệ thống trư
 
 ---
 
-## 7. Dự toán Chi phí Vốn & Doanh thu Dự phóng
+## 7. Dự toán Chi phí Vốn & Doanh thu Dự phóng (Dữ liệu Thực tế 2025–2026)
 
-### 7.1. Chi phí vốn ban đầu (Khởi nghiệp dự án)
-| Khoản chi | Mục đích | Chi phí ước tính |
-|---|---|---|
-| **Tên miền .xyz** | Định danh thương hiệu (1 năm) | ~3$ |
-| **Hosting Vercel** | Máy chủ web toàn cầu | **0$** (Free tier) |
-| **Database Supabase** | Lưu trữ người dùng, điểm, câu hỏi | **0$** (Free tier 500MB) |
-| **Phí deploy Base Mainnet** | Đưa 2 Smart Contract lên mạng thật | ~1.5$ |
-| **Vốn nạp thanh khoản ban đầu** | Đảm bảo giá trị đổi tiền cho token | ~30$ - 50$ |
-| **TỔNG VỐN KHỞI TẠO** | | **~35$ - 55$ (~850.000 - 1.300.000 VNĐ)** |
+> [!CAUTION]
+> **CẢNH BÁO NGUY CƠ VỠ NỢ POOL NẾU ĐỊNH GIÁ SAI:**
+> Nhiều dự án Play-to-Earn chết yểu vì phát hành token thưởng nhiều hơn doanh thu quảng cáo thu về.
+> Theo số liệu thực tế từ các nền tảng Faucet/Learn-to-Earn (Cointiply, ReadyFaucet):
+> - **eCPM hỗn hợp thực tế của Banner Crypto (với 70% traffic Châu Á/Việt Nam):** chỉ dao động từ **0.30$ - 0.70$ / 1.000 lượt xem** (trung bình thực tế **0.50$**).
+> - **Quy tắc vàng:** Tổng ngân sách trả thưởng token **KHÔNG ĐƯỢC VƯỢT QUÁ 30% - 40% doanh thu quảng cáo**. 60% - 70% còn lại là lợi nhuận ròng của bạn.
 
-### 7.2. Dự phóng dòng tiền hàng tháng (Ví dụ với 1.000 người chơi/ngày)
-Giả định:
-- **1.000 người chơi hoạt động mỗi ngày (DAU)**.
-- Mỗi người chơi trả lời trung bình 10 câu hỏi ➔ **10.000 lượt xem trang/ngày** ➔ **300.000 lượt hiển thị quảng cáo (Impressions) / tháng**.
+### 7.1. Bài toán kinh tế trên 1 Người chơi (Unit Economics)
+- 1 người chơi trả lời **10 câu hỏi/ngày** ➔ xem **30 lượt banner**.
+- Doanh thu quảng cáo từ 1 người chơi:
+  $$\text{Doanh thu} = \frac{30}{1.000} \times 0.50\$ = \mathbf{0.015\$} \text{ (~375 VNĐ)}$$
+- Ngân sách trả thưởng tối đa an toàn (30%):
+  $$\text{Quỹ thưởng} = 0.015\$ \times 30\% = \mathbf{0.0045\$} \text{ (~112 VNĐ)}$$
+- 10 câu đúng người chơi nhận được **100 $QUIZ**.
+- 👉 **Định giá token $QUIZ an toàn trên sàn DEX Uniswap:**
+  $$\mathbf{1\ \$QUIZ = 0.000045\$\ USD} \quad (\text{hoặc } 100.000\ \$QUIZ \approx 4.5\$\ \text{USDC})$$
+  *(Không được định giá cao hơn mức này khi chưa có nguồn thu lớn khác, nếu không thanh khoản sẽ bị rút sạch!)*.
 
-| Chỉ số tài chính | Con số dự phóng |
+### 7.2. Dự phóng dòng tiền thực tế hàng tháng (Với 1.000 người chơi hoạt động/ngày)
+Giả định: 1.000 DAU, mỗi người chơi 10 câu/ngày ➔ 300.000 lượt hiển thị banner/tháng.
+
+| Chỉ số tài chính | Con số thực tế ước tính |
 |---|---|
-| **Doanh thu Quảng cáo (eCPM trung bình 2$ - 3$)** | **+600$ - 900$ / tháng** |
-| Chi phí duy trì thanh khoản cho người chơi | -150$ - 250$ / tháng |
-| Chi phí máy chủ / cơ sở dữ liệu | -0$ (vẫn nằm trong free tier) |
-| **LỢI NHUẬN RÒNG CỦA BẠN (NET PROFIT)** | **+450$ - 650$ / tháng (~11.000.000 - 16.000.000 VNĐ)** |
+| **Doanh thu Banner Quảng cáo (eCPM 0.50$)** | **+450$ / tháng** (~11.250.000 VNĐ) |
+| Chi phí thanh khoản chi trả thưởng token (30%) | **-135$ / tháng** (~3.375.000 VNĐ) |
+| Chi phí duy trì Supabase + Vercel | **-25$ / tháng** (~625.000 VNĐ) |
+| **LỢI NHUẬN RÒNG THỰC TẾ (NET PROFIT)** | **+290$ / tháng (~7.250.000 VNĐ / tháng)** |
+
+---
+
+### 7.3. Cách Nâng eCPM từ 0.50$ lên 2.0$ - 4.0$ (Tăng gấp 5 lần doanh thu)
+1. **Tích hợp Offerwall (Monlix, BitLabs, CPALead):** Cho phép người chơi làm khảo sát crypto nhận token thưởng lớn. Mạng trả cho bạn **0.50$ - 2.0$ / khảo sát**.
+2. **Rewarded Video Ads:** Người chơi xem video ngắn 15s để nhận thêm lượt 50:50 hoặc skip câu khó. eCPM video đạt **8.0$ - 15.0$**.
+3. **Token Sinks:** Thu lại token $QUIZ khi người chơi mua vé giải đấu tuần (Weekly Tournament) hoặc phí lập Clan.
 
 ---
 
