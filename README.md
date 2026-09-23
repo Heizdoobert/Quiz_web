@@ -11,11 +11,14 @@ It features anti-cheat server-side answer verification, real-time statistics, gl
 ```
 quick-quiz/
 ├── app/                           # Next.js App Router (SSR initial data, error/loading boundaries)
-│   ├── layout.tsx                 # Root layout with Inter font and Web3 Providers
-│   ├── page.tsx                   # SSR Home Page (pre-fetches initial question & leaderboard)
+│   ├── layout.tsx                 # Root layout with Metadata, Fonts, and JSON-LD Structured Data
+│   ├── page.tsx                   # SSR Home Page (pre-fetches initial question, leaderboard & Quiz schema)
 │   ├── loading.tsx                # Streaming loading skeleton
 │   ├── error.tsx                  # Error boundary with recovery action
 │   ├── not-found.tsx              # Custom 404 page
+│   ├── sitemap.ts                 # Dynamic XML sitemap generator
+│   ├── robots.ts                  # Search engine robots.txt configuration
+│   ├── manifest.ts                # Web App Manifest (PWA) configuration
 │   └── globals.css                # Tailwind CSS v4 and 3D card perspective utilities
 ├── components/                    # UI Component Library
 │   ├── Header.tsx                 # Web3 ConnectButton + animated Rewards button + Audio toggle
@@ -24,6 +27,7 @@ quick-quiz/
 │   ├── QuizCard.tsx               # 3D Flip Card wrapper with Confetti & Keyboard Nav
 │   ├── QuestionFront.tsx          # Card front with Sponsor Gate, Timer, 50:50/Skip, and Options
 │   ├── AnswerBack.tsx             # Card back with Result feedback, Explanation, and Dispute button
+│   ├── SeoFaqSection.tsx          # Semantic SEO & Knowledge FAQ accordion
 │   ├── QuestionForm.tsx           # Community question submission accordion with heuristic audit
 │   ├── Sidebar.tsx                # Left column coordinating stats, history, and rewards summary
 │   ├── StatsPanel.tsx             # Live score, streak counter, accuracy, and claimable tokens
@@ -105,6 +109,13 @@ quick-quiz/
 - **$QUIZ Token (ERC-20)**: Players earn 10 $QUIZ tokens per verified correct answer. Claims are signed off-chain via **EIP-712** vouchers.
 - **Achievement Badges (ERC-721)**: Milestone NFT badges (Leaderboard Champion, Streak Fire, Century Quizzer, Perfect Round).
 - **Zero Gas Cost for Host**: The user submits the transaction and pays fractional-cent L2 gas (~$0.001) on Base Sepolia.
+
+### 6. Full-Stack Google SEO & Rich Snippets (Schema.org)
+- **JSON-LD Structured Data**: Injects schema.org `WebSite`, `WebApplication`, `FAQPage`, and dynamic educational `Quiz` / `Question` multiple-choice schemas into server-rendered HTML for maximum Google SERP real estate.
+- **Automated Metadata Routes**: Dynamic `app/sitemap.ts` (`/sitemap.xml`) and `app/robots.ts` (`/robots.txt`).
+- **Progressive Web App (PWA)**: Configured `app/manifest.ts` and responsive cyberpunk SVG icons (`public/icon.svg`).
+- **OpenGraph & Twitter Cards**: Complete social preview tags with canonical URL safeguards.
+- **Semantic SEO Content**: Integrated crawlable FAQ and platform overview accordion (`components/SeoFaqSection.tsx`).
 
 ---
 

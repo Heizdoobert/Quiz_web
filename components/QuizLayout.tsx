@@ -18,6 +18,7 @@ import ReviewModal from './modals/ReviewModal';
 import RewardsModal from './modals/RewardsModal';
 import ProfileModal from './modals/ProfileModal';
 import DisputeModal from './modals/DisputeModal';
+import SeoFaqSection from './SeoFaqSection';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -147,6 +148,9 @@ export default function QuizLayout({
 
           {/* Bottom Banner Ad */}
           <AdZone variant="banner" slot="bottom-banner" />
+
+          {/* Semantic SEO & Knowledge FAQ Section */}
+          <SeoFaqSection />
         </div>
 
         {/* Right Skyscraper Ad (Desktop Only) */}
