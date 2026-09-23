@@ -14,7 +14,9 @@ import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
 import { useState } from 'react';
 
-// Configure Coinbase Wallet to support Coinbase Smart Wallet (passkeys / EIP-5792)
+// Configure Coinbase Wallet to support Coinbase Smart Wallet (passkeys / EIP-5792).
+// In @rainbow-me/rainbowkit, static property assignment on the wallet factory
+// is the documented API pattern (AcceptedCoinbaseWalletParameters interface).
 coinbaseWallet.preference = 'all';
 
 const projectId =

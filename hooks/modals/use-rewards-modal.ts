@@ -193,6 +193,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
 
   const handleClaimTokens = async () => {
     if (!walletAddress || isWrongChain) return;
+    setMintingBadge(null);
     setTxHash(null);
     setCallId(null);
     setEoaTxHash(null);
