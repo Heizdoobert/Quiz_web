@@ -32,6 +32,7 @@ import GroupModal from './modals/GroupModal';
 import ReviewModal, { HistoryItem } from './modals/ReviewModal';
 import RewardsModal from './modals/RewardsModal';
 import ProfileModal from './modals/ProfileModal';
+import DisputeModal from './modals/DisputeModal';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { ClaimableRewards } from '@/lib/types';
 import { soundEngine } from '@/lib/audio';
@@ -89,7 +90,7 @@ export default function QuizLayout({
 
   // Modals
   const [activeModal, setActiveModal] = useState<
-    'intro' | 'timer' | 'group' | 'review' | 'rewards' | 'profile' | null
+    'intro' | 'timer' | 'group' | 'review' | 'rewards' | 'profile' | 'dispute' | null
   >(null);
 
   // Rewards
@@ -333,6 +334,7 @@ export default function QuizLayout({
                   const form = document.getElementById('custom-form');
                   form?.scrollIntoView({ behavior: 'smooth' });
                 }}
+                onOpenDispute={() => setActiveModal('dispute')}
               />
 
               <div id="custom-form" className="w-full mt-4">
@@ -407,6 +409,12 @@ export default function QuizLayout({
         stats={stats}
         claimableRewards={claimableRewards}
         onOpenRewards={() => setActiveModal('rewards')}
+      />
+      <DisputeModal
+        isOpen={activeModal === 'dispute'}
+        onClose={() => setActiveModal(null)}
+        questionId={currentQuestion?.id}
+        walletAddress={address || null}
       />
     </div>
 
