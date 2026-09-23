@@ -59,7 +59,7 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="w-full p-2.5 bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#00FFCC]/50 rounded-2xl flex items-center justify-between hover:bg-[#25284D] transition-all cursor-pointer group"
+          className="w-full p-2.5 bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#00FFCC]/50 rounded-2xl flex items-center justify-between hover:bg-[#25284D] transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
         >
           <div className="flex items-center gap-2">
             <Coins className="w-4 h-4 text-[#FFD166] group-hover:rotate-12 transition-transform" />

@@ -24,6 +24,7 @@ import Sidebar from './Sidebar';
 import LeaderboardPanel from './LeaderboardPanel';
 import QuestionForm from './QuestionForm';
 import AdZone from './AdZone';
+import StickyBannerAd from './StickyBannerAd';
 import IntroModal from './modals/IntroModal';
 import TimerSettingsModal from './modals/TimerSettingsModal';
 import GroupModal from './modals/GroupModal';
@@ -49,6 +50,7 @@ export default function QuizLayout({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<AnswerSubmissionResult | null>(null);
+  const [showStickyAd, setShowStickyAd] = useState(true);
 
   // Stats & History
   const [stats, setStats] = useState<UserStats>({
@@ -250,7 +252,7 @@ export default function QuizLayout({
         hasClaimable={BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) || (claimableRewards?.eligibleBadges?.length ?? 0) > 0}
         isConnected={isConnected}
       />
-      <div className="w-full flex justify-center py-6 px-4">
+      <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-[84px]' : 'pb-6'}`}>
       <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">
         {/* Left Skyscraper Ad (Desktop Only) */}
         <AdZone variant="skyscraper" slot="left-sky" />
@@ -361,6 +363,14 @@ export default function QuizLayout({
         walletAddress={address || null}
       />
     </div>
+
+    {/* Sticky Bottom Banner Ad with Isolated Tap Targets */}
+    {showStickyAd && (
+      <StickyBannerAd
+        position="bottom"
+        onDismiss={() => setShowStickyAd(false)}
+      />
+    )}
     </>
   );
 }

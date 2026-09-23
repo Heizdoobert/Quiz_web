@@ -213,8 +213,9 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
         <div className="mb-4 p-3 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-[#FF4757] text-sm flex items-center justify-between">
           <span className="font-medium">Switch to Base Sepolia to claim rewards</span>
           <button
+            type="button"
             onClick={() => switchChain({ chainId: TARGET_CHAIN_ID })}
-            className="px-3 py-1 bg-[#FF4757] hover:bg-[#FF4757]/90 text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+            className="px-3 py-1 bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
           >
             Switch
           </button>
@@ -224,8 +225,9 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
       {/* Tabs */}
       <div className="flex gap-1.5 mb-4 bg-[#0A1128]/80 border border-[#2D305A] rounded-xl p-1.5">
         <button
+          type="button"
           onClick={() => setTab('tokens')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
             tab === 'tokens'
               ? 'bg-[#6C5CE7] text-white shadow-md'
               : 'text-slate-400 hover:text-[#00FFCC]'
@@ -234,8 +236,9 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
           <Coins className="w-4 h-4" /> $QUIZ Tokens
         </button>
         <button
+          type="button"
           onClick={() => setTab('badges')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-98 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
             tab === 'badges'
               ? 'bg-[#6C5CE7] text-white shadow-md'
               : 'text-slate-400 hover:text-[#00FFCC]'
@@ -307,7 +310,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
             whileHover={{ scale: 1.015 }}
             whileTap={{ scale: 0.985 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading"
+            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           >
             {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
@@ -365,7 +368,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
                     whileHover={{ scale: isMinting ? 1 : 1.02 }}
                     whileTap={{ scale: isMinting ? 1 : 0.98 }}
                     transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow font-heading"
+                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                   >
                     {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-[#0A1128]" /> : null}
                     {isMinting ? 'Minting...' : 'Mint Badge'}

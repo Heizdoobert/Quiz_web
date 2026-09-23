@@ -23,8 +23,9 @@ export default function Header({ onOpenRewards, hasClaimable, isConnected }: Hea
       <div className="flex items-center gap-3">
         {isConnected && onOpenRewards && (
           <button
+            type="button"
             onClick={onOpenRewards}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#FFD166] font-bold font-heading text-xs transition-all shadow-[0_0_15px_rgba(255,209,102,0.12)] hover:scale-105 cursor-pointer"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#FFD166] font-bold font-heading text-xs transition-all shadow-[0_0_15px_rgba(255,209,102,0.12)] hover:scale-105 cursor-pointer"
             aria-label="Rewards"
           >
             <Gift className="w-4 h-4 text-[#FFD166]" />

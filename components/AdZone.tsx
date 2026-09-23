@@ -1,14 +1,19 @@
 import React from 'react';
 import { Zap, Rocket } from 'lucide-react';
+import StickyBannerAd from './StickyBannerAd';
 
 interface AdZoneProps {
-  variant: 'skyscraper' | 'banner';
+  variant: 'skyscraper' | 'banner' | 'sticky-bottom';
   slot: string;
   className?: string;
   children?: React.ReactNode;
 }
 
 export default function AdZone({ variant, slot, className = '', children }: AdZoneProps) {
+  if (variant === 'sticky-bottom') {
+    return <StickyBannerAd />;
+  }
+
   if (variant === 'skyscraper') {
     return (
       <aside

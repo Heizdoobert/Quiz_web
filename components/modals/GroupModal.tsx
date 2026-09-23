@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
 import { Group } from '@/lib/types';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
-import { Shield, Users, UserPlus, Plus } from 'lucide-react';
+import { Shield, Users, UserPlus, Plus, Loader2 } from 'lucide-react';
 
 interface GroupModalProps {
   isOpen: boolean;
@@ -233,9 +233,10 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading"
+              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
             >
-              {loading ? 'Creating...' : 'Create Group'}
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+              <span>{loading ? 'Creating Group...' : 'Create Group'}</span>
             </motion.button>
           </form>
         )}
@@ -260,9 +261,10 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading"
+              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-all shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
             >
-              {loading ? 'Joining...' : 'Join Group'}
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+              <span>{loading ? 'Joining Guild...' : 'Join Group'}</span>
             </motion.button>
           </form>
         )}
