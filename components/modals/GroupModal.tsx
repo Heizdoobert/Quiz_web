@@ -45,7 +45,7 @@ export default function GroupModal({
       icon={<Shield className="w-5 h-5 text-[#6C5CE7]" />}
       maxWidth="max-w-lg"
     >
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Navigation Tabs */}
         <div className="flex border-b border-[#2D305A] gap-2">
           <button
@@ -86,7 +86,7 @@ export default function GroupModal({
         {/* Message Banner */}
         {message && (
           <div
-            className={`p-3 rounded-xl text-xs font-semibold ${
+            className={`p-4 rounded-xl text-xs font-semibold ${
               message.type === 'error'
                 ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/30'
                 : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30'
@@ -110,10 +110,10 @@ export default function GroupModal({
                 {groups.map((g) => (
                   <div
                     key={g.id}
-                    className="p-3 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
+                    className="p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
                   >
                     <div>
-                      <h4 className="font-bold text-white text-sm">{g.name}</h4>
+                      <h5 className="font-bold text-white text-sm">{g.name}</h5>
                       {g.description && (
                         <p className="text-xs text-slate-400 line-clamp-1">{g.description}</p>
                       )}
@@ -146,7 +146,7 @@ export default function GroupModal({
 
         {/* Tab 2: Create Group */}
         {tab === 'create' && (
-          <form onSubmit={handleCreate} className="space-y-3">
+          <form onSubmit={handleCreate} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-white mb-1">Group Name *</label>
               <input
@@ -156,7 +156,7 @@ export default function GroupModal({
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="e.g. Web3 Titans"
-                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <div>
@@ -167,7 +167,7 @@ export default function GroupModal({
                 value={groupDesc}
                 onChange={(e) => setGroupDesc(e.target.value)}
                 placeholder="What is this guild about?"
-                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <motion.button
@@ -186,7 +186,7 @@ export default function GroupModal({
 
         {/* Tab 3: Join Group */}
         {tab === 'join' && (
-          <form onSubmit={handleJoin} className="space-y-3">
+          <form onSubmit={handleJoin} className="space-y-4">
             <div>
               <label className="block text-xs font-bold text-white mb-1">Group ID (UUID) *</label>
               <input
@@ -195,7 +195,7 @@ export default function GroupModal({
                 value={joinId}
                 onChange={(e) => setJoinId(e.target.value)}
                 placeholder="Paste group UUID here..."
-                className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm font-mono focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm font-mono focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
               />
             </div>
             <motion.button

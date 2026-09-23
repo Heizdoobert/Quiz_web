@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import Modal from '../Modal';
 import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/modals/use-dispute-modal';
 import { AlertTriangle, Flag, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
@@ -40,19 +41,19 @@ export default function DisputeModal({
       maxWidth="max-w-md"
     >
       {success ? (
-        <div className="text-center py-6 space-y-4">
+        <div className="text-center py-7 space-y-5">
           <div className="w-12 h-12 mx-auto rounded-2xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 flex items-center justify-center text-[#00FFCC]">
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-heading font-black text-base text-slate-100">
+            <h5 className="font-black text-base text-slate-100">
               Dispute Recorded
-            </h4>
+            </h5>
             <p className="text-xs text-slate-400 mt-2 leading-relaxed">
               Thank you for protecting the integrity of our Crypto Learn-to-Earn ecosystem.
             </p>
             {isQuarantined && (
-              <div className="mt-3 p-3 rounded-xl bg-[#FF4757]/10 border border-[#FF4757]/30 text-[#FF4757] text-xs font-medium flex items-center justify-center gap-2">
+              <div className="mt-3 p-4 rounded-xl bg-[#FF4757]/10 border border-[#FF4757]/30 text-[#FF4757] text-xs font-medium flex items-center justify-center gap-2">
                 <ShieldAlert className="w-4 h-4 shrink-0" />
                 <span>Threshold met! This question has been quarantined from the reward pool.</span>
               </div>
@@ -67,13 +68,13 @@ export default function DisputeModal({
           </button>
         </div>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <p className="text-xs text-slate-400 leading-relaxed">
             Report factual errors or unfair options to protect the Learn-to-Earn reward pool.
           </p>
 
           {error && (
-            <div className="p-3 rounded-xl bg-[#FF4757]/15 border border-[#FF4757]/40 text-[#FF4757] text-xs font-medium">
+            <div className="p-4 rounded-xl bg-[#FF4757]/15 border border-[#FF4757]/40 text-[#FF4757] text-xs font-medium">
               {error}
             </div>
           )}
@@ -86,7 +87,7 @@ export default function DisputeModal({
               {DISPUTE_REASONS.map((r) => (
                 <label
                   key={r.id}
-                  className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs cursor-pointer transition-all ${
+                  className={`flex items-start gap-2.5 p-4 rounded-xl border text-xs cursor-pointer transition-all ${
                     selectedReason === r.id
                       ? 'bg-[#FF4757]/10 border-[#FF4757]/50 text-slate-100'
                       : 'bg-[#0A1128]/70 border-[#2D305A] text-slate-400 hover:text-slate-300 hover:border-[#3A3E70]'
@@ -127,10 +128,13 @@ export default function DisputeModal({
             >
               Cancel
             </button>
-            <button
+            <motion.button
               type="submit"
               disabled={loading || !walletAddress}
-              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+              whileHover={loading || !walletAddress ? {} : { filter: 'brightness(1.1)' }}
+              whileTap={loading || !walletAddress ? {} : { scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               {loading ? (
                 <>
@@ -143,7 +147,7 @@ export default function DisputeModal({
                   <span>Submit Dispute</span>
                 </>
               )}
-            </button>
+            </motion.button>
           </div>
         </form>
       )}

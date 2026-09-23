@@ -55,18 +55,18 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         </div>
       }
     >
-      <div className="space-y-4">
+      <div className="space-y-5">
         {step === 1 && (
-          <div className="text-center py-2 space-y-3">
+          <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-3 rounded-2xl bg-[#00FFCC]/15 border border-[#00FFCC]/30 text-[#00FFCC]">
+              <div className="p-4 rounded-2xl bg-[#00FFCC]/15 border border-[#00FFCC]/30 text-[#00FFCC]">
                 <FileEdit className="w-8 h-8" />
               </div>
             </div>
             <span className="text-xs font-bold px-2.5 py-1 bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30 rounded-full font-heading">
               Step 1 of 3
             </span>
-            <h3 className="text-lg font-bold text-white font-heading">Create Your Questions</h3>
+            <h5 className="text-lg font-bold text-white">Create Your Questions</h5>
             <p className="text-sm text-slate-300">
               Click <strong className="text-[#00FFCC]">&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
             </p>
@@ -74,16 +74,16 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         )}
 
         {step === 2 && (
-          <div className="text-center py-2 space-y-3">
+          <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-3 rounded-2xl bg-[#6C5CE7]/20 border border-[#6C5CE7]/40 text-[#6C5CE7]">
+              <div className="p-4 rounded-2xl bg-[#6C5CE7]/20 border border-[#6C5CE7]/40 text-[#6C5CE7]">
                 <Boxes className="w-8 h-8" />
               </div>
             </div>
             <span className="text-xs font-bold px-2.5 py-1 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/40 rounded-full font-heading">
               Step 2 of 3
             </span>
-            <h3 className="text-lg font-bold text-white font-heading">Build Your Trivia Pool</h3>
+            <h5 className="text-lg font-bold text-white">Build Your Trivia Pool</h5>
             <p className="text-sm text-slate-300">
               Every question you add is stored securely in Supabase. Your questions become playable by everyone in the community!
             </p>
@@ -91,16 +91,16 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         )}
 
         {step === 3 && (
-          <div className="text-center py-2 space-y-3">
+          <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-3 rounded-2xl bg-[#FFD166]/20 border border-[#FFD166]/40 text-[#FFD166]">
+              <div className="p-4 rounded-2xl bg-[#FFD166]/20 border border-[#FFD166]/40 text-[#FFD166]">
                 <Trophy className="w-8 h-8" />
               </div>
             </div>
             <span className="text-xs font-bold px-2.5 py-1 bg-[#FFD166]/20 text-[#FFD166] border border-[#FFD166]/40 rounded-full font-heading">
               Step 3 of 3
             </span>
-            <h3 className="text-lg font-bold text-white font-heading">Play & Climb Ranks</h3>
+            <h5 className="text-lg font-bold text-white">Play & Climb Ranks</h5>
             <p className="text-sm text-slate-300">
               Use keys <strong className="text-[#00FFCC]">1–4</strong> or <strong className="text-[#00FFCC]">A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
             </p>

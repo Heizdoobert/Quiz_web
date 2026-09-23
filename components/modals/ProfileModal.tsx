@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import Modal from '../Modal';
 import { useProfileModal } from '@/hooks/modals/use-profile-modal';
 import { UserStats, ClaimableRewards, BADGE_NAMES, BADGE_ICONS } from '@/lib/types';
@@ -56,9 +57,9 @@ export default function ProfileModal({
       icon={<User className="w-5 h-5 text-[#6C5CE7]" />}
       maxWidth="max-w-xl"
     >
-      <div className="space-y-6">
+      <div className="space-y-7">
         {/* User Identity Card */}
-        <div className="p-4 rounded-2xl bg-[#0A1128]/90 border border-[#2D305A] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-5 rounded-2xl bg-[#0A1128]/90 border border-[#2D305A] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#6C5CE7] to-[#00FFCC] flex items-center justify-center font-heading font-black text-xl text-[#0A1128] shadow-lg">
               {address ? address.slice(2, 4).toUpperCase() : '??'}
@@ -117,28 +118,28 @@ export default function ProfileModal({
 
         {/* 4 Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="p-3 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
+          <div className="p-4 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
             <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
               <Trophy className="w-3 h-3 text-[#00FFCC]" /> Score
             </div>
             <div className="mt-1 font-heading font-black text-lg text-[#00FFCC]">{stats.score}</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
+          <div className="p-4 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
             <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
               <Award className="w-3 h-3 text-[#6C5CE7]" /> Accuracy
             </div>
             <div className="mt-1 font-heading font-black text-lg text-[#6C5CE7]">{stats.accuracy}%</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
+          <div className="p-4 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
             <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
               <Flame className="w-3 h-3 text-[#FFD166]" /> Streak
             </div>
             <div className="mt-1 font-heading font-black text-lg text-[#FFD166]">{stats.streak}</div>
           </div>
 
-          <div className="p-3 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
+          <div className="p-4 rounded-2xl bg-[#0A1128]/70 border border-[#2D305A] text-center">
             <div className="text-[11px] text-slate-400 font-medium flex items-center justify-center gap-1">
               <Sparkles className="w-3 h-3 text-[#FF4757]" /> Best Streak
             </div>
@@ -149,9 +150,9 @@ export default function ProfileModal({
         {/* NFT Trophy Case */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-black font-heading tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
+            <h5 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
               <Award className="w-4 h-4 text-[#FFD166]" /> NFT Achievement Badges
-            </h4>
+            </h5>
             <span className="text-[11px] text-slate-400 font-mono">
               {(claimableRewards?.alreadyClaimedBadges?.length || 0)} / 4 Minted
             </span>
@@ -168,11 +169,11 @@ export default function ProfileModal({
               return (
                 <div
                   key={badgeId}
-                  className={`p-3.5 rounded-2xl border transition-all flex items-start gap-3 ${
+                  className={`p-4 rounded-2xl border transition-all flex items-start gap-3 ${
                     isMinted
-                      ? 'bg-[#FFD166]/10 border-[#FFD166]/50 shadow-[0_0_15px_rgba(255,209,102,0.12)]'
+                      ? 'bg-[#FFD166]/10 border-[#FFD166]/50'
                       : isEligible
-                      ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50 shadow-[0_0_15px_rgba(0,255,204,0.12)]'
+                      ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50'
                       : 'bg-[#0A1128]/60 border-[#2D305A]/70 opacity-75'
                   }`}
                 >
@@ -226,7 +227,7 @@ export default function ProfileModal({
 
         {/* Claim Rewards CTA Banner */}
         {BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) && (
-          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-[#00FFCC]/15 to-[#6C5CE7]/15 border border-[#00FFCC]/30 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-[#00FFCC]/15 to-[#6C5CE7]/15 border border-[#00FFCC]/30 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Coins className="w-4 h-4 text-[#00FFCC] animate-bounce" />
               <span className="text-xs text-slate-200 font-medium">
@@ -235,16 +236,19 @@ export default function ProfileModal({
                 unclaimed!
               </span>
             </div>
-            <button
+            <motion.button
               type="button"
               onClick={() => {
                 onClose();
                 onOpenRewards();
               }}
-              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] hover:bg-[#00FFCC]/90 active:scale-95 text-[#0A1128] font-heading font-black text-xs transition-all cursor-pointer shadow-[0_0_12px_rgba(0,255,204,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+              whileHover={{ filter: 'brightness(1.1)' }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] text-[#0A1128] font-heading font-black text-xs transition-all cursor-pointer shadow-[0_0_12px_rgba(0,255,204,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               Claim All
-            </button>
+            </motion.button>
           </div>
         )}
       </div>

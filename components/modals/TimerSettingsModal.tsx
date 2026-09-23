@@ -57,13 +57,13 @@ export default function TimerSettingsModal({
         </>
       }
     >
-      <div className="space-y-5">
+      <div className="space-y-6">
         <div>
           <label className="block text-sm font-bold text-white mb-2">Timer Mode</label>
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as 'per-question' | 'total' | 'stopwatch')}
-            className="w-full px-3.5 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+            className="w-full px-4 py-3 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
           >
             <option value="per-question">Per-Question Countdown</option>
             <option value="total">Total Quiz Countdown</option>
@@ -82,7 +82,7 @@ export default function TimerSettingsModal({
                   key={p}
                   type="button"
                   onClick={() => setDuration(p)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] ${
                     duration === p
                       ? 'bg-[#6C5CE7] border-[#6C5CE7] text-white shadow-sm'
                       : 'bg-[#0A1128] border-[#2D305A] text-slate-300 hover:bg-[#25284D] hover:border-[#6C5CE7]/50'
@@ -98,7 +98,7 @@ export default function TimerSettingsModal({
               max="600"
               value={duration}
               onChange={(e) => setValidatedDuration(e.target.value)}
-              className="w-full px-3.5 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+              className="w-full px-4 py-3 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
             />
           </div>
         )}
