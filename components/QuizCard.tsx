@@ -24,6 +24,8 @@ interface QuizCardProps {
   isSubmitting: boolean;
   onAddQuestionClick: () => void;
   onOpenDispute?: () => void;
+  isUnlocked?: boolean;
+  onUnlock?: () => void;
 }
 
 export default function QuizCard({
@@ -42,6 +44,8 @@ export default function QuizCard({
   isSubmitting,
   onAddQuestionClick,
   onOpenDispute,
+  isUnlocked = true,
+  onUnlock,
 }: QuizCardProps) {
   // Fire confetti if result is correct
   React.useEffect(() => {
@@ -101,6 +105,8 @@ export default function QuizCard({
             eliminatedIndices={eliminatedIndices}
             isSubmitting={isSubmitting}
             isFlipped={isFlipped}
+            isUnlocked={isUnlocked}
+            onUnlock={onUnlock}
           />
         </div>
 

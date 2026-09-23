@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ClientQuestion } from '@/lib/types';
-import { Timer, Settings2, Sparkles, FastForward, Loader2, Users, ShieldCheck } from 'lucide-react';
+import { Timer, Settings2, Sparkles, FastForward, Loader2, Users, ShieldCheck, ExternalLink, Rocket } from 'lucide-react';
 
 interface QuestionFrontProps {
   question: ClientQuestion;
@@ -17,6 +17,8 @@ interface QuestionFrontProps {
   eliminatedIndices: number[];
   isSubmitting: boolean;
   isFlipped?: boolean;
+  isUnlocked?: boolean;
+  onUnlock?: () => void;
 }
 
 export default function QuestionFront({
@@ -31,6 +33,8 @@ export default function QuestionFront({
   eliminatedIndices,
   isSubmitting,
   isFlipped = false,
+  isUnlocked = true,
+  onUnlock,
 }: QuestionFrontProps) {
   const [prevQuestionId, setPrevQuestionId] = useState(question.id);
   const [clickedIdx, setClickedIdx] = useState<number | null>(null);
@@ -43,7 +47,7 @@ export default function QuestionFront({
   // Keyboard navigation: 1-4 or A-D
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (isFlipped || isSubmitting) return;
+      if (isFlipped || isSubmitting || !isUnlocked) return;
       const target = e.target as HTMLElement;
       if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable) return;
 
@@ -61,7 +65,7 @@ export default function QuestionFront({
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isFlipped, isSubmitting, eliminatedIndices, question.options.length, onSelectAnswer]);
+  }, [isFlipped, isSubmitting, isUnlocked, eliminatedIndices, question.options.length, onSelectAnswer]);
 
   function getCategoryBadge(cat: string) {
     const lower = (cat || '').toLowerCase();
@@ -164,50 +168,83 @@ export default function QuestionFront({
         </h2>
       </div>
 
-      {/* Options Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-auto" role="group" aria-label="Answer options">
-        {question.options.map((opt, idx) => {
-          const isEliminated = eliminatedIndices.includes(idx);
-          const isClicked = clickedIdx === idx;
-          const letter = ['A', 'B', 'C', 'D'][idx];
+      {/* Options Grid or Unlock Sponsor CTA */}
+      {!isUnlocked ? (
+        <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-[#0A1128]/85 border border-[#00FFCC]/40 rounded-2xl shadow-[0_0_35px_rgba(0,255,204,0.15)] text-center backdrop-blur-md my-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FFD166]/15 border border-[#FFD166]/40 text-[#FFD166] text-xs font-bold font-heading uppercase tracking-wider mb-3">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Mở khóa câu hỏi • Nhận thưởng $QUIZ</span>
+          </div>
 
-          return (
-            <motion.button
-              key={idx}
-              type="button"
-              disabled={isEliminated || isSubmitting}
-              onClick={() => handleOptionClick(idx)}
-              whileHover={isEliminated || isSubmitting ? {} : { scale: 1.015 }}
-              whileTap={isEliminated || isSubmitting ? {} : { scale: 0.985 }}
-              transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
-                isEliminated
-                  ? 'opacity-20 bg-[#0A1128] border-[#1C1E3A] cursor-not-allowed pointer-events-none'
-                  : isClicked && isSubmitting
-                  ? 'bg-[#222344] border-[#00FFCC] shadow-[0_0_25px_rgba(0,255,204,0.3)] ring-1 ring-[#00FFCC] cursor-wait'
-                  : isSubmitting
-                  ? 'bg-[#131428]/60 border-[#2D305A]/60 opacity-60 cursor-not-allowed'
-                  : 'bg-[#131428]/80 border-[#2D305A] hover:border-[#00FFCC] hover:bg-[#222344] hover:shadow-[0_0_20px_rgba(0,255,204,0.18)] cursor-pointer'
-              }`}
-            >
-              <span className={`w-8 h-8 flex items-center justify-center rounded-xl border text-xs font-black font-heading transition-all shrink-0 ${
-                isClicked && isSubmitting
-                  ? 'bg-[#00FFCC]/20 border-[#00FFCC] text-[#00FFCC]'
-                  : 'bg-[#1A1B35] border-[#2D305A] text-slate-300 group-hover:bg-[#00FFCC] group-hover:text-[#0A1128] group-hover:border-[#00FFCC] group-hover:shadow-[0_0_10px_#00FFCC]'
-              }`}>
-                {isClicked && isSubmitting ? (
-                  <Loader2 className="w-4 h-4 animate-spin text-[#00FFCC]" />
-                ) : (
-                  letter
-                )}
-              </span>
-              <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">
-                {opt}
-              </span>
-            </motion.button>
-          );
-        })}
-      </div>
+          <h3 className="text-base sm:text-lg font-bold font-heading text-white mb-2">
+            Sẵn sàng thử thách trí tuệ Web3?
+          </h3>
+          <p className="text-xs sm:text-sm text-slate-300 max-w-md mb-6 leading-relaxed">
+            Bấm nút dưới đây để <span className="text-[#00FFCC] font-bold">mở tab đối tác tài trợ</span> và kích hoạt đồng hồ đếm ngược trả lời!
+          </p>
+
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.04 }}
+            whileTap={{ scale: 0.96 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+            onClick={onUnlock}
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-[#00FFCC] via-[#3071FF] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] shadow-[0_0_30px_rgba(0,255,204,0.45)] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          >
+            <Rocket className="w-5 h-5 text-[#0A1128]" />
+            <span>BẮT ĐẦU TRẢ LỜI NGAY</span>
+            <ExternalLink className="w-4 h-4 text-[#0A1128] opacity-80" />
+          </motion.button>
+
+          <span className="text-[11px] text-slate-400 mt-3 font-medium">
+            🛡️ Mở tab mới • Trang quiz không bị tải lại • Đảm bảo 100% lượt tài trợ
+          </span>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-auto" role="group" aria-label="Answer options">
+          {question.options.map((opt, idx) => {
+            const isEliminated = eliminatedIndices.includes(idx);
+            const isClicked = clickedIdx === idx;
+            const letter = ['A', 'B', 'C', 'D'][idx];
+
+            return (
+              <motion.button
+                key={idx}
+                type="button"
+                disabled={isEliminated || isSubmitting}
+                onClick={() => handleOptionClick(idx)}
+                whileHover={isEliminated || isSubmitting ? {} : { scale: 1.015 }}
+                whileTap={isEliminated || isSubmitting ? {} : { scale: 0.985 }}
+                transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+                className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+                  isEliminated
+                    ? 'opacity-20 bg-[#0A1128] border-[#1C1E3A] cursor-not-allowed pointer-events-none'
+                    : isClicked && isSubmitting
+                    ? 'bg-[#222344] border-[#00FFCC] shadow-[0_0_25px_rgba(0,255,204,0.3)] ring-1 ring-[#00FFCC] cursor-wait'
+                    : isSubmitting
+                    ? 'bg-[#131428]/60 border-[#2D305A]/60 opacity-60 cursor-not-allowed'
+                    : 'bg-[#131428]/80 border-[#2D305A] hover:border-[#00FFCC] hover:bg-[#222344] hover:shadow-[0_0_20px_rgba(0,255,204,0.18)] cursor-pointer'
+                }`}
+              >
+                <span className={`w-8 h-8 flex items-center justify-center rounded-xl border text-xs font-black font-heading transition-all shrink-0 ${
+                  isClicked && isSubmitting
+                    ? 'bg-[#00FFCC]/20 border-[#00FFCC] text-[#00FFCC]'
+                    : 'bg-[#1A1B35] border-[#2D305A] text-slate-300 group-hover:bg-[#00FFCC] group-hover:text-[#0A1128] group-hover:border-[#00FFCC] group-hover:shadow-[0_0_10px_#00FFCC]'
+                }`}>
+                  {isClicked && isSubmitting ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-[#00FFCC]" />
+                  ) : (
+                    letter
+                  )}
+                </span>
+                <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">
+                  {opt}
+                </span>
+              </motion.button>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

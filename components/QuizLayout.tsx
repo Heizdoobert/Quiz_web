@@ -82,6 +82,18 @@ export default function QuizLayout({
   const [skipUsed, setSkipUsed] = useState(false);
   const [eliminatedIndices, setEliminatedIndices] = useState<number[]>([]);
 
+  // Ad / Affiliate Sponsor Gate
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
+  const handleUnlock = useCallback(() => {
+    const sponsorUrl = process.env.NEXT_PUBLIC_SPONSOR_AD_URL || 'https://coinzilla.com';
+    if (typeof window !== 'undefined') {
+      window.open(sponsorUrl, '_blank', 'noopener,noreferrer');
+    }
+    setIsUnlocked(true);
+    soundEngine.playPowerup();
+  }, []);
+
   // Leaderboard data
   const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
   const [groupLeaderboard, setGroupLeaderboard] = useState<LeaderboardEntry[]>([]);
@@ -128,6 +140,7 @@ export default function QuizLayout({
       setIsFlipped(false);
       setResult(null);
       setEliminatedIndices([]);
+      setIsUnlocked(false);
       setTimeLeft(timerDuration);
       soundEngine.playFlip();
 
@@ -146,6 +159,7 @@ export default function QuizLayout({
       setEliminatedIndices([]);
       setIsFlipped(false);
       setResult(null);
+      setIsUnlocked(false);
       setTimeLeft(timerDuration);
       soundEngine.playFlip();
       const q = await fetchRandomQuestion([], catId);
@@ -240,7 +254,7 @@ export default function QuizLayout({
 
   // Timer Countdown effect
   useEffect(() => {
-    if (!currentQuestion || isFlipped || isSubmitting) return;
+    if (!currentQuestion || isFlipped || isSubmitting || !isUnlocked) return;
 
     if (timerMode === 'per-question') {
       const interval = setInterval(() => {
@@ -260,7 +274,7 @@ export default function QuizLayout({
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [currentQuestion, isFlipped, isSubmitting, timerMode, handleAnswerSubmit]);
+  }, [currentQuestion, isFlipped, isSubmitting, isUnlocked, timerMode, handleAnswerSubmit]);
 
   const handle5050 = async () => {
     if (fiftyFiftyUsed || !currentQuestion) return;
@@ -335,6 +349,8 @@ export default function QuizLayout({
                   form?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 onOpenDispute={() => setActiveModal('dispute')}
+                isUnlocked={isUnlocked}
+                onUnlock={handleUnlock}
               />
 
               <div id="custom-form" className="w-full mt-4">
