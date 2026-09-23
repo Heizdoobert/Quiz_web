@@ -79,7 +79,7 @@ export default function Modal({
               y: 6,
               transition: { duration: 0.15, ease: 'easeIn' },
             }}
-            className={`relative w-full ${maxWidth} bg-[#1A1B35] border border-[#2D305A] rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
+            className={`glass glass-border glass-edge relative w-full ${maxWidth} rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D305A] bg-[#0A1128]/70 select-none">
