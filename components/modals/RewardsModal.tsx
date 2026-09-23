@@ -3,7 +3,7 @@
 import React from 'react';
 import Modal from '@/components/Modal';
 import { BADGE_NAMES } from '@/lib/types';
-import { useRewardsModal } from '@/hooks/use-rewards-modal';
+import { useRewardsModal } from '@/hooks/modals/use-rewards-modal';
 import { motion } from 'framer-motion';
 import { Gift, Coins, Award, ExternalLink, Loader2, Trophy, Flame, Sparkles, Check, Lock, Target } from 'lucide-react';
 

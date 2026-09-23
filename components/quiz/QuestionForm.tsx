@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useQuestionForm } from '@/hooks/use-question-form';
+import { useQuestionForm } from '@/hooks/quiz/use-question-form';
 import { ChevronDown, ChevronUp, Plus, Sparkles, Loader2 } from 'lucide-react';
 
 interface QuestionFormProps {

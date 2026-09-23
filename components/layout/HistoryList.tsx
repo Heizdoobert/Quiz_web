@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { HistoryItem } from './modals/ReviewModal';
+import { HistoryItem } from '../modals/ReviewModal';
 import { History, Check, X } from 'lucide-react';
 
 interface HistoryListProps {

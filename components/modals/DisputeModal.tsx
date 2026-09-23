@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Modal from '../Modal';
-import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/use-dispute-modal';
+import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/modals/use-dispute-modal';
 import { AlertTriangle, Flag, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 
 interface DisputeModalProps {

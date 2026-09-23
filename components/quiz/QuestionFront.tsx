@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ClientQuestion } from '@/lib/types';
-import { useQuestionFront } from '@/hooks/use-question-front';
+import { useQuestionFront } from '@/hooks/quiz/use-question-front';
 import { Timer, Settings2, Sparkles, FastForward, Loader2, Users, ShieldCheck, ExternalLink, Rocket } from 'lucide-react';
 
 interface QuestionFrontProps {

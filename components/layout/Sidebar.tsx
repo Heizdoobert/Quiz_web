@@ -4,7 +4,7 @@ import React from 'react';
 import { UserStats } from '@/lib/types';
 import StatsPanel from './StatsPanel';
 import HistoryList from './HistoryList';
-import { HistoryItem } from './modals/ReviewModal';
+import { HistoryItem } from '../modals/ReviewModal';
 
 interface SidebarProps {
   stats: UserStats;
