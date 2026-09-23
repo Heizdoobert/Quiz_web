@@ -108,8 +108,9 @@ export default function GroupModal({
         {/* Navigation Tabs */}
         <div className="flex border-b border-[#2D305A] gap-2">
           <button
+            type="button"
             onClick={() => { setTab('my'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'my'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
@@ -118,8 +119,9 @@ export default function GroupModal({
             <Users className="w-4 h-4" /> My Groups ({groups.length})
           </button>
           <button
+            type="button"
             onClick={() => { setTab('create'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'create'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
@@ -128,8 +130,9 @@ export default function GroupModal({
             <Plus className="w-4 h-4" /> Create Group
           </button>
           <button
+            type="button"
             onClick={() => { setTab('join'); setMessage(null); }}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               tab === 'join'
                 ? 'border-[#6C5CE7] text-[#6C5CE7]'
                 : 'border-transparent text-slate-400 hover:text-white'
@@ -178,18 +181,20 @@ export default function GroupModal({
                     <div className="flex gap-2">
                       {onSelectGroup && (
                         <button
+                          type="button"
                           onClick={() => {
                             onSelectGroup(g.id);
                             onClose();
                           }}
-                          className="px-2.5 py-1 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                          className="px-2.5 py-1 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]"
                         >
                           View Board
                         </button>
                       )}
                       <button
+                        type="button"
                         onClick={() => handleLeave(g.id)}
-                        className="px-2.5 py-1 bg-[#FF4757]/15 hover:bg-[#FF4757] text-[#FF4757] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                        className="px-2.5 py-1 bg-[#FF4757]/15 hover:bg-[#FF4757] text-[#FF4757] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757]"
                       >
                         Leave
                       </button>

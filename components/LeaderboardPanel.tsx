@@ -31,8 +31,9 @@ export default function LeaderboardPanel({
       <div className="flex items-center justify-between border-b border-[#2D305A] pb-3">
         <div className="flex gap-4">
           <button
+            type="button"
             onClick={() => setActiveTab('global')}
-            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166] rounded-t ${
               activeTab === 'global'
                 ? 'border-[#FFD166] text-[#FFD166] shadow-[0_4px_12px_rgba(255,209,102,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -41,8 +42,9 @@ export default function LeaderboardPanel({
             <Trophy className="w-3.5 h-3.5" /> Global Top
           </button>
           <button
+            type="button"
             onClick={() => setActiveTab('group')}
-            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer ${
+            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
               activeTab === 'group'
                 ? 'border-[#6C5CE7] text-[#6C5CE7] shadow-[0_4px_12px_rgba(108,92,231,0.2)]'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -55,7 +57,7 @@ export default function LeaderboardPanel({
         <button
           type="button"
           onClick={onOpenGroupModal}
-          className="p-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#00FFCC] hover:text-white transition-all cursor-pointer shadow-sm"
+          className="p-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#00FFCC] hover:text-white transition-all cursor-pointer shadow-sm active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           title="Create or Join Groups"
         >
           <Shield className="w-3.5 h-3.5" />

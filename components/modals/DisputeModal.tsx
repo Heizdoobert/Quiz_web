@@ -99,7 +99,7 @@ export default function DisputeModal({
           <button
             type="button"
             onClick={handleResetAndClose}
-            className="w-full py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-bold font-heading text-xs transition-all cursor-pointer"
+            className="w-full py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-bold font-heading text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           >
             Close
           </button>
@@ -161,14 +161,14 @@ export default function DisputeModal({
             <button
               type="button"
               onClick={handleResetAndClose}
-              className="flex-1 py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-400 hover:text-slate-200 font-bold font-heading text-xs transition-all cursor-pointer"
+              className="flex-1 py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-400 hover:text-slate-200 font-bold font-heading text-xs transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || !walletAddress}
-              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5"
+              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               {loading ? (
                 <>
