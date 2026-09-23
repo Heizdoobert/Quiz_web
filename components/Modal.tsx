@@ -57,9 +57,8 @@ export default function Modal({
         >
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
+            animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
+            exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeIn' } }}
             className="fixed inset-0 bg-black/75 backdrop-blur-xs"
             onClick={onClose}
           />
@@ -68,11 +67,17 @@ export default function Modal({
             aria-modal="true"
             aria-label={title}
             initial={{ opacity: 0, scale: 0.95, y: 8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.96, y: 6 }}
-            transition={{
-              duration: 0.22,
-              ease: [0.16, 1, 0.3, 1], // snappy Apple/Framer pro-curve
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] }, // snappy Apple/Framer pro-curve
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.96,
+              y: 6,
+              transition: { duration: 0.15, ease: 'easeIn' },
             }}
             className={`relative w-full ${maxWidth} bg-[#1A1B35] border border-[#2D305A] rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
           >

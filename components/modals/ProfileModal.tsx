@@ -87,7 +87,7 @@ export default function ProfileModal({
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="p-1 rounded-lg hover:bg-[#25284D] text-slate-400 hover:text-[#00FFCC] transition-colors cursor-pointer"
+                    className="p-1 rounded-lg hover:bg-[#25284D] text-slate-400 hover:text-[#00FFCC] transition-colors cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
                     title="Copy address"
                     aria-label="Copy address"
                   >
@@ -99,7 +99,7 @@ export default function ProfileModal({
                     href={`https://sepolia.basescan.org/address/${address}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1 rounded-lg hover:bg-[#25284D] text-slate-400 hover:text-[#6C5CE7] transition-colors cursor-pointer"
+                    className="p-1 rounded-lg hover:bg-[#25284D] text-slate-400 hover:text-[#6C5CE7] transition-colors cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#6C5CE7]"
                     title="View on BaseScan"
                     aria-label="View on BaseScan"
                   >
@@ -219,7 +219,7 @@ export default function ProfileModal({
                             onClose();
                             onOpenRewards();
                           }}
-                          className="px-2 py-0.5 rounded-md bg-[#00FFCC] text-[#0A1128] font-heading font-black text-[10px] hover:bg-[#00FFCC]/90 transition-colors cursor-pointer shrink-0"
+                          className="px-2 py-0.5 rounded-md bg-[#00FFCC] text-[#0A1128] font-heading font-black text-[10px] hover:bg-[#00FFCC]/90 active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
                         >
                           Mint Now
                         </button>
@@ -256,7 +256,7 @@ export default function ProfileModal({
                 onClose();
                 onOpenRewards();
               }}
-              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] hover:bg-[#00FFCC]/90 active:scale-95 text-[#0A1128] font-heading font-black text-xs transition-all cursor-pointer shadow-[0_0_12px_rgba(0,255,204,0.3)]"
+              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] hover:bg-[#00FFCC]/90 active:scale-95 text-[#0A1128] font-heading font-black text-xs transition-all cursor-pointer shadow-[0_0_12px_rgba(0,255,204,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               Claim All
             </button>
