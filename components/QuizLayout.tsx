@@ -18,6 +18,7 @@ import {
   getGlobalLeaderboard,
   getGroupLeaderboard,
 } from '@/lib/actions/leaderboard-actions';
+import Header from './Header';
 import QuizCard from './QuizCard';
 import Sidebar from './Sidebar';
 import LeaderboardPanel from './LeaderboardPanel';
@@ -243,7 +244,13 @@ export default function QuizLayout({
   };
 
   return (
-    <div className="w-full flex justify-center py-6 px-4">
+    <>
+      <Header
+        onOpenRewards={() => setActiveModal('rewards')}
+        hasClaimable={BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) || (claimableRewards?.eligibleBadges?.length ?? 0) > 0}
+        isConnected={isConnected}
+      />
+      <div className="w-full flex justify-center py-6 px-4">
       <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">
         {/* Left Skyscraper Ad (Desktop Only) */}
         <AdZone variant="skyscraper" slot="left-sky" />
@@ -347,9 +354,13 @@ export default function QuizLayout({
       />
       <RewardsModal
         isOpen={activeModal === 'rewards'}
-        onClose={() => setActiveModal(null)}
+        onClose={() => {
+          setActiveModal(null);
+          refreshRewards();
+        }}
         walletAddress={address || null}
       />
     </div>
+    </>
   );
 }
