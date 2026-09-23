@@ -117,6 +117,65 @@ CREATE POLICY "Allow public read for question_disputes" ON question_disputes FOR
 CREATE POLICY "Allow public insert for question_disputes" ON question_disputes FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
+-- Question Lists (user-authored, peer-reviewed crypto contests)
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS question_lists (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  owner_wallet TEXT NOT NULL REFERENCES users(wallet_address) ON DELETE CASCADE,
+  title TEXT NOT NULL,
+  description TEXT,
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'live', 'rejected')),
+  reward_pool_tokens NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals), NUMERIC to avoid BIGINT overflow at token scale
+  submitted_at TIMESTAMPTZ,
+  started_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE questions ADD COLUMN IF NOT EXISTS list_id UUID REFERENCES question_lists(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_questions_list_id ON questions(list_id);
+
+-- Peer confirmations required before a submitted list can go live
+CREATE TABLE IF NOT EXISTS question_list_confirmations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  list_id UUID NOT NULL REFERENCES question_lists(id) ON DELETE CASCADE,
+  confirmer_wallet TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(list_id, confirmer_wallet)
+);
+
+CREATE INDEX IF NOT EXISTS idx_list_confirmations_list ON question_list_confirmations(list_id);
+
+-- One contest attempt per wallet per list; tracks completion + claim
+CREATE TABLE IF NOT EXISTS list_entries (
+  list_id UUID NOT NULL REFERENCES question_lists(id) ON DELETE CASCADE,
+  wallet_address TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'claimed')),
+  correct_count INT NOT NULL DEFAULT 0,
+  reward_amount NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals)
+  completed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (list_id, wallet_address)
+);
+
+ALTER TABLE reward_claims ADD COLUMN IF NOT EXISTS list_id UUID REFERENCES question_lists(id) ON DELETE SET NULL;
+
+ALTER TABLE question_lists ENABLE ROW LEVEL SECURITY;
+ALTER TABLE question_list_confirmations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE list_entries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read for question_lists" ON question_lists FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for question_lists" ON question_lists FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update for question_lists" ON question_lists FOR UPDATE USING (true);
+CREATE POLICY "Allow public delete for question_lists" ON question_lists FOR DELETE USING (true);
+
+CREATE POLICY "Allow public read for question_list_confirmations" ON question_list_confirmations FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for question_list_confirmations" ON question_list_confirmations FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Allow public read for list_entries" ON list_entries FOR SELECT USING (true);
+CREATE POLICY "Allow public insert for list_entries" ON list_entries FOR INSERT WITH CHECK (true);
+CREATE POLICY "Allow public update for list_entries" ON list_entries FOR UPDATE USING (true);
+
+-- ============================================================================
 -- Initial Question Seed Data (Curated Trivia Bank)
 -- ============================================================================
 INSERT INTO questions (category, prompt, options, correct_index, explanation) VALUES

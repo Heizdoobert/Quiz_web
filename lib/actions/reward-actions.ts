@@ -18,6 +18,77 @@ function getSignerAccount() {
   return privateKeyToAccount(key as `0x${string}`);
 }
 
+// Shared EIP-712 token-claim signing, reused by the global per-answer claim
+// flow (generateTokenVoucher) and the list-contest claim flow
+// (claimListReward in question-list-actions.ts) so both pay out through the
+// same QuizToken voucher mechanism.
+export async function buildTokenClaimVoucher(
+  walletAddress: string,
+  amount: bigint,
+  listId?: string
+): Promise<RewardVoucher | { error: string }> {
+  try {
+    if (!walletAddress) return { error: 'Wallet address required' };
+    if (amount <= BigInt(0)) return { error: 'Nothing to claim' };
+
+    const account = getSignerAccount();
+    if (!account) return { error: 'Reward signing not configured' };
+
+    const normalized = walletAddress.toLowerCase();
+    const nonce = crypto.randomUUID();
+    const nonceUint = BigInt('0x' + nonce.replace(/-/g, ''));
+    const nonceStr = nonceUint.toString();
+    const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
+
+    const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
+
+    const signature = await account.signTypedData({
+      domain: {
+        name: 'QuizToken',
+        version: '1',
+        chainId: BigInt(chainId),
+        verifyingContract: QUIZ_TOKEN_ADDRESS,
+      },
+      types: {
+        ClaimTokens: [
+          { name: 'recipient', type: 'address' },
+          { name: 'amount', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      primaryType: 'ClaimTokens',
+      message: {
+        recipient: normalized as `0x${string}`,
+        amount,
+        nonce: nonceUint,
+        deadline,
+      },
+    });
+
+    await supabase.from('reward_claims').insert({
+      wallet_address: normalized,
+      claim_type: 'token',
+      amount: amount.toString(),
+      nonce: nonceStr,
+      status: 'pending',
+      ...(listId ? { list_id: listId } : {}),
+    });
+
+    return {
+      recipient: normalized,
+      amount: amount.toString(),
+      nonce: nonceStr,
+      deadline: deadline.toString(),
+      signature,
+      contractAddress: QUIZ_TOKEN_ADDRESS,
+    };
+  } catch (err) {
+    console.error('buildTokenClaimVoucher error:', err);
+    return { error: 'Failed to generate voucher' };
+  }
+}
+
 export async function getClaimableRewards(walletAddress: string): Promise<ClaimableRewards> {
   const empty: ClaimableRewards = {
     claimableTokens: '0',
@@ -105,69 +176,9 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
 export async function generateTokenVoucher(
   walletAddress: string
 ): Promise<RewardVoucher | { error: string }> {
-  try {
-    if (!walletAddress) return { error: 'Wallet address required' };
-
-    const account = getSignerAccount();
-    if (!account) return { error: 'Reward signing not configured' };
-
-    const rewards = await getClaimableRewards(walletAddress);
-    const claimable = BigInt(rewards.claimableTokens);
-    if (claimable <= BigInt(0)) return { error: 'Nothing to claim' };
-
-    const normalized = walletAddress.toLowerCase();
-    const nonce = crypto.randomUUID();
-    const nonceUint = BigInt('0x' + nonce.replace(/-/g, ''));
-    const nonceStr = nonceUint.toString();
-    const deadline = BigInt(Math.floor(Date.now() / 1000) + 3600);
-
-    const chainId = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
-
-    const signature = await account.signTypedData({
-      domain: {
-        name: 'QuizToken',
-        version: '1',
-        chainId: BigInt(chainId),
-        verifyingContract: QUIZ_TOKEN_ADDRESS,
-      },
-      types: {
-        ClaimTokens: [
-          { name: 'recipient', type: 'address' },
-          { name: 'amount', type: 'uint256' },
-          { name: 'nonce', type: 'uint256' },
-          { name: 'deadline', type: 'uint256' },
-        ],
-      },
-      primaryType: 'ClaimTokens',
-      message: {
-        recipient: normalized as `0x${string}`,
-        amount: claimable,
-        nonce: nonceUint,
-        deadline,
-      },
-    });
-
-    // Record pending claim
-    await supabase.from('reward_claims').insert({
-      wallet_address: normalized,
-      claim_type: 'token',
-      amount: claimable.toString(),
-      nonce: nonceStr,
-      status: 'pending',
-    });
-
-    return {
-      recipient: normalized,
-      amount: claimable.toString(),
-      nonce: nonceStr,
-      deadline: deadline.toString(),
-      signature,
-      contractAddress: QUIZ_TOKEN_ADDRESS,
-    };
-  } catch (err) {
-    console.error('generateTokenVoucher error:', err);
-    return { error: 'Failed to generate voucher' };
-  }
+  if (!walletAddress) return { error: 'Wallet address required' };
+  const rewards = await getClaimableRewards(walletAddress);
+  return buildTokenClaimVoucher(walletAddress, BigInt(rewards.claimableTokens));
 }
 
 export async function generateBadgeVoucher(

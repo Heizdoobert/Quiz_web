@@ -51,6 +51,36 @@ export interface Group {
   created_at: string;
 }
 
+export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | 'rejected';
+
+export interface QuestionList {
+  id: string;
+  owner_wallet: string;
+  title: string;
+  description: string | null;
+  status: QuestionListStatus;
+  reward_pool_tokens: string;
+  submitted_at: string | null;
+  started_at: string | null;
+  created_at: string;
+}
+
+export interface QuestionListWithMeta extends QuestionList {
+  questionCount: number;
+  confirmationCount: number;
+  hasConfirmed?: boolean;
+  perQuestionReward?: string;
+}
+
+export interface ListEntry {
+  list_id: string;
+  wallet_address: string;
+  status: 'in_progress' | 'completed' | 'claimed';
+  correct_count: number;
+  reward_amount: string;
+  completed_at: string | null;
+}
+
 export interface UserStats {
   score: number;
   streak: number;

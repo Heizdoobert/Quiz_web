@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useSyncExternalStore } from 'react';
+import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Gift, Zap, Volume2, VolumeX, User } from 'lucide-react';
+import { Gift, Zap, Volume2, VolumeX, User, Trophy } from 'lucide-react';
 import { soundEngine } from '@/lib/audio';
 
 interface HeaderProps {
@@ -56,6 +57,16 @@ export default function Header({
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
+
+        {/* Question Lists / Contests */}
+        <Link
+          href="/my-lists"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#00FFCC] font-bold font-heading text-xs transition-all shadow-sm hover:scale-105"
+          aria-label="Question Lists & Contests"
+        >
+          <Trophy className="w-4 h-4" />
+          <span className="hidden sm:inline">Contests</span>
+        </Link>
 
         {/* Profile Button */}
         {isConnected && onOpenProfile && (
