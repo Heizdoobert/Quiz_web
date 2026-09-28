@@ -8,12 +8,12 @@ Plan: `tasks/plan.md`
 
 **Acceptance criteria:**
 - [x] `getUserStats` and `getClaimableRewards` no longer select raw `quiz_results` rows
-- [ ] For every wallet in the DB, the RPC result equals the old JS computation (score, streak, bestStreak, accuracy, totalAnswered)
+- [x] For every wallet in the DB, the RPC result equals the old JS computation (score, streak, bestStreak, accuracy, totalAnswered) — live DB had 0 `quiz_results` rows on 2026-09-28, so this is vacuous; the local fixture run is the real proof
 - [x] A wallet with more than 1000 answers gets its full correct count (verified in a throwaway local Postgres 16 container instead of `--seed`: 1,500-row wallet plus 8 edge cases, 0 mismatches against the old JS logic)
 
 **Verification:**
-- [ ] SQL applied in Supabase SQL Editor without errors, and re-running it is a no-op (re-run verified locally)
-- [ ] `node scripts/check-stats-parity.mts` reports 0 mismatches against live data
+- [x] SQL applied in Supabase SQL Editor without errors, and re-running it is a no-op (re-run verified locally); `rpc/get_user_stats` returns 200 on live
+- [x] `node scripts/check-stats-parity.mts` reports 0 mismatches against live data (0 rows)
 - [x] `npx tsc --noEmit`, `npx eslint` on touched files, and `npm run build` clean
 - [ ] Manual: connect a wallet on `preview`; stats panel and View Rewards show the same numbers as before
 
@@ -29,9 +29,9 @@ Plan: `tasks/plan.md`
 **Estimated scope:** M
 
 ## Checkpoint A: after Task 1
-- [ ] SQL applied on Supabase before the code deploys
-- [ ] Parity script: 0 mismatches
-- [ ] Lint + build clean
+- [x] SQL applied on Supabase before the code deploys
+- [x] Parity script: 0 mismatches
+- [x] Lint + build clean
 - [ ] Human review before continuing
 
 ## Task 2: Global leaderboard in Postgres
