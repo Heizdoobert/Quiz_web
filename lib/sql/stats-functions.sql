@@ -88,3 +88,10 @@ AS $$
   ORDER BY t.score DESC, t.accuracy DESC, t.wallet_address
   LIMIT LEAST(GREATEST(p_limit, 1), 100);
 $$;
+
+-- The app calls these with the public (anon) key, so they need EXECUTE.
+-- Without this, PostgREST returns "permission denied" and stats/leaderboards
+-- silently read as zero/empty even though answers are recorded.
+GRANT EXECUTE ON FUNCTION get_user_stats(TEXT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_global_leaderboard(INT) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION get_group_leaderboard(UUID, INT) TO anon, authenticated;

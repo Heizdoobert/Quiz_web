@@ -191,8 +191,9 @@ export function useQuizLogic({
         ...prev,
       ]);
 
-      // Optimistically update local session stats (a connected wallet's stats only move when the answer counted)
-      if (res.recorded || !isConnected) setStats((prev) => {
+      // Optimistically update local session stats, but only when the answer was
+      // actually recorded — otherwise the score is phantom and vanishes on reload.
+      if (res.recorded) setStats((prev) => {
         const nextTotal = prev.totalAnswered + 1;
         const nextScore = res.isCorrect ? prev.score + 1 : prev.score;
         const nextStreak = res.isCorrect ? prev.streak + 1 : 0;
