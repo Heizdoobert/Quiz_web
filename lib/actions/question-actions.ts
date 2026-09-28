@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { ClientQuestion, Question } from '@/lib/types';
 
 export async function createQuestion(params: {
@@ -52,17 +53,14 @@ export async function createQuestion(params: {
       dispute_count: 0,
     };
 
-    const { data, error } = await supabase
-      .from('questions')
-      .insert(newQuestion)
-      .select()
-      .single();
+    // Returning the full row would need SELECT on correct_index, which the public key no longer has.
+    const { error } = await supabase.from('questions').insert(newQuestion);
 
     if (error) {
       return { success: false, error: error.message };
     }
 
-    return { success: true, question: data as Question };
+    return { success: true };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
     return { success: false, error: message };
@@ -189,7 +187,7 @@ export async function getQuestionCount(): Promise<number> {
   try {
     const { count, error } = await supabase
       .from('questions')
-      .select('*', { count: 'exact', head: true });
+      .select('id', { count: 'exact', head: true });
     if (error) return 0;
     return count ?? 0;
   } catch {
@@ -199,7 +197,9 @@ export async function getQuestionCount(): Promise<number> {
 
 export async function get5050EliminatedIndices(questionId: string): Promise<number[]> {
   try {
-    const { data } = await supabase
+    // correct_index is only readable with the secret key.
+    if (!supabaseAdmin) return [0, 1];
+    const { data } = await supabaseAdmin
       .from('questions')
       .select('correct_index')
       .eq('id', questionId)

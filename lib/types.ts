@@ -71,6 +71,8 @@ export interface AnswerSubmissionResult {
   isCorrect: boolean;
   correctIndex: number;
   explanation: string | null;
+  // False when the answer didn't count: not signed in, or the question was already answered.
+  recorded: boolean;
 }
 
 export interface ClaimableRewards {
