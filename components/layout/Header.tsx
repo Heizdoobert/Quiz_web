@@ -30,7 +30,8 @@ export default function Header({
           Quick Quiz
         </h1>
       </div>
-      <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
+      {/* min-h reserves the Connect button's height; it mounts after hydration and shifted the page */}
+      <div className="flex shrink-0 min-h-10 items-center gap-2.5 sm:gap-3">
         {/* Sound FX Toggle Button */}
         <button
           type="button"
