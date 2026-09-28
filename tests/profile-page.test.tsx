@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ProfilePage from '../app/profile/page';
 
@@ -56,5 +56,50 @@ describe('ProfilePage', () => {
     expect(quizText).toBeDefined();
 
     expect(screen.getByText('Backup Data')).toBeDefined();
+  });
+
+  it('renders error recovery state with retry button when fetching quizzes fails', async () => {
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
+      success: false,
+      error: 'Network timeout loading quizzes',
+      code: 'FETCH_FAILED',
+    });
+
+    render(<ProfilePage />);
+
+    const errorHeading = await screen.findByText('Failed to Load Quizzes');
+    expect(errorHeading).toBeDefined();
+    expect(screen.getByText('Network timeout loading quizzes')).toBeDefined();
+    expect(screen.getByRole('button', { name: /retry/i })).toBeDefined();
+    expect(screen.queryByText('No Quizzes Created')).toBeNull();
+  });
+
+  it('recovers and displays quizzes when user clicks retry button', async () => {
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
+
+    mockGetUserQuizzes
+      .mockResolvedValueOnce({
+        success: false,
+        error: 'Network glitch',
+        code: 'FETCH_FAILED',
+      })
+      .mockResolvedValueOnce({
+        success: true,
+        quizzes: [{ id: '99', prompt: 'Recovered Quiz' }],
+        count: 1,
+      });
+
+    render(<ProfilePage />);
+
+    const retryBtn = await screen.findByRole('button', { name: /retry/i });
+    expect(retryBtn).toBeDefined();
+
+    fireEvent.click(retryBtn);
+
+    const recoveredQuiz = await screen.findByText('Recovered Quiz');
+    expect(recoveredQuiz).toBeDefined();
+    expect(screen.queryByText('Failed to Load Quizzes')).toBeNull();
   });
 });
