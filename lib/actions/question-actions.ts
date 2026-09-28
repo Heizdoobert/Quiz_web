@@ -1,7 +1,14 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
-import { ClientQuestion, Question } from '@/lib/types';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSessionWallet } from '@/lib/wallet-session';
+import { ClientQuestion } from '@/lib/types';
+import { isUuid, validateQuestionInput } from '@/lib/validation';
+
+const MAX_DISPUTE_REASON = 500;
+const QUESTIONS_PER_DAY = 5;
+const QUARANTINE_AT = 3;
 
 export async function createQuestion(params: {
   prompt: string;
@@ -9,63 +16,49 @@ export async function createQuestion(params: {
   correctIndex: number;
   category?: string;
   explanation?: string;
-  createdBy?: string;
-}): Promise<{ success: boolean; question?: Question; error?: string }> {
+}): Promise<{ success: boolean; error?: string }> {
   try {
-    const trimmedPrompt = params.prompt?.trim() || '';
-    if (trimmedPrompt.length < 15) {
-      return { success: false, error: 'Question prompt must be at least 15 characters long.' };
+    const wallet = await getSessionWallet();
+    if (!wallet) return { success: false, error: 'Sign in with your wallet to add questions.' };
+    if (!supabaseAdmin) return { success: false, error: 'Adding questions is unavailable right now.' };
+
+    const validated = validateQuestionInput(params);
+    if (!validated.valid) return { success: false, error: validated.error };
+
+    // New questions go live at once and are moderated by disputes, so cap how fast one wallet adds them.
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { count, error: countErr } = await supabaseAdmin
+      .from('questions')
+      .select('id', { count: 'exact', head: true })
+      .eq('created_by', wallet)
+      .gte('created_at', since);
+    if (countErr) {
+      console.error('createQuestion count error:', countErr);
+      return { success: false, error: 'Failed to add question.' };
     }
-    if (!Array.isArray(params.options) || params.options.length !== 4) {
-      return { success: false, error: 'Exactly 4 options are required.' };
-    }
-    if (params.options.some((opt) => !opt?.trim())) {
-      return { success: false, error: 'All 4 options must be filled.' };
+    if ((count ?? 0) >= QUESTIONS_PER_DAY) {
+      return { success: false, error: `You can add up to ${QUESTIONS_PER_DAY} questions per day.` };
     }
 
-    const trimmedOptions = params.options.map((o) => o.trim());
-    const lowerOptions = new Set(trimmedOptions.map((o) => o.toLowerCase()));
-    if (lowerOptions.size !== 4) {
-      return { success: false, error: 'All 4 options must be distinct from one another.' };
-    }
-
-    if (params.correctIndex < 0 || params.correctIndex > 3) {
-      return { success: false, error: 'Correct option must be between 0 and 3.' };
-    }
-
-    const trimmedExplanation = params.explanation?.trim() || '';
-    if (trimmedExplanation.length < 20) {
-      return {
-        success: false,
-        error: 'An educational explanation of at least 20 characters is required to ensure quiz quality.',
-      };
-    }
-
-    const newQuestion = {
-      prompt: trimmedPrompt,
-      options: trimmedOptions,
-      correct_index: params.correctIndex,
-      category: params.category?.trim() || 'General',
-      explanation: trimmedExplanation,
-      created_by: params.createdBy?.toLowerCase() || null,
+    const { error } = await supabaseAdmin.from('questions').insert({
+      prompt: validated.prompt,
+      options: validated.options,
+      correct_index: validated.correctIndex,
+      category: validated.category,
+      explanation: validated.explanation,
+      created_by: wallet,
       status: 'verified',
       dispute_count: 0,
-    };
-
-    const { data, error } = await supabase
-      .from('questions')
-      .insert(newQuestion)
-      .select()
-      .single();
-
+    });
     if (error) {
-      return { success: false, error: error.message };
+      console.error('createQuestion insert error:', error);
+      return { success: false, error: 'Failed to add question.' };
     }
 
-    return { success: true, question: data as Question };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return { success: false, error: message };
+    return { success: true };
+  } catch (err) {
+    console.error('createQuestion error:', err);
+    return { success: false, error: 'Failed to add question.' };
   }
 }
 
@@ -77,10 +70,13 @@ export async function fetchRandomQuestion(
     let query = supabase
       .from('questions')
       .select('id, category, prompt, options, created_by, status')
-      .neq('status', 'quarantined');
+      .neq('status', 'quarantined')
+      .neq('status', 'pending'); // list-contest questions stay hidden until their list goes live
 
-    if (excludeIds.length > 0) {
-      query = query.not('id', 'in', `(${excludeIds.join(',')})`);
+    // Only well-formed ids reach the filter string; the newest 200 are enough to avoid repeats.
+    const ids = (Array.isArray(excludeIds) ? excludeIds : []).filter(isUuid).slice(-200);
+    if (ids.length > 0) {
+      query = query.not('id', 'in', `(${ids.join(',')})`);
     }
 
     if (category && category !== 'All') {
@@ -95,6 +91,7 @@ export async function fetchRandomQuestion(
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
         .neq('status', 'quarantined')
+        .neq('status', 'pending')
         .eq('category', category)
         .limit(20);
       const fallbackRes = await fallbackQuery;
@@ -110,6 +107,7 @@ export async function fetchRandomQuestion(
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
         .neq('status', 'quarantined')
+        .neq('status', 'pending')
         .limit(20);
       if (generalQuery.data && generalQuery.data.length > 0) {
         data = generalQuery.data;
@@ -136,52 +134,70 @@ export async function fetchRandomQuestion(
 
 export async function disputeQuestion(params: {
   questionId: string;
-  reporterWallet: string;
   reason: string;
 }): Promise<{ success: boolean; quarantined?: boolean; error?: string }> {
   try {
-    if (!params.questionId || !params.reporterWallet || !params.reason?.trim()) {
-      return { success: false, error: 'Question ID, wallet, and dispute reason are required.' };
+    const reason = params.reason?.trim() || '';
+    if (!isUuid(params.questionId) || !reason) {
+      return { success: false, error: 'Question and dispute reason are required.' };
     }
-    const wallet = params.reporterWallet.toLowerCase();
+    if (reason.length > MAX_DISPUTE_REASON) {
+      return { success: false, error: `Dispute reason must be at most ${MAX_DISPUTE_REASON} characters.` };
+    }
+    const wallet = await getSessionWallet();
+    if (!wallet) return { success: false, error: 'Sign in with your wallet to report questions.' };
+    if (!supabaseAdmin) return { success: false, error: 'Reporting is unavailable right now.' };
 
-    // Record dispute
-    const { error: disputeErr } = await supabase.from('question_disputes').insert({
+    // Only players whose answer to this question was recorded may report it,
+    // so a quarantine takes signed-in wallets that actually played it.
+    const { data: answered, error: answeredErr } = await supabaseAdmin
+      .from('quiz_results')
+      .select('id')
+      .eq('wallet_address', wallet)
+      .eq('question_id', params.questionId)
+      .limit(1);
+    if (answeredErr) {
+      console.error('disputeQuestion answered check error:', answeredErr);
+      return { success: false, error: 'Failed to submit dispute.' };
+    }
+    if (!answered?.length) {
+      return { success: false, error: 'Answer this question before reporting it.' };
+    }
+
+    const { error: disputeErr } = await supabaseAdmin.from('question_disputes').insert({
       question_id: params.questionId,
       reporter_wallet: wallet,
-      reason: params.reason.trim(),
+      reason,
     });
-
     if (disputeErr) {
-      if (disputeErr.code === '23505' || disputeErr.message.includes('unique')) {
+      if (disputeErr.code === '23505') {
         return { success: false, error: 'You have already reported this question.' };
       }
-      return { success: false, error: disputeErr.message };
+      console.error('disputeQuestion insert error:', disputeErr);
+      return { success: false, error: 'Failed to submit dispute.' };
     }
 
-    // Fetch and increment dispute_count
-    const { data: qData } = await supabase
+    // Count dispute rows instead of incrementing, so concurrent reports can't lose an update.
+    const { count, error: countErr } = await supabaseAdmin
+      .from('question_disputes')
+      .select('id', { count: 'exact', head: true })
+      .eq('question_id', params.questionId);
+    if (countErr) {
+      console.error('disputeQuestion count error:', countErr);
+      return { success: true, quarantined: false };
+    }
+    const disputeCount = count ?? 0;
+    const quarantined = disputeCount >= QUARANTINE_AT;
+    const { error: updateErr } = await supabaseAdmin
       .from('questions')
-      .select('dispute_count')
-      .eq('id', params.questionId)
-      .single();
-
-    const currentCount = qData?.dispute_count ?? 0;
-    const nextCount = currentCount + 1;
-    const isQuarantined = nextCount >= 3;
-
-    await supabase
-      .from('questions')
-      .update({
-        dispute_count: nextCount,
-        ...(isQuarantined ? { status: 'quarantined' } : {}),
-      })
+      .update({ dispute_count: disputeCount, ...(quarantined ? { status: 'quarantined' } : {}) })
       .eq('id', params.questionId);
+    if (updateErr) console.error('disputeQuestion update error:', updateErr);
 
-    return { success: true, quarantined: isQuarantined };
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return { success: false, error: message };
+    return { success: true, quarantined: quarantined && !updateErr };
+  } catch (err) {
+    console.error('disputeQuestion error:', err);
+    return { success: false, error: 'Failed to submit dispute.' };
   }
 }
 
@@ -189,7 +205,7 @@ export async function getQuestionCount(): Promise<number> {
   try {
     const { count, error } = await supabase
       .from('questions')
-      .select('*', { count: 'exact', head: true });
+      .select('id', { count: 'exact', head: true });
     if (error) return 0;
     return count ?? 0;
   } catch {
@@ -199,7 +215,9 @@ export async function getQuestionCount(): Promise<number> {
 
 export async function get5050EliminatedIndices(questionId: string): Promise<number[]> {
   try {
-    const { data } = await supabase
+    // correct_index is only readable with the secret key.
+    if (!supabaseAdmin) return [0, 1];
+    const { data } = await supabaseAdmin
       .from('questions')
       .select('correct_index')
       .eq('id', questionId)
@@ -221,4 +239,3 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
     return [0, 1];
   }
 }
-
