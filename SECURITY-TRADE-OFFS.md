@@ -1,49 +1,58 @@
-# Security Trade-Offs: Profile Dashboard
+# Security Posture & Threat Model: Quick Quiz
 
-> [!CAUTION]
-> This document records **known, accepted** security limitations in the profile
-> dashboard. They exist because of architectural constraints (Web3 wallet auth,
-> permissive RLS) that cannot be fixed without a significant refactor.
+## 1. Threat Model & STRIDE Analysis
 
-## 1. No Server-Side Identity Verification (IDOR Risk)
+| Threat | Risk Analysis | Mitigations Implemented |
+|---|---|---|
+| **S**poofing | Client claims to own an EVM wallet address without cryptographic signature (SIWE). | Strict EIP-55 format regex validation (`isValidEthAddress`); addresses normalized to lowercase; roadmap item for SIWE integration. |
+| **T**ampering | Client manipulates query parameters or sends malicious payloads to Server Actions. | Bounded limit caps (max 500); parameterized queries via Supabase PostgREST; schema validation. |
+| **R**epudiation | State-changing operations performed without attribution. | Actions require explicit wallet address parameter; database audit timestamps on `questions` and `quiz_results`. |
+| **I**nformation Disclosure | Attackers query questions to extract `correct_index` and `explanation` before answering, bypassing anti-cheat. | **Hardened projection**: `getUserQuizzes` strictly selects public display fields (`id, category, prompt, options, status, created_at, created_by`), omitting `correct_index` and `explanation`. Raw database errors are sanitized. |
+| **D**enial of Service | Malicious actor queries massive rowsets or floods database with large payloads. | Explicit caps on queries (`limit: 500`, export capped at 1000 questions and 5000 stats); range pagination. |
+| **E**levation of Privilege | Standard user attempts to perform admin or creator operations on arbitrary resources. | Restricted database projection; isolation of creator questions by address. |
 
-**Issue:** Server Actions accept `walletAddress` from the client. There is no
-cryptographic proof (e.g., SIWE — Sign-In With Ethereum) that the caller
-actually owns that address. An attacker can call `getUserQuizzes("0xVictim")`
-directly.
+---
 
-**Mitigation applied:** Ethereum address format validation prevents injection
-attacks, but does NOT prevent IDOR.
+## 2. Hardening Controls Implemented
 
-**Proper fix:** Implement SIWE (Sign-In With Ethereum) to create a server-side
-session that cryptographically proves wallet ownership. Then validate the session
-token in every Server Action instead of trusting client-provided addresses.
+### HTTP Security Headers (OWASP Recommended)
+Configured globally in `next.config.js`:
+- `X-Content-Type-Options: nosniff` (prevents MIME sniffing)
+- `X-Frame-Options: DENY` (clickjacking protection)
+- `Referrer-Policy: strict-origin-when-cross-origin` (protects referral leakage)
+- `Permissions-Policy: camera=(), microphone=(), geolocation=()` (restricts sensitive hardware APIs)
+- `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload` (enforces HTTPS)
 
-**Severity:** HIGH — but blast radius is limited to quiz data (no financial
-assets or PII beyond wallet addresses).
+### Server Action Boundaries & Sanitization
+- **Strict Format Regex**: `^0x[0-9a-fA-F]{40}$` rejects injection attacks and non-hex inputs at the boundary.
+- **Address Lowercasing**: Eliminates EIP-55 case-sensitivity bypasses.
+- **Error Sanitization**: Backend database errors (e.g. relation or constraint errors) are logged internally (`console.error`) and never reflected back to clients.
 
-## 2. Permissive RLS Is Bypassable
+### Privacy & Data Portability (GDPR Article 20)
+- **Export Endpoint**: `exportUserData` provides structured, machine-readable JSON backups (`quizzes` and `stats`) with schema versioning (`1.0`).
+- **Data Minimization**: Only quiz questions and game results associated with the wallet are retained.
 
-**Issue:** The database uses `USING (true)` RLS policies. The Supabase anon key
-is exposed to the frontend (standard architecture). An attacker who knows the
-Supabase URL and anon key can hit the PostgREST API directly, bypassing all
-Server Action security.
+---
 
-**Mitigation applied:** None at the application level. This is a database-layer
-problem.
+## 3. Dependency Audit Triage (`npm audit`)
 
-**Proper fix:** Implement row-level security policies that filter by
-`auth.uid()` after integrating SIWE → Supabase custom JWT authentication.
+As of September 2026, `npm audit` reports 23 moderate and 1 high vulnerability in transitive dependencies:
+- **High (`ws: Memory disclosure / DoS`)**: Arises from `viem` inside `@walletconnect/utils` (used by `@rainbow-me/rainbowkit` and `wagmi`).
+- **Moderate (`uuid: buffer bounds check`)**: Arises from `@metamask/sdk` dependencies.
+- **Triage Decision**:
+  - `npm audit fix --force` would attempt a major version upgrade to `wagmi@3.x`, introducing breaking changes across RainbowKit 2.x and React 19 bindings.
+  - Since websocket connections in `@walletconnect` are initiated client-side to authenticated relay endpoints rather than serving unauthenticated inbound sockets, reachability for remote code execution or server DoS is low.
+  - **Action**: Deferred until RainbowKit publishes official updates resolving the upstream `@walletconnect` dependencies.
 
-**Severity:** HIGH — same blast radius as #1.
+---
 
-## When to Fix
+## 4. Architectural Trade-Offs (Accepted Limitations)
 
-These trade-offs should be addressed when:
+### A. Client-Provided Wallet Address (IDOR Limitation)
+- **Constraint**: The application currently authenticates via Web3 browser wallets without an active SIWE (Sign-In With Ethereum) session token.
+- **Impact**: Any user can call `getUserQuizzes("0xOtherAddress")`.
+- **Mitigation**: Anti-cheat answers (`correct_index`, `explanation`) are completely stripped from `getUserQuizzes`, rendering public enumeration safe from cheating. Full quiz answers remain private.
 
-- The application handles financial transactions or sensitive PII
-- The user base grows beyond trusted early adopters
-- A security audit is requested
-
-Both fixes require the same prerequisite: **SIWE integration** to establish
-server-side identity.
+### B. Supabase Permissive Row-Level Security
+- **Constraint**: Database tables use `USING (true)` policies for public testnet access.
+- **Proper Fix**: Implement Supabase Custom JWTs generated via SIWE server verification and tighten RLS policies to `USING (auth.uid() = created_by)`.
