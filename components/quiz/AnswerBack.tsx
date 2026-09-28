@@ -41,8 +41,8 @@ export default function AnswerBack({
       <div
         className={`flex items-center gap-3.5 p-4 rounded-2xl border ${
           result.isCorrect
-            ? 'bg-[#00FFCC]/10 border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_20px_rgba(0,255,204,0.15)]'
-            : 'bg-[#FF4757]/10 border-[#FF4757]/40 text-[#FF4757] shadow-[0_0_20px_rgba(255,71,87,0.15)]'
+            ? 'bg-[#00FFCC]/10 border-[#00FFCC]/40 text-[#00FFCC]'
+            : 'bg-[#FF4757]/10 border-[#FF4757]/40 text-[#FF4757]'
         }`}
       >
         {result.isCorrect ? (
@@ -51,7 +51,7 @@ export default function AnswerBack({
           <XCircle className="w-8 h-8 text-[#FF4757] shrink-0" />
         )}
         <div>
-          <h3 className="text-lg font-bold font-heading tracking-wide">
+          <h3 className="text-lg font-bold tracking-wide">
             {result.isCorrect ? 'Correct! Well Done!' : 'Incorrect! Keep Going!'}
           </h3>
           <p className="text-xs font-semibold opacity-90">
@@ -105,7 +105,7 @@ export default function AnswerBack({
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl text-sm shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
         >
           <span>Next Question</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

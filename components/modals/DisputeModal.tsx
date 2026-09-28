@@ -46,7 +46,7 @@ export default function DisputeModal({
             <CheckCircle2 className="w-6 h-6" />
           </div>
           <div>
-            <h4 className="font-black text-base text-slate-100 !font-sans">
+            <h4 className="font-black text-base text-slate-100">
               Dispute Recorded
             </h4>
             <p className="text-xs text-slate-400 mt-2 leading-relaxed">
@@ -134,7 +134,7 @@ export default function DisputeModal({
               whileHover={loading || !walletAddress ? {} : { filter: 'brightness(1.1)' }}
               whileTap={loading || !walletAddress ? {} : { scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs transition-all cursor-pointer shadow-[0_0_15px_rgba(255,71,87,0.3)] flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+              className="flex-1 py-2.5 rounded-xl bg-[#FF4757] disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               {loading ? (
                 <>

@@ -19,7 +19,7 @@ export default function SeoFaqSection() {
     >
       {/* Platform Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
-        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
+        <div className="glass glass-border rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#00FFCC]/10 text-[#00FFCC] shrink-0">
             <Coins className="w-5 h-5" />
           </div>
@@ -29,7 +29,7 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
+        <div className="glass glass-border rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
             <Award className="w-5 h-5" />
           </div>
@@ -39,7 +39,7 @@ export default function SeoFaqSection() {
           </div>
         </div>
 
-        <div className="glass glass-border border border-transparent rounded-2xl p-5 flex items-start gap-3">
+        <div className="glass glass-border rounded-2xl p-5 flex items-start gap-3">
           <div className="p-2.5 rounded-lg bg-[#3071FF]/10 text-[#3071FF] shrink-0">
             <ShieldCheck className="w-5 h-5" />
           </div>
@@ -56,7 +56,7 @@ export default function SeoFaqSection() {
           <Zap className="w-3.5 h-3.5" />
           Web3 Knowledge Arena
         </div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white font-heading">
+        <h2 className="text-2xl md:text-3xl font-bold text-white">
           Master Crypto Trivia. Earn On-Chain Rewards.
         </h2>
         <p className="text-sm text-slate-400 max-w-2xl mx-auto mt-2 leading-relaxed">

@@ -85,7 +85,7 @@ export default function Modal({
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D305A] bg-[#0A1128]/70 select-none">
               <div className="flex items-center gap-2.5">
                 {icon && <span className="text-xl flex items-center justify-center">{icon}</span>}
-                <h2 className="text-lg font-bold text-white tracking-wide font-heading">{title}</h2>
+                <h2 className="text-lg font-bold text-white tracking-wide">{title}</h2>
               </div>
               <button
                 type="button"

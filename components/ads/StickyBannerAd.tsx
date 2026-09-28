@@ -47,7 +47,7 @@ export default function StickyBannerAd({
             ${isBottom ? 'bottom-0' : 'top-0'}
             /* Height constraints */
             min-h-[50px] sm:min-h-[60px]
-            glass
+            bg-elevation-2/90 backdrop-blur-[20px]
             ${isBottom ? 'border-t' : 'border-b'} border-[#2D305A]
             shadow-[0_-8px_24px_rgba(0,0,0,0.5)]
             pb-[env(safe-area-inset-bottom)]

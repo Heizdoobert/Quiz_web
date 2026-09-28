@@ -150,7 +150,7 @@ export default function ProfileModal({
         {/* NFT Trophy Case */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5 !font-sans">
+            <h4 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
               <Award className="w-4 h-4 text-[#FFD166]" /> NFT Achievement Badges
             </h4>
             <span className="text-[11px] text-slate-400 font-mono">
@@ -245,7 +245,7 @@ export default function ProfileModal({
               whileHover={{ filter: 'brightness(1.1)' }}
               whileTap={{ scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] text-[#0A1128] font-heading font-black text-xs transition-all cursor-pointer shadow-[0_0_12px_rgba(0,255,204,0.3)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+              className="px-3 py-1.5 rounded-xl bg-[#00FFCC] text-[#0A1128] font-heading font-black text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
             >
               Claim All
             </motion.button>

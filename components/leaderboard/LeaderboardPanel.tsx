@@ -25,7 +25,7 @@ export default function LeaderboardPanel({
 
   return (
     <section
-      className={`glass glass-border glass-edge p-5 rounded-3xl border border-transparent shadow-2xl space-y-4 ${className}`}
+      className={`glass glass-border glass-edge p-5 rounded-3xl shadow-2xl space-y-4 ${className}`}
       aria-label="Leaderboards"
     >
       <div className="flex items-center justify-between border-b border-[#2D305A] pb-3">

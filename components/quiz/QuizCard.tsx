@@ -65,7 +65,7 @@ export default function QuizCard({
     return (
       <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 glass glass-border glass-edge rounded-3xl shadow-2xl shadow-black/60 text-center">
         <Rocket className="w-12 h-12 text-[#00FFCC] mb-4 animate-bounce" />
-        <h2 className="text-2xl font-bold font-heading text-white mb-2">No Quiz Questions Yet</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-300 max-w-md mb-6">
           Be the first to contribute! Add your own custom questions to kick off the trivia session.
         </p>

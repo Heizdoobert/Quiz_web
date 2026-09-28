@@ -44,7 +44,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
             <Plus className="w-5 h-5" />
           </span>
           <div>
-            <h3 className="font-black font-heading text-white text-base">Add Custom Question</h3>
+            <h3 className="font-black text-white text-base">Add Custom Question</h3>
             <p className="text-xs text-slate-400">Contribute new trivia to the global database</p>
           </div>
         </div>
@@ -118,7 +118,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                       key={letter}
                       className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all ${
                         correctIndex === idx
-                          ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50 shadow-[0_0_12px_rgba(0,255,204,0.12)]'
+                          ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50'
                           : 'bg-[#0A1128] border-[#2D305A] hover:border-[#6C5CE7]/50'
                       }`}
                     >
@@ -194,7 +194,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                   whileHover={{ scale: loading ? 1 : 1.03, filter: loading ? 'none' : 'brightness(1.1)' }}
                   whileTap={{ scale: loading ? 1 : 0.97 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] rounded-xl font-black font-heading text-xs shadow-[0_0_20px_rgba(0,255,204,0.25)] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] rounded-xl font-black font-heading text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />

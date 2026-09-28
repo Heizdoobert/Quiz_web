@@ -43,7 +43,7 @@ body {
   overflow-x: hidden;
 }
 
-h1, h2, h3, h4, .font-heading {
+.font-heading {
   font-family: var(--font-orbitron), sans-serif;
   letter-spacing: 0.02em;
 }

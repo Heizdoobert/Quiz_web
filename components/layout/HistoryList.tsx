@@ -13,7 +13,7 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="flex items-center gap-1.5 text-xs font-bold font-heading text-slate-300 uppercase tracking-wider">
+        <h4 className="flex items-center gap-1.5 text-xs font-bold text-slate-300 uppercase tracking-wider">
           <History className="w-3.5 h-3.5 text-slate-400" />
           Recent History
         </h4>
@@ -35,7 +35,7 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
           {history.slice(0, 6).map((item, idx) => (
             <div
               key={`${item.questionId}-${idx}`}
-              className="glass glass-border border border-transparent flex items-center justify-between p-2.5 rounded-2xl hover:border-[#6C5CE7]/40 transition-colors text-xs"
+              className="bg-elevation-2 glass-border border border-transparent flex items-center justify-between p-2.5 rounded-2xl hover:border-[#6C5CE7]/40 transition-colors text-xs"
             >
               <span className="truncate max-w-[150px] text-slate-300 font-medium">
                 {item.prompt}

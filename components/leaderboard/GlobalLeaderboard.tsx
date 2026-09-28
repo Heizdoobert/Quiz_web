@@ -51,8 +51,8 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
                 isTopThree
                   ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
                   : index % 2 === 0
-                    ? 'bg-[color:var(--color-deep-space)] border-[#2D305A] hover:border-[#6C5CE7]/60'
-                    : 'bg-[color:var(--color-elevation-2)] border-[#2D305A] hover:border-[#6C5CE7]/60'
+                    ? 'bg-deep-space border-[#2D305A] hover:border-[#6C5CE7]/60'
+                    : 'bg-elevation-2 border-[#2D305A] hover:border-[#6C5CE7]/60'
               }`}
             >
               <div className="flex items-center gap-2.5">
