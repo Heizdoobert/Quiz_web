@@ -641,6 +641,22 @@ export async function completeListAttempt(
 const VOUCHER_TTL_SECONDS = 3600;
 const EXPIRY_MARGIN_SECONDS = 300;
 
+function toContestVoucher(
+  wallet: string,
+  claim: { amount: string; nonce: string; deadline: string; signature: string },
+  contestId: `0x${string}`,
+): RewardVoucher {
+  return {
+    recipient: wallet,
+    amount: claim.amount,
+    nonce: claim.nonce,
+    deadline: claim.deadline,
+    signature: claim.signature,
+    contractAddress: CONTEST_ESCROW_ADDRESS,
+    contestId,
+  };
+}
+
 export async function claimListReward(listId: string): Promise<RewardVoucher | { error: string }> {
   try {
     if (!isUuid(listId)) return { error: 'Invalid contest ID.' };
@@ -700,15 +716,16 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
             return { error: 'Reward has already been claimed.' };
           }
         } else {
-          return {
-            recipient: auth.wallet,
-            amount: claim.amount,
-            nonce: claim.nonce,
-            deadline: String(claim.deadline),
-            signature: claim.signature,
-            contractAddress: CONTEST_ESCROW_ADDRESS,
+          return toContestVoucher(
+            auth.wallet,
+            {
+              amount: claim.amount,
+              nonce: claim.nonce,
+              deadline: String(claim.deadline),
+              signature: claim.signature,
+            },
             contestId,
-          };
+          );
         }
       }
     }
@@ -758,15 +775,16 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
       return { error: 'Failed to record reward voucher.' };
     }
 
-    return {
-      recipient: auth.wallet,
-      amount: amount.toString(),
-      nonce: nonce.toString(),
-      deadline: deadline.toString(),
-      signature,
-      contractAddress: CONTEST_ESCROW_ADDRESS,
+    return toContestVoucher(
+      auth.wallet,
+      {
+        amount: amount.toString(),
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+        signature,
+      },
       contestId,
-    };
+    );
   } catch (err) {
     console.error('claimListReward error:', err);
     return { error: 'Failed to claim contest reward.' };
