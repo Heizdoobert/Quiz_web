@@ -25,7 +25,13 @@ Result:
 - Files: `lib/sql/accounts.sql`, `lib/schema.sql` (public insert policy removed), `README.md` (setup step). `schema.sql` itself is folded to the final shape in Task 25.
 - Depends: none. Size: M
 
-### Task 2: Account session, and wallet sign-in creates an account
+### Task 2: Account session, and wallet sign-in creates an account — done
+Result:
+- The cookie carries `accountId.wallet-or-dash.exp.hmac`, so actions read the wallet without a lookup.
+- Sign-in now fails, instead of setting a session, when the account can't be created.
+- `tests/identity-accounts.test.ts` has 16 tests; its tamper tests fail when the HMAC check is removed.
+- 79/79 tests pass; `lib/session.ts` has 100% line coverage.
+
 - Acceptance:
   - new `lib/session.ts`: `getSessionAccount()` and `setSessionAccount()`, with a `quiz_session` cookie (`accountId.exp.hmac`); tampered or expired cookies are rejected
   - `signInWithWallet` finds or creates the account for that wallet (`ensureAccountForWallet`, replacing `ensureUserRow`) and sets the cookie

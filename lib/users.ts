@@ -1,21 +1,31 @@
 import 'server-only';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
-// Creates the users row a signed-in wallet needs (quiz_results, groups and
-// questions all reference it by foreign key). Never call this with an address
-// that hasn't been proven by a session or a SIWE signature just verified.
-export async function ensureUserRow(walletAddress: string): Promise<void> {
+// The account id for a wallet, creating the account if the wallet has none.
+// Never call this with an address that hasn't been proven by a session or a
+// SIWE signature just verified.
+export async function ensureAccountForWallet(walletAddress: string): Promise<string | null> {
   if (!supabaseAdmin) {
-    console.error('ensureUserRow: SUPABASE_SECRET_KEY is not set');
-    return;
+    console.error('ensureAccountForWallet: SUPABASE_SECRET_KEY is not set');
+    return null;
   }
-  const normalized = walletAddress.toLowerCase();
-  const { error } = await supabaseAdmin.from('users').upsert(
+  const wallet = walletAddress.toLowerCase();
+  const { error: upsertError } = await supabaseAdmin.from('users').upsert(
     {
-      wallet_address: normalized,
-      display_name: `${normalized.slice(0, 6)}...${normalized.slice(-4)}`,
+      wallet_address: wallet,
+      display_name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
+      wallet_linked_at: new Date().toISOString(),
     },
     { onConflict: 'wallet_address', ignoreDuplicates: true }
   );
-  if (error) console.error('ensureUserRow error:', error);
+  if (upsertError) {
+    console.error('ensureAccountForWallet upsert error:', upsertError);
+    return null;
+  }
+  const { data, error } = await supabaseAdmin.from('users').select('id').eq('wallet_address', wallet).single();
+  if (error || !data) {
+    console.error('ensureAccountForWallet lookup error:', error);
+    return null;
+  }
+  return data.id;
 }

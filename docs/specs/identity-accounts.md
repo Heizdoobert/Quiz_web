@@ -38,7 +38,8 @@ Next.js 16.3 server actions; Supabase Auth email OTP through the installed `@sup
 - Drop the "Allow public insert for users" policy. The server creates accounts with the secret key.
 
 **Session.**
-- Cookie `quiz_session` = `<accountId>.<expiresAt>.<HMAC>`, replacing `wallet_session`: same HMAC key, 7-day TTL, httpOnly, `sameSite: 'lax'`, `Secure` from `shouldUseSecureCookies()`.
+- Cookie `quiz_session` = `<accountId>.<wallet or ->.<expiresAt>.<HMAC>`, replacing `wallet_session`: same HMAC key, 7-day TTL, httpOnly, `sameSite: 'lax'`, `Secure` from `shouldUseSecureCookies()`.
+- The wallet is in the signed cookie so actions need no database lookup; `linkWallet` sets the session again.
 - Existing `wallet_session` cookies stop working at release; players sign in once more.
 - Supabase Auth tokens are never stored in the browser. The server verifies the code with a non-persisting client, then issues `quiz_session`.
 

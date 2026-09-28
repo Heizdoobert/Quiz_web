@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { getSessionWallet } from '@/lib/wallet-session';
-import { ensureUserRow } from '@/lib/users';
+import { ensureAccountForWallet } from '@/lib/users';
 import { User } from '@/lib/types';
 
 // Reads the users row, creating it first if the caller is the session wallet itself
@@ -14,7 +14,7 @@ export async function getOrCreateUser(walletAddress: string): Promise<User | nul
 
   try {
     if (normalized === (await getSessionWallet())) {
-      await ensureUserRow(normalized);
+      await ensureAccountForWallet(normalized);
     }
 
     const { data: existingUser, error: fetchError } = await supabase
