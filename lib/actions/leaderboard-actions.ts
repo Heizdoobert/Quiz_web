@@ -3,37 +3,25 @@
 import { supabase } from '@/lib/supabase';
 import { LeaderboardEntry } from '@/lib/types';
 
+// Rows come pre-aggregated and pre-sorted from Postgres (lib/sql/stats-functions.sql);
+// raw quiz_results reads are capped at 1000 rows, so counting is done there.
+type LeaderboardRow = { wallet_address: string; score: number; accuracy: number };
+
+function toEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
+  return rows.map((row, idx) => ({
+    wallet_address: row.wallet_address,
+    display_name: `${row.wallet_address.slice(0, 6)}...${row.wallet_address.slice(-4)}`,
+    score: row.score,
+    accuracy: row.accuracy,
+    rank: idx + 1,
+  }));
+}
+
 export async function getGlobalLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
   try {
-    const { data, error } = await supabase
-      .from('quiz_results')
-      .select('wallet_address, is_correct');
-
-    if (error || !data || data.length === 0) return [];
-
-    // Aggregate user scores
-    const userMap: Record<string, { correct: number; total: number }> = {};
-    for (const r of data) {
-      if (!userMap[r.wallet_address]) {
-        userMap[r.wallet_address] = { correct: 0, total: 0 };
-      }
-      userMap[r.wallet_address].total++;
-      if (r.is_correct) userMap[r.wallet_address].correct++;
-    }
-
-    const sorted = Object.entries(userMap)
-      .map(([wallet, stats]) => ({
-        wallet_address: wallet,
-        display_name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
-        score: stats.correct,
-        accuracy: Math.round((stats.correct / stats.total) * 100),
-        rank: 0,
-      }))
-      .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy)
-      .slice(0, limit)
-      .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
-
-    return sorted;
+    const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: limit });
+    if (error || !data) return [];
+    return toEntries(data as LeaderboardRow[]);
   } catch (err) {
     console.error('getGlobalLeaderboard error:', err);
     return [];
@@ -45,47 +33,12 @@ export async function getGroupLeaderboard(
   limit: number = 50
 ): Promise<LeaderboardEntry[]> {
   try {
-    // Get group members
-    const { data: members, error: mError } = await supabase
-      .from('group_members')
-      .select('wallet_address')
-      .eq('group_id', groupId);
-
-    if (mError || !members || members.length === 0) return [];
-
-    const memberWallets = members.map((m) => m.wallet_address);
-
-    const { data: results, error: rError } = await supabase
-      .from('quiz_results')
-      .select('wallet_address, is_correct')
-      .in('wallet_address', memberWallets);
-
-    if (rError || !results) return [];
-
-    const userMap: Record<string, { correct: number; total: number }> = {};
-    for (const wallet of memberWallets) {
-      userMap[wallet] = { correct: 0, total: 0 };
-    }
-    for (const r of results) {
-      if (userMap[r.wallet_address]) {
-        userMap[r.wallet_address].total++;
-        if (r.is_correct) userMap[r.wallet_address].correct++;
-      }
-    }
-
-    const sorted = Object.entries(userMap)
-      .map(([wallet, stats]) => ({
-        wallet_address: wallet,
-        display_name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
-        score: stats.correct,
-        accuracy: stats.total > 0 ? Math.round((stats.correct / stats.total) * 100) : 0,
-        rank: 0,
-      }))
-      .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy)
-      .slice(0, limit)
-      .map((entry, idx) => ({ ...entry, rank: idx + 1 }));
-
-    return sorted;
+    const { data, error } = await supabase.rpc('get_group_leaderboard', {
+      p_group_id: groupId,
+      p_limit: limit,
+    });
+    if (error || !data) return [];
+    return toEntries(data as LeaderboardRow[]);
   } catch (err) {
     console.error('getGroupLeaderboard error:', err);
     return [];
