@@ -53,7 +53,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
   };
 
   const formattedDate = quiz.created_at
-    ? new Date(quiz.created_at).toLocaleDateString(undefined, {
+    ? new Date(quiz.created_at).toLocaleDateString('en-US', {
         month: 'short',
         day: 'numeric',
         year: 'numeric',

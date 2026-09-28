@@ -168,4 +168,31 @@ describe('ProfilePage', () => {
 
     expect(screen.queryByText('Export rate limit reached')).toBeNull();
   });
+
+  it('fetches new quizzes and resets state when wallet address changes', async () => {
+    const mockUseAccount = useAccount as import("vitest").Mock;
+    const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: '0x1111111111111111111111111111111111111111' });
+    mockGetUserQuizzes.mockResolvedValueOnce({
+      success: true,
+      quizzes: [{ id: 'q1', prompt: 'First Account Quiz' }],
+      count: 1,
+    });
+
+    const { rerender } = render(<ProfilePage />);
+    expect(await screen.findByText('First Account Quiz')).toBeDefined();
+
+    mockGetUserQuizzes.mockResolvedValueOnce({
+      success: true,
+      quizzes: [{ id: 'q2', prompt: 'Second Account Quiz' }],
+      count: 1,
+    });
+
+    mockUseAccount.mockReturnValue({ isConnected: true, address: '0x2222222222222222222222222222222222222222' });
+    rerender(<ProfilePage />);
+
+    expect(await screen.findByText('Second Account Quiz')).toBeDefined();
+    expect(screen.queryByText('First Account Quiz')).toBeNull();
+  });
 });

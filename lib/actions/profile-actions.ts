@@ -18,6 +18,16 @@ function isValidEthAddress(address: string): boolean {
   return typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address);
 }
 
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String((error as { message: unknown }).message);
+  }
+  return fallback;
+}
+
 const DEFAULT_LIMIT = 500;
 const MAX_LIMIT = 500;
 const MAX_EXPORT_QUIZZES = 1000;
@@ -75,14 +85,9 @@ export async function getUserQuizzes(
       count: quizzes.length,
     };
   } catch (error: unknown) {
-    const message = error instanceof Error
-      ? error.message
-      : (typeof error === 'object' && error !== null && 'message' in error)
-        ? String((error as { message: unknown }).message)
-        : 'An unexpected error occurred.';
     return {
       success: false,
-      error: message,
+      error: getErrorMessage(error, 'An unexpected error occurred.'),
       code: 'UNKNOWN_ERROR',
     };
   }
@@ -141,14 +146,9 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
       data: exportData,
     };
   } catch (error: unknown) {
-    const message = error instanceof Error
-      ? error.message
-      : (typeof error === 'object' && error !== null && 'message' in error)
-        ? String((error as { message: unknown }).message)
-        : 'Failed to generate secure backup.';
     return {
       success: false,
-      error: message,
+      error: getErrorMessage(error, 'Failed to generate secure backup.'),
       code: 'UNKNOWN_ERROR',
     };
   }

@@ -113,14 +113,6 @@ export interface PaginationParams {
   offset?: number;
 }
 
-export interface PaginatedResult<T> {
-  items: T[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-}
-
 export interface GetUserQuizzesFilter extends PaginationParams {
   category?: string;
   status?: Question['status'];
