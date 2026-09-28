@@ -132,6 +132,7 @@ export interface UserBackupData {
   version: string;
   quizzes: Question[];
   stats: QuizResult[];
+  isTruncated?: boolean;
 }
 
 export type ProfileErrorCode =

@@ -4,6 +4,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
 import { ClientQuestion } from '@/lib/types';
+import { downloadJson } from '@/lib/utils';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';
 import CreatorQuizCard from '@/components/profile/CreatorQuizCard';
@@ -74,21 +75,7 @@ export default function ProfilePage() {
     try {
       const res = await exportUserData(address);
       if (res.success) {
-        const jsonString = JSON.stringify(res.data, null, 2);
-        const blob = new Blob([jsonString], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `quick-quiz-backup-${address.slice(0, 8)}.json`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-
-        // Safe delay before revoking blob URL to prevent premature cancellation in browsers
-        setTimeout(() => {
-          URL.revokeObjectURL(url);
-        }, 1000);
-
+        downloadJson(`quick-quiz-backup-${address.slice(0, 8)}.json`, res.data);
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 4000);
       } else {

@@ -123,12 +123,17 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
       };
     }
 
+    const quizzes = (quizzesResponse.data as Question[]) || [];
+    const stats = (statsResponse.data as QuizResult[]) || [];
+    const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
+
     const exportData: UserBackupData = {
       walletAddress: normalized,
       exportedAt: new Date().toISOString(),
       version: BACKUP_SCHEMA_VERSION,
-      quizzes: (quizzesResponse.data as Question[]) || [],
-      stats: (statsResponse.data as QuizResult[]) || [],
+      quizzes,
+      stats,
+      isTruncated,
     };
 
     return {

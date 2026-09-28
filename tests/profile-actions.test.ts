@@ -187,6 +187,32 @@ describe('profile-actions', () => {
         expect(result.data.quizzes).toEqual(mockQuizzes);
         expect(result.data.stats).toEqual(mockStats);
         expect(result.data.walletAddress).toBe(VALID_ADDRESS_CHECKSUMMED.toLowerCase());
+        expect(result.data.isTruncated).toBe(false);
+      }
+    });
+
+    it('sets isTruncated to true when quizzes or stats reach max export limit', async () => {
+      const cappedQuizzes = new Array(1000).fill({ id: 'q' });
+      let callCount = 0;
+      (supabase.from as import("vitest").Mock).mockImplementation(() => {
+        callCount++;
+        return {
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              limit: vi.fn().mockResolvedValue(
+                callCount === 1
+                  ? { data: cappedQuizzes, error: null }
+                  : { data: [], error: null }
+              ),
+            }),
+          }),
+        };
+      });
+
+      const result = await exportUserData(VALID_ADDRESS);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.isTruncated).toBe(true);
       }
     });
   });
