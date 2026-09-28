@@ -1,12 +1,13 @@
 {
   "name": "quick-quiz",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run tests/",
     "type-check": "tsc --noEmit",
     "docker:build": "docker compose build && docker image prune -f",
     "docker:up": "docker compose up -d --build && docker image prune -f"
