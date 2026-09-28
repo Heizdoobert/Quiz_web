@@ -14,6 +14,57 @@ const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
 const QUARANTINE_AT = 3;
 
+// Shared prompt/option/explanation validation, reused by both the global
+// single-question submission flow (below) and list-contest questions
+// (addListQuestion in question-list-actions.ts) so both go through the
+// same quality bar.
+export function validateQuestionInput(params: {
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation?: string;
+}):
+  | { valid: true; prompt: string; options: string[]; explanation: string }
+  | { valid: false; error: string } {
+  const trimmedPrompt = params.prompt?.trim() || '';
+  if (trimmedPrompt.length < 15) {
+    return { valid: false, error: 'Question prompt must be at least 15 characters long.' };
+  }
+  if (!Array.isArray(params.options) || params.options.length !== 4) {
+    return { valid: false, error: 'Exactly 4 options are required.' };
+  }
+  if (params.options.some((opt) => !opt?.trim())) {
+    return { valid: false, error: 'All 4 options must be filled.' };
+  }
+
+  const trimmedOptions = params.options.map((o) => o.trim());
+  const lowerOptions = new Set(trimmedOptions.map((o) => o.toLowerCase()));
+  if (lowerOptions.size !== 4) {
+    return { valid: false, error: 'All 4 options must be distinct from one another.' };
+  }
+
+  if (params.correctIndex < 0 || params.correctIndex > 3) {
+    return { valid: false, error: 'Correct option must be between 0 and 3.' };
+  }
+
+  const trimmedExplanation = params.explanation?.trim() || '';
+  if (trimmedExplanation.length < 20) {
+    return {
+      valid: false,
+      error: 'An educational explanation of at least 20 characters is required to ensure quiz quality.',
+    };
+  }
+
+  return { valid: true, prompt: trimmedPrompt, options: trimmedOptions, explanation: trimmedExplanation };
+}
+
+// Normalizes a prompt for duplicate/spam detection: case-insensitive,
+// whitespace-collapsed comparison so re-typing the same question with
+// different spacing/casing still counts as a duplicate.
+export function normalizePrompt(prompt: string): string {
+  return prompt.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 export async function createQuestion(params: {
   prompt: string;
   options: string[];
@@ -26,39 +77,17 @@ export async function createQuestion(params: {
     if (!wallet) return { success: false, error: 'Sign in with your wallet to add questions.' };
     if (!supabaseAdmin) return { success: false, error: 'Adding questions is unavailable right now.' };
 
-    const trimmedPrompt = params.prompt?.trim() || '';
-    if (trimmedPrompt.length < 15) {
-      return { success: false, error: 'Question prompt must be at least 15 characters long.' };
+    const validated = validateQuestionInput(params);
+    if (!validated.valid) {
+      return { success: false, error: validated.error };
     }
+    const { prompt: trimmedPrompt, options: trimmedOptions, explanation: trimmedExplanation } = validated;
+
     if (trimmedPrompt.length > MAX_PROMPT) {
       return { success: false, error: `Question prompt must be at most ${MAX_PROMPT} characters.` };
     }
-    if (!Array.isArray(params.options) || params.options.length !== 4) {
-      return { success: false, error: 'Exactly 4 options are required.' };
-    }
-    if (params.options.some((opt) => typeof opt !== 'string' || !opt.trim())) {
-      return { success: false, error: 'All 4 options must be filled.' };
-    }
-    if (params.options.some((opt) => opt.trim().length > MAX_OPTION)) {
+    if (trimmedOptions.some((opt) => opt.length > MAX_OPTION)) {
       return { success: false, error: `Each option must be at most ${MAX_OPTION} characters.` };
-    }
-
-    const trimmedOptions = params.options.map((o) => o.trim());
-    const lowerOptions = new Set(trimmedOptions.map((o) => o.toLowerCase()));
-    if (lowerOptions.size !== 4) {
-      return { success: false, error: 'All 4 options must be distinct from one another.' };
-    }
-
-    if (!Number.isInteger(params.correctIndex) || params.correctIndex < 0 || params.correctIndex > 3) {
-      return { success: false, error: 'Correct option must be between 0 and 3.' };
-    }
-
-    const trimmedExplanation = params.explanation?.trim() || '';
-    if (trimmedExplanation.length < 20) {
-      return {
-        success: false,
-        error: 'An educational explanation of at least 20 characters is required to ensure quiz quality.',
-      };
     }
     if (trimmedExplanation.length > MAX_EXPLANATION) {
       return { success: false, error: `Explanation must be at most ${MAX_EXPLANATION} characters.` };
@@ -113,7 +142,8 @@ export async function fetchRandomQuestion(
     let query = supabase
       .from('questions')
       .select('id, category, prompt, options, created_by, status')
-      .neq('status', 'quarantined');
+      .neq('status', 'quarantined')
+      .neq('status', 'pending'); // list-contest questions stay hidden until their list goes live
 
     // Only well-formed ids reach the filter string; the newest 200 are enough to avoid repeats.
     const ids = (Array.isArray(excludeIds) ? excludeIds : []).filter(isUuid).slice(-200);
@@ -133,6 +163,7 @@ export async function fetchRandomQuestion(
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
         .neq('status', 'quarantined')
+        .neq('status', 'pending')
         .eq('category', category)
         .limit(20);
       const fallbackRes = await fallbackQuery;
@@ -148,6 +179,7 @@ export async function fetchRandomQuestion(
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
         .neq('status', 'quarantined')
+        .neq('status', 'pending')
         .limit(20);
       if (generalQuery.data && generalQuery.data.length > 0) {
         data = generalQuery.data;
