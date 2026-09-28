@@ -88,12 +88,11 @@ export default function QuizCard({
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        {/* Front Face */}
+        {/* Front Face; inert hides the turned-away face from mouse, keyboard and screen readers */}
         <div
-          className={`col-start-1 row-start-1 backface-hidden ${
-            isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={isFlipped}
+          className="col-start-1 row-start-1 backface-hidden"
+          data-testid="quiz-card-front"
+          inert={isFlipped}
         >
           <QuestionFront
             question={question}
@@ -113,12 +112,7 @@ export default function QuizCard({
         </div>
 
         {/* Back Face */}
-        <div
-          className={`col-start-1 row-start-1 backface-hidden rotate-y-180 ${
-            !isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={!isFlipped}
-        >
+        <div className="col-start-1 row-start-1 backface-hidden rotate-y-180" inert={!isFlipped}>
           {result && (
             <AnswerBack
               question={question}
