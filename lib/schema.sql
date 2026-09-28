@@ -90,7 +90,8 @@ CREATE OR REPLACE VIEW client_questions AS
 CREATE TABLE IF NOT EXISTS reward_claims (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     wallet_address TEXT NOT NULL,
-    claim_type TEXT NOT NULL CHECK (claim_type IN ('token', 'badge')),
+    claim_type TEXT NOT NULL CHECK (claim_type IN ('token', 'badge', 'contest')),
+    list_id UUID REFERENCES question_lists(id) ON DELETE CASCADE,
     amount NUMERIC(78,0), -- wei; any uint256 fits
     badge_type INTEGER,
     nonce TEXT NOT NULL,
@@ -108,6 +109,8 @@ CREATE POLICY "Allow public read for reward_claims" ON reward_claims FOR SELECT 
 -- Only the server (secret key) writes claims. One open token voucher per wallet.
 CREATE UNIQUE INDEX IF NOT EXISTS reward_claims_one_open_token
   ON reward_claims (wallet_address) WHERE claim_type = 'token' AND status = 'pending';
+CREATE UNIQUE INDEX IF NOT EXISTS reward_claims_one_open_contest
+  ON reward_claims (wallet_address, list_id) WHERE claim_type = 'contest' AND status = 'pending';
 
 -- Question Disputes Table (Community Challenge & Transparency Engine)
 CREATE TABLE IF NOT EXISTS question_disputes (

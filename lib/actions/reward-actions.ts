@@ -6,27 +6,20 @@ import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getUserStats } from '@/lib/actions/quiz-actions';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
-import { REWARD_CHAIN_ID, isVoucherUsed } from '@/lib/chain';
-import { privateKeyToAccount } from 'viem/accounts';
-import crypto from 'crypto';
+import {
+  REWARD_CHAIN_ID,
+  isVoucherUsed,
+  isContestVoucherUsed,
+  getSignerAccount,
+  newNonce,
+  getContestId,
+} from '@/lib/chain';
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
 const VOUCHER_TTL_SECONDS = 3600;
 // An unused voucher past its deadline can never be minted. The margin covers
 // the gap between block time and this server's clock.
 const EXPIRY_MARGIN_SECONDS = 300;
-
-function getSignerAccount() {
-  const key = process.env.REWARD_SIGNER_PRIVATE_KEY;
-  if (!key || key === '0x_your_signer_private_key') {
-    return null;
-  }
-  return privateKeyToAccount(key as `0x${string}`);
-}
-
-function newNonce() {
-  return BigInt('0x' + crypto.randomUUID().replace(/-/g, ''));
-}
 
 type PendingTokenClaim = { nonce: string; amount: string; deadline: string; signature: `0x${string}` };
 
@@ -326,15 +319,21 @@ export async function confirmRewardClaim(
 
     const { data: claim } = await supabaseAdmin
       .from('reward_claims')
-      .select('id, claim_type')
+      .select('id, claim_type, list_id')
       .eq('wallet_address', normalized)
       .eq('nonce', nonce)
       .eq('status', 'pending')
       .maybeSingle();
     if (!claim) return { success: false };
 
-    // Trust the chain, not the caller: only a spent nonce means the reward was minted.
-    if (!(await isVoucherUsed(claim.claim_type, normalized, nonce))) return { success: false };
+    // Trust the chain, not the caller: only a spent nonce means the reward was minted / claimed.
+    if (claim.list_id) {
+      const contestId = getContestId(claim.list_id);
+      const usedOnEscrow = await isContestVoucherUsed(contestId, normalized, nonce);
+      if (!usedOnEscrow) return { success: false };
+    } else {
+      if (!(await isVoucherUsed(claim.claim_type as 'token' | 'badge', normalized, nonce))) return { success: false };
+    }
 
     const { data, error } = await supabaseAdmin
       .from('reward_claims')
@@ -344,6 +343,14 @@ export async function confirmRewardClaim(
       .select('id');
 
     if (error || !data || data.length === 0) return { success: false };
+
+    if (claim.list_id) {
+      await supabaseAdmin
+        .from('list_entries')
+        .update({ status: 'claimed' })
+        .eq('list_id', claim.list_id)
+        .eq('wallet_address', normalized);
+    }
 
     return { success: true };
   } catch (err) {

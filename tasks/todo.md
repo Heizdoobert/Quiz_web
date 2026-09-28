@@ -1,183 +1,135 @@
-# Tasks: Profile Dashboard & Quiz Export (Complete)
+# Tasks: On-Chain Contest Escrow Smart Contract
 
-## Task 1: Create Profile Server Actions
-
-**Description:** Create a new file for server actions (`profile-actions.ts`) to fetch a user's created quizzes and export their quiz data as a secure backup, filtering by their wallet address.
+## Task 1: Implement `ContestEscrow.sol`
+**Description:** Implement the `ContestEscrow` Solidity contract inheriting OpenZeppelin's `Ownable`, `ReentrancyGuard`, and `EIP712`. Allows creators to lock `$QUIZ` tokens in escrow, players to claim rewards with EIP-712 vouchers, and creators to refund remaining tokens post-expiry.
 
 **Acceptance criteria:**
-- [x] `getUserQuizzes` action exists and returns questions filtered by `created_by`
-- [x] `exportUserData` action exists and returns combined JSON data of questions and results filtered by wallet address
+- [x] Contract compiles with Solidity ^0.8.24
+- [x] `createContest` locks ERC-20 tokens via `SafeERC20.safeTransferFrom`
+- [x] `claimReward` verifies EIP-712 signature from `authorizedSigner`, prevents replay, and transfers tokens
+- [x] `refundRemaining` returns unearned tokens to creator after `expiresAt`
 
 **Verification:**
-- [x] Build succeeds
-- [x] Manual check: verify the returned JSON structure is valid
+- [x] `npm --prefix contracts run compile` succeeds with 0 errors
 
 **Dependencies:** None
-
 **Files likely touched:**
-- `lib/actions/profile-actions.ts`
-
-**Estimated scope:** Small
-
----
-
-## Task 2: Build the Profile Page UI (`/profile`)
-
-**Description:** Build the Next.js App Router page that displays the dashboard. It must enforce connection via `useAccount` and show a grid of the user's quizzes along with an export button.
-
-**Acceptance criteria:**
-- [x] Shows "Access Denied" or connect prompt if wallet is not connected
-- [x] Lists user's quizzes using the dark theme matching existing `QuizCard` styles
-- [x] Includes a "Backup Data" button that triggers a JSON download
-
-**Verification:**
-- [x] Build succeeds
-- [x] Manual check: Visit `/profile` disconnected, then connected
-
-**Dependencies:** Task 1
-
-**Files likely touched:**
-- `app/profile/page.tsx`
-
+- `contracts/contracts/ContestEscrow.sol`
 **Estimated scope:** Medium
 
 ---
 
-## Task 3: Link to the Profile Page
-
-**Description:** Add a navigational link so users can discover the new `/profile` page. The best place is inside the existing `ProfileModal.tsx` near the rewards section.
+## Task 2: Hardhat Test Suite for `ContestEscrow.sol`
+**Description:** Write unit and scenario tests covering all execution paths and failure modes of `ContestEscrow.sol`.
 
 **Acceptance criteria:**
-- [x] Link to `/profile` is added in `components/modals/ProfileModal.tsx`
-- [x] Link matches existing UI styles
+- [x] Tests contest creation, deposit balance, and event emission
+- [x] Tests valid EIP-712 reward claim and recipient token receipt
+- [x] Tests replay protection (reverting on reused nonce)
+- [x] Tests deadline enforcement (reverting on expired voucher)
+- [x] Tests signature verification (reverting on tampered contestId, recipient, amount, or nonce)
+- [x] Tests pool bounds (reverting if claim exceeds remaining pool)
+- [x] Tests refund authorization and timing (reverts before `expiresAt`, succeeds after `expiresAt`)
 
 **Verification:**
-- [x] Build succeeds
-- [x] Manual check: Open Profile Modal, click the new link to ensure it navigates to `/profile`
+- [x] `npm --prefix contracts test` passes 100%
 
-**Dependencies:** Task 2
-
+**Dependencies:** Task 1
 **Files likely touched:**
-- `components/modals/ProfileModal.tsx`
-
-**Estimated scope:** XS
+- `contracts/test/ContestEscrow.test.ts`
+**Estimated scope:** Medium
 
 ---
 
-## Checkpoint: Complete (Profile Dashboard)
-- [x] All tests pass
-- [x] Application builds without errors
-- [x] Core user flow works end-to-end
-- [x] Review with human before proceeding
+## Task 3: Export ABI and Contract Addresses
+**Description:** Generate typed ABI and address constants for `ContestEscrow` in the web application codebase.
+
+**Acceptance criteria:**
+- [x] `lib/contracts/ContestEscrowABI.ts` contains the generated ABI
+- [x] `lib/contracts/addresses.ts` exports `CONTEST_ESCROW_ADDRESS`
+- [x] `contracts/scripts/sync-abi.ts` updated to include `ContestEscrow`
+
+**Verification:**
+- [x] TypeScript compiles cleanly: `npm run type-check`
+
+**Dependencies:** Task 1
+**Files likely touched:**
+- `contracts/scripts/sync-abi.ts`
+- `lib/contracts/ContestEscrowABI.ts`
+- `lib/contracts/addresses.ts`
+**Estimated scope:** Small
 
 ---
 
-# Tasks: Stats & Leaderboard Aggregation in Postgres (Complete)
-
-Plan: `tasks/plan.md`
-
-## Task 1: Per-wallet stats in Postgres (stats + rewards)
-
-**Description:** Add `get_user_stats(p_wallet text)` to a new `lib/sql/stats-functions.sql`. It returns one row: `total_answered`, `correct_count`, `streak` (consecutive correct from the most recent answer), and `best_streak` (longest run of correct answers, chronological, gaps-and-islands). `getUserStats` calls it via `supabase.rpc()` and keeps its return shape and accuracy rounding. `getClaimableRewards` takes `totalCorrect` from the same RPC instead of downloading rows. Add `scripts/check-stats-parity.ts` (paginated raw fetch → old JS logic vs RPC, per wallet).
+## Task 4: Unpause & Implement `claimListReward` Server Action
+**Description:** Unpause the `claimListReward` Server Action in `lib/actions/question-list-actions.ts`, signing EIP-712 `ClaimContestReward` vouchers for `ContestEscrow`.
 
 **Acceptance criteria:**
-- [x] `getUserStats` and `getClaimableRewards` no longer select raw `quiz_results` rows
-- [x] For every wallet in the DB, the RPC result equals the old JS computation (score, streak, bestStreak, accuracy, totalAnswered) — live DB had 0 `quiz_results` rows on 2026-09-28, so this is vacuous; the local fixture run is the real proof
-- [x] A wallet with more than 1000 answers gets its full correct count (verified in a throwaway local Postgres 16 container instead of `--seed`: 1,500-row wallet plus 8 edge cases, 0 mismatches against the old JS logic)
+- [x] Requires signed-in wallet via `getSessionWallet()`
+- [x] Verifies contest completion in `list_entries`
+- [x] Calculates earned tokens and issues valid EIP-712 voucher targeting `ContestEscrow`
+- [x] Records pending claim in `reward_claims`
+- [x] Unit tests updated in `tests/answer-and-list-guards.test.ts`
 
 **Verification:**
-- [x] SQL applied in Supabase SQL Editor without errors, and re-running it is a no-op (re-run verified locally); `rpc/get_user_stats` returns 200 on live
-- [x] `node scripts/check-stats-parity.mts` reports 0 mismatches against live data (0 rows)
-- [x] `npx tsc --noEmit`, `npx eslint` on touched files, and `npm run build` clean
-- [x] Manual: connect a wallet on `preview`; stats panel and View Rewards show the same numbers as before
+- [x] `npm test` passes all tests
 
-**Dependencies:** None
-
+**Dependencies:** Task 3
 **Files likely touched:**
-- `lib/sql/stats-functions.sql` (new)
-- `lib/actions/quiz-actions.ts`
-- `lib/actions/reward-actions.ts`
-- `scripts/check-stats-parity.ts` (new)
-- `README.md` (one line under Database)
+- `lib/actions/question-list-actions.ts`
+- `lib/types.ts`
+- `tests/answer-and-list-guards.test.ts`
+**Estimated scope:** Medium
 
-**Estimated scope:** M
+---
 
-## Checkpoint A: after Task 1
-- [x] SQL applied on Supabase before the code deploys
-- [x] Parity script: 0 mismatches
-- [x] Lint + build clean
-- [x] Human review before continuing
-
-## Task 2: Global leaderboard in Postgres
-
-**Description:** Add `get_global_leaderboard(p_limit int)` to `lib/sql/stats-functions.sql`: `GROUP BY wallet_address`, `score = count(*) filter (where is_correct)`, `accuracy = round(score * 100.0 / count(*))`, `ORDER BY score desc, accuracy desc, wallet_address`, `LIMIT p_limit`. `getGlobalLeaderboard` calls it and keeps building `display_name` and `rank` in JavaScript, as it does today. Extend the parity script to compare the global top 50.
+## Task 5: Connect Contest Play & Claim UI
+**Description:** Update `components/lists/ContestPlay.tsx` to execute `claimReward` on `ContestEscrow` instead of `QuizToken`.
 
 **Acceptance criteria:**
-- [x] `getGlobalLeaderboard` no longer selects raw `quiz_results` rows
-- [x] Top 50 matches the old JS computation (same wallets, same order, same score/accuracy)
-- [x] Badge eligibility in `getClaimableRewards` (uses `getGlobalLeaderboard(3)`) is unchanged
+- [x] Calls `claimReward` on `CONTEST_ESCROW_ADDRESS` using `ContestEscrowABI`
+- [x] Handles transaction submission, receipt waiting, and state transitions
+- [x] Calls `markListRewardClaimed` upon receipt confirmation
 
 **Verification:**
-- [x] Parity script: 0 mismatches for global
-- [x] `npm run lint` and `npm run build` clean
-- [x] Manual: leaderboard on `preview` shows the same top rows as before
+- [x] `npm run type-check` and `npm run build` succeed
 
-**Dependencies:** Task 1 (shares the SQL file and parity script)
-
+**Dependencies:** Task 3, Task 4
 **Files likely touched:**
-- `lib/sql/stats-functions.sql`
-- `lib/actions/leaderboard-actions.ts`
-- `scripts/check-stats-parity.ts`
+- `components/lists/ContestPlay.tsx`
+**Estimated scope:** Small
 
-**Estimated scope:** S
+---
 
-## Task 3: Group leaderboard in Postgres
-
-**Description:** Add `get_group_leaderboard(p_group_id uuid, p_limit int)`: start from `group_members` and `LEFT JOIN` `quiz_results`, so members with no answers still appear with score 0 and accuracy 0 (matches today's behaviour). Same ordering as Task 2. `getGroupLeaderboard` calls it; the separate members query goes away. Extend the parity script to cover every group.
+## Task 6: Connect Creator Contest Funding UI
+**Description:** Update `components/lists/MyListsDashboard.tsx` to handle ERC-20 approval and `createContest` call when a creator launches a contest.
 
 **Acceptance criteria:**
-- [x] `getGroupLeaderboard` makes one RPC call instead of two raw queries
-- [x] Members with zero answers still listed with score 0 and accuracy 0
-- [x] Every group matches the old JS computation
+- [x] Prompt creator to approve token spend and create contest on-chain if pool > 0
+- [x] Updates list state on successful transaction
 
 **Verification:**
-- [x] Parity script: 0 mismatches for all groups
-- [x] `npm run lint` and `npm run build` clean
-- [x] Manual: Group Guild tab on `preview` shows the same rows as before
+- [x] `npm run type-check` and `npm run build` succeed
 
-**Dependencies:** Task 2
-
+**Dependencies:** Task 3, Task 5
 **Files likely touched:**
-- `lib/sql/stats-functions.sql`
-- `lib/actions/leaderboard-actions.ts`
-- `scripts/check-stats-parity.ts`
+- `components/lists/MyListsDashboard.tsx`
+**Estimated scope:** Medium
 
-**Estimated scope:** S
+---
 
-Tasks 2–3 verified in a throwaway local Postgres 16 container: global top 50, a >50-member group, a 5-member group with a zero-answer member, a zero-answer-only group and an unknown group all match the old JS logic (0 mismatches), including ties, a 1,300-row wallet, and JS float rounding (57/200 → 28, 1/8 → 13). `tsc`, `eslint`, and `npm run build` clean.
-
-## Checkpoint B: after Tasks 2–3
-- [x] SQL applied on Supabase; `rpc/get_global_leaderboard` and `rpc/get_group_leaderboard` return 200 on live
-- [x] Parity script: 0 mismatches for global and all groups (live DB has 0 `quiz_results` rows and 0 groups on 2026-09-28, so vacuous; the local fixture run is the real proof)
-- [x] Lint + build clean
-- [x] Leaderboards render correctly on `preview`
-- [x] Human review before merging to `main`
-
-## Task 4 (optional): Next question doesn't wait behind leaderboard refresh
-
-**Description:** Next.js runs server actions one at a time per client. In `handleAnswerSubmit`, the leaderboard and rewards refresh start right after an answer, so a "Next Question" click queues behind them. Prefetch the next question right after `submitAnswer` resolves, before the refreshes, and show it on "Next Question".
+## Task 7: Full System Verification & Quality Gates
+**Description:** Run the complete suite of tests and checks across both the smart contract and web application environments.
 
 **Acceptance criteria:**
-- [ ] After answering, the next question appears without waiting for the leaderboard refresh
-- [ ] Answered questions are still excluded, and category selection still applies
+- [x] Hardhat tests pass 100% (`npm --prefix contracts test`)
+- [x] Web application unit tests pass 100% (`npm test`)
+- [x] `npm run lint` clean
+- [x] `npm run type-check` clean
+- [x] `npm run build` production build succeeds
 
 **Verification:**
-- [ ] Headless timing run (same method as `docs/intent/quiz-load-speed.md`): next-question wait no longer includes the leaderboard call
-- [ ] `npm run lint` and `npm run build` clean
+- [x] All check commands exit with code 0
 
-**Dependencies:** None (independent of Tasks 1–3). Only do this if Open Question 2 says yes.
-
-**Files likely touched:**
-- `hooks/quiz/use-quiz-logic.ts`
-
-**Estimated scope:** S
+**Dependencies:** Tasks 1-6
+**Estimated scope:** Small

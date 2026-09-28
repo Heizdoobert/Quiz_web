@@ -24,7 +24,7 @@ export const ${contractName}ABI = ${JSON.stringify(abi, null, 2)} as const;
 }
 
 function main(): void {
-  for (const name of ["QuizToken", "QuizBadgeNFT"]) {
+  for (const name of ["QuizToken", "QuizBadgeNFT", "ContestEscrow"]) {
     const abi = extractABI(name);
     writeABI(name, abi);
   }

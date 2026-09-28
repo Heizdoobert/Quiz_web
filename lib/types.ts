@@ -122,6 +122,7 @@ export interface RewardVoucher {
   deadline: string;
   signature: string;
   contractAddress: string;
+  contestId?: `0x${string}`;
 }
 
 export const BADGE_NAMES: Record<number, string> = {

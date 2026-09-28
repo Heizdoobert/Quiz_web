@@ -6,6 +6,15 @@ import { getSessionWallet } from '@/lib/wallet-session';
 import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
 import { isUuid, normalizePrompt, validateQuestionInput } from '@/lib/validation';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
+import {
+  REWARD_CHAIN_ID,
+  isContestVoucherUsed,
+  isContestFundedOnChain,
+  getSignerAccount,
+  newNonce,
+  getContestId,
+} from '@/lib/chain';
 
 // Every write acts for the signed-in wallet (never a wallet argument) and goes through
 // the secret key: the public key can only read lists, confirmations and entries
@@ -469,11 +478,18 @@ export async function startContest(listId: string, rewardPoolWholeTokens: number
       return { success: false, error: `List must be approved by ${REQUIRED_CONFIRMATIONS} reviewers before starting.` };
     }
 
+    const minPoolWei = toWei(rewardPoolWholeTokens);
+    const contestId = getContestId(listId);
+    const isFunded = await isContestFundedOnChain(contestId, auth.wallet, minPoolWei);
+    if (!isFunded) {
+      return { success: false, error: 'Contest pool has not been funded on-chain.' };
+    }
+
     const { error } = await auth.db
       .from('question_lists')
       .update({
         status: 'live',
-        reward_pool_tokens: toWei(rewardPoolWholeTokens).toString(),
+        reward_pool_tokens: minPoolWei.toString(),
         started_at: new Date().toISOString(),
       })
       .eq('id', listId)
@@ -622,10 +638,155 @@ export async function completeListAttempt(
   }
 }
 
-// Paused: contest pools are minted by the reward signer, not funded by the owner,
-// and the owner knows every answer, so any pool can be drained with extra wallets.
-// Re-enable once pools are funded up front (escrowed tokens) or capped by design.
+const VOUCHER_TTL_SECONDS = 3600;
+const EXPIRY_MARGIN_SECONDS = 300;
+
+function toContestVoucher(
+  wallet: string,
+  claim: { amount: string; nonce: string; deadline: string; signature: string },
+  contestId: `0x${string}`,
+): RewardVoucher {
+  return {
+    recipient: wallet,
+    amount: claim.amount,
+    nonce: claim.nonce,
+    deadline: claim.deadline,
+    signature: claim.signature,
+    contractAddress: CONTEST_ESCROW_ADDRESS,
+    contestId,
+  };
+}
+
 export async function claimListReward(listId: string): Promise<RewardVoucher | { error: string }> {
-  void listId;
-  return { error: 'Contest payouts are paused.' };
+  try {
+    if (!isUuid(listId)) return { error: 'Invalid contest ID.' };
+    const auth = await signedIn();
+    if ('error' in auth) return { error: auth.error || 'Sign in with your wallet first.' };
+
+    const account = getSignerAccount();
+    if (!account) return { error: 'Reward signing not configured' };
+
+    const { data: entry, error: entryErr } = await auth.db
+      .from('list_entries')
+      .select('status, reward_amount')
+      .eq('list_id', listId)
+      .eq('wallet_address', auth.wallet)
+      .maybeSingle();
+
+    if (entryErr || !entry) return { error: 'Contest entry not found.' };
+    if (entry.status === 'claimed') return { error: 'Reward has already been claimed.' };
+    if (entry.status !== 'completed') return { error: 'Contest attempt has not been completed.' };
+
+    const amount = BigInt(entry.reward_amount || '0');
+    if (amount <= BigInt(0)) return { error: 'No rewards earned for this contest.' };
+
+    const contestId = getContestId(listId);
+
+    // Reuse unexpired open voucher if already generated
+    const { data: pendingClaims } = await auth.db
+      .from('reward_claims')
+      .select('id, nonce, amount::text, deadline, signature')
+      .eq('wallet_address', auth.wallet)
+      .eq('list_id', listId)
+      .eq('status', 'pending');
+
+    const now = Math.floor(Date.now() / 1000);
+
+    if (pendingClaims && pendingClaims.length > 0) {
+      for (const claim of pendingClaims) {
+        let status: 'claimed' | 'expired' | null = null;
+        if (await isContestVoucherUsed(contestId, auth.wallet, claim.nonce)) {
+          status = 'claimed';
+        } else if (!claim.deadline || Number(claim.deadline) + EXPIRY_MARGIN_SECONDS < now) {
+          status = 'expired';
+        }
+
+        if (status) {
+          await auth.db
+            .from('reward_claims')
+            .update({ status })
+            .eq('id', claim.id)
+            .eq('status', 'pending');
+          if (status === 'claimed') {
+            await auth.db
+              .from('list_entries')
+              .update({ status: 'claimed' })
+              .eq('list_id', listId)
+              .eq('wallet_address', auth.wallet);
+            return { error: 'Reward has already been claimed.' };
+          }
+        } else {
+          return toContestVoucher(
+            auth.wallet,
+            {
+              amount: claim.amount,
+              nonce: claim.nonce,
+              deadline: String(claim.deadline),
+              signature: claim.signature,
+            },
+            contestId,
+          );
+        }
+      }
+    }
+
+    const nonce = newNonce();
+    const deadline = BigInt(now + VOUCHER_TTL_SECONDS);
+
+    const signature = await account.signTypedData({
+      domain: {
+        name: 'ContestEscrow',
+        version: '1',
+        chainId: BigInt(REWARD_CHAIN_ID),
+        verifyingContract: CONTEST_ESCROW_ADDRESS,
+      },
+      types: {
+        ClaimContestReward: [
+          { name: 'contestId', type: 'bytes32' },
+          { name: 'recipient', type: 'address' },
+          { name: 'amount', type: 'uint256' },
+          { name: 'nonce', type: 'uint256' },
+          { name: 'deadline', type: 'uint256' },
+        ],
+      },
+      primaryType: 'ClaimContestReward',
+      message: {
+        contestId,
+        recipient: auth.wallet as `0x${string}`,
+        amount,
+        nonce,
+        deadline,
+      },
+    });
+
+    const { error: insertErr } = await auth.db.from('reward_claims').insert({
+      wallet_address: auth.wallet,
+      claim_type: 'contest',
+      status: 'pending',
+      list_id: listId,
+      nonce: nonce.toString(),
+      amount: amount.toString(),
+      deadline: deadline.toString(),
+      signature,
+    });
+
+    if (insertErr) {
+      console.error('claimListReward insert error:', insertErr);
+      return { error: 'Failed to record reward voucher.' };
+    }
+
+    return toContestVoucher(
+      auth.wallet,
+      {
+        amount: amount.toString(),
+        nonce: nonce.toString(),
+        deadline: deadline.toString(),
+        signature,
+      },
+      contestId,
+    );
+  } catch (err) {
+    console.error('claimListReward error:', err);
+    return { error: 'Failed to claim contest reward.' };
+  }
 }

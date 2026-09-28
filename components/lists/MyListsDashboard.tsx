@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
 import {
   createList,
   updateList,
@@ -15,7 +15,13 @@ import {
   startContest,
 } from '@/lib/actions/question-list-actions';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
+import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
+import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
+import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS } from '@/lib/contracts/addresses';
 import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+
+const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
 import { Question, QuestionListWithMeta } from '@/lib/types';
@@ -194,6 +200,11 @@ function ListCard({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [poolAmount, setPoolAmount] = useState('');
+  const [funding, setFunding] = useState<null | 'approving' | 'creating'>(null);
+  const chainId = useChainId();
+  const { switchChain } = useSwitchChain();
+  const { writeContractAsync } = useWriteContract();
+  const publicClient = usePublicClient({ chainId: TARGET_CHAIN_ID });
   const [editingList, setEditingList] = useState(false);
   const [editTitle, setEditTitle] = useState(list.title);
   const [editDescription, setEditDescription] = useState(list.description || '');
@@ -249,7 +260,46 @@ function ListCard({
       setError('Enter a positive reward pool amount (in QUIZ tokens).');
       return;
     }
+    if (!(await ensureSession())) {
+      setError(SIGN_IN_ERROR);
+      return;
+    }
+    if (chainId !== TARGET_CHAIN_ID) {
+      setError('Switch to Base Sepolia to fund the contest on-chain.');
+      switchChain({ chainId: TARGET_CHAIN_ID });
+      return;
+    }
+    if (!publicClient) {
+      setError('Wallet network not ready. Try again.');
+      return;
+    }
+    // Fund on-chain first: a live contest must never promise unfunded rewards.
     setError(null);
+    try {
+      const amountWei = BigInt(Math.floor(amount)) * (BigInt(10) ** BigInt(18));
+      setFunding('approving');
+      const approveHash = await writeContractAsync({
+        address: QUIZ_TOKEN_ADDRESS,
+        abi: QuizTokenABI,
+        functionName: 'approve',
+        args: [CONTEST_ESCROW_ADDRESS, amountWei],
+      });
+      await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      setFunding('creating');
+      const createHash = await writeContractAsync({
+        address: CONTEST_ESCROW_ADDRESS,
+        abi: ContestEscrowABI,
+        functionName: 'createContest',
+        args: [getContestId(list.id), amountWei, BigInt(CONTEST_DURATION_SECONDS)],
+      });
+      await publicClient.waitForTransactionReceipt({ hash: createHash });
+    } catch (err) {
+      console.error('Contest funding tx failed:', err);
+      setError('On-chain funding failed or was rejected.');
+      setFunding(null);
+      return;
+    }
+    setFunding(null);
     const res = await asSignedIn(() => startContest(list.id, amount));
     if (!res.success) {
       setError(res.error || 'Failed to start contest.');
@@ -374,9 +424,10 @@ function ListCard({
               <button
                 type="button"
                 onClick={handleStartContest}
-                className="px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-lg text-xs font-black cursor-pointer"
+                disabled={funding !== null}
+                className="px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-lg text-xs font-black disabled:opacity-40 cursor-pointer"
               >
-                Start Contest
+                {funding === 'approving' ? 'Approving QUIZ…' : funding === 'creating' ? 'Funding escrow…' : 'Start Contest'}
               </button>
             </div>
           )}
