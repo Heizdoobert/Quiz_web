@@ -25,7 +25,7 @@ Copy `.env.example` to `.env.local` and fill in your own Supabase, WalletConnect
 
 ### Database
 
-Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to create tables and seed data, then run [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) for the stats and leaderboard functions (safe to re-run).
+Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to create tables and seed data, then run [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) for the stats and leaderboard functions (safe to re-run). Databases created before public answer inserts were removed also need [`lib/sql/restrict-quiz-results-insert.sql`](lib/sql/restrict-quiz-results-insert.sql). The server records answers with `SUPABASE_SECRET_KEY`, so set it wherever the app runs.
 
 ### Smart Contracts
 

@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { AnswerSubmissionResult, QuizResult, UserStats } from '@/lib/types';
 
 export async function submitAnswer(params: {
@@ -26,12 +27,17 @@ export async function submitAnswer(params: {
 
     // Log the result only if a valid wallet is connected (prevents corrupting leaderboard with dummy address)
     if (normalizedWallet && normalizedWallet !== '0x0000000000000000000000000000000000000000') {
-      await supabase.from('quiz_results').insert({
-        wallet_address: normalizedWallet,
-        question_id: params.questionId,
-        answer_index: params.answerIndex,
-        is_correct: isCorrect,
-      });
+      if (!supabaseAdmin) {
+        console.error('submitAnswer: SUPABASE_SECRET_KEY is not set, answer not recorded');
+      } else {
+        const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
+          wallet_address: normalizedWallet,
+          question_id: params.questionId,
+          answer_index: params.answerIndex,
+          is_correct: isCorrect,
+        });
+        if (insertError) console.error('submitAnswer insert error:', insertError);
+      }
     }
 
     return {
