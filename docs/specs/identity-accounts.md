@@ -29,7 +29,7 @@ Next.js 16.3 server actions; Supabase Auth email OTP through the installed `@sup
   - `auth_user_id UUID UNIQUE` (Supabase `auth.users.id`, set for email accounts)
   - `wallet_linked_at TIMESTAMPTZ`
 - `users.wallet_address` becomes nullable and stays `UNIQUE`. Existing rows keep their wallet and get `wallet_linked_at = created_at`.
-- Every table that references a player gets a `user_id UUID REFERENCES users(id)` column, backfilled by joining on the old wallet column: `questions.created_by`, `quiz_results`, `groups.owner_wallet`, `group_members`, `question_lists.owner_wallet`, `list_entries`, `question_list_confirmations`, `question_disputes`, `reward_claims`. Unique constraints move to `user_id`.
+- Every table that references a player gets a `UUID REFERENCES users(id)` column, backfilled by joining on the old wallet column. It is named `user_id` in `quiz_results`, `group_members`, `list_entries` and `reward_claims`, and named for the role elsewhere: `questions.created_by_user`, `question_disputes.reporter_user`, `groups.owner_user`, `question_lists.owner_user`, `question_list_confirmations.confirmer_user`. Unique constraints move to the new columns.
 - The old wallet columns are dropped in a later script (`lib/sql/accounts-drop-wallet-columns.sql`), only after all code reads `user_id`.
 - Email addresses are never copied into `users`: that table has a public read policy. Email stays in `auth.users`.
 - Drop the "Allow public insert for users" policy. The server creates accounts with the secret key.
