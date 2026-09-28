@@ -94,13 +94,6 @@ describe('profile-actions', () => {
     });
 
     it('returns error when statsResponse fails', async () => {
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockEq = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockImplementation(() => {
-        // We need to differentiate between the two parallel calls
-        return Promise.resolve({ data: null, error: { message: 'Stats table error' } });
-      });
-
       let callCount = 0;
       (supabase.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
