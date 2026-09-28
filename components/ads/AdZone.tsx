@@ -18,7 +18,7 @@ export default function AdZone({ variant, slot, className = '', children }: AdZo
     return (
       <aside
         data-slot={slot}
-        className={`hidden xl:flex flex-col w-[160px] shrink-0 sticky top-20 self-start p-3 rounded-2xl bg-[#1A1B35]/90 border border-[#2D305A] shadow-xl text-center backdrop-blur-sm transition-all hover:border-[#6C5CE7]/60 ${className}`}
+        className={`hidden xl:flex flex-col w-[160px] shrink-0 sticky top-20 self-start p-4 rounded-2xl glass glass-border border border-transparent shadow-xl text-center transition-all hover:border-[#6C5CE7]/60 ${className}`}
         aria-label="Sponsored Promotions"
       >
         <div className="text-[10px] font-bold font-heading uppercase tracking-wider text-slate-400 mb-2 py-0.5 px-2 bg-[#0A1128]/80 rounded-full inline-block mx-auto border border-[#2D305A]">
@@ -47,7 +47,7 @@ export default function AdZone({ variant, slot, className = '', children }: AdZo
   return (
     <section
       data-slot={slot}
-      className={`w-full my-4 p-3 rounded-2xl bg-[#1A1B35]/90 border border-[#2D305A] shadow-md backdrop-blur-sm transition-all hover:border-[#6C5CE7]/60 ${className}`}
+      className={`w-full my-4 p-4 rounded-2xl glass glass-border border border-transparent shadow-md transition-all hover:border-[#6C5CE7]/60 ${className}`}
       aria-label="Sponsored Banner"
     >
       <div className="flex items-center justify-between mb-2">

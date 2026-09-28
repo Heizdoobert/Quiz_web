@@ -41,8 +41,8 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
         </motion.button>
       }
     >
-      <div className="space-y-4">
-        <div className="flex justify-between items-center p-3.5 bg-[#0A1128]/70 rounded-xl border border-[#2D305A]">
+      <div className="space-y-5">
+        <div className="flex justify-between items-center p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A]">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Answered</span>
             <p className="text-lg font-bold text-white font-heading">{history.length}</p>
@@ -64,7 +64,7 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
             history.map((item, idx) => (
               <div
                 key={`${item.questionId}-${idx}`}
-                className={`p-3 rounded-xl border flex items-start gap-3 transition-colors ${
+                className={`p-4 rounded-xl border flex items-start gap-3 transition-colors ${
                   item.isCorrect
                     ? 'bg-[#00FFCC]/10 border-[#00FFCC]/30 text-slate-200'
                     : 'bg-[#FF4757]/10 border-[#FF4757]/30 text-slate-200'
