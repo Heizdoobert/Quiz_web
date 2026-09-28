@@ -20,6 +20,7 @@ function toEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
 export async function getGlobalLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
   try {
     const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: limit });
+    if (error) console.error('getGlobalLeaderboard rpc error:', error);
     if (error || !data) return [];
     return toEntries(data as LeaderboardRow[]);
   } catch (err) {
@@ -37,6 +38,7 @@ export async function getGroupLeaderboard(
       p_group_id: groupId,
       p_limit: limit,
     });
+    if (error) console.error('getGroupLeaderboard rpc error:', error);
     if (error || !data) return [];
     return toEntries(data as LeaderboardRow[]);
   } catch (err) {

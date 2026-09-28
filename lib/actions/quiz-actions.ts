@@ -1,6 +1,7 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { AnswerSubmissionResult, QuizResult, UserStats } from '@/lib/types';
 
 export async function submitAnswer(params: {
@@ -26,12 +27,17 @@ export async function submitAnswer(params: {
 
     // Log the result only if a valid wallet is connected (prevents corrupting leaderboard with dummy address)
     if (normalizedWallet && normalizedWallet !== '0x0000000000000000000000000000000000000000') {
-      await supabase.from('quiz_results').insert({
-        wallet_address: normalizedWallet,
-        question_id: params.questionId,
-        answer_index: params.answerIndex,
-        is_correct: isCorrect,
-      });
+      if (!supabaseAdmin) {
+        console.error('submitAnswer: SUPABASE_SECRET_KEY is not set, answer not recorded');
+      } else {
+        const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
+          wallet_address: normalizedWallet,
+          question_id: params.questionId,
+          answer_index: params.answerIndex,
+          is_correct: isCorrect,
+        });
+        if (insertError) console.error('submitAnswer insert error:', insertError);
+      }
     }
 
     return {
@@ -55,6 +61,7 @@ export async function getUserStats(walletAddress: string): Promise<UserStats> {
       .rpc('get_user_stats', { p_wallet: walletAddress.toLowerCase() })
       .single<{ total_answered: number; correct_count: number; streak: number; best_streak: number }>();
 
+    if (error) console.error('getUserStats rpc error:', error);
     if (error || !data || data.total_answered === 0) {
       return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     }

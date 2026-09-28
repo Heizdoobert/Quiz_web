@@ -71,7 +71,7 @@ CREATE POLICY "Allow public insert for group_members" ON group_members FOR INSER
 CREATE POLICY "Allow public delete for group_members" ON group_members FOR DELETE USING (true);
 
 CREATE POLICY "Allow public read for quiz_results" ON quiz_results FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for quiz_results" ON quiz_results FOR INSERT WITH CHECK (true);
+-- No public insert: answers are recorded by the server with the secret key.
 
 CREATE POLICY "Allow public read for questions" ON questions FOR SELECT USING (true);
 CREATE POLICY "Allow public insert for questions" ON questions FOR INSERT WITH CHECK (true);
