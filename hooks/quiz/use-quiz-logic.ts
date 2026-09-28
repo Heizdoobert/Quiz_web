@@ -8,13 +8,13 @@ import {
   LeaderboardEntry,
   UserStats,
   ClaimableRewards,
+  HistoryItem,
 } from '@/lib/types';
 import { getOrCreateUser } from '@/lib/actions/user-actions';
 import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/question-actions';
-import { getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
+import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
-import { HistoryItem } from '@/components/modals/ReviewModal';
 import { soundEngine } from '@/lib/audio';
 import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 
@@ -110,6 +110,16 @@ export function useQuizLogic({
     if (!address) return;
     const data = await getClaimableRewards(address);
     setClaimableRewards(data);
+  }, [address]);
+
+  // Loads the signed-in wallet's saved answers so history and the "already answered"
+  // set survive a reload; a wallet with no session yet gets [] back.
+  const refreshHistory = useCallback(async () => {
+    if (!address) return;
+    const saved = await getAnswerHistory(address);
+    if (saved.length === 0) return;
+    setHistory(saved);
+    setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
   }, [address]);
 
   const loadLeaderboards = useCallback(
@@ -215,15 +225,16 @@ export function useQuizLogic({
     [currentQuestion, isSubmitting, isFlipped, isConnected, ensureSession, loadLeaderboards, refreshRewards]
   );
 
-  // Initial user sync & stats fetch
+  // Initial user sync, stats and history fetch
   useEffect(() => {
     if (isConnected && address) {
       getOrCreateUser(address).then(() => {
         refreshStats();
         refreshRewards();
+        refreshHistory();
       });
     }
-  }, [isConnected, address, refreshStats, refreshRewards]);
+  }, [isConnected, address, refreshStats, refreshRewards, refreshHistory]);
 
   // Only fetch initial question and leaderboards if not supplied via SSR
   useEffect(() => {

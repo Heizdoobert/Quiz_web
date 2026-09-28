@@ -5,6 +5,7 @@ import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
 import { getSessionWallet, setSessionWallet, shouldUseSecureCookies } from '@/lib/wallet-session';
+import { ensureUserRow } from '@/lib/users';
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -60,7 +61,9 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
       domain: (await requestOrigin()).host,
       nonce,
     });
-    return valid && (await setSessionWallet(address));
+    if (!valid || !(await setSessionWallet(address))) return false;
+    await ensureUserRow(address);
+    return true;
   } catch (err) {
     console.error('signInWithWallet error:', err);
     return false;

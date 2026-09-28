@@ -105,6 +105,14 @@ export interface AnswerSubmissionResult {
   explanation: string | null;
   // False when the answer didn't count: not signed in, or the question was already answered.
   recorded: boolean;
+  // Set only when recorded is false, so the UI can say why instead of claiming a point was earned.
+  notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'error';
+}
+
+export interface HistoryItem {
+  questionId: string;
+  prompt: string;
+  isCorrect: boolean;
 }
 
 export interface ClaimableRewards {

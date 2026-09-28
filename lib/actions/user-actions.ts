@@ -1,46 +1,34 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { getSessionWallet } from '@/lib/wallet-session';
+import { ensureUserRow } from '@/lib/users';
 import { User } from '@/lib/types';
 
+// Reads the users row, creating it first if the caller is the session wallet itself
+// (sign-in already creates it, but a wallet that was signed in before this ran needs
+// it created too). Never inserts for an address that isn't the current session's.
 export async function getOrCreateUser(walletAddress: string): Promise<User | null> {
   if (!walletAddress) return null;
   const normalized = walletAddress.toLowerCase();
 
   try {
+    if (normalized === (await getSessionWallet())) {
+      await ensureUserRow(normalized);
+    }
+
     const { data: existingUser, error: fetchError } = await supabase
       .from('users')
       .select('*')
       .eq('wallet_address', normalized)
       .maybeSingle();
 
-    if (fetchError && fetchError.code !== 'PGRST116') {
+    if (fetchError) {
       console.error('Error fetching user:', fetchError);
       return { wallet_address: normalized, display_name: null, created_at: new Date().toISOString() };
     }
 
-    if (existingUser) {
-      return existingUser as User;
-    }
-
-    const newUser = {
-      wallet_address: normalized,
-      display_name: `${normalized.slice(0, 6)}...${normalized.slice(-4)}`,
-      created_at: new Date().toISOString(),
-    };
-
-    const { data: inserted, error: insertError } = await supabase
-      .from('users')
-      .insert(newUser)
-      .select()
-      .single();
-
-    if (insertError) {
-      console.warn('Could not persist new user, using fallback:', insertError.message);
-      return newUser;
-    }
-
-    return inserted as User;
+    return (existingUser as User) ?? { wallet_address: normalized, display_name: null, created_at: new Date().toISOString() };
   } catch (err) {
     console.error('getOrCreateUser exception:', err);
     return { wallet_address: normalized, display_name: null, created_at: new Date().toISOString() };
