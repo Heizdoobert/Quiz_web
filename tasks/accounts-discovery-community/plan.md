@@ -53,7 +53,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 ## Task List
 
 ### Phase 1: Identity
-- [ ] Task 1: Accounts schema migration script
+- [x] Task 1: Accounts schema migration script (your Supabase-branch run still pending)
 - [ ] Task 2: Account session, and wallet sign-in creates an account
 - [ ] Task 3: Answers, history and personal stats on account ids
 - [ ] Task 4: Leaderboards on account ids
@@ -129,7 +129,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 | Risk | Impact | Mitigation |
 |------|--------|------------|
 | Account migration touches every table and action | High | Additive migration; old columns kept until Task 25; branch dry run compares counts and scores; one path per task |
-| Rows written between running `accounts.sql` and deploying miss the new columns | High | Idempotent backfill, re-run right after deploy (Task 24) |
+| Rows written between running `accounts.sql` and deploying miss the new columns | High | `bridge_wallet_account` insert trigger fills the account from the wallet (and back) until Task 25; tested in Task 1 |
 | Email accounts have no wagmi connection, so any leftover `useAccount` gating locks them out | High | Task 10 moves gating to `useSession`; Task 11 covers the remaining pages; checkpoint grep and manual test as an email account |
 | Connected wallet differs from the account's wallet during on-chain claims | Med | Task 11: on-chain actions check the wallet matches and ask the player to switch |
 | Session cookie change signs everyone out | Low | Expected once |

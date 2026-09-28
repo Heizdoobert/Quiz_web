@@ -8,13 +8,21 @@ Every task's verification includes `npm run check:task`: type-check, lint, tests
 
 Tasks 3-9 each move one path from wallet to account id. The old wallet columns stay filled for wallet accounts until Task 25, so the paths not yet moved keep working.
 
-### Task 1: Accounts schema migration script
+### Task 1: Accounts schema migration script — done
+Result:
+- `lib/sql/accounts.sql` also adds the `bridge_wallet_account` insert trigger, so old and new code can write side by side and no backfill re-run is needed after deploy.
+- Verified with `bash tests/sql/run-accounts-migration.sh` (Docker, throwaway `postgres:16-alpine`, every existing script plus test data):
+  - row counts, `get_user_stats` and both leaderboards are identical before and after
+  - a second run changes nothing
+  - trigger, unique and upsert checks pass
+- Still to do: your run on a Supabase branch.
+
 - Acceptance:
   - `users` gains `id UUID PK`, `auth_user_id UUID UNIQUE` and `wallet_linked_at`; `wallet_address` becomes nullable and unique
   - the 9 player-referencing tables gain a backfilled account column (FK to `users(id)`), and the old wallet columns become nullable. The column is `user_id` in `quiz_results`, `group_members`, `list_entries` and `reward_claims`; role-named elsewhere: `questions.created_by_user`, `question_disputes.reporter_user`, `groups.owner_user`, `question_lists.owner_user`, `question_list_confirmations.confirmer_user`. Unique constraints are mirrored on the new columns
   - the "Allow public insert for users" policy is dropped
 - Verify: on a Supabase branch, row counts per table and `get_user_stats` per player are equal before and after, and a second run changes nothing (you run it).
-- Files: `lib/sql/accounts.sql`, `lib/schema.sql`
+- Files: `lib/sql/accounts.sql`, `lib/schema.sql` (public insert policy removed), `README.md` (setup step). `schema.sql` itself is folded to the final shape in Task 25.
 - Depends: none. Size: M
 
 ### Task 2: Account session, and wallet sign-in creates an account
@@ -31,7 +39,7 @@ Answer, reload, and see your own stats, on account ids.
 - Acceptance:
   - `submitAnswer` writes `user_id` (plus the wallet while that column exists)
   - `getAnswerHistory()` and `getUserStats()` take no address; a server-only `statsForAccount(id)` backs both and `reward-actions`; `get_user_stats` is re-keyed to `user_id`
-  - `getOrCreateUser` and its call in `use-quiz-logic` are deleted: sign-in creates the account now
+  - `getOrCreateUser` and its call in `use-quiz-logic` are deleted: sign-in creates the account now. With that `select('*')` gone, the public key's `SELECT` on `users` is limited to `id, wallet_address, display_name, created_at`, so `auth_user_id` is hidden
 - Verify: `npx vitest run tests/answer-and-list-guards.test.ts tests/user-persistence.test.ts tests/use-quiz-logic-history.test.tsx tests/submit-answer-no-admin.test.ts`
 - Files: `lib/actions/quiz-actions.ts`, `lib/actions/user-actions.ts`, `lib/sql/stats-functions.sql`, `hooks/quiz/use-quiz-logic.ts`, `lib/actions/reward-actions.ts` (import only), tests
 - Depends: 2. Size: M
@@ -232,15 +240,15 @@ Answer, reload, and see your own stats, on account ids.
 - Acceptance:
   - Supabase Auth email provider on, with the OTP template showing `{{ .Token }}`
   - custom SMTP set, and `TREASURY_WALLET_ADDRESS` set in Production
-  - SQL scripts 1-7 run in the plan's order, then deploy, then re-run the `accounts.sql` backfill
+  - SQL scripts 1-7 run in the plan's order, then deploy (the bridge trigger covers rows written while old code is still live)
 - Verify: on production, sign up with email, answer 3 questions, reload, add a wallet, claim; search, topics, rate and comment work signed out and signed in; the logs are clean.
 - Files: none. Depends: 23. Size: S
 
 ### Task 25: Drop the old wallet columns
 - Acceptance:
   - grep finds no code that reads or writes the old wallet columns
-  - `accounts-drop-wallet-columns.sql` drops them and their constraints
-  - `lib/schema.sql` matches
+  - `accounts-drop-wallet-columns.sql` drops them, their constraints, and the `bridge_wallet_account` trigger and function
+  - `lib/schema.sql` is rewritten to the final account-keyed shape
 - Verify: gates pass; dry run on a branch, then you run it on production about a week after Task 24
 - Files: `lib/sql/accounts-drop-wallet-columns.sql`, `lib/schema.sql`
 - Depends: 24. Size: S
