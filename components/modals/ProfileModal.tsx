@@ -3,6 +3,7 @@
 import React from 'react';
 import Modal from '../Modal';
 import { useProfileModal } from '@/hooks/modals/use-profile-modal';
+import Link from 'next/link';
 import { UserStats, ClaimableRewards, BADGE_NAMES, BADGE_ICONS } from '@/lib/types';
 import {
   User,
@@ -144,6 +145,25 @@ export default function ProfileModal({
             </div>
             <div className="mt-1 font-heading font-black text-lg text-[#FF4757]">{stats.bestStreak}</div>
           </div>
+        </div>
+
+        {/* Creator Dashboard Link */}
+        <div className="pt-2">
+          <Link
+            href="/profile"
+            onClick={onClose}
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-[#6C5CE7]/10 hover:bg-[#6C5CE7]/20 border border-[#6C5CE7]/30 text-white transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-[#6C5CE7]/20 text-[#6C5CE7] group-hover:scale-110 transition-transform">
+                <User className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="font-bold font-heading">Creator Dashboard & Backups</div>
+                <div className="text-xs text-[#6C5CE7]">Manage your quizzes and data</div>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* NFT Trophy Case */}

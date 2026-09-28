@@ -29,7 +29,7 @@ vi.mock('../lib/actions/profile-actions', () => ({
 
 describe('ProfilePage', () => {
   it('renders Access Denied when wallet is disconnected', () => {
-    (useAccount as any).mockReturnValue({ isConnected: false, address: undefined });
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: false, address: undefined });
 
     render(<ProfilePage />);
 
@@ -37,8 +37,8 @@ describe('ProfilePage', () => {
   });
 
   it('renders loading state then empty state for connected wallet with no quizzes', async () => {
-    (useAccount as any).mockReturnValue({ isConnected: true, address: '0x123' });
-    (getUserQuizzes as any).mockResolvedValue({ success: true, quizzes: [] });
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [] });
 
     render(<ProfilePage />);
 
@@ -47,8 +47,8 @@ describe('ProfilePage', () => {
   });
 
   it('renders quizzes and backup button when quizzes are present', async () => {
-    (useAccount as any).mockReturnValue({ isConnected: true, address: '0x123' });
-    (getUserQuizzes as any).mockResolvedValue({ success: true, quizzes: [{ id: '1', prompt: 'First Quiz' }] });
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [{ id: '1', prompt: 'First Quiz' }] });
 
     render(<ProfilePage />);
 

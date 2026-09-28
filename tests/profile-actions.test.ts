@@ -28,7 +28,7 @@ describe('profile-actions', () => {
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockResolvedValue({ data: mockData, error: null });
 
-      (supabase.from as any).mockReturnValue({
+      (supabase.from as import("vitest").Mock).mockReturnValue({
         select: mockSelect,
         eq: mockEq,
         order: mockOrder,
@@ -64,7 +64,7 @@ describe('profile-actions', () => {
         return Promise.resolve({ data: null, error: null });
       });
 
-      (supabase.from as any).mockReturnValue({
+      (supabase.from as import("vitest").Mock).mockReturnValue({
         select: mockSelect,
         eq: mockEq,
       });
