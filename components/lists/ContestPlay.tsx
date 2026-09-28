@@ -7,8 +7,8 @@ import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
-import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
-import { QUIZ_TOKEN_ADDRESS } from '@/lib/contracts/addresses';
+import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
+import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
 import { ArrowLeft, Loader2, Trophy, Coins, CheckCircle2, XCircle } from 'lucide-react';
 
 const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
@@ -116,10 +116,11 @@ export default function ContestPlay({
     setClaimStep('submitting');
     try {
       const hash = await writeContractAsync({
-        address: QUIZ_TOKEN_ADDRESS,
-        abi: QuizTokenABI,
-        functionName: 'claimTokens',
+        address: CONTEST_ESCROW_ADDRESS,
+        abi: ContestEscrowABI,
+        functionName: 'claimReward',
         args: [
+          voucher.contestId as `0x${string}`,
           voucher.recipient as `0x${string}`,
           BigInt(voucher.amount),
           BigInt(voucher.nonce),

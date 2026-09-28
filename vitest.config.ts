@@ -9,6 +9,7 @@ export default defineConfig({
     globals: true,
     alias: {
       '@': path.resolve(__dirname, './'),
+      'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
     },
     exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**'],
   },

@@ -8,6 +8,14 @@ import { validateQuestionInput } from '../lib/validation';
 vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/wallet-session', () => ({ getSessionWallet: vi.fn() }));
+vi.mock('../lib/chain', () => ({
+  REWARD_CHAIN_ID: 84532,
+  CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
+  getContestId: (listId: string) => ('0x' + listId.replace(/-/g, '').padEnd(64, '0').slice(0, 64)),
+  newNonce: () => BigInt(7),
+  getSignerAccount: () => ({ signTypedData: async () => ('0x' + 's'.repeat(130)) }),
+  isContestVoucherUsed: async () => false,
+}));
 
 const WALLET = '0x' + 'a'.repeat(40);
 const LIST_ID = '00000000-0000-4000-8000-000000000001';
@@ -89,8 +97,50 @@ describe('question list guards', () => {
     expect(supabaseAdmin!.from).not.toHaveBeenCalled();
   });
 
-  it('keeps contest payouts paused', async () => {
-    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Contest payouts are paused.' });
+  it('refuses claimListReward without a signed-in wallet', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Sign in with your wallet first.' });
+  });
+
+  it('refuses claimListReward for invalid uuid', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    expect(await claimListReward('not-a-valid-uuid')).toEqual({ error: 'Invalid contest ID.' });
+  });
+
+  it('refuses claimListReward if contest entry is not completed', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    mockTables({
+      list_entries: { row: { status: 'in_progress', reward_amount: '10000000000000000000' } },
+    });
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Contest attempt has not been completed.' });
+  });
+
+  it('refuses claimListReward if already claimed', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    mockTables({
+      list_entries: { row: { status: 'claimed', reward_amount: '10000000000000000000' } },
+    });
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Reward has already been claimed.' });
+  });
+
+  it('refuses claimListReward if zero rewards earned', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    mockTables({
+      list_entries: { row: { status: 'completed', reward_amount: '0' } },
+    });
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'No rewards earned for this contest.' });
+  });
+
+  it('issues an EIP-712 contest voucher for a completed entry', async () => {
+    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    const inserts = mockTables({
+      list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
+    });
+    const res = await claimListReward(LIST_ID);
+    expect(res).toMatchObject({ recipient: WALLET, amount: '10000000000000000000' });
+    expect((res as { contestId?: string }).contestId).toBeDefined();
+    expect((res as { signature?: string }).signature).toMatch(/^0x/);
+    expect(inserts.reward_claims).toHaveLength(1);
   });
 });
 
