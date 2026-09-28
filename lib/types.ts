@@ -34,15 +34,6 @@ export interface QuestionDispute {
   created_at: string;
 }
 
-export interface QuizResult {
-  id: string;
-  wallet_address: string;
-  question_id: string;
-  answer_index: number;
-  is_correct: boolean;
-  answered_at: string;
-}
-
 export interface Group {
   id: string;
   name: string;

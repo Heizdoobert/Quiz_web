@@ -2,10 +2,14 @@
 
 import { supabase } from '@/lib/supabase';
 import { LeaderboardEntry } from '@/lib/types';
+import { isUuid } from '@/lib/validation';
 
 // Rows come pre-aggregated and pre-sorted from Postgres (lib/sql/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
 type LeaderboardRow = { wallet_address: string; score: number; accuracy: number };
+
+// The SQL functions clamp too, since the public key can call them directly.
+const clampLimit = (limit: number) => Math.min(Math.max(Math.trunc(limit) || 1, 1), 100);
 
 function toEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
   return rows.map((row, idx) => ({
@@ -19,7 +23,7 @@ function toEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
 
 export async function getGlobalLeaderboard(limit: number = 50): Promise<LeaderboardEntry[]> {
   try {
-    const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: limit });
+    const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: clampLimit(limit) });
     if (error) console.error('getGlobalLeaderboard rpc error:', error);
     if (error || !data) return [];
     return toEntries(data as LeaderboardRow[]);
@@ -34,9 +38,10 @@ export async function getGroupLeaderboard(
   limit: number = 50
 ): Promise<LeaderboardEntry[]> {
   try {
+    if (!isUuid(groupId)) return [];
     const { data, error } = await supabase.rpc('get_group_leaderboard', {
       p_group_id: groupId,
-      p_limit: limit,
+      p_limit: clampLimit(limit),
     });
     if (error) console.error('getGroupLeaderboard rpc error:', error);
     if (error || !data) return [];

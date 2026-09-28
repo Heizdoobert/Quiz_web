@@ -65,18 +65,15 @@ ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for users" ON users FOR SELECT USING (true);
 CREATE POLICY "Allow public insert for users" ON users FOR INSERT WITH CHECK (true);
 
+-- Groups, questions and disputes are written by the server (secret key) for the signed-in wallet.
 CREATE POLICY "Allow public read for groups" ON groups FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for groups" ON groups FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Allow public read for group_members" ON group_members FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for group_members" ON group_members FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public delete for group_members" ON group_members FOR DELETE USING (true);
 
-CREATE POLICY "Allow public read for quiz_results" ON quiz_results FOR SELECT USING (true);
--- No public insert: answers are recorded by the server with the secret key.
+-- No public read or insert: answers are recorded by the server, and stats are read
+-- through the SECURITY DEFINER functions in lib/sql/stats-functions.sql.
 
 CREATE POLICY "Allow public read for questions" ON questions FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for questions" ON questions FOR INSERT WITH CHECK (true);
 -- Answers and explanations are only readable with the secret key.
 REVOKE SELECT ON questions FROM anon, authenticated;
 GRANT SELECT (id, category, prompt, options, created_by, status, dispute_count, verified_at, created_at)
@@ -123,7 +120,6 @@ CREATE TABLE IF NOT EXISTS question_disputes (
 CREATE INDEX IF NOT EXISTS idx_question_disputes_qid ON question_disputes(question_id);
 ALTER TABLE question_disputes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for question_disputes" ON question_disputes FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for question_disputes" ON question_disputes FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
 -- Initial Question Seed Data (Curated Trivia Bank)

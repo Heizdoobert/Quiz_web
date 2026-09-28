@@ -2,6 +2,9 @@
 -- Idempotent: safe to re-run in the Supabase SQL Editor after lib/schema.sql.
 -- Counting happens here instead of in the app because PostgREST caps each
 -- response at 1000 rows, which silently truncated raw-row aggregation.
+-- SECURITY DEFINER: quiz_results has no public read (each row's answer_index
+-- would reveal the correct answer), so these run with the owner's rights and
+-- return only totals. Limits are clamped because the public key can call them.
 
 -- One player's totals and streaks.
 -- streak: consecutive correct answers ending at the most recent answer.
@@ -10,6 +13,8 @@ CREATE OR REPLACE FUNCTION get_user_stats(p_wallet TEXT)
 RETURNS TABLE (total_answered INT, correct_count INT, streak INT, best_streak INT)
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   WITH ordered AS (
     SELECT
@@ -41,6 +46,8 @@ CREATE OR REPLACE FUNCTION get_global_leaderboard(p_limit INT)
 RETURNS TABLE (wallet_address TEXT, score INT, accuracy INT)
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   WITH totals AS (
     SELECT
@@ -53,7 +60,7 @@ AS $$
   SELECT t.wallet_address, t.score, t.accuracy
   FROM totals t
   ORDER BY t.score DESC, t.accuracy DESC, t.wallet_address
-  LIMIT p_limit;
+  LIMIT LEAST(GREATEST(p_limit, 1), 100);
 $$;
 
 -- Group members ranked the same way; members with no answers appear with 0 / 0.
@@ -61,6 +68,8 @@ CREATE OR REPLACE FUNCTION get_group_leaderboard(p_group_id UUID, p_limit INT)
 RETURNS TABLE (wallet_address TEXT, score INT, accuracy INT)
 LANGUAGE sql
 STABLE
+SECURITY DEFINER
+SET search_path = public
 AS $$
   WITH totals AS (
     SELECT
@@ -77,5 +86,5 @@ AS $$
   SELECT t.wallet_address, t.score, t.accuracy
   FROM totals t
   ORDER BY t.score DESC, t.accuracy DESC, t.wallet_address
-  LIMIT p_limit;
+  LIMIT LEAST(GREATEST(p_limit, 1), 100);
 $$;

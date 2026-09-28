@@ -3,7 +3,7 @@
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getSessionWallet } from '@/lib/wallet-session';
-import { AnswerSubmissionResult, QuizResult, UserStats } from '@/lib/types';
+import { AnswerSubmissionResult, UserStats } from '@/lib/types';
 
 export async function submitAnswer(params: {
   questionId: string;
@@ -81,27 +81,5 @@ export async function getUserStats(walletAddress: string): Promise<UserStats> {
   } catch (err) {
     console.error('getUserStats error:', err);
     return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-  }
-}
-
-export async function getQuestionHistory(
-  walletAddress: string,
-  limit: number = 10
-): Promise<QuizResult[]> {
-  try {
-    if (!walletAddress) return [];
-    const normalized = walletAddress.toLowerCase();
-    const { data, error } = await supabase
-      .from('quiz_results')
-      .select('*')
-      .eq('wallet_address', normalized)
-      .order('answered_at', { ascending: false })
-      .limit(limit);
-
-    if (error || !data) return [];
-    return data as QuizResult[];
-  } catch (err) {
-    console.error('getQuestionHistory error:', err);
-    return [];
   }
 }
