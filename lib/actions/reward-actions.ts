@@ -31,15 +31,10 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     if (!walletAddress) return empty;
     const normalized = walletAddress.toLowerCase();
 
-    // Get total correct answers (aggregated in Postgres; raw rows are capped at 1000)
-    const { data: totals, error: rErr } = await supabase
-      .rpc('get_user_stats', { p_wallet: normalized })
-      .single<{ correct_count: number }>();
-
-    if (rErr || !totals) return empty;
-
-    const totalCorrect = totals.correct_count;
-    const totalEarned = BigInt(totalCorrect) * TOKENS_PER_CORRECT;
+    // One stats read covers both the token total and badge checks.
+    // On error getUserStats returns zeros, so nothing becomes claimable.
+    const stats = await getUserStats(walletAddress);
+    const totalEarned = BigInt(stats.score) * TOKENS_PER_CORRECT;
 
     // Get total already-claimed tokens
     const { data: claims, error: cErr } = await supabase
@@ -59,7 +54,6 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     const claimableTokens = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
 
     // Check badge eligibility
-    const stats = await getUserStats(walletAddress);
     const leaderboard = await getGlobalLeaderboard(3);
     const isTop3 = leaderboard.some(
       (e) => e.wallet_address === normalized && e.rank <= 3
