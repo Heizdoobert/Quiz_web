@@ -26,7 +26,7 @@ export default function Header({
         <div className="p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC]">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
-        <h1 className="text-2xl font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
+        <h1 className="text-lg sm:text-2xl whitespace-nowrap font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
           Quick Quiz
         </h1>
       </div>
@@ -75,7 +75,7 @@ export default function Header({
           </button>
         )}
 
-        <ConnectButton showBalance={false} />
+        <ConnectButton label="Connect" showBalance={false} />
       </div>
     </header>
   );
