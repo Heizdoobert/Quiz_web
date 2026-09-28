@@ -44,8 +44,8 @@ Plan: `tasks/plan.md`
 - [x] Badge eligibility in `getClaimableRewards` (uses `getGlobalLeaderboard(3)`) is unchanged
 
 **Verification:**
-- [ ] Parity script: 0 mismatches for global
-- [ ] `npm run lint` and `npm run build` clean
+- [x] Parity script: 0 mismatches for global
+- [x] `npm run lint` and `npm run build` clean
 - [ ] Manual: leaderboard on `preview` shows the same top rows as before
 
 **Dependencies:** Task 1 (shares the SQL file and parity script)
@@ -67,8 +67,8 @@ Plan: `tasks/plan.md`
 - [x] Every group matches the old JS computation
 
 **Verification:**
-- [ ] Parity script: 0 mismatches for all groups
-- [ ] `npm run lint` and `npm run build` clean
+- [x] Parity script: 0 mismatches for all groups
+- [x] `npm run lint` and `npm run build` clean
 - [ ] Manual: Group Guild tab on `preview` shows the same rows as before
 
 **Dependencies:** Task 2
@@ -83,8 +83,9 @@ Plan: `tasks/plan.md`
 Tasks 2–3 verified in a throwaway local Postgres 16 container: global top 50, a >50-member group, a 5-member group with a zero-answer member, a zero-answer-only group and an unknown group all match the old JS logic (0 mismatches), including ties, a 1,300-row wallet, and JS float rounding (57/200 → 28, 1/8 → 13). `tsc`, `eslint`, and `npm run build` clean.
 
 ## Checkpoint B: after Tasks 2–3
-- [ ] Parity script: 0 mismatches for global and all groups
-- [ ] Lint + build clean
+- [x] SQL applied on Supabase; `rpc/get_global_leaderboard` and `rpc/get_group_leaderboard` return 200 on live
+- [x] Parity script: 0 mismatches for global and all groups (live DB has 0 `quiz_results` rows and 0 groups on 2026-09-28, so vacuous; the local fixture run is the real proof)
+- [x] Lint + build clean
 - [ ] Leaderboards render correctly on `preview`
 - [ ] Human review before merging to `main`
 
