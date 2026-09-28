@@ -32,6 +32,34 @@ async function fetchAllResults(): Promise<Row[]> {
   }
 }
 
+async function fetchAllMembers(): Promise<{ group_id: string; wallet_address: string }[]> {
+  const pageSize = 1000;
+  const rows: { group_id: string; wallet_address: string }[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await supabase
+      .from('group_members')
+      .select('group_id, wallet_address')
+      .order('group_id')
+      .order('wallet_address')
+      .range(from, from + pageSize - 1);
+    if (error) throw error;
+    rows.push(...data);
+    if (data.length < pageSize) return rows;
+  }
+}
+
+// The old leaderboard logic (score desc, accuracy desc), plus the wallet tie-break the SQL adds.
+function oldLeaderboard(stats: Map<string, { correct: number; total: number }>, limit: number) {
+  return [...stats.entries()]
+    .map(([wallet, s]) => ({
+      wallet_address: wallet,
+      score: s.correct,
+      accuracy: s.total > 0 ? Math.round((s.correct / s.total) * 100) : 0,
+    }))
+    .sort((a, b) => b.score - a.score || b.accuracy - a.accuracy || (a.wallet_address < b.wallet_address ? -1 : 1))
+    .slice(0, limit);
+}
+
 // The old getUserStats logic, fed chronological rows for one wallet.
 function oldUserStats(chronological: Row[]) {
   const totalAnswered = chronological.length;
@@ -69,5 +97,35 @@ for (const [wallet, walletRows] of byWallet) {
   }
 }
 
-console.log(`${rows.length} rows, ${byWallet.size} wallets checked, ${mismatches} mismatches`);
+const totals = new Map<string, { correct: number; total: number }>();
+for (const [wallet, walletRows] of byWallet) {
+  totals.set(wallet, { correct: walletRows.filter((r) => r.is_correct).length, total: walletRows.length });
+}
+
+function compare(label: string, expected: unknown, got: unknown) {
+  if (JSON.stringify(expected) !== JSON.stringify(got)) {
+    mismatches++;
+    console.log(`${label} MISMATCH\n  expected ${JSON.stringify(expected)}\n  got      ${JSON.stringify(got)}`);
+  }
+}
+
+const LIMIT = 50;
+const global = await supabase.rpc('get_global_leaderboard', { p_limit: LIMIT });
+if (global.error) throw global.error;
+compare('global_leaderboard', oldLeaderboard(totals, LIMIT), global.data);
+
+const membersByGroup = new Map<string, string[]>();
+for (const m of await fetchAllMembers()) {
+  membersByGroup.set(m.group_id, [...(membersByGroup.get(m.group_id) ?? []), m.wallet_address]);
+}
+for (const [groupId, wallets] of membersByGroup) {
+  const groupTotals = new Map(wallets.map((w) => [w, totals.get(w) ?? { correct: 0, total: 0 }]));
+  const group = await supabase.rpc('get_group_leaderboard', { p_group_id: groupId, p_limit: LIMIT });
+  if (group.error) throw group.error;
+  compare(`group_leaderboard ${groupId}`, oldLeaderboard(groupTotals, LIMIT), group.data);
+}
+
+console.log(
+  `${rows.length} rows, ${byWallet.size} wallets, ${membersByGroup.size} groups checked, ${mismatches} mismatches`
+);
 process.exit(mismatches > 0 ? 1 : 0);

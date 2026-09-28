@@ -39,9 +39,9 @@ Plan: `tasks/plan.md`
 **Description:** Add `get_global_leaderboard(p_limit int)` to `lib/sql/stats-functions.sql`: `GROUP BY wallet_address`, `score = count(*) filter (where is_correct)`, `accuracy = round(score * 100.0 / count(*))`, `ORDER BY score desc, accuracy desc, wallet_address`, `LIMIT p_limit`. `getGlobalLeaderboard` calls it and keeps building `display_name` and `rank` in JavaScript, as it does today. Extend the parity script to compare the global top 50.
 
 **Acceptance criteria:**
-- [ ] `getGlobalLeaderboard` no longer selects raw `quiz_results` rows
-- [ ] Top 50 matches the old JS computation (same wallets, same order, same score/accuracy)
-- [ ] Badge eligibility in `getClaimableRewards` (uses `getGlobalLeaderboard(3)`) is unchanged
+- [x] `getGlobalLeaderboard` no longer selects raw `quiz_results` rows
+- [x] Top 50 matches the old JS computation (same wallets, same order, same score/accuracy)
+- [x] Badge eligibility in `getClaimableRewards` (uses `getGlobalLeaderboard(3)`) is unchanged
 
 **Verification:**
 - [ ] Parity script: 0 mismatches for global
@@ -62,9 +62,9 @@ Plan: `tasks/plan.md`
 **Description:** Add `get_group_leaderboard(p_group_id uuid, p_limit int)`: start from `group_members` and `LEFT JOIN` `quiz_results`, so members with no answers still appear with score 0 and accuracy 0 (matches today's behaviour). Same ordering as Task 2. `getGroupLeaderboard` calls it; the separate members query goes away. Extend the parity script to cover every group.
 
 **Acceptance criteria:**
-- [ ] `getGroupLeaderboard` makes one RPC call instead of two raw queries
-- [ ] Members with zero answers still listed with score 0 and accuracy 0
-- [ ] Every group matches the old JS computation
+- [x] `getGroupLeaderboard` makes one RPC call instead of two raw queries
+- [x] Members with zero answers still listed with score 0 and accuracy 0
+- [x] Every group matches the old JS computation
 
 **Verification:**
 - [ ] Parity script: 0 mismatches for all groups
@@ -79,6 +79,8 @@ Plan: `tasks/plan.md`
 - `scripts/check-stats-parity.ts`
 
 **Estimated scope:** S
+
+Tasks 2–3 verified in a throwaway local Postgres 16 container: global top 50, a >50-member group, a 5-member group with a zero-answer member, a zero-answer-only group and an unknown group all match the old JS logic (0 mismatches), including ties, a 1,300-row wallet, and JS float rounding (57/200 → 28, 1/8 → 13). `tsc`, `eslint`, and `npm run build` clean.
 
 ## Checkpoint B: after Tasks 2–3
 - [ ] Parity script: 0 mismatches for global and all groups
