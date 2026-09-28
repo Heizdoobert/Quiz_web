@@ -1,9 +1,10 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import { LeaderboardEntry } from '@/lib/types';
 import { usePagination } from '@/hooks/shared/use-pagination';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Trophy, Medal } from 'lucide-react';
 
 interface GroupLeaderboardProps {
   entries: LeaderboardEntry[];
@@ -46,23 +47,49 @@ export default function GroupLeaderboard({
     <div className="space-y-3">
       {/* Entries List with Min-Height to Prevent Layout Shift */}
       <div className="space-y-2 min-h-[260px]">
-        {pagedEntries.map((entry) => (
-          <div
-            key={entry.wallet_address}
-            className="flex items-center justify-between p-3 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] hover:border-[#6C5CE7]/60 text-xs transition-colors"
-          >
-            <div className="flex items-center gap-2">
-              <span className="font-heading font-bold text-[#6C5CE7]">#{entry.rank}</span>
-              <span className="font-bold text-slate-200">
-                {entry.display_name || entry.wallet_address.slice(0, 10)}
-              </span>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
-              <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
-            </div>
-          </div>
-        ))}
+        {pagedEntries.map((entry, index) => {
+          const isTop1 = entry.rank === 1;
+          const isTop2 = entry.rank === 2;
+          const isTop3 = entry.rank === 3;
+          const isTopThree = entry.rank <= 3;
+
+          return (
+            <motion.div
+              key={entry.wallet_address}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.04 }}
+              className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
+                isTopThree
+                  ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
+                  : index % 2 === 0
+                    ? 'bg-deep-space border-[#2D305A] hover:border-[#6C5CE7]/60'
+                    : 'bg-elevation-2 border-[#2D305A] hover:border-[#6C5CE7]/60'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="w-6 flex items-center justify-center font-heading font-bold text-[#6C5CE7]">
+                  {isTop1 ? (
+                    <Trophy className="w-4 h-4 text-[#FFD166]" />
+                  ) : isTop2 ? (
+                    <Medal className="w-4 h-4 text-slate-300" />
+                  ) : isTop3 ? (
+                    <Medal className="w-4 h-4 text-[#FF8A65]" />
+                  ) : (
+                    <span className="text-[11px]">#{entry.rank}</span>
+                  )}
+                </span>
+                <span className={`font-bold ${isTop1 ? 'text-[#FFD166]' : 'text-slate-200'}`}>
+                  {entry.display_name || entry.wallet_address.slice(0, 10)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
+                <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* Pagination Controls */}

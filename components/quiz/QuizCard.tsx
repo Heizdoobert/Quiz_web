@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { motion } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
@@ -62,9 +63,9 @@ export default function QuizCard({
   // Empty state when no question is available
   if (!question) {
     return (
-      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 text-center">
+      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 glass glass-border glass-edge rounded-3xl shadow-2xl shadow-black/60 text-center">
         <Rocket className="w-12 h-12 text-[#00FFCC] mb-4 animate-bounce" />
-        <h2 className="text-2xl font-bold font-heading text-white mb-2">No Quiz Questions Yet</h2>
+        <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-300 max-w-md mb-6">
           Be the first to contribute! Add your own custom questions to kick off the trivia session.
         </p>
@@ -80,18 +81,18 @@ export default function QuizCard({
   }
 
   return (
-    <div className="relative w-full min-h-[460px] perspective-1000">
-      <div
-        className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${
-          isFlipped ? 'rotate-y-180' : ''
-        }`}
+    <div className="relative w-full perspective-1000">
+      {/* Both faces share one grid cell, so the card grows to the taller face */}
+      <motion.div
+        className="grid w-full min-h-[460px] transform-style-3d"
+        animate={{ rotateY: isFlipped ? 180 : 0 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        {/* Front Face */}
+        {/* Front Face; inert hides the turned-away face from mouse, keyboard and screen readers */}
         <div
-          className={`absolute inset-0 w-full h-full backface-hidden ${
-            isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={isFlipped}
+          className="col-start-1 row-start-1 backface-hidden"
+          data-testid="quiz-card-front"
+          inert={isFlipped}
         >
           <QuestionFront
             question={question}
@@ -111,12 +112,7 @@ export default function QuizCard({
         </div>
 
         {/* Back Face */}
-        <div
-          className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 ${
-            !isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={!isFlipped}
-        >
+        <div className="col-start-1 row-start-1 backface-hidden rotate-y-180" inert={!isFlipped}>
           {result && (
             <AnswerBack
               question={question}
@@ -126,7 +122,7 @@ export default function QuizCard({
             />
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

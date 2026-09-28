@@ -1,17 +1,22 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
-import { AnswerSubmissionResult, QuizResult, UserStats } from '@/lib/types';
+import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSessionWallet } from '@/lib/wallet-session';
+import { AnswerSubmissionResult, UserStats } from '@/lib/types';
 
 export async function submitAnswer(params: {
   questionId: string;
   answerIndex: number;
-  walletAddress: string;
 }): Promise<AnswerSubmissionResult> {
+  const failed = { isCorrect: false, correctIndex: 0, explanation: null, recorded: false };
   try {
-    const rawWallet = params?.walletAddress || '0x0000000000000000000000000000000000000000';
-    const normalizedWallet = rawWallet.toLowerCase();
-    const { data: qData, error: qError } = await supabase
+    // correct_index and explanation are not readable with the public key.
+    if (!supabaseAdmin) {
+      console.error('submitAnswer: SUPABASE_SECRET_KEY is not set');
+      return failed;
+    }
+    const { data: qData, error: qError } = await supabaseAdmin
       .from('questions')
       .select('correct_index, explanation')
       .eq('id', params.questionId)
@@ -19,29 +24,35 @@ export async function submitAnswer(params: {
 
     if (qError || !qData) {
       console.error('Question not found for answer submission:', qError);
-      return { isCorrect: false, correctIndex: 0, explanation: null };
+      return failed;
     }
 
     const isCorrect = params.answerIndex === qData.correct_index;
 
-    // Log the result only if a valid wallet is connected (prevents corrupting leaderboard with dummy address)
-    if (normalizedWallet && normalizedWallet !== '0x0000000000000000000000000000000000000000') {
-      await supabase.from('quiz_results').insert({
-        wallet_address: normalizedWallet,
+    // Only a signed-in wallet's answers count; guests still see the result.
+    // The first answer to a question is the one that counts (unique per wallet and question).
+    const wallet = await getSessionWallet();
+    let recorded = false;
+    if (wallet) {
+      const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
+        wallet_address: wallet,
         question_id: params.questionId,
         answer_index: params.answerIndex,
         is_correct: isCorrect,
       });
+      if (insertError && insertError.code !== '23505') console.error('submitAnswer insert error:', insertError);
+      recorded = !insertError;
     }
 
     return {
       isCorrect,
       correctIndex: qData.correct_index,
       explanation: qData.explanation,
+      recorded,
     };
   } catch (err) {
     console.error('submitAnswer error:', err);
-    return { isCorrect: false, correctIndex: 0, explanation: null };
+    return failed;
   }
 }
 
@@ -50,72 +61,25 @@ export async function getUserStats(walletAddress: string): Promise<UserStats> {
     if (!walletAddress) {
       return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     }
-    const normalized = walletAddress.toLowerCase();
+    // Aggregated in Postgres (lib/sql/stats-functions.sql); raw rows are capped at 1000.
     const { data, error } = await supabase
-      .from('quiz_results')
-      .select('is_correct, answered_at')
-      .eq('wallet_address', normalized)
-      .order('answered_at', { ascending: false });
+      .rpc('get_user_stats', { p_wallet: walletAddress.toLowerCase() })
+      .single<{ total_answered: number; correct_count: number; streak: number; best_streak: number }>();
 
-    if (error || !data || data.length === 0) {
+    if (error) console.error('getUserStats rpc error:', error);
+    if (error || !data || data.total_answered === 0) {
       return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     }
 
-    const totalAnswered = data.length;
-    const correctCount = data.filter((r) => r.is_correct).length;
-    const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
-
-    // Calculate current streak (consecutive correct answers from most recent)
-    let streak = 0;
-    for (const res of data) {
-      if (res.is_correct) streak++;
-      else break;
-    }
-
-    // Calculate best streak (in chronological order)
-    const chronological = [...data].reverse();
-    let bestStreak = 0;
-    let currentRun = 0;
-    for (const res of chronological) {
-      if (res.is_correct) {
-        currentRun++;
-        if (currentRun > bestStreak) bestStreak = currentRun;
-      } else {
-        currentRun = 0;
-      }
-    }
-
     return {
-      score: correctCount,
-      streak,
-      bestStreak,
-      accuracy,
-      totalAnswered,
+      score: data.correct_count,
+      streak: data.streak,
+      bestStreak: data.best_streak,
+      accuracy: Math.round((data.correct_count / data.total_answered) * 100),
+      totalAnswered: data.total_answered,
     };
   } catch (err) {
     console.error('getUserStats error:', err);
     return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-  }
-}
-
-export async function getQuestionHistory(
-  walletAddress: string,
-  limit: number = 10
-): Promise<QuizResult[]> {
-  try {
-    if (!walletAddress) return [];
-    const normalized = walletAddress.toLowerCase();
-    const { data, error } = await supabase
-      .from('quiz_results')
-      .select('*')
-      .eq('wallet_address', normalized)
-      .order('answered_at', { ascending: false })
-      .limit(limit);
-
-    if (error || !data) return [];
-    return data as QuizResult[];
-  } catch (err) {
-    console.error('getQuestionHistory error:', err);
-    return [];
   }
 }

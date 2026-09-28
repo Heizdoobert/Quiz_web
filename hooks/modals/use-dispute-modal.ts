@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { disputeQuestion } from '@/lib/actions/question-actions';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 
 export const DISPUTE_REASONS = [
   { id: 'incorrect_answer', label: 'Designated answer is factually incorrect' },
@@ -23,6 +24,7 @@ export function useDisputeModal({ onClose, questionId, walletAddress }: UseDispu
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [isQuarantined, setIsQuarantined] = useState(false);
+  const ensureSession = useWalletSession();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,12 +40,13 @@ export function useDisputeModal({ onClose, questionId, walletAddress }: UseDispu
     setLoading(true);
     setError(null);
 
+    if (!(await ensureSession())) {
+      setLoading(false);
+      setError('Sign the message in your wallet to submit a dispute.');
+      return;
+    }
     const fullReason = `${selectedReason}${details.trim() ? `: ${details.trim()}` : ''}`;
-    const res = await disputeQuestion({
-      questionId,
-      reporterWallet: walletAddress,
-      reason: fullReason,
-    });
+    const res = await disputeQuestion({ questionId, reason: fullReason });
 
     setLoading(false);
     if (res.success) {

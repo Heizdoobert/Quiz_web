@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Group } from '@/lib/types';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+
+const SIGN_IN_ERROR = { type: 'error', text: 'Sign the message in your wallet to manage groups.' } as const;
 
 interface UseGroupModalOptions {
   isOpen: boolean;
@@ -20,6 +23,7 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
   const [groupName, setGroupName] = useState('');
   const [groupDesc, setGroupDesc] = useState('');
   const [joinId, setJoinId] = useState('');
+  const ensureSession = useWalletSession();
 
   const loadGroups = useCallback(async () => {
     if (!walletAddress) return;
@@ -49,11 +53,12 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
     }
     setLoading(true);
     setMessage(null);
-    const res = await createGroup({
-      name: groupName,
-      description: groupDesc,
-      ownerWallet: walletAddress,
-    });
+    if (!(await ensureSession())) {
+      setLoading(false);
+      setMessage(SIGN_IN_ERROR);
+      return;
+    }
+    const res = await createGroup({ name: groupName, description: groupDesc });
     setLoading(false);
     if (!res.success) {
       setMessage({ type: 'error', text: res.error || 'Failed to create group' });
@@ -74,7 +79,12 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
     }
     setLoading(true);
     setMessage(null);
-    const res = await joinGroup(joinId.trim(), walletAddress);
+    if (!(await ensureSession())) {
+      setLoading(false);
+      setMessage(SIGN_IN_ERROR);
+      return;
+    }
+    const res = await joinGroup(joinId.trim());
     setLoading(false);
     if (!res.success) {
       setMessage({ type: 'error', text: res.error || 'Failed to join group' });
@@ -88,7 +98,12 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
 
   const handleLeave = async (groupId: string) => {
     if (!walletAddress) return;
-    await leaveGroup(groupId, walletAddress);
+    if (!(await ensureSession())) {
+      setMessage(SIGN_IN_ERROR);
+      return;
+    }
+    const res = await leaveGroup(groupId);
+    if (!res.success) setMessage({ type: 'error', text: res.error || 'Failed to leave group' });
     loadGroups();
   };
 
