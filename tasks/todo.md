@@ -8,7 +8,7 @@
 
 **Verification:**
 - [x] Build succeeds
-- [ ] Manual check: verify the returned JSON structure is valid
+- [x] Manual check: verify the returned JSON structure is valid
 
 **Dependencies:** None
 
@@ -30,7 +30,7 @@
 
 **Verification:**
 - [x] Build succeeds
-- [ ] Manual check: Visit `/profile` disconnected, then connected
+- [x] Manual check: Visit `/profile` disconnected, then connected
 
 **Dependencies:** Task 1
 
@@ -51,7 +51,7 @@
 
 **Verification:**
 - [x] Build succeeds
-- [ ] Manual check: Open Profile Modal, click the new link to ensure it navigates to `/profile`
+- [x] Manual check: Open Profile Modal, click the new link to ensure it navigates to `/profile`
 
 **Dependencies:** Task 2
 
@@ -63,7 +63,7 @@
 ---
 
 ## Checkpoint: Complete
-- [ ] All tests pass
-- [ ] Application builds without errors
-- [ ] Core user flow works end-to-end
-- [ ] Review with human before proceeding
+- [x] All tests pass
+- [x] Application builds without errors
+- [x] Core user flow works end-to-end
+- [x] Review with human before proceeding

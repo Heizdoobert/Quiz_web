@@ -14,18 +14,18 @@ We are building a protected Profile Dashboard where authenticated (Web3 connecte
 - [x] Task 1: Create Profile Server Actions
 
 ### Checkpoint: Foundation
-- [ ] Server actions compile without errors
-- [ ] Export structure is verified
+- [x] Server actions compile without errors
+- [x] Export structure is verified
 
 ### Phase 2: Core Features (UI and Navigation)
 - [x] Task 2: Build the Profile Page UI (`/profile`)
 - [x] Task 3: Link to the Profile Page from the existing `ProfileModal`
 
 ### Checkpoint: Complete
-- [ ] Application builds cleanly (`npm run build`)
-- [ ] Profile page correctly shows "Access Denied" if disconnected
-- [ ] Profile page lists quizzes when connected
-- [ ] Backup JSON download works
+- [x] Application builds cleanly (`npm run build`)
+- [x] Profile page correctly shows "Access Denied" if disconnected
+- [x] Profile page lists quizzes when connected
+- [x] Backup JSON download works
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
