@@ -104,3 +104,46 @@ export const BADGE_ICONS: Record<number, string> = {
   2: '💯',
   3: '⭐',
 };
+
+// --- Profile & Data Export Interface Contracts ---
+
+export interface PaginationParams {
+  limit?: number;
+  offset?: number;
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
+
+export interface GetUserQuizzesFilter extends PaginationParams {
+  category?: string;
+  status?: Question['status'];
+}
+
+export interface UserBackupData {
+  walletAddress: string;
+  exportedAt: string;
+  version: string;
+  quizzes: Question[];
+  stats: QuizResult[];
+}
+
+export type ProfileErrorCode =
+  | 'INVALID_ADDRESS'
+  | 'FETCH_FAILED'
+  | 'EXPORT_FAILED'
+  | 'RATE_LIMITED'
+  | 'UNKNOWN_ERROR';
+
+export type GetUserQuizzesResult =
+  | { success: true; quizzes: Question[]; count: number }
+  | { success: false; error: string; code: ProfileErrorCode };
+
+export type ExportUserDataResult =
+  | { success: true; data: UserBackupData }
+  | { success: false; error: string; code: ProfileErrorCode };

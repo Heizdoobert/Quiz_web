@@ -31,9 +31,9 @@ export default function ProfilePage() {
       try {
         const res = await getUserQuizzes(address as string);
         if (!isCancelled) {
-          if (res.success && res.quizzes) {
+          if (res.success) {
             setQuizzes(res.quizzes);
-          } else if (res.error) {
+          } else {
             setErrorMessage(res.error);
           }
           setLoading(false);
@@ -61,7 +61,7 @@ export default function ProfilePage() {
 
     try {
       const res = await exportUserData(address);
-      if (res.success && res.data) {
+      if (res.success) {
         const jsonString = JSON.stringify(res.data, null, 2);
         const blob = new Blob([jsonString], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -76,7 +76,7 @@ export default function ProfilePage() {
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 4000);
       } else {
-        setErrorMessage(res.error || 'Failed to download backup data.');
+        setErrorMessage(res.error);
       }
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'An error occurred during export.');
