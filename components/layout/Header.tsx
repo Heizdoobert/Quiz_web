@@ -22,15 +22,15 @@ export default function Header({
 
   return (
     <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] sticky top-0 z-30 shadow-lg">
-      <div className="flex items-center gap-2.5">
-        <div className="p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC]">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div className="shrink-0 p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC]">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
-        <h1 className="text-2xl font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
+        <h1 className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
           Quick Quiz
         </h1>
       </div>
-      <div className="flex items-center gap-2.5 sm:gap-3">
+      <div className="flex shrink-0 items-center gap-2.5 sm:gap-3">
         {/* Sound FX Toggle Button */}
         <button
           type="button"
@@ -75,7 +75,7 @@ export default function Header({
           </button>
         )}
 
-        <ConnectButton showBalance={false} />
+        <ConnectButton label="Connect" showBalance={false} />
       </div>
     </header>
   );
