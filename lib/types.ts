@@ -61,6 +61,7 @@ export interface QuestionList {
   description: string | null;
   status: QuestionListStatus;
   reward_pool_tokens: string;
+  max_participants?: number;
   submitted_at: string | null;
   started_at: string | null;
   created_at: string;

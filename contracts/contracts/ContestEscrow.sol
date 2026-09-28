@@ -120,6 +120,9 @@ contract ContestEscrow is EIP712, Ownable, ReentrancyGuard {
 
         usedNonces[contestId][recipient][nonce] = true;
         contest.remainingPool -= amount;
+        if (contest.remainingPool == 0) {
+            contest.active = false;
+        }
 
         token.safeTransfer(recipient, amount);
 

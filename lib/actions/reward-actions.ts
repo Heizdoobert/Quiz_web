@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSessionWallet } from '@/lib/wallet-session';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getUserStats } from '@/lib/actions/quiz-actions';
@@ -162,6 +163,11 @@ export async function generateTokenVoucher(
   try {
     if (!walletAddress) return { error: 'Wallet address required' };
 
+    const sessionWallet = await getSessionWallet();
+    if (!sessionWallet || sessionWallet.toLowerCase() !== walletAddress.toLowerCase()) {
+      return { error: 'Sign in with your wallet first.' };
+    }
+
     const account = getSignerAccount();
     if (!account || !supabaseAdmin) return { error: 'Reward signing not configured' };
 
@@ -241,6 +247,11 @@ export async function generateBadgeVoucher(
   try {
     if (!walletAddress) return { error: 'Wallet address required' };
 
+    const sessionWallet = await getSessionWallet();
+    if (!sessionWallet || sessionWallet.toLowerCase() !== walletAddress.toLowerCase()) {
+      return { error: 'Sign in with your wallet first.' };
+    }
+
     const account = getSignerAccount();
     if (!account || !supabaseAdmin) return { error: 'Reward signing not configured' };
 
@@ -315,7 +326,9 @@ export async function confirmRewardClaim(
 ): Promise<{ success: boolean }> {
   try {
     if (!walletAddress || !nonce || !txHash || !supabaseAdmin) return { success: false };
+    const sessionWallet = await getSessionWallet();
     const normalized = walletAddress.toLowerCase();
+    if (!sessionWallet || sessionWallet.toLowerCase() !== normalized) return { success: false };
 
     const { data: claim } = await supabaseAdmin
       .from('reward_claims')
@@ -328,7 +341,12 @@ export async function confirmRewardClaim(
 
     // Trust the chain, not the caller: only a spent nonce means the reward was minted / claimed.
     if (claim.list_id) {
-      const contestId = getContestId(claim.list_id);
+      const { data: qList } = await supabaseAdmin
+        .from('question_lists')
+        .select('owner_wallet')
+        .eq('id', claim.list_id)
+        .maybeSingle();
+      const contestId = getContestId(claim.list_id, qList?.owner_wallet);
       const usedOnEscrow = await isContestVoucherUsed(contestId, normalized, nonce);
       if (!usedOnEscrow) return { success: false };
     } else {

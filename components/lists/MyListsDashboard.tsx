@@ -254,6 +254,9 @@ function ListCard({
     onChanged();
   };
 
+  const { address } = useAccount();
+  const wallet = address || list.owner_wallet;
+
   const handleStartContest = async () => {
     const amount = parseFloat(poolAmount);
     if (!amount || amount <= 0) {
@@ -277,22 +280,41 @@ function ListCard({
     setError(null);
     try {
       const amountWei = BigInt(Math.floor(amount)) * (BigInt(10) ** BigInt(18));
-      setFunding('approving');
-      const approveHash = await writeContractAsync({
-        address: QUIZ_TOKEN_ADDRESS,
-        abi: QuizTokenABI,
-        functionName: 'approve',
-        args: [CONTEST_ESCROW_ADDRESS, amountWei],
-      });
-      await publicClient.waitForTransactionReceipt({ hash: approveHash });
-      setFunding('creating');
-      const createHash = await writeContractAsync({
-        address: CONTEST_ESCROW_ADDRESS,
-        abi: ContestEscrowABI,
-        functionName: 'createContest',
-        args: [getContestId(list.id), amountWei, BigInt(CONTEST_DURATION_SECONDS)],
-      });
-      await publicClient.waitForTransactionReceipt({ hash: createHash });
+      const contestId = getContestId(list.id, wallet);
+
+      let alreadyFunded = false;
+      try {
+        const contestData = await publicClient.readContract({
+          address: CONTEST_ESCROW_ADDRESS,
+          abi: ContestEscrowABI,
+          functionName: 'contests',
+          args: [contestId],
+        });
+        if (contestData && contestData[5] && contestData[2] >= amountWei) {
+          alreadyFunded = true;
+        }
+      } catch {
+        // contest doesn't exist yet on chain
+      }
+
+      if (!alreadyFunded) {
+        setFunding('approving');
+        const approveHash = await writeContractAsync({
+          address: QUIZ_TOKEN_ADDRESS,
+          abi: QuizTokenABI,
+          functionName: 'approve',
+          args: [CONTEST_ESCROW_ADDRESS, amountWei],
+        });
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+        setFunding('creating');
+        const createHash = await writeContractAsync({
+          address: CONTEST_ESCROW_ADDRESS,
+          abi: ContestEscrowABI,
+          functionName: 'createContest',
+          args: [contestId, amountWei, BigInt(CONTEST_DURATION_SECONDS)],
+        });
+        await publicClient.waitForTransactionReceipt({ hash: createHash });
+      }
     } catch (err) {
       console.error('Contest funding tx failed:', err);
       setError('On-chain funding failed or was rejected.');

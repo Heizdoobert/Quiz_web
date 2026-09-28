@@ -136,6 +136,7 @@ CREATE TABLE IF NOT EXISTS question_lists (
   description TEXT,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'live', 'rejected')),
   reward_pool_tokens NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals), NUMERIC to avoid BIGINT overflow at token scale
+  max_participants INT NOT NULL DEFAULT 10,
   submitted_at TIMESTAMPTZ,
   started_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()

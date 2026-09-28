@@ -74,7 +74,9 @@ export async function isContestFundedOnChain(
   minPoolWei: bigint
 ): Promise<boolean> {
   const client = publicClientFor(REWARD_CHAIN_ID);
-  if (!client || CONTEST_ESCROW_ADDRESS === '0x0000000000000000000000000000000000000000') return true;
+  if (!client || !CONTEST_ESCROW_ADDRESS || CONTEST_ESCROW_ADDRESS === '0x0000000000000000000000000000000000000000') {
+    return false;
+  }
   try {
     const contest = (await client.readContract({
       address: CONTEST_ESCROW_ADDRESS,
@@ -86,6 +88,33 @@ export async function isContestFundedOnChain(
     return active && cCreator.toLowerCase() === creator.toLowerCase() && totalPool >= minPoolWei;
   } catch {
     return false;
+  }
+}
+
+// Fetches live on-chain status of a contest from ContestEscrow.
+export async function getContestOnChain(contestId: `0x${string}`): Promise<{
+  creator: string;
+  totalPool: bigint;
+  remainingPool: bigint;
+  createdAt: bigint;
+  expiresAt: bigint;
+  active: boolean;
+} | null> {
+  const client = publicClientFor(REWARD_CHAIN_ID);
+  if (!client || !CONTEST_ESCROW_ADDRESS || CONTEST_ESCROW_ADDRESS === '0x0000000000000000000000000000000000000000') {
+    return null;
+  }
+  try {
+    const contest = (await client.readContract({
+      address: CONTEST_ESCROW_ADDRESS,
+      abi: ContestEscrowABI,
+      functionName: 'contests',
+      args: [contestId],
+    })) as [string, bigint, bigint, bigint, bigint, boolean];
+    const [creator, totalPool, remainingPool, createdAt, expiresAt, active] = contest;
+    return { creator, totalPool, remainingPool, createdAt, expiresAt, active };
+  } catch {
+    return null;
   }
 }
 
