@@ -1,7 +1,7 @@
 # Spec: Question Search and Topic Browse
 
 Module: `discovery` (consumes `trivia`) — see `CAPABILITY-MAP.md`.
-Status: Draft, awaiting approval. Depends on `docs/specs/trivia-guest-access.md` (`getTopics`, `getPublicQuestion`, public-question rule).
+Status: Approved 2026-09-28. Depends on `docs/specs/trivia-guest-access.md` (`getTopics`, `getPublicQuestion`, public-question rule).
 
 ## Objective
 Anyone, signed in or not, can find questions the way they would search Google:

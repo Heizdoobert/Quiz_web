@@ -1,7 +1,7 @@
 # Spec: Sample Question Removal, Signed-In Creation, Read-Only Guests
 
 Module: `trivia` (consumes `identity`) — see `CAPABILITY-MAP.md`.
-Status: Draft, awaiting approval. Depends on `docs/specs/identity-accounts.md` (`getSessionAccount`).
+Status: Approved 2026-09-28. Depends on `docs/specs/identity-accounts.md` (`getSessionAccount`).
 
 ## Objective
 - The 14 built-in sample questions stop appearing. Only questions that players added are played, searched and listed.
@@ -84,6 +84,6 @@ if (!account) return { success: false, code: 'UNAUTHORIZED' as const };
 6. Play serves only public questions; answering a served question as a signed-in player always returns `recorded: true` or a real reason.
 7. `npm run check:task` and `npm run build` pass; changed-line coverage ≥ 80%.
 
-## Open Questions
-- "Move the create button": keep it where it is now (below the quiz) but signed-in only, or move it into the header menu?
-- Should guests still be able to play (result shown, not saved), or only browse and search?
+## Decisions
+- 2026-09-28: guests keep playing (the result is shown, never saved).
+- The create button stays where it is now (below the quiz), shown only to signed-in players. Moving it into the header is a later, separate change if wanted.

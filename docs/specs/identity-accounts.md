@@ -1,7 +1,7 @@
 # Spec: Accounts with Optional Wallet
 
 Module: `identity` — see `CAPABILITY-MAP.md`. Supersedes the wallet-only identity in ADR-001 (the session-cookie approach stays).
-Status: Draft, awaiting approval.
+Status: Approved 2026-09-28.
 
 ## Objective
 Signing up and signing in must be easy, and a wallet must be optional. A player can:
@@ -9,7 +9,7 @@ Signing up and signing in must be easy, and a wallet must be optional. A player 
 - sign in with a wallet (existing SIWE flow), and
 - add a wallet to an email account later.
 
-Registration is the first sign-in; there is no separate register form. The account, not the wallet, is the player's identity. Whether an account has a wallet decides who receives its $QUIZ (see `docs/specs/rewards-no-wallet-payee.md`).
+Registration is the first sign-in; there is no separate register form. The account, not the wallet, is the player's identity. $QUIZ belongs to the account and is claimable once it has a wallet (see `docs/specs/rewards-no-wallet-payee.md`).
 
 Out of scope: passwords, social logins (see Open Questions), unlinking or changing a wallet, merging two accounts, adding an email to a wallet account.
 

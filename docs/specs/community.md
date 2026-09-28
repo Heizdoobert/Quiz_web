@@ -1,7 +1,7 @@
 # Spec: Question Ratings, Comments and Suggestions
 
 Module: `community` (consumes `identity`, `trivia`; provides to `profile`) — see `CAPABILITY-MAP.md`.
-Status: Draft, awaiting approval. Depends on `docs/specs/identity-accounts.md` (`users.id`, `getSessionAccount`) and `docs/specs/trivia-guest-access.md` (public-question rule).
+Status: Approved 2026-09-28. Depends on `docs/specs/identity-accounts.md` (`users.id`, `getSessionAccount`) and `docs/specs/trivia-guest-access.md` (public-question rule).
 
 ## Objective
 After answering a question, a signed-in player can:
