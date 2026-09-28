@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS reward_claims (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     wallet_address TEXT NOT NULL,
     claim_type TEXT NOT NULL CHECK (claim_type IN ('token', 'badge')),
-    amount BIGINT,
+    amount NUMERIC(78,0), -- wei; any uint256 fits
     badge_type INTEGER,
     nonce TEXT NOT NULL,
     tx_hash TEXT,

@@ -36,10 +36,10 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     const stats = await getUserStats(walletAddress);
     const totalEarned = BigInt(stats.score) * TOKENS_PER_CORRECT;
 
-    // Get total already-claimed tokens
+    // Get total already-claimed tokens. Read as text: JSON numbers lose precision past 2^53.
     const { data: claims, error: cErr } = await supabase
       .from('reward_claims')
-      .select('amount')
+      .select('amount::text')
       .eq('wallet_address', normalized)
       .eq('claim_type', 'token')
       .eq('status', 'claimed');
@@ -140,14 +140,18 @@ export async function generateTokenVoucher(
       },
     });
 
-    // Record pending claim
-    await supabase.from('reward_claims').insert({
+    // A voucher we can't record can never be marked claimed, so don't hand it out.
+    const { error: insertErr } = await supabase.from('reward_claims').insert({
       wallet_address: normalized,
       claim_type: 'token',
       amount: claimable.toString(),
       nonce: nonceStr,
       status: 'pending',
     });
+    if (insertErr) {
+      console.error('generateTokenVoucher record error:', insertErr);
+      return { error: 'Failed to generate voucher' };
+    }
 
     return {
       recipient: normalized,
@@ -210,14 +214,18 @@ export async function generateBadgeVoucher(
       },
     });
 
-    // Record pending claim
-    await supabase.from('reward_claims').insert({
+    // A voucher we can't record can never be marked claimed, so don't hand it out.
+    const { error: insertErr } = await supabase.from('reward_claims').insert({
       wallet_address: normalized,
       claim_type: 'badge',
       badge_type: badgeType,
       nonce: nonceStr,
       status: 'pending',
     });
+    if (insertErr) {
+      console.error('generateBadgeVoucher record error:', insertErr);
+      return { error: 'Failed to generate badge voucher' };
+    }
 
     return {
       recipient: normalized,
