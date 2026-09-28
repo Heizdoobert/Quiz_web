@@ -1,8 +1,9 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Gift, Zap, Volume2, VolumeX, User } from 'lucide-react';
+import { Gift, Zap, Volume2, VolumeX, User, Trophy } from 'lucide-react';
 import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
 
 interface HeaderProps {
@@ -22,15 +23,20 @@ export default function Header({
 
   return (
     <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] sticky top-0 z-30 shadow-lg">
-      <div className="flex items-center gap-2.5">
-        <div className="p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC]">
+      <Link
+        href="/"
+        className="flex items-center gap-2.5 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] rounded-xl group transition-transform active:scale-95"
+        aria-label="Quick Quiz Home"
+      >
+        <div className="shrink-0 p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_12px_rgba(0,255,204,0.2)] group-hover:scale-105 transition-transform">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
-        <h1 className="text-2xl font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
+        <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
           Quick Quiz
-        </h1>
-      </div>
-      <div className="flex items-center gap-2.5 sm:gap-3">
+        </span>
+      </Link>
+      {/* min-h reserves the Connect button's height; it mounts after hydration and shifted the page */}
+      <div className="flex shrink-0 min-h-10 items-center gap-2.5 sm:gap-3">
         {/* Sound FX Toggle Button */}
         <button
           type="button"
@@ -45,6 +51,16 @@ export default function Header({
         >
           {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
         </button>
+
+        {/* Question Lists / Contests */}
+        <Link
+          href="/my-lists"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#00FFCC] font-bold font-heading text-xs transition-all shadow-sm hover:scale-105"
+          aria-label="Question Lists & Contests"
+        >
+          <Trophy className="w-4 h-4" />
+          <span className="hidden sm:inline">Contests</span>
+        </Link>
 
         {/* Profile Button */}
         {isConnected && onOpenProfile && (
@@ -75,7 +91,7 @@ export default function Header({
           </button>
         )}
 
-        <ConnectButton showBalance={false} />
+        <ConnectButton label="Connect" showBalance={false} />
       </div>
     </header>
   );

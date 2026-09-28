@@ -81,18 +81,18 @@ export default function QuizCard({
   }
 
   return (
-    <div className="relative w-full min-h-[460px] perspective-1000">
+    <div className="relative w-full perspective-1000">
+      {/* Both faces share one grid cell, so the card grows to the taller face */}
       <motion.div
-        className="relative w-full h-full transform-style-3d"
+        className="grid w-full min-h-[460px] transform-style-3d"
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >
-        {/* Front Face */}
+        {/* Front Face; inert hides the turned-away face from mouse, keyboard and screen readers */}
         <div
-          className={`absolute inset-0 w-full h-full backface-hidden ${
-            isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={isFlipped}
+          className="col-start-1 row-start-1 backface-hidden"
+          data-testid="quiz-card-front"
+          inert={isFlipped}
         >
           <QuestionFront
             question={question}
@@ -112,12 +112,7 @@ export default function QuizCard({
         </div>
 
         {/* Back Face */}
-        <div
-          className={`absolute inset-0 w-full h-full backface-hidden rotate-y-180 ${
-            !isFlipped ? 'pointer-events-none' : ''
-          }`}
-          aria-hidden={!isFlipped}
-        >
+        <div className="col-start-1 row-start-1 backface-hidden rotate-y-180" inert={!isFlipped}>
           {result && (
             <AnswerBack
               question={question}

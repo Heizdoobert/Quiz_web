@@ -16,6 +16,7 @@ import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderb
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { HistoryItem } from '@/components/modals/ReviewModal';
 import { soundEngine } from '@/lib/audio';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 
 export type ActiveModal =
   | 'intro'
@@ -37,6 +38,7 @@ export function useQuizLogic({
   initialLeaderboard = [],
 }: UseQuizLogicOptions = {}) {
   const { address, isConnected } = useAccount();
+  const ensureSession = useWalletSession();
 
   // Quiz state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -160,10 +162,12 @@ export function useQuizLogic({
       if (!currentQuestion || isSubmitting || isFlipped) return;
 
       setIsSubmitting(true);
+      // Answers only count for a signed-in wallet. If the signature is declined the
+      // answer is still shown, just not recorded (blocking would re-prompt on every timer tick).
+      if (isConnected) await ensureSession();
       const res = await submitAnswer({
         questionId: currentQuestion.id,
         answerIndex,
-        walletAddress: address || '0x0000000000000000000000000000000000000000',
       });
 
       setResult(res);
@@ -187,8 +191,8 @@ export function useQuizLogic({
         ...prev,
       ]);
 
-      // Optimistically update local session stats
-      setStats((prev) => {
+      // Optimistically update local session stats (a connected wallet's stats only move when the answer counted)
+      if (res.recorded || !isConnected) setStats((prev) => {
         const nextTotal = prev.totalAnswered + 1;
         const nextScore = res.isCorrect ? prev.score + 1 : prev.score;
         const nextStreak = res.isCorrect ? prev.streak + 1 : 0;
@@ -207,7 +211,7 @@ export function useQuizLogic({
       loadLeaderboards();
       refreshRewards();
     },
-    [currentQuestion, isSubmitting, isFlipped, address, loadLeaderboards, refreshRewards]
+    [currentQuestion, isSubmitting, isFlipped, isConnected, ensureSession, loadLeaderboards, refreshRewards]
   );
 
   // Initial user sync & stats fetch

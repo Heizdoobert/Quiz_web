@@ -50,7 +50,7 @@ export default function QuestionFront({
   return (
     <div className="flex flex-col h-full justify-between p-6 sm:p-8 glass glass-border glass-edge rounded-3xl shadow-2xl">
       {/* Top Meta Bar */}
-      <div className="flex items-center justify-between pb-4 border-b border-[#2D305A]">
+      <div className="flex flex-wrap items-center justify-between gap-2 pb-4 border-b border-[#2D305A]">
         <div className="flex items-center gap-2">
           <span className={`px-3 py-1 border rounded-full text-xs font-bold font-heading tracking-wider uppercase select-none ${getCategoryBadge(question.category)}`}>
             {question.category || 'Trivia'}

@@ -24,6 +24,7 @@ export interface ClientQuestion {
   options: string[];
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
   created_by?: string | null;
+  created_at?: string;
 }
 
 export interface QuestionDispute {
@@ -51,6 +52,36 @@ export interface Group {
   created_at: string;
 }
 
+export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | 'rejected';
+
+export interface QuestionList {
+  id: string;
+  owner_wallet: string;
+  title: string;
+  description: string | null;
+  status: QuestionListStatus;
+  reward_pool_tokens: string;
+  submitted_at: string | null;
+  started_at: string | null;
+  created_at: string;
+}
+
+export interface QuestionListWithMeta extends QuestionList {
+  questionCount: number;
+  confirmationCount: number;
+  hasConfirmed?: boolean;
+  perQuestionReward?: string;
+}
+
+export interface ListEntry {
+  list_id: string;
+  wallet_address: string;
+  status: 'in_progress' | 'completed' | 'claimed' | 'reviewer';
+  correct_count: number;
+  reward_amount: string;
+  completed_at: string | null;
+}
+
 export interface UserStats {
   score: number;
   streak: number;
@@ -71,6 +102,8 @@ export interface AnswerSubmissionResult {
   isCorrect: boolean;
   correctIndex: number;
   explanation: string | null;
+  // False when the answer didn't count: not signed in, or the question was already answered.
+  recorded: boolean;
 }
 
 export interface ClaimableRewards {
@@ -104,3 +137,40 @@ export const BADGE_ICONS: Record<number, string> = {
   2: '💯',
   3: '⭐',
 };
+
+// --- Profile & Data Export Interface Contracts ---
+
+export interface PaginationParams {
+  limit?: number;
+  offset?: number;
+}
+
+export interface GetUserQuizzesFilter extends PaginationParams {
+  category?: string;
+  status?: Question['status'];
+}
+
+export interface UserBackupData {
+  walletAddress: string;
+  exportedAt: string;
+  version: string;
+  quizzes: Question[];
+  stats: QuizResult[];
+  isTruncated?: boolean;
+}
+
+export type ProfileErrorCode =
+  | 'INVALID_ADDRESS'
+  | 'FETCH_FAILED'
+  | 'EXPORT_FAILED'
+  | 'UNAUTHORIZED'
+  | 'RATE_LIMITED'
+  | 'UNKNOWN_ERROR';
+
+export type GetUserQuizzesResult =
+  | { success: true; quizzes: ClientQuestion[]; count: number }
+  | { success: false; error: string; code: ProfileErrorCode };
+
+export type ExportUserDataResult =
+  | { success: true; data: UserBackupData }
+  | { success: false; error: string; code: ProfileErrorCode };
