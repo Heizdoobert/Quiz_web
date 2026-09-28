@@ -20,6 +20,8 @@ CREATE TABLE IF NOT EXISTS questions (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE INDEX IF NOT EXISTS idx_questions_created_by ON questions(created_by);
+
 -- Quiz results log table
 CREATE TABLE IF NOT EXISTS quiz_results (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

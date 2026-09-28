@@ -44,13 +44,13 @@ describe('profile-actions', () => {
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockData, error: null });
+      const mockRange = vi.fn().mockResolvedValue({ data: mockData, error: null });
 
       (supabase.from as import("vitest").Mock).mockReturnValue({
         select: mockSelect,
         eq: mockEq,
         order: mockOrder,
-        limit: mockLimit,
+        range: mockRange,
       });
 
       await getUserQuizzes(VALID_ADDRESS_CHECKSUMMED);
@@ -59,27 +59,28 @@ describe('profile-actions', () => {
       expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS_CHECKSUMMED.toLowerCase());
     });
 
-    it('returns user quizzes successfully with count', async () => {
-      const mockData = [{ id: '1', prompt: 'Test Question' }];
+    it('returns user quizzes with public fields only (no correct_index leak)', async () => {
+      const mockData = [{ id: '1', prompt: 'Test Question', options: ['A', 'B'], category: 'General' }];
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockData, error: null });
+      const mockRange = vi.fn().mockResolvedValue({ data: mockData, error: null });
 
       (supabase.from as import("vitest").Mock).mockReturnValue({
         select: mockSelect,
         eq: mockEq,
         order: mockOrder,
-        limit: mockLimit,
+        range: mockRange,
       });
 
       const result = await getUserQuizzes(VALID_ADDRESS);
 
       expect(supabase.from).toHaveBeenCalledWith('questions');
-      expect(mockSelect).toHaveBeenCalledWith('*');
+      // Verify anti-cheat: ONLY public fields projected, correct_index and explanation omitted
+      expect(mockSelect).toHaveBeenCalledWith('id, category, prompt, options, status, created_at, created_by');
       expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS);
       expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
-      expect(mockLimit).toHaveBeenCalledWith(500);
+      expect(mockRange).toHaveBeenCalledWith(0, 499);
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -88,25 +89,25 @@ describe('profile-actions', () => {
       }
     });
 
-    it('honors optional pagination and category filter', async () => {
+    it('honors pagination offset, limit, and category filter', async () => {
       const mockData = [{ id: '2', prompt: 'DeFi Question', category: 'DeFi' }];
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
-      const mockLimit = vi.fn().mockResolvedValue({ data: mockData, error: null });
+      const mockRange = vi.fn().mockResolvedValue({ data: mockData, error: null });
 
       (supabase.from as import("vitest").Mock).mockReturnValue({
         select: mockSelect,
         eq: mockEq,
         order: mockOrder,
-        limit: mockLimit,
+        range: mockRange,
       });
 
-      const result = await getUserQuizzes(VALID_ADDRESS, { limit: 10, category: 'DeFi' });
+      const result = await getUserQuizzes(VALID_ADDRESS, { limit: 10, offset: 20, category: 'DeFi' });
 
       expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS);
       expect(mockEq).toHaveBeenCalledWith('category', 'DeFi');
-      expect(mockLimit).toHaveBeenCalledWith(10);
+      expect(mockRange).toHaveBeenCalledWith(20, 29);
       expect(result.success).toBe(true);
     });
   });
@@ -130,7 +131,7 @@ describe('profile-actions', () => {
       }
     });
 
-    it('returns error with code EXPORT_FAILED when statsResponse fails', async () => {
+    it('returns sanitized error with code EXPORT_FAILED when statsResponse fails (no DB leak)', async () => {
       let callCount = 0;
       (supabase.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
@@ -139,8 +140,8 @@ describe('profile-actions', () => {
             eq: vi.fn().mockReturnValue({
               limit: vi.fn().mockResolvedValue(
                 callCount === 1
-                  ? { data: [], error: null }           // quizzes OK
-                  : { data: null, error: { message: 'Stats table error' } }  // stats FAIL
+                  ? { data: [], error: null }
+                  : { data: null, error: { message: 'relation "quiz_results" does not exist' } }
               ),
             }),
           }),
@@ -150,7 +151,8 @@ describe('profile-actions', () => {
       const result = await exportUserData(VALID_ADDRESS);
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe('Stats table error');
+        // Must NOT leak internal database table/constraint names
+        expect(result.error).toBe('Failed to fetch stats for export.');
         expect(result.code).toBe('EXPORT_FAILED');
       }
     });

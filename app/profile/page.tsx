@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
-import { Question } from '@/lib/types';
+import { ClientQuestion } from '@/lib/types';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';
 import CreatorQuizCard from '@/components/profile/CreatorQuizCard';
@@ -15,7 +15,7 @@ import { AlertCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { address, isConnected } = useAccount();
-  const [quizzes, setQuizzes] = useState<Question[]>([]);
+  const [quizzes, setQuizzes] = useState<ClientQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
@@ -39,12 +39,14 @@ export default function ProfilePage() {
             setFetchError(null);
           } else {
             setFetchError(res.error);
+            setQuizzes([]);
           }
           setLoading(false);
         }
       } catch (err) {
         if (!isCancelled) {
           setFetchError(err instanceof Error ? err.message : 'Failed to load quizzes.');
+          setQuizzes([]);
           setLoading(false);
         }
       }
@@ -77,7 +79,7 @@ export default function ProfilePage() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `quick-quiz-backup-${address.slice(0, 6)}.json`;
+        link.download = `quick-quiz-backup-${address.slice(0, 8)}.json`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -101,9 +103,12 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col selection:bg-[#00FFCC] selection:text-[#0A1128]">
-      <Header />
+      <Header isConnected={isConnected} />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16">
+      <main
+        key={address || 'disconnected'}
+        className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
+      >
         {!isConnected || !address ? (
           <AccessDeniedView />
         ) : (
@@ -147,15 +152,20 @@ export default function ProfilePage() {
             ) : quizzes.length === 0 ? (
               <CreatorEmptyState />
             ) : (
-              <ul
-                role="list"
-                aria-label="Your created questions"
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
-              >
-                {quizzes.map((quiz) => (
-                  <CreatorQuizCard key={quiz.id} quiz={quiz} />
-                ))}
-              </ul>
+              <section aria-labelledby="created-quizzes-heading">
+                <h2 id="created-quizzes-heading" className="sr-only">
+                  Your Created Questions
+                </h2>
+                <ul
+                  role="list"
+                  aria-label="Your created questions"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"
+                >
+                  {quizzes.map((quiz) => (
+                    <CreatorQuizCard key={quiz.id} quiz={quiz} />
+                  ))}
+                </ul>
+              </section>
             )}
           </>
         )}

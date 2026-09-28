@@ -24,6 +24,7 @@ export interface ClientQuestion {
   options: string[];
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
   created_by?: string | null;
+  created_at?: string;
 }
 
 export interface QuestionDispute {
@@ -141,7 +142,7 @@ export type ProfileErrorCode =
   | 'UNKNOWN_ERROR';
 
 export type GetUserQuizzesResult =
-  | { success: true; quizzes: Question[]; count: number }
+  | { success: true; quizzes: ClientQuestion[]; count: number }
   | { success: false; error: string; code: ProfileErrorCode };
 
 export type ExportUserDataResult =

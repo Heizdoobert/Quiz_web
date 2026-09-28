@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Question } from '@/lib/types';
+import { ClientQuestion } from '@/lib/types';
 import { CheckCircle2, Clock, AlertTriangle, ListChecks } from 'lucide-react';
 
 interface CreatorQuizCardProps {
-  quiz: Question;
+  quiz: ClientQuestion;
 }
 
 export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
@@ -24,7 +24,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
     return 'bg-[#6C5CE7]/15 text-[#6C5CE7] border-[#6C5CE7]/30';
   };
 
-  const getStatusBadge = (status?: Question['status']) => {
+  const getStatusBadge = (status?: ClientQuestion['status']) => {
     switch (status) {
       case 'verified':
         return (

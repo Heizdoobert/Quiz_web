@@ -3,6 +3,7 @@
 import { supabase } from '../supabase';
 import {
   Question,
+  ClientQuestion,
   QuizResult,
   GetUserQuizzesFilter,
   GetUserQuizzesResult,
@@ -38,10 +39,13 @@ export async function getUserQuizzes(
 
     const normalized = walletAddress.toLowerCase();
     const limit = Math.min(Math.max(options?.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
+    const offset = Math.max(options?.offset ?? 0, 0);
 
+    // SECURITY: Select public display fields only.
+    // Exclude correct_index and explanation to prevent answer leakage during quizzes.
     let query = supabase
       .from('questions')
-      .select('*')
+      .select('id, category, prompt, options, status, created_at, created_by')
       .eq('created_by', normalized);
 
     if (options?.category) {
@@ -54,7 +58,7 @@ export async function getUserQuizzes(
 
     const { data, error } = await query
       .order('created_at', { ascending: false })
-      .limit(limit);
+      .range(offset, offset + limit - 1);
 
     if (error) {
       return {
@@ -64,7 +68,7 @@ export async function getUserQuizzes(
       };
     }
 
-    const quizzes = (data as Question[]) || [];
+    const quizzes = (data as ClientQuestion[]) || [];
     return {
       success: true,
       quizzes,
@@ -102,23 +106,19 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
     ]);
 
     if (quizzesResponse.error) {
-      const msg = typeof quizzesResponse.error === 'object' && 'message' in quizzesResponse.error
-        ? String(quizzesResponse.error.message)
-        : 'Failed to fetch quizzes for export.';
+      console.error('[exportUserData:quizzes]', quizzesResponse.error);
       return {
         success: false,
-        error: msg,
+        error: 'Failed to fetch quizzes for export.',
         code: 'EXPORT_FAILED',
       };
     }
 
     if (statsResponse.error) {
-      const msg = typeof statsResponse.error === 'object' && 'message' in statsResponse.error
-        ? String(statsResponse.error.message)
-        : 'Failed to fetch stats for export.';
+      console.error('[exportUserData:stats]', statsResponse.error);
       return {
         success: false,
-        error: msg,
+        error: 'Failed to fetch stats for export.',
         code: 'EXPORT_FAILED',
       };
     }

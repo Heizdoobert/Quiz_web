@@ -42,7 +42,7 @@ export default function CreatorDashboardHeader({
         </div>
 
         <p className="text-slate-400 text-sm mt-1.5 leading-relaxed max-w-md">
-          Manage your community quiz contributions and download encrypted data backups.
+          Manage your community quiz contributions and download JSON data backups.
         </p>
       </div>
 

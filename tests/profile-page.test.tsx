@@ -102,4 +102,70 @@ describe('ProfilePage', () => {
     expect(recoveredQuiz).toBeDefined();
     expect(screen.queryByText('Failed to Load Quizzes')).toBeNull();
   });
+
+  it('triggers backup data download on export button click', async () => {
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
+      success: true,
+      quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
+      count: 1,
+    });
+
+    const { exportUserData } = await import('../lib/actions/profile-actions');
+    (exportUserData as import("vitest").Mock).mockResolvedValueOnce({
+      success: true,
+      data: {
+        walletAddress: '0x123',
+        exportedAt: new Date().toISOString(),
+        version: '1.0',
+        quizzes: [],
+        stats: [],
+      },
+    });
+
+    // Mock DOM URL methods
+    const createObjectURLMock = vi.fn().mockReturnValue('blob:mock-url');
+    const revokeObjectURLMock = vi.fn();
+    window.URL.createObjectURL = createObjectURLMock;
+    window.URL.revokeObjectURL = revokeObjectURLMock;
+
+    render(<ProfilePage />);
+
+    const backupBtn = await screen.findByRole('button', { name: /backup.*data/i });
+    fireEvent.click(backupBtn);
+
+    const successIndicator = await screen.findByText('Backup Downloaded');
+    expect(successIndicator).toBeDefined();
+    expect(createObjectURLMock).toHaveBeenCalled();
+  });
+
+  it('displays error banner when export fails and allows user to dismiss it', async () => {
+    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
+      success: true,
+      quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
+      count: 1,
+    });
+
+    const { exportUserData } = await import('../lib/actions/profile-actions');
+    (exportUserData as import("vitest").Mock).mockResolvedValueOnce({
+      success: false,
+      error: 'Export rate limit reached',
+      code: 'EXPORT_FAILED',
+    });
+
+    render(<ProfilePage />);
+
+    const backupBtn = await screen.findByRole('button', { name: /backup.*data/i });
+    fireEvent.click(backupBtn);
+
+    const errorAlert = await screen.findByText('Export rate limit reached');
+    expect(errorAlert).toBeDefined();
+
+    // Dismiss error
+    const dismissBtn = screen.getByRole('button', { name: /dismiss/i });
+    fireEvent.click(dismissBtn);
+
+    expect(screen.queryByText('Export rate limit reached')).toBeNull();
+  });
 });
