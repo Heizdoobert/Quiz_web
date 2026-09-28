@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
 import { ClientQuestion } from '@/lib/types';
 import { downloadJson } from '@/lib/utils';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';
 import CreatorQuizCard from '@/components/profile/CreatorQuizCard';
@@ -16,6 +17,7 @@ import { AlertCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { address, isConnected } = useAccount();
+  const ensureSession = useWalletSession();
   const [quizzes, setQuizzes] = useState<ClientQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -73,6 +75,10 @@ export default function ProfilePage() {
     setActionError(null);
 
     try {
+      if (!(await ensureSession())) {
+        setActionError('Sign the message in your wallet to export your data.');
+        return;
+      }
       const res = await exportUserData(address);
       if (res.success) {
         downloadJson(`quick-quiz-backup-${address.slice(0, 8)}.json`, res.data);

@@ -1,6 +1,8 @@
 'use server';
 
 import { supabase } from '../supabase';
+import { supabaseAdmin } from '../supabase-admin';
+import { getSessionWallet } from '../wallet-session';
 import {
   Question,
   ClientQuestion,
@@ -16,16 +18,6 @@ import {
 // See SECURITY-TRADE-OFFS.md for the full threat model.
 function isValidEthAddress(address: string): boolean {
   return typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address);
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (typeof error === 'object' && error !== null && 'message' in error) {
-    return String((error as { message: unknown }).message);
-  }
-  return fallback;
 }
 
 const DEFAULT_LIMIT = 500;
@@ -85,9 +77,10 @@ export async function getUserQuizzes(
       count: quizzes.length,
     };
   } catch (error: unknown) {
+    console.error('[getUserQuizzes]', error);
     return {
       success: false,
-      error: getErrorMessage(error, 'An unexpected error occurred.'),
+      error: 'An unexpected error occurred.',
       code: 'UNKNOWN_ERROR',
     };
   }
@@ -105,9 +98,23 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
 
     const normalized = walletAddress.toLowerCase();
 
+    // The backup holds correct answers and every recorded answer, which the public key
+    // can't read, so it's read with the secret key and only for the signed-in wallet.
+    if ((await getSessionWallet()) !== normalized) {
+      return {
+        success: false,
+        error: 'Sign in with this wallet to export its data.',
+        code: 'UNAUTHORIZED',
+      };
+    }
+    if (!supabaseAdmin) {
+      console.error('[exportUserData] SUPABASE_SECRET_KEY is not set');
+      return { success: false, error: 'Failed to generate secure backup.', code: 'EXPORT_FAILED' };
+    }
+
     const [quizzesResponse, statsResponse] = await Promise.all([
-      supabase.from('questions').select('*').eq('created_by', normalized).limit(MAX_EXPORT_QUIZZES),
-      supabase.from('quiz_results').select('*').eq('wallet_address', normalized).limit(MAX_EXPORT_STATS),
+      supabaseAdmin.from('questions').select('*').eq('created_by', normalized).limit(MAX_EXPORT_QUIZZES),
+      supabaseAdmin.from('quiz_results').select('*').eq('wallet_address', normalized).limit(MAX_EXPORT_STATS),
     ]);
 
     if (quizzesResponse.error) {
@@ -146,9 +153,10 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
       data: exportData,
     };
   } catch (error: unknown) {
+    console.error('[exportUserData]', error);
     return {
       success: false,
-      error: getErrorMessage(error, 'Failed to generate secure backup.'),
+      error: 'Failed to generate secure backup.',
       code: 'UNKNOWN_ERROR',
     };
   }

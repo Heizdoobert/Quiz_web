@@ -25,6 +25,10 @@ vi.mock('../lib/actions/profile-actions', () => ({
   exportUserData: vi.fn(),
 }));
 
+// The sign-in signature is covered by the server actions; here it always succeeds.
+vi.mock('../hooks/shared/use-wallet-session', () => ({
+  useWalletSession: () => async () => true,
+}));
 
 
 describe('ProfilePage', () => {

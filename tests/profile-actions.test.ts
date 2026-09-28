@@ -1,12 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
 import { supabase } from '../lib/supabase';
+import { supabaseAdmin } from '../lib/supabase-admin';
+import { getSessionWallet } from '../lib/wallet-session';
 
 // Mock the supabase module
 vi.mock('../lib/supabase', () => ({
   supabase: {
     from: vi.fn(),
   },
+}));
+
+// Export reads with the secret key, for the signed-in wallet only.
+vi.mock('../lib/supabase-admin', () => ({
+  supabaseAdmin: {
+    from: vi.fn(),
+  },
+}));
+vi.mock('../lib/wallet-session', () => ({
+  getSessionWallet: vi.fn(),
 }));
 
 // Valid Ethereum address for testing (40 hex chars after 0x)
@@ -113,6 +125,24 @@ describe('profile-actions', () => {
   });
 
   describe('exportUserData', () => {
+    beforeEach(() => {
+      (getSessionWallet as import("vitest").Mock).mockResolvedValue(VALID_ADDRESS);
+    });
+
+    it('refuses to export a wallet that is not the signed-in one', async () => {
+      (getSessionWallet as import("vitest").Mock).mockResolvedValue(null);
+      const guest = await exportUserData(VALID_ADDRESS);
+
+      (getSessionWallet as import("vitest").Mock).mockResolvedValue('0x' + 'b'.repeat(40));
+      const otherWallet = await exportUserData(VALID_ADDRESS);
+
+      for (const result of [guest, otherWallet]) {
+        expect(result.success).toBe(false);
+        if (!result.success) expect(result.code).toBe('UNAUTHORIZED');
+      }
+      expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+    });
+
     it('returns an error with code INVALID_ADDRESS if walletAddress is empty', async () => {
       const result = await exportUserData('');
       expect(result.success).toBe(false);
@@ -133,7 +163,7 @@ describe('profile-actions', () => {
 
     it('returns sanitized error with code EXPORT_FAILED when statsResponse fails (no DB leak)', async () => {
       let callCount = 0;
-      (supabase.from as import("vitest").Mock).mockImplementation(() => {
+      (supabaseAdmin!.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
         return {
           select: vi.fn().mockReturnValue({
@@ -162,7 +192,7 @@ describe('profile-actions', () => {
       const mockStats = [{ id: 's1', score: 100 }];
 
       let callCount = 0;
-      (supabase.from as import("vitest").Mock).mockImplementation(() => {
+      (supabaseAdmin!.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
         return {
           select: vi.fn().mockReturnValue({
@@ -179,8 +209,8 @@ describe('profile-actions', () => {
 
       const result = await exportUserData(VALID_ADDRESS_CHECKSUMMED);
 
-      expect(supabase.from).toHaveBeenCalledWith('questions');
-      expect(supabase.from).toHaveBeenCalledWith('quiz_results');
+      expect(supabaseAdmin!.from).toHaveBeenCalledWith('questions');
+      expect(supabaseAdmin!.from).toHaveBeenCalledWith('quiz_results');
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.version).toBe('1.0');
@@ -194,7 +224,7 @@ describe('profile-actions', () => {
     it('sets isTruncated to true when quizzes or stats reach max export limit', async () => {
       const cappedQuizzes = new Array(1000).fill({ id: 'q' });
       let callCount = 0;
-      (supabase.from as import("vitest").Mock).mockImplementation(() => {
+      (supabaseAdmin!.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
         return {
           select: vi.fn().mockReturnValue({
