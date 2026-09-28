@@ -17,5 +17,6 @@ Contracts at boundaries (provider owns contract):
 - `trivia` provides `quiz_results` rows to `rankings`, `profile`.
 
 Existing specs traced to modules:
+- `docs/specs/answer-persistence.md` → `trivia` (consumes `identity`)
 - `docs/specs/profile-dashboard.md` → `profile`
 - `docs/specs/contest-escrow.md` → `rewards` (consumes `lists` interface above)
