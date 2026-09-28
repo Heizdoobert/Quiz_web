@@ -37,11 +37,12 @@ try {
     let buf = '';
     const onData = (d) => {
       const m = (buf += d).match(/ws:\/\/\S+/);
+      // Keep draining stderr after we stop reading it, or a full pipe blocks Chrome.
       if (m) { chrome.stderr.off('data', onData); chrome.stderr.resume(); resolve(m[0]); }
     };
     chrome.stderr.on('data', onData);
     chrome.once('error', reject);
-    chrome.once('exit', () => reject(new Error('Chrome exited before DevTools was ready')));
+    exited.then(() => reject(new Error('Chrome exited before DevTools was ready')));
   }), 15000, 'Chrome DevTools startup');
 
   const port = new URL(browserWs).port;
