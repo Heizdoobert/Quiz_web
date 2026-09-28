@@ -3,7 +3,6 @@
 import { supabase } from '@/lib/supabase';
 import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
 import { normalizePrompt, validateQuestionInput } from '@/lib/validation';
-import { buildTokenClaimVoucher } from '@/lib/actions/reward-actions';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 
 const TOKEN_DECIMALS = BigInt(10) ** BigInt(18);
@@ -555,33 +554,16 @@ export async function completeListAttempt(
   }
 }
 
+// Paused: contest pools are minted by the reward signer, not funded by the owner,
+// and the owner knows every answer, so any pool can be drained with extra wallets.
+// Re-enable once pools are funded up front (escrowed tokens) or capped by design.
 export async function claimListReward(
   listId: string,
   walletAddress: string
 ): Promise<RewardVoucher | { error: string }> {
-  try {
-    if (!walletAddress) return { error: 'Wallet address required' };
-    const normalized = walletAddress.toLowerCase();
-
-    const { data: entry, error } = await supabase
-      .from('list_entries')
-      .select('status, reward_amount')
-      .eq('list_id', listId)
-      .eq('wallet_address', normalized)
-      .single();
-
-    if (error || !entry) return { error: 'No contest entry found for this wallet.' };
-    if (entry.status === 'claimed') return { error: 'Reward already claimed for this contest.' };
-    if (entry.status !== 'completed') return { error: 'Finish the contest before claiming.' };
-
-    const amount = BigInt(entry.reward_amount || '0');
-    if (amount <= BigInt(0)) return { error: 'Nothing to claim for this contest.' };
-
-    return buildTokenClaimVoucher(normalized, amount, listId);
-  } catch (err: unknown) {
-    console.error('claimListReward error:', err);
-    return { error: 'Failed to generate voucher' };
-  }
+  void listId;
+  void walletAddress;
+  return { error: 'Contest payouts are paused.' };
 }
 
 export async function markListRewardClaimed(
