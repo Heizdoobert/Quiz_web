@@ -7,14 +7,14 @@ Plan: `tasks/plan.md`
 **Description:** Add `get_user_stats(p_wallet text)` to a new `lib/sql/stats-functions.sql`. It returns one row: `total_answered`, `correct_count`, `streak` (consecutive correct from the most recent answer), and `best_streak` (longest run of correct answers, chronological, gaps-and-islands). `getUserStats` calls it via `supabase.rpc()` and keeps its return shape and accuracy rounding. `getClaimableRewards` takes `totalCorrect` from the same RPC instead of downloading rows. Add `scripts/check-stats-parity.ts` (paginated raw fetch → old JS logic vs RPC, per wallet).
 
 **Acceptance criteria:**
-- [ ] `getUserStats` and `getClaimableRewards` no longer select raw `quiz_results` rows
+- [x] `getUserStats` and `getClaimableRewards` no longer select raw `quiz_results` rows
 - [ ] For every wallet in the DB, the RPC result equals the old JS computation (score, streak, bestStreak, accuracy, totalAnswered)
-- [ ] A wallet with more than 1000 answers gets its full correct count (verified with the `--seed` run on a non-production project)
+- [x] A wallet with more than 1000 answers gets its full correct count (verified in a throwaway local Postgres 16 container instead of `--seed`: 1,500-row wallet plus 8 edge cases, 0 mismatches against the old JS logic)
 
 **Verification:**
-- [ ] SQL applied in Supabase SQL Editor without errors, and re-running it is a no-op
-- [ ] `npx tsx scripts/check-stats-parity.ts` reports 0 mismatches
-- [ ] `npm run lint` and `npm run build` clean
+- [ ] SQL applied in Supabase SQL Editor without errors, and re-running it is a no-op (re-run verified locally)
+- [ ] `node scripts/check-stats-parity.mts` reports 0 mismatches against live data
+- [x] `npx tsc --noEmit`, `npx eslint` on touched files, and `npm run build` clean
 - [ ] Manual: connect a wallet on `preview`; stats panel and View Rewards show the same numbers as before
 
 **Dependencies:** None

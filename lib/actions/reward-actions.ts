@@ -31,15 +31,14 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     if (!walletAddress) return empty;
     const normalized = walletAddress.toLowerCase();
 
-    // Get total correct answers
-    const { data: results, error: rErr } = await supabase
-      .from('quiz_results')
-      .select('is_correct')
-      .eq('wallet_address', normalized);
+    // Get total correct answers (aggregated in Postgres; raw rows are capped at 1000)
+    const { data: totals, error: rErr } = await supabase
+      .rpc('get_user_stats', { p_wallet: normalized })
+      .single<{ correct_count: number }>();
 
-    if (rErr || !results) return empty;
+    if (rErr || !totals) return empty;
 
-    const totalCorrect = results.filter((r) => r.is_correct).length;
+    const totalCorrect = totals.correct_count;
     const totalEarned = BigInt(totalCorrect) * TOKENS_PER_CORRECT;
 
     // Get total already-claimed tokens

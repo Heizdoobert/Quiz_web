@@ -50,47 +50,21 @@ export async function getUserStats(walletAddress: string): Promise<UserStats> {
     if (!walletAddress) {
       return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     }
-    const normalized = walletAddress.toLowerCase();
+    // Aggregated in Postgres (lib/sql/stats-functions.sql); raw rows are capped at 1000.
     const { data, error } = await supabase
-      .from('quiz_results')
-      .select('is_correct, answered_at')
-      .eq('wallet_address', normalized)
-      .order('answered_at', { ascending: false });
+      .rpc('get_user_stats', { p_wallet: walletAddress.toLowerCase() })
+      .single<{ total_answered: number; correct_count: number; streak: number; best_streak: number }>();
 
-    if (error || !data || data.length === 0) {
+    if (error || !data || data.total_answered === 0) {
       return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     }
 
-    const totalAnswered = data.length;
-    const correctCount = data.filter((r) => r.is_correct).length;
-    const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
-
-    // Calculate current streak (consecutive correct answers from most recent)
-    let streak = 0;
-    for (const res of data) {
-      if (res.is_correct) streak++;
-      else break;
-    }
-
-    // Calculate best streak (in chronological order)
-    const chronological = [...data].reverse();
-    let bestStreak = 0;
-    let currentRun = 0;
-    for (const res of chronological) {
-      if (res.is_correct) {
-        currentRun++;
-        if (currentRun > bestStreak) bestStreak = currentRun;
-      } else {
-        currentRun = 0;
-      }
-    }
-
     return {
-      score: correctCount,
-      streak,
-      bestStreak,
-      accuracy,
-      totalAnswered,
+      score: data.correct_count,
+      streak: data.streak,
+      bestStreak: data.best_streak,
+      accuracy: Math.round((data.correct_count / data.total_answered) * 100),
+      totalAnswered: data.total_answered,
     };
   } catch (err) {
     console.error('getUserStats error:', err);

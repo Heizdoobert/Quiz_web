@@ -25,7 +25,7 @@ Copy `.env.example` to `.env.local` and fill in your own Supabase, WalletConnect
 
 ### Database
 
-Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to create tables and seed data.
+Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to create tables and seed data, then run [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) for the stats and leaderboard functions (safe to re-run).
 
 ### Smart Contracts
 
