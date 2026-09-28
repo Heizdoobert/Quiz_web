@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS quiz_results (
 
 CREATE INDEX IF NOT EXISTS idx_quiz_results_wallet ON quiz_results(wallet_address);
 CREATE INDEX IF NOT EXISTS idx_quiz_results_question ON quiz_results(question_id);
+-- Only the first answer to a question counts.
+CREATE UNIQUE INDEX IF NOT EXISTS quiz_results_one_answer_per_question ON quiz_results (wallet_address, question_id);
 
 -- Groups table
 CREATE TABLE IF NOT EXISTS groups (
@@ -63,18 +65,19 @@ ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for users" ON users FOR SELECT USING (true);
 CREATE POLICY "Allow public insert for users" ON users FOR INSERT WITH CHECK (true);
 
+-- Groups, questions and disputes are written by the server (secret key) for the signed-in wallet.
 CREATE POLICY "Allow public read for groups" ON groups FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for groups" ON groups FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Allow public read for group_members" ON group_members FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for group_members" ON group_members FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public delete for group_members" ON group_members FOR DELETE USING (true);
 
-CREATE POLICY "Allow public read for quiz_results" ON quiz_results FOR SELECT USING (true);
--- No public insert: answers are recorded by the server with the secret key.
+-- No public read or insert: answers are recorded by the server, and stats are read
+-- through the SECURITY DEFINER functions in lib/sql/stats-functions.sql.
 
 CREATE POLICY "Allow public read for questions" ON questions FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for questions" ON questions FOR INSERT WITH CHECK (true);
+-- Answers and explanations are only readable with the secret key.
+REVOKE SELECT ON questions FROM anon, authenticated;
+GRANT SELECT (id, category, prompt, options, created_by, status, dispute_count, verified_at, created_at)
+  ON questions TO anon, authenticated;
 
 -- Secure Client View (omits correct_index and explanation)
 CREATE OR REPLACE VIEW client_questions AS
@@ -86,9 +89,11 @@ CREATE TABLE IF NOT EXISTS reward_claims (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     wallet_address TEXT NOT NULL,
     claim_type TEXT NOT NULL CHECK (claim_type IN ('token', 'badge')),
-    amount BIGINT,
+    amount NUMERIC(78,0), -- wei; any uint256 fits
     badge_type INTEGER,
     nonce TEXT NOT NULL,
+    deadline BIGINT, -- unix seconds; past it an unused voucher can't be minted
+    signature TEXT,  -- kept so the one open voucher can be handed out again
     tx_hash TEXT,
     status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'claimed', 'expired')),
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -98,8 +103,9 @@ CREATE TABLE IF NOT EXISTS reward_claims (
 CREATE INDEX IF NOT EXISTS idx_reward_claims_wallet ON reward_claims(wallet_address);
 ALTER TABLE reward_claims ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for reward_claims" ON reward_claims FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for reward_claims" ON reward_claims FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update for reward_claims" ON reward_claims FOR UPDATE USING (true);
+-- Only the server (secret key) writes claims. One open token voucher per wallet.
+CREATE UNIQUE INDEX IF NOT EXISTS reward_claims_one_open_token
+  ON reward_claims (wallet_address) WHERE claim_type = 'token' AND status = 'pending';
 
 -- Question Disputes Table (Community Challenge & Transparency Engine)
 CREATE TABLE IF NOT EXISTS question_disputes (
@@ -114,7 +120,6 @@ CREATE TABLE IF NOT EXISTS question_disputes (
 CREATE INDEX IF NOT EXISTS idx_question_disputes_qid ON question_disputes(question_id);
 ALTER TABLE question_disputes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read for question_disputes" ON question_disputes FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for question_disputes" ON question_disputes FOR INSERT WITH CHECK (true);
 
 -- ============================================================================
 -- Initial Question Seed Data (Curated Trivia Bank)

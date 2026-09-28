@@ -2,17 +2,21 @@
 
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { AnswerSubmissionResult, QuizResult, UserStats } from '@/lib/types';
+import { getSessionWallet } from '@/lib/wallet-session';
+import { AnswerSubmissionResult, UserStats } from '@/lib/types';
 
 export async function submitAnswer(params: {
   questionId: string;
   answerIndex: number;
-  walletAddress: string;
 }): Promise<AnswerSubmissionResult> {
+  const failed = { isCorrect: false, correctIndex: 0, explanation: null, recorded: false };
   try {
-    const rawWallet = params?.walletAddress || '0x0000000000000000000000000000000000000000';
-    const normalizedWallet = rawWallet.toLowerCase();
-    const { data: qData, error: qError } = await supabase
+    // correct_index and explanation are not readable with the public key.
+    if (!supabaseAdmin) {
+      console.error('submitAnswer: SUPABASE_SECRET_KEY is not set');
+      return failed;
+    }
+    const { data: qData, error: qError } = await supabaseAdmin
       .from('questions')
       .select('correct_index, explanation')
       .eq('id', params.questionId)
@@ -20,34 +24,35 @@ export async function submitAnswer(params: {
 
     if (qError || !qData) {
       console.error('Question not found for answer submission:', qError);
-      return { isCorrect: false, correctIndex: 0, explanation: null };
+      return failed;
     }
 
     const isCorrect = params.answerIndex === qData.correct_index;
 
-    // Log the result only if a valid wallet is connected (prevents corrupting leaderboard with dummy address)
-    if (normalizedWallet && normalizedWallet !== '0x0000000000000000000000000000000000000000') {
-      if (!supabaseAdmin) {
-        console.error('submitAnswer: SUPABASE_SECRET_KEY is not set, answer not recorded');
-      } else {
-        const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
-          wallet_address: normalizedWallet,
-          question_id: params.questionId,
-          answer_index: params.answerIndex,
-          is_correct: isCorrect,
-        });
-        if (insertError) console.error('submitAnswer insert error:', insertError);
-      }
+    // Only a signed-in wallet's answers count; guests still see the result.
+    // The first answer to a question is the one that counts (unique per wallet and question).
+    const wallet = await getSessionWallet();
+    let recorded = false;
+    if (wallet) {
+      const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
+        wallet_address: wallet,
+        question_id: params.questionId,
+        answer_index: params.answerIndex,
+        is_correct: isCorrect,
+      });
+      if (insertError && insertError.code !== '23505') console.error('submitAnswer insert error:', insertError);
+      recorded = !insertError;
     }
 
     return {
       isCorrect,
       correctIndex: qData.correct_index,
       explanation: qData.explanation,
+      recorded,
     };
   } catch (err) {
     console.error('submitAnswer error:', err);
-    return { isCorrect: false, correctIndex: 0, explanation: null };
+    return failed;
   }
 }
 
@@ -76,27 +81,5 @@ export async function getUserStats(walletAddress: string): Promise<UserStats> {
   } catch (err) {
     console.error('getUserStats error:', err);
     return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-  }
-}
-
-export async function getQuestionHistory(
-  walletAddress: string,
-  limit: number = 10
-): Promise<QuizResult[]> {
-  try {
-    if (!walletAddress) return [];
-    const normalized = walletAddress.toLowerCase();
-    const { data, error } = await supabase
-      .from('quiz_results')
-      .select('*')
-      .eq('wallet_address', normalized)
-      .order('answered_at', { ascending: false })
-      .limit(limit);
-
-    if (error || !data) return [];
-    return data as QuizResult[];
-  } catch (err) {
-    console.error('getQuestionHistory error:', err);
-    return [];
   }
 }
