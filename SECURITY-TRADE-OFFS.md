@@ -46,13 +46,27 @@ As of September 2026, `npm audit` reports 23 moderate and 1 high vulnerability i
 
 ---
 
-## 4. Architectural Trade-Offs (Accepted Limitations)
+## 4. Resolved Security Milestones & Current Architecture
 
-### A. Client-Provided Wallet Address (IDOR Limitation)
-- **Constraint**: The application currently authenticates via Web3 browser wallets without an active SIWE (Sign-In With Ethereum) session token.
-- **Impact**: Any user can call `getUserQuizzes("0xOtherAddress")`.
-- **Mitigation**: Anti-cheat answers (`correct_index`, `explanation`) are completely stripped from `getUserQuizzes`, rendering public enumeration safe from cheating. Full quiz answers remain private.
+### A. Cryptographic Session Authentication (SIWE) — RESOLVED
+- **Implementation**: EIP-4361 Sign-In with Ethereum (`auth-actions.ts`, `wallet-session.ts`).
+- **Enforcement**: State-changing Server Actions (`createQuestion`, `submitAnswer`, `createList`, `exportUserData`) authenticate the caller via tamper-proof, HTTP-only HMAC session cookies (`quiz_session`) issued only after verifying the user's private key signature.
+- **Impact**: Eliminates wallet spoofing and IDOR risks across user data export and submission workflows.
 
-### B. Supabase Permissive Row-Level Security
-- **Constraint**: Database tables use `USING (true)` policies for public testnet access.
-- **Proper Fix**: Implement Supabase Custom JWTs generated via SIWE server verification and tighten RLS policies to `USING (auth.uid() = created_by)`.
+### B. Supabase RLS Write Lock-Down — RESOLVED
+- **Implementation**: `lib/sql/lock-down-public-writes.sql` and `lib/sql/question-lists.sql`.
+- **Enforcement**: All public write access (`INSERT`, `UPDATE`, `DELETE`) is completely disabled at the database level for the anonymous client. All writes are mediated through `supabaseAdmin` with the server-side secret key (`SUPABASE_SECRET_KEY`).
+- **Impact**: Prevents direct database manipulation and unauthenticated result injection.
+
+### C. Contest Payout Escrow & Anti-Drain — ACTIVE MITIGATION
+- **Constraint**: List creators define contest reward pools and possess advance knowledge of all correct answers.
+- **Enforcement**: Public arbitrary voucher signing (`buildTokenClaimVoucher`) has been eliminated. Contest reward claims (`claimListReward`) return `{ error: 'Contest payouts are paused.' }` until an on-chain staking/escrow contract is deployed to custody creator funds before contests go live.
+
+---
+
+## 5. Architectural Decision Records (ADRs)
+For detailed design decisions and trade-offs, consult:
+- [ADR-001: Sign-In with Ethereum & Session Authorization](docs/decisions/001-siwe-session-authorization.md)
+- [ADR-002: Dual-Key Supabase Architecture & RLS Lockdown](docs/decisions/002-dual-key-supabase-rls-lockdown.md)
+- [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](docs/decisions/003-question-lists-and-contest-voucher-safeguards.md)
+- [ADR-004: Next.js Server Action Bundling & Module Separation](docs/decisions/004-server-action-module-separation.md)
