@@ -11,6 +11,7 @@ import {
   REWARD_CHAIN_ID,
   isContestVoucherUsed,
   isContestFundedOnChain,
+  getContestOnChain,
   getSignerAccount,
   newNonce,
   getContestId,
@@ -454,7 +455,11 @@ export async function confirmList(listId: string): Promise<{ success: boolean; a
   }
 }
 
-export async function startContest(listId: string, rewardPoolWholeTokens: number): Promise<Result> {
+export async function startContest(
+  listId: string,
+  rewardPoolWholeTokens: number,
+  maxParticipants: number = 10
+): Promise<Result> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'List not found.' };
     if (
@@ -478,8 +483,9 @@ export async function startContest(listId: string, rewardPoolWholeTokens: number
       return { success: false, error: `List must be approved by ${REQUIRED_CONFIRMATIONS} reviewers before starting.` };
     }
 
+    const safeParticipants = Math.max(1, Math.min(1000, Math.floor(maxParticipants || 10)));
     const minPoolWei = toWei(rewardPoolWholeTokens);
-    const contestId = getContestId(listId);
+    const contestId = getContestId(listId, auth.wallet);
     const isFunded = await isContestFundedOnChain(contestId, auth.wallet, minPoolWei);
     if (!isFunded) {
       return { success: false, error: 'Contest pool has not been funded on-chain.' };
@@ -490,6 +496,7 @@ export async function startContest(listId: string, rewardPoolWholeTokens: number
       .update({
         status: 'live',
         reward_pool_tokens: minPoolWei.toString(),
+        max_participants: safeParticipants,
         started_at: new Date().toISOString(),
       })
       .eq('id', listId)
@@ -532,7 +539,7 @@ export async function startListAttempt(
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('status, owner_wallet')
+      .select('status, owner_wallet, max_participants')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list || list.status !== 'live') return { success: false, error: 'This contest is not live.' };
@@ -552,6 +559,17 @@ export async function startListAttempt(
       return { success: false, error: 'You have already completed this contest.' };
     }
     if (!entry) {
+      const maxParticipants = list.max_participants || 10;
+      const { count } = await auth.db
+        .from('list_entries')
+        .select('wallet_address', { count: 'exact', head: true })
+        .eq('list_id', listId)
+        .neq('status', 'reviewer');
+
+      if ((count ?? 0) >= maxParticipants) {
+        return { success: false, error: 'This contest has reached its participant limit.' };
+      }
+
       const { error: insertErr } = await auth.db
         .from('list_entries')
         .insert({ list_id: listId, wallet_address: auth.wallet });
@@ -594,7 +612,7 @@ export async function completeListAttempt(
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('reward_pool_tokens')
+      .select('reward_pool_tokens, max_participants')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list) return { success: false, error: 'List not found.' };
@@ -610,7 +628,9 @@ export async function completeListAttempt(
       .in('question_id', questionIds);
 
     const correctCount = (results || []).filter((r) => r.is_correct).length;
-    const perQuestionReward = BigInt(list.reward_pool_tokens || '0') / BigInt(questionIds.length);
+    const maxParticipants = BigInt(list.max_participants || 10);
+    const poolPerParticipant = BigInt(list.reward_pool_tokens || '0') / maxParticipants;
+    const perQuestionReward = poolPerParticipant / BigInt(questionIds.length);
     const rewardAmount = perQuestionReward * BigInt(correctCount);
 
     const { data: updated, error } = await auth.db
@@ -680,7 +700,25 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     const amount = BigInt(entry.reward_amount || '0');
     if (amount <= BigInt(0)) return { error: 'No rewards earned for this contest.' };
 
-    const contestId = getContestId(listId);
+    const { data: list, error: listErr } = await auth.db
+      .from('question_lists')
+      .select('owner_wallet, status')
+      .eq('id', listId)
+      .maybeSingle();
+
+    if (listErr || !list) return { error: 'Contest not found.' };
+    const contestId = getContestId(listId, list.owner_wallet);
+
+    // Verify on-chain contest status if deployed
+    const onChain = await getContestOnChain(contestId);
+    if (onChain) {
+      if (!onChain.active || onChain.remainingPool < amount) {
+        return { error: 'Contest reward pool has been exhausted or closed.' };
+      }
+      if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
+        return { error: 'Contest has expired.' };
+      }
+    }
 
     // Reuse unexpired open voucher if already generated
     const { data: pendingClaims } = await auth.db
@@ -731,7 +769,9 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     }
 
     const nonce = newNonce();
-    const deadline = BigInt(now + VOUCHER_TTL_SECONDS);
+    const ttlDeadline = now + VOUCHER_TTL_SECONDS;
+    const effectiveDeadline = onChain ? Math.min(ttlDeadline, Number(onChain.expiresAt)) : ttlDeadline;
+    const deadline = BigInt(effectiveDeadline);
 
     const signature = await account.signTypedData({
       domain: {
@@ -771,6 +811,27 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     });
 
     if (insertErr) {
+      if (insertErr.code === '23505') {
+        const { data: existing } = await auth.db
+          .from('reward_claims')
+          .select('id, nonce, amount::text, deadline, signature')
+          .eq('wallet_address', auth.wallet)
+          .eq('list_id', listId)
+          .eq('status', 'pending')
+          .maybeSingle();
+        if (existing) {
+          return toContestVoucher(
+            auth.wallet,
+            {
+              amount: existing.amount,
+              nonce: existing.nonce,
+              deadline: String(existing.deadline),
+              signature: existing.signature,
+            },
+            contestId,
+          );
+        }
+      }
       console.error('claimListReward insert error:', insertErr);
       return { error: 'Failed to record reward voucher.' };
     }

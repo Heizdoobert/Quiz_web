@@ -55,7 +55,11 @@ export default function AnswerBack({
             {result.isCorrect ? 'Correct! Well Done!' : 'Incorrect! Keep Going!'}
           </h3>
           <p className="text-xs font-semibold opacity-90">
-            {result.isCorrect ? '+1 Score point & tokens earned' : 'Streak reset to 0'}
+            {!result.recorded
+              ? 'Not saved — connect a wallet so progress counts'
+              : result.isCorrect
+                ? '+1 Score point & tokens earned'
+                : 'Streak reset to 0'}
           </p>
         </div>
       </div>

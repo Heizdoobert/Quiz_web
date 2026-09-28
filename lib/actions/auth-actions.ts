@@ -4,7 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
-import { getSessionWallet, setSessionWallet } from '@/lib/wallet-session';
+import { getSessionWallet, setSessionWallet, shouldUseSecureCookies } from '@/lib/wallet-session';
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -23,7 +23,7 @@ export async function requestSignIn(address: string, chainId: number): Promise<s
   const nonce = generateSiweNonce();
   (await cookies()).set(CHALLENGE_COOKIE, nonce, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: await shouldUseSecureCookies(),
     sameSite: 'strict',
     path: '/',
     maxAge: CHALLENGE_TTL_SECONDS,
