@@ -76,7 +76,7 @@ export interface QuestionListWithMeta extends QuestionList {
 export interface ListEntry {
   list_id: string;
   wallet_address: string;
-  status: 'in_progress' | 'completed' | 'claimed';
+  status: 'in_progress' | 'completed' | 'claimed' | 'reviewer';
   correct_count: number;
   reward_amount: string;
   completed_at: string | null;

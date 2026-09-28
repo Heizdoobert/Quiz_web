@@ -15,6 +15,9 @@ import {
   startContest,
 } from '@/lib/actions/question-list-actions';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+
+const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import ListQuestionEditor, { QuestionFormValues } from '@/components/lists/ListQuestionEditor';
 import {
@@ -49,6 +52,7 @@ function questionToFormValues(q: Question): QuestionFormValues {
 export default function MyListsDashboard() {
   const { address, isConnected } = useAccount();
   const wallet = address || null;
+  const ensureSession = useWalletSession();
 
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -73,7 +77,11 @@ export default function MyListsDashboard() {
     e.preventDefault();
     if (!wallet) return;
     setMessage(null);
-    const res = await createList({ ownerWallet: wallet, title, description });
+    if (!(await ensureSession())) {
+      setMessage({ type: 'error', text: SIGN_IN_ERROR });
+      return;
+    }
+    const res = await createList({ title, description });
     if (!res.success) {
       setMessage({ type: 'error', text: res.error || 'Failed to create list.' });
       return;
@@ -154,7 +162,6 @@ export default function MyListsDashboard() {
             <ListCard
               key={list.id}
               list={list}
-              wallet={wallet as string}
               expanded={expandedId === list.id}
               onToggle={() => setExpandedId(expandedId === list.id ? null : list.id)}
               onChanged={refresh}
@@ -168,17 +175,19 @@ export default function MyListsDashboard() {
 
 function ListCard({
   list,
-  wallet,
   expanded,
   onToggle,
   onChanged,
 }: {
   list: QuestionListWithMeta;
-  wallet: string;
   expanded: boolean;
   onToggle: () => void;
   onChanged: () => void;
 }) {
+  const ensureSession = useWalletSession();
+  // Runs a list action as the signed-in wallet, asking for the one-time signature first.
+  const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
+    (await ensureSession()) ? action() : { success: false, error: SIGN_IN_ERROR };
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -192,10 +201,12 @@ function ListCard({
 
   const loadDetail = useCallback(async () => {
     setLoadingDetail(true);
-    const detail = await getListDetail(list.id, wallet);
+    // Answers come back only for the signed-in owner, so sign in before loading.
+    await ensureSession();
+    const detail = await getListDetail(list.id);
     setQuestions(detail?.questions || []);
     setLoadingDetail(false);
-  }, [list.id, wallet]);
+  }, [list.id, ensureSession]);
 
   useEffect(() => {
     if (expanded) {
@@ -206,7 +217,7 @@ function ListCard({
 
   const handleSaveListEdit = async () => {
     setError(null);
-    const res = await updateList(list.id, wallet, { title: editTitle, description: editDescription });
+    const res = await asSignedIn(() => updateList(list.id, { title: editTitle, description: editDescription }));
     if (!res.success) {
       setError(res.error || 'Failed to update list.');
       return;
@@ -217,13 +228,14 @@ function ListCard({
 
   const handleDeleteList = async () => {
     if (!confirm(`Delete draft list "${list.title}"? This cannot be undone.`)) return;
-    await deleteList(list.id, wallet);
+    const res = await asSignedIn(() => deleteList(list.id));
+    if (!res.success) setError(res.error || 'Failed to delete list.');
     onChanged();
   };
 
   const handleSubmitForReview = async () => {
     setError(null);
-    const res = await submitListForReview(list.id, wallet);
+    const res = await asSignedIn(() => submitListForReview(list.id));
     if (!res.success) {
       setError(res.error || 'Failed to submit list.');
       return;
@@ -238,7 +250,7 @@ function ListCard({
       return;
     }
     setError(null);
-    const res = await startContest(list.id, wallet, amount);
+    const res = await asSignedIn(() => startContest(list.id, amount));
     if (!res.success) {
       setError(res.error || 'Failed to start contest.');
       return;
@@ -373,13 +385,15 @@ function ListCard({
             <ListQuestionEditor
               submitLabel="Add Question"
               onSubmit={(values) =>
-                addListQuestion(list.id, wallet, {
-                  prompt: values.prompt,
-                  options: values.options,
-                  correctIndex: values.correctIndex,
-                  category: values.category,
-                  explanation: values.explanation,
-                })
+                asSignedIn(() =>
+                  addListQuestion(list.id, {
+                    prompt: values.prompt,
+                    options: values.options,
+                    correctIndex: values.correctIndex,
+                    category: values.category,
+                    explanation: values.explanation,
+                  })
+                )
               }
               onDone={() => {
                 setAdding(false);
@@ -401,13 +415,15 @@ function ListCard({
                     initial={questionToFormValues(q)}
                     submitLabel="Save Changes"
                     onSubmit={(values) =>
-                      updateListQuestion(q.id, wallet, {
-                        prompt: values.prompt,
-                        options: values.options,
-                        correctIndex: values.correctIndex,
-                        category: values.category,
-                        explanation: values.explanation,
-                      })
+                      asSignedIn(() =>
+                        updateListQuestion(q.id, {
+                          prompt: values.prompt,
+                          options: values.options,
+                          correctIndex: values.correctIndex,
+                          category: values.category,
+                          explanation: values.explanation,
+                        })
+                      )
                     }
                     onDone={() => {
                       setEditingId(null);
@@ -436,7 +452,8 @@ function ListCard({
                         <button
                           type="button"
                           onClick={async () => {
-                            await deleteListQuestion(q.id, wallet);
+                            const res = await asSignedIn(() => deleteListQuestion(q.id));
+                            if (!res.success) setError(res.error || 'Failed to delete question.');
                             loadDetail();
                             onChanged();
                           }}

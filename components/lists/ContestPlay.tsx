@@ -2,12 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
-import {
-  startListAttempt,
-  completeListAttempt,
-  claimListReward,
-  markListRewardClaimed,
-} from '@/lib/actions/question-list-actions';
+import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
@@ -50,21 +46,28 @@ export default function ContestPlay({
   const { writeContractAsync } = useWriteContract();
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
 
+  const ensureSession = useWalletSession();
+
   useEffect(() => {
-    startListAttempt(list.id, wallet).then((res) => {
+    // Contest answers only count for the signed-in wallet that started the attempt.
+    ensureSession().then(async (signedIn) => {
+      if (!signedIn) {
+        setError('Sign the message in your wallet to play.');
+        return;
+      }
+      const res = await startListAttempt(list.id);
       if (!res.success) {
         setError(res.error || 'Failed to start contest.');
         return;
       }
       setQuestions(res.questions || []);
     });
-  }, [list.id, wallet]);
+  }, [list.id, ensureSession]);
 
   useEffect(() => {
     if (txConfirmed && currentNonce && txHash) {
-      confirmRewardClaim(wallet, currentNonce, txHash).then(async (res) => {
+      confirmRewardClaim(wallet, currentNonce, txHash).then((res) => {
         if (res?.success) {
-          await markListRewardClaimed(list.id, wallet);
           setClaimStep('done');
         } else {
           setClaimStep('error');
@@ -73,7 +76,7 @@ export default function ContestPlay({
         setCurrentNonce(null);
       });
     }
-  }, [txConfirmed, currentNonce, txHash, wallet, list.id]);
+  }, [txConfirmed, currentNonce, txHash, wallet]);
 
   const isWrongChain = chainId !== TARGET_CHAIN_ID;
 
@@ -92,7 +95,7 @@ export default function ContestPlay({
       setIndex(index + 1);
       return;
     }
-    const res = await completeListAttempt(list.id, wallet);
+    const res = await completeListAttempt(list.id);
     if (!res.success) {
       setError(res.error || 'Failed to finalize contest.');
       return;
@@ -103,7 +106,7 @@ export default function ContestPlay({
   const handleClaim = async () => {
     setClaimError(null);
     setClaimStep('signing');
-    const voucher: RewardVoucher | { error: string } = await claimListReward(list.id, wallet);
+    const voucher: RewardVoucher | { error: string } = await claimListReward(list.id);
     if ('error' in voucher) {
       setClaimError(voucher.error);
       setClaimStep('error');

@@ -152,11 +152,12 @@ CREATE TABLE IF NOT EXISTS question_list_confirmations (
 
 CREATE INDEX IF NOT EXISTS idx_list_confirmations_list ON question_list_confirmations(list_id);
 
--- One contest attempt per wallet per list; tracks completion + claim
+-- One row per wallet per list. 'reviewer' marks a wallet that has seen the answers
+-- while reviewing; it can never start an attempt at that list.
 CREATE TABLE IF NOT EXISTS list_entries (
   list_id UUID NOT NULL REFERENCES question_lists(id) ON DELETE CASCADE,
   wallet_address TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'claimed')),
+  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'completed', 'claimed', 'reviewer')),
   correct_count INT NOT NULL DEFAULT 0,
   reward_amount NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals)
   completed_at TIMESTAMPTZ,
@@ -164,23 +165,14 @@ CREATE TABLE IF NOT EXISTS list_entries (
   PRIMARY KEY (list_id, wallet_address)
 );
 
-ALTER TABLE reward_claims ADD COLUMN IF NOT EXISTS list_id UUID REFERENCES question_lists(id) ON DELETE SET NULL;
-
 ALTER TABLE question_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE question_list_confirmations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE list_entries ENABLE ROW LEVEL SECURITY;
 
+-- Public read only; the server writes as the signed-in wallet (lib/actions/question-list-actions.ts).
 CREATE POLICY "Allow public read for question_lists" ON question_lists FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for question_lists" ON question_lists FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update for question_lists" ON question_lists FOR UPDATE USING (true);
-CREATE POLICY "Allow public delete for question_lists" ON question_lists FOR DELETE USING (true);
-
 CREATE POLICY "Allow public read for question_list_confirmations" ON question_list_confirmations FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for question_list_confirmations" ON question_list_confirmations FOR INSERT WITH CHECK (true);
-
 CREATE POLICY "Allow public read for list_entries" ON list_entries FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for list_entries" ON list_entries FOR INSERT WITH CHECK (true);
-CREATE POLICY "Allow public update for list_entries" ON list_entries FOR UPDATE USING (true);
 
 -- ============================================================================
 -- Initial Question Seed Data (Curated Trivia Bank)

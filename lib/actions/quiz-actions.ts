@@ -16,9 +16,10 @@ export async function submitAnswer(params: {
       console.error('submitAnswer: SUPABASE_SECRET_KEY is not set');
       return failed;
     }
+    // '*' so this keeps working before lib/sql/question-lists.sql adds list_id.
     const { data: qData, error: qError } = await supabaseAdmin
       .from('questions')
-      .select('correct_index, explanation')
+      .select('*')
       .eq('id', params.questionId)
       .single();
 
@@ -26,14 +27,29 @@ export async function submitAnswer(params: {
       console.error('Question not found for answer submission:', qError);
       return failed;
     }
+    const wallet = await getSessionWallet();
+    // Contest questions stay 'pending' (out of the global pool) and are only answerable
+    // by a wallet playing that contest, so their answers can't be looked up beforehand;
+    // owners and reviewers never get an entry. Other non-verified questions reveal nothing.
+    if (!qData.list_id && qData.status !== 'verified') return failed;
+    if (qData.list_id) {
+      if (!wallet) return failed;
+      const { data: entry } = await supabaseAdmin
+        .from('list_entries')
+        .select('status')
+        .eq('list_id', qData.list_id)
+        .eq('wallet_address', wallet)
+        .maybeSingle();
+      if (entry?.status !== 'in_progress') return failed;
+    }
 
     const isCorrect = params.answerIndex === qData.correct_index;
 
     // Only a signed-in wallet's answers count; guests still see the result.
-    // The first answer to a question is the one that counts (unique per wallet and question).
-    const wallet = await getSessionWallet();
+    // The first answer to a question is the one that counts (unique per wallet and question),
+    // and nobody scores on a question they wrote.
     let recorded = false;
-    if (wallet) {
+    if (wallet && qData.created_by !== wallet) {
       const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
         wallet_address: wallet,
         question_id: params.questionId,

@@ -6,10 +6,6 @@ import { getSessionWallet } from '@/lib/wallet-session';
 import { ClientQuestion } from '@/lib/types';
 import { isUuid, validateQuestionInput } from '@/lib/validation';
 
-const MAX_PROMPT = 300;
-const MAX_OPTION = 120;
-const MAX_EXPLANATION = 1000;
-const MAX_CATEGORY = 40;
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
 const QUARANTINE_AT = 3;
@@ -27,24 +23,7 @@ export async function createQuestion(params: {
     if (!supabaseAdmin) return { success: false, error: 'Adding questions is unavailable right now.' };
 
     const validated = validateQuestionInput(params);
-    if (!validated.valid) {
-      return { success: false, error: validated.error };
-    }
-    const { prompt: trimmedPrompt, options: trimmedOptions, explanation: trimmedExplanation } = validated;
-
-    if (trimmedPrompt.length > MAX_PROMPT) {
-      return { success: false, error: `Question prompt must be at most ${MAX_PROMPT} characters.` };
-    }
-    if (trimmedOptions.some((opt) => opt.length > MAX_OPTION)) {
-      return { success: false, error: `Each option must be at most ${MAX_OPTION} characters.` };
-    }
-    if (trimmedExplanation.length > MAX_EXPLANATION) {
-      return { success: false, error: `Explanation must be at most ${MAX_EXPLANATION} characters.` };
-    }
-    const category = params.category?.trim() || 'General';
-    if (category.length > MAX_CATEGORY) {
-      return { success: false, error: `Category must be at most ${MAX_CATEGORY} characters.` };
-    }
+    if (!validated.valid) return { success: false, error: validated.error };
 
     // New questions go live at once and are moderated by disputes, so cap how fast one wallet adds them.
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -62,11 +41,11 @@ export async function createQuestion(params: {
     }
 
     const { error } = await supabaseAdmin.from('questions').insert({
-      prompt: trimmedPrompt,
-      options: trimmedOptions,
-      correct_index: params.correctIndex,
-      category,
-      explanation: trimmedExplanation,
+      prompt: validated.prompt,
+      options: validated.options,
+      correct_index: validated.correctIndex,
+      category: validated.category,
+      explanation: validated.explanation,
       created_by: wallet,
       status: 'verified',
       dispute_count: 0,

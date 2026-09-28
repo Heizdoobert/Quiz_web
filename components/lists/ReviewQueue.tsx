@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { confirmList, getListDetail, getListsPendingReview } from '@/lib/actions/question-list-actions';
 import { REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { useWalletSession } from '@/hooks/shared/use-wallet-session';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import { CheckCircle2, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 
@@ -42,6 +43,7 @@ export default function ReviewQueue() {
         <p className="text-sm text-slate-400 mt-1">
           Read a list&apos;s questions for quality and clarity before confirming. A list needs{' '}
           {REQUIRED_CONFIRMATIONS} distinct confirmations from wallets other than its owner before it can go live.
+          Opening a list shows its answers, so you won&apos;t be able to play it once it&apos;s a contest.
         </p>
       </div>
 
@@ -55,7 +57,6 @@ export default function ReviewQueue() {
             <ReviewCard
               key={list.id}
               list={list}
-              wallet={wallet as string}
               expanded={expandedId === list.id}
               onToggle={() => setExpandedId(expandedId === list.id ? null : list.id)}
               onChanged={refresh}
@@ -69,17 +70,16 @@ export default function ReviewQueue() {
 
 function ReviewCard({
   list,
-  wallet,
   expanded,
   onToggle,
   onChanged,
 }: {
   list: QuestionListWithMeta;
-  wallet: string;
   expanded: boolean;
   onToggle: () => void;
   onChanged: () => void;
 }) {
+  const ensureSession = useWalletSession();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,10 +87,12 @@ function ReviewCard({
 
   const loadDetail = useCallback(async () => {
     setLoadingDetail(true);
+    // Answers come back only for a signed-in reviewer, so sign in before loading.
+    await ensureSession();
     const detail = await getListDetail(list.id);
     setQuestions(detail?.questions || []);
     setLoadingDetail(false);
-  }, [list.id]);
+  }, [list.id, ensureSession]);
 
   useEffect(() => {
     if (expanded) {
@@ -102,7 +104,9 @@ function ReviewCard({
   const handleConfirm = async () => {
     setConfirming(true);
     setError(null);
-    const res = await confirmList(list.id, wallet);
+    const res = (await ensureSession())
+      ? await confirmList(list.id)
+      : { success: false, error: 'Sign the message in your wallet to confirm.' };
     setConfirming(false);
     if (!res.success) {
       setError(res.error || 'Failed to confirm list.');
