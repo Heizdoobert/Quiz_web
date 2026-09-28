@@ -163,6 +163,7 @@ export type ProfileErrorCode =
   | 'INVALID_ADDRESS'
   | 'FETCH_FAILED'
   | 'EXPORT_FAILED'
+  | 'UNAUTHORIZED'
   | 'RATE_LIMITED'
   | 'UNKNOWN_ERROR';
 
