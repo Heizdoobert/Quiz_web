@@ -80,7 +80,7 @@ export default function ContestPlay({
   const handleSelect = async (optionIdx: number) => {
     if (selected !== null || !questions) return;
     setSelected(optionIdx);
-    const res = await submitAnswer({ questionId: questions[index].id, answerIndex: optionIdx, walletAddress: wallet });
+    const res = await submitAnswer({ questionId: questions[index].id, answerIndex: optionIdx });
     setFeedback({ isCorrect: res.isCorrect, correctIndex: res.correctIndex });
   };
 

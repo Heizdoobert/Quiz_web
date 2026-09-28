@@ -13,9 +13,8 @@ import {
   deleteListQuestion,
   submitListForReview,
   startContest,
-  MIN_LIST_QUESTIONS,
-  REQUIRED_CONFIRMATIONS,
 } from '@/lib/actions/question-list-actions';
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import ListQuestionEditor, { QuestionFormValues } from '@/components/lists/ListQuestionEditor';
 import {

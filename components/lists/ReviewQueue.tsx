@@ -2,7 +2,8 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
-import { confirmList, getListDetail, getListsPendingReview, REQUIRED_CONFIRMATIONS } from '@/lib/actions/question-list-actions';
+import { confirmList, getListDetail, getListsPendingReview } from '@/lib/actions/question-list-actions';
+import { REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import { CheckCircle2, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 

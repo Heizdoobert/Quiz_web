@@ -2,14 +2,9 @@
 
 import { supabase } from '@/lib/supabase';
 import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
-import { normalizePrompt, validateQuestionInput } from '@/lib/actions/question-actions';
+import { normalizePrompt, validateQuestionInput } from '@/lib/validation';
 import { buildTokenClaimVoucher } from '@/lib/actions/reward-actions';
-
-// A list must reach this many questions before it can be submitted for peer
-// review, and needs this many distinct non-owner approvals before its owner
-// can start it as a live contest.
-export const MIN_LIST_QUESTIONS = 20;
-export const REQUIRED_CONFIRMATIONS = 3;
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 
 const TOKEN_DECIMALS = BigInt(10) ** BigInt(18);
 
