@@ -4,7 +4,8 @@ import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
-import { getSessionWallet, setSessionWallet, shouldUseSecureCookies } from '@/lib/wallet-session';
+import { getSessionWallet, setSessionWallet, clearSessionWallet, shouldUseSecureCookies } from '@/lib/wallet-session';
+import { getOrCreateUser } from '@/lib/actions/user-actions';
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -18,8 +19,7 @@ async function requestOrigin() {
   return { host, uri: `${proto}://${host}` };
 }
 
-export async function requestSignIn(address: string, chainId: number): Promise<string> {
-  const { host, uri } = await requestOrigin();
+export async function getAuthNonce(): Promise<string> {
   const nonce = generateSiweNonce();
   (await cookies()).set(CHALLENGE_COOKIE, nonce, {
     httpOnly: true,
@@ -28,6 +28,12 @@ export async function requestSignIn(address: string, chainId: number): Promise<s
     path: '/',
     maxAge: CHALLENGE_TTL_SECONDS,
   });
+  return nonce;
+}
+
+export async function requestSignIn(address: string, chainId: number): Promise<string> {
+  const { host, uri } = await requestOrigin();
+  const nonce = await getAuthNonce();
   const now = new Date();
   return createSiweMessage({
     address: getAddress(address),
@@ -60,7 +66,13 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
       domain: (await requestOrigin()).host,
       nonce,
     });
-    return valid && (await setSessionWallet(address));
+    if (!valid) return false;
+
+    const sessionOk = await setSessionWallet(address);
+    if (sessionOk) {
+      await getOrCreateUser(address);
+    }
+    return sessionOk;
   } catch (err) {
     console.error('signInWithWallet error:', err);
     return false;
@@ -69,4 +81,8 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
 
 export async function getSignedInWallet(): Promise<string | null> {
   return getSessionWallet();
+}
+
+export async function signOutWallet(): Promise<void> {
+  await clearSessionWallet();
 }

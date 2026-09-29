@@ -1,27 +1,39 @@
-# Implementation Plan: On-Chain Contest Escrow Smart Contract
+# Implementation Plan: Automatic Wallet Authentication & User Persistence
 
 ## Overview
-Deploy and integrate an on-chain **`ContestEscrow`** smart contract on Base Sepolia. This contract holds creator-deposited `$QUIZ` tokens in escrow for peer-reviewed question list contests. Winners redeem EIP-712 typed vouchers against the escrow contract. This replaces paused backend voucher minting with a trustless, anti-inflationary, and anti-drain mechanism.
+Implement an automatic Sign-In with Ethereum (SIWE) authentication flow using RainbowKit's native authentication adapter (`RainbowKitAuthenticationProvider` / `createAuthenticationAdapter`). When a player connects their crypto wallet, they are prompted for a SIWE signature; upon verification, a secure HTTP-only session cookie is issued and basic user profile information (`wallet_address`, truncated `display_name`, `created_at`) is automatically registered in Supabase.
 
 ## Architecture Decisions
-- **Escrow-Custodied Pools:** Contest creators approve and transfer tokens to `ContestEscrow` upfront. Unearned tokens can only be reclaimed by the creator after the contest expires.
-- **EIP-712 Structured Claims:** Payout vouchers are signed by the backend `authorizedSigner` using the `ClaimContestReward(bytes32 contestId,address recipient,uint256 amount,uint256 nonce,uint256 deadline)` schema.
-- **Strict Nonce Isolation:** Used nonces are tracked per `(contestId, recipient, nonce)` preventing double-claims across different contests.
-- **Reentrancy & Safe Transfers:** OpenZeppelin's `ReentrancyGuard` and `SafeERC20` are applied to all token-moving functions.
+- **RainbowKit Native SIWE Adapter:** Integrate `RainbowKitAuthenticationProvider` with `createAuthenticationAdapter` in `components/Providers.tsx`. This automatically orchestrates the SIWE sign-in prompt upon wallet connection and handles sign-out when disconnected.
+- **Server Action Synchronization:** `signInWithWallet` verifies the SIWE message via RPC node, sets the encrypted session cookie (`wallet_session`), and automatically calls `getOrCreateUser(address)` to ensure user persistence in Supabase.
+- **Session Lifecycle & Disconnect:** Introduce `clearSessionWallet` / `signOutWallet` so disconnecting a wallet or switching accounts invalidates the server session cookie immediately.
+- **Database Resilience:** `getOrCreateUser` leverages `supabaseAdmin || supabase` for reliable write capabilities under RLS without requiring schema changes or migrations.
+- **Backward Compatibility:** Existing `useWalletSession`'s `ensureSession()` continues to act as a fallback guard for protected user actions.
 
-## Implementation Phases
+## Task List
 
-### Phase 1: Smart Contract Foundation
-- Task 1: Implement `ContestEscrow.sol` contract with creation, claim, refund, and EIP-712 verification.
-- Task 2: Write complete Hardhat unit test suite in `contracts/test/ContestEscrow.test.ts`.
+### Phase 1: Foundation
+- [x] Task 1: Server-side Auth Session & User Auto-Creation
+- [x] Task 2: RainbowKit SIWE Authentication Adapter & State Hook
 
-### Phase 2: Frontend Contract Synchronization
-- Task 3: Export typed ABI and address configuration into `lib/contracts/`.
+### Checkpoint: Foundation
+- [x] Unit tests for session management and adapter pass
+- [x] Type check and lint are clean
 
-### Phase 3: Server Action Unpausing
-- Task 4: Unpause `claimListReward` in `lib/actions/question-list-actions.ts` with SIWE session check and EIP-712 voucher signing.
+### Phase 2: UI Integration
+- [x] Task 3: Wire RainbowKitAuthenticationProvider into Providers & Header
 
-### Phase 4: UI Integration & Verification
-- Task 5: Connect `ContestPlay.tsx` claim flow to `ContestEscrow.claimReward`.
-- Task 6: Connect `MyListsDashboard.tsx` contest funding flow to approve & create contest.
-- Task 7: End-to-end verification (Hardhat tests, Next.js tests, lint, type-check, build).
+### Phase 3: Verification & Quality Gates
+- [x] Task 4: Full System Verification & Constraint Validation
+
+### Checkpoint: Complete
+- [x] All tests pass with >= 80% coverage on changed lines and project coverage >= 60%
+- [x] Zero TypeScript and ESLint errors
+- [x] Production build succeeds and bundle size stays within limits
+
+## Risks and Mitigations
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| User rejects signature request | Medium | Status remains `unauthenticated`; user can still browse read-only and retry sign-in via `ConnectButton` or contextual action guards. |
+| Account switching in wallet | Low | Auth adapter tracks account changes and resets status to prompt verification for the new address. |
+| Supabase write failure during connect | Low | `getOrCreateUser` fails open with an in-memory fallback user object so app remains functional even if database is temporarily unreachable. |
