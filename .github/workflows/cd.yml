@@ -1,0 +1,122 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+      - preview
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      target_env:
+        description: 'Target environment for manual deployment'
+        required: true
+        default: 'preview'
+        type: choice
+        options:
+          - preview
+          - production
+      rollback_sha:
+        description: 'Optional commit SHA to deploy / rollback to (leave blank for latest)'
+        required: false
+        default: ''
+
+concurrency:
+  group: cd-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-container:
+    name: Build & Publish Container Image (GHCR)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.rollback_sha != '' && inputs.rollback_sha || github.sha }}
+          fetch-depth: 0
+
+      - name: Determine Deployment Environment & Tags
+        id: meta-env
+        run: |
+          REF="${{ github.ref }}"
+          EVENT="${{ github.event_name }}"
+          MANUAL_ENV="${{ inputs.target_env }}"
+          IMAGE_NAME="ghcr.io/${{ github.repository }}"
+          IMAGE_NAME_LOWER=$(echo "$IMAGE_NAME" | tr '[:upper:]' '[:lower:]')
+
+          if [ "$EVENT" = "workflow_dispatch" ]; then
+            ENV_NAME="$MANUAL_ENV"
+          elif [[ "$REF" == refs/heads/main ]]; then
+            ENV_NAME="production"
+          elif [[ "$REF" == refs/heads/preview ]]; then
+            ENV_NAME="preview"
+          elif [[ "$REF" == refs/tags/v* ]]; then
+            ENV_NAME="production"
+          else
+            ENV_NAME="preview"
+          fi
+
+          echo "environment=$ENV_NAME" >> "$GITHUB_OUTPUT"
+          echo "image=$IMAGE_NAME_LOWER" >> "$GITHUB_OUTPUT"
+
+      - name: Docker Meta Configuration
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.meta-env.outputs.image }}
+          tags: |
+            type=raw,value=latest,enable=${{ steps.meta-env.outputs.environment == 'production' }}
+            type=raw,value=preview,enable=${{ steps.meta-env.outputs.environment == 'preview' }}
+            type=ref,event=tag
+            type=sha,prefix=${{ steps.meta-env.outputs.environment }}-sha-
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Create GitHub Release on Tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deployment Summary
+        run: |
+          echo "### 🚀 Deployment Completed Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- **Target Environment**: \`${{ steps.meta-env.outputs.environment }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Container Registry**: \`ghcr.io\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Image Tags**:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.meta.outputs.tags }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit SHA**: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
