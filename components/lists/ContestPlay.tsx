@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
@@ -20,11 +20,9 @@ function formatTokens(weiStr: string): string {
 
 export default function ContestPlay({
   list,
-  wallet,
   onExit,
 }: {
   list: QuestionListWithMeta;
-  wallet: string;
   onExit: () => void;
 }) {
   const [questions, setQuestions] = useState<ClientQuestion[] | null>(null);
@@ -43,8 +41,9 @@ export default function ContestPlay({
   const { switchChain } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
+  const { address } = useAccount();
 
-  const ensureSession = useWalletSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   useEffect(() => {
     // Contest answers only count for the signed-in wallet that started the attempt.
@@ -64,7 +63,7 @@ export default function ContestPlay({
 
   useEffect(() => {
     if (txConfirmed && currentNonce && txHash) {
-      confirmRewardClaim(wallet, currentNonce, txHash).then((res) => {
+      confirmRewardClaim(currentNonce, txHash).then((res) => {
         if (res?.success) {
           setClaimStep('done');
         } else {
@@ -74,7 +73,7 @@ export default function ContestPlay({
         setCurrentNonce(null);
       });
     }
-  }, [txConfirmed, currentNonce, txHash, wallet]);
+  }, [txConfirmed, currentNonce, txHash]);
 
   const isWrongChain = chainId !== TARGET_CHAIN_ID;
 
@@ -103,6 +102,11 @@ export default function ContestPlay({
 
   const handleClaim = async () => {
     setClaimError(null);
+    if (account?.wallet && address && address.toLowerCase() !== account.wallet.toLowerCase()) {
+      setClaimError(`Switch your connected wallet to ${account.wallet} to claim this reward.`);
+      setClaimStep('error');
+      return;
+    }
     setClaimStep('signing');
     const voucher: RewardVoucher | { error: string } = await claimListReward(list.id);
     if ('error' in voucher) {

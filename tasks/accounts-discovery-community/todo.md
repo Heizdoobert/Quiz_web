@@ -168,15 +168,44 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   line in both files covered (verified via `coverage-final.json` cross-referenced against `git diff`
   hunks).
 
-### Task 9: Rewards on `user_id`; delete `lib/wallet-session.ts`
+### Task 9: Rewards on `user_id`; delete `lib/wallet-session.ts` — done
 - Acceptance:
   - `getClaimableRewards()`, the vouchers and `confirmRewardClaim()` take no wallet argument; the recipient is `account.wallet`, and `WALLET_REQUIRED` is returned without one
   - `lib/wallet-session.ts` is deleted, and grep finds `getSessionWallet` 0 times
 - Verify: `npx vitest run tests/` plus grep
 - Files: `lib/actions/reward-actions.ts`, `hooks/modals/use-rewards-modal.ts`, `hooks/quiz/use-quiz-logic.ts`, `components/lists/ContestPlay.tsx`, `lib/wallet-session.ts` (deleted)
 - Depends: 3-8. Size: M
+- Result: All four reward actions in `reward-actions.ts` are now session-gated via `getSessionAccount()`
+  instead of a `getSessionWallet()` equality check, and no longer take a wallet argument:
+  `getClaimableRewards()`, `generateTokenVoucher()`, `generateBadgeVoucher(badgeType)`,
+  `confirmRewardClaim(nonce, txHash)`. Reads/writes moved to `reward_claims.user_id` (present since
+  Task 1); on insert only `user_id` is written and the DB's `bridge_wallet_account` trigger backfills
+  `wallet_address` when the account has one, so it's no longer set from application code. Voucher
+  recipient is `account.wallet`; missing a wallet returns `{ error, code: 'WALLET_REQUIRED' }` from the
+  two voucher functions (on-chain signing needs a real address). `getClaimableRewards()` no longer needs
+  `accountIdForWallet()` at all — the session already carries the account id, so that lookup and its
+  `lib/users` import are gone from this file. `confirmRewardClaim`'s `list_entries` update also moved to
+  `user_id`. Deleted `lib/wallet-session.ts`; grep confirms 0 remaining uses of `getSessionWallet`
+  (`hooks/shared/use-wallet-session.ts`'s client-side `useWalletSession` SIWE-signing hook is a different,
+  unrelated module and is untouched, per Task 10's scope).
+  Callers updated to the new signatures: `hooks/modals/use-rewards-modal.ts` (4 call sites),
+  `hooks/quiz/use-quiz-logic.ts` (1), `components/lists/ContestPlay.tsx` (1). Their wagmi-based
+  `walletAddress`/`address` client gating is untouched, pending Task 10/11. `ContestPlay`'s `wallet` prop
+  became fully unused once its one caller (`confirmRewardClaim`) dropped the argument, so it and its
+  passed-in value in `components/lists/ContestBrowser.tsx` were removed too (kept lint clean, no dead
+  prop threading).
+  Rewrote `tests/get-claimable-rewards.test.ts` for the session-based signature (5 tests, incl. a
+  no-wallet-account case) and added `tests/reward-actions.test.ts` (13 tests: session/wallet guards,
+  a signed voucher keyed by `user_id`, the open-voucher-reuse path, badge eligibility, and
+  `confirmRewardClaim`'s token/contest branches) — these three functions had zero prior test coverage.
+  Removed `tests/identity-accounts.test.ts`'s `getSessionWallet` describe block (module deleted).
+  Mutation-tested the `if (!account.wallet)` guard in `generateTokenVoucher` (inverted) — caught by
+  3/13 `reward-actions.test.ts` tests; restored via job-tmp backup, confirmed 18/18 green after.
+  Gate: 130/130 tests pass, tsc/eslint clean, 62.45% line coverage (floor 54%); every changed executable
+  line in `reward-actions.ts` covered (the two uncovered ranges the coverage report names, 307-308 and
+  364-365, are unchanged catch-block lines, not part of this diff).
 
-### Task 10: Client session provider and sign-in modal (wallet)
+### Task 10: Client session provider and sign-in modal (wallet) — done
 - Acceptance:
   - `getSessionInfo()` feeds a `SessionProvider` exposing `{ account, refresh, requireSignIn }`
   - `requireSignIn()` replaces `useWalletSession()`: it resolves `true` when signed in, otherwise opens `SignInModal` (wallet connect and SIWE for now) and resolves when done
@@ -184,16 +213,133 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Verify: `npx vitest run tests/use-quiz-logic-history.test.tsx`, plus manual wallet sign-in, reload, sign-out
 - Files: `hooks/shared/use-session.ts` (replaces `use-wallet-session.ts`), `components/auth/SignInModal.tsx`, `components/Providers.tsx`, `components/layout/Header.tsx`, `hooks/quiz/use-quiz-logic.ts`; the other 7 `useWalletSession` call sites get a mechanical rename
 - Depends: 9. Size: M
+- Result: Added `lib/actions/auth-actions.ts#getSessionInfo()`, a thin server-action wrapper over
+  `getSessionAccount()` (client components can't import the `server-only` module directly). New
+  `hooks/shared/use-session.tsx` (`.tsx`, not `.ts` — it renders JSX) exports `SessionProvider` and
+  `useSession()`. `SessionProvider` fetches `getSessionInfo()` on mount into `account` state, and
+  `requireSignIn()` re-checks it: returns `true` immediately if already signed in, otherwise opens
+  `SignInModal` and returns a promise that a later `refresh()` call settles once an account appears
+  (or `false` if the player cancels the modal). No polling: `refresh()` itself resolves the pending
+  promise inline when it finds an account while one is waiting, so there's only one effect in the
+  whole provider (the mount fetch).
+  `components/auth/SignInModal.tsx` is deliberately thin: wraps the existing `Modal` shell around
+  RainbowKit's own `<ConnectButton />`, reusing PR #11's already-shipped `RainbowKitAuthenticationProvider`
+  + `useQuizAuth` auto-SIWE flow instead of re-implementing `signMessageAsync`/`requestSignIn`/
+  `signInWithWallet` by hand (that's what the old `useWalletSession` did). `components/Providers.tsx`
+  now wraps the tree in `SessionProvider` and calls `refresh()` whenever `useQuizAuth()`'s `status`
+  changes, so the session catches up right after the wallet's auto sign-in/sign-out completes.
+  `components/layout/Header.tsx` drops its `isConnected` prop and reads `account` from `useSession()`
+  directly to gate the Profile/Rewards buttons; its existing RainbowKit `<ConnectButton />` already
+  renders "Connect"/address+disconnect once wired to that auth provider, satisfying "Sign in or account
+  menu with sign-out" without new UI. Both call sites (`QuizLayout.tsx`, `app/profile/page.tsx`) updated
+  to drop the now-gone prop.
+  `hooks/quiz/use-quiz-logic.ts`: `refreshStats`/`refreshRewards`/`refreshHistory` and the initial-fetch
+  effect now gate on `account` (from `useSession()`) instead of wagmi `address`/`isConnected` — correct
+  for a future email account, which has no wagmi connection at all. `handleAnswerSubmit`'s
+  `if (isConnected) await ensureSession()` is untouched: that's a wallet-specific "connected but maybe
+  not yet signed" check, distinct from the general signed-in concept, and out of this task's scope.
+  `address`/`isConnected` are still returned from the hook for `QuizLayout`'s other wallet-address
+  prop-threading (`QuestionForm`, `GroupModal`, `RewardsModal`, `ProfileModal`, `DisputeModal`), which
+  Task 11 owns.
+  Mechanical rename (`useWalletSession()` -> `const { requireSignIn: ensureSession } = useSession();`,
+  call sites otherwise untouched) across the other 7 callers: `hooks/quiz/use-question-form.ts`,
+  `hooks/modals/use-group-modal.ts`, `hooks/modals/use-dispute-modal.ts`,
+  `components/lists/MyListsDashboard.tsx` (2 sites), `components/lists/ReviewQueue.tsx`,
+  `components/lists/ContestPlay.tsx`, `app/profile/page.tsx`. Deleted `hooks/shared/use-wallet-session.ts`;
+  grep confirms 0 remaining uses of `useWalletSession`/`use-wallet-session`.
+  Tests: rewrote `tests/auth-integration.test.tsx` for the new `SessionProvider`/`useSession` contract
+  (3 tests: resolves immediately when signed in, opens the modal and resolves true once a session
+  appears, resolves false on cancel — `SignInModal` mocked out so no RainbowKit/wagmi context is
+  needed); updated the `use-wallet-session` mocks in `tests/use-quiz-logic-history.test.tsx` and
+  `tests/profile-page.test.tsx` to mock `use-session` instead; added a one-line `getSessionInfo` test
+  to `tests/auth-actions.test.ts`. Mutation-tested `requireSignIn`'s `if (info) return true` guard
+  (inverted to `if (!info)`) — caught by 3/3 `auth-integration.test.tsx` tests; restored via job-tmp
+  backup, confirmed 13/13 green after.
+  Gate: 153/153 tests pass, `tsc`/eslint/`gitleaks`/`depcruise` clean, 68.07% line coverage (floor 54%);
+  `use-session.tsx` itself is 100% line-covered (only the "used outside a provider" throw guard, line 80,
+  is statement-uncovered).
 
-### Task 11: Session-based gating on list, contest and profile pages
+### Task 11: Session-based gating on list, contest and profile pages — done
 - Acceptance:
   - `/profile`, `/my-lists`, `/review` and the contest browser decide "signed in" from `useSession()`, not wagmi `useAccount`
   - on-chain actions check that the connected wallet equals `account.wallet`, otherwise they ask the player to switch wallets
 - Verify: `npx vitest run tests/profile-page.test.tsx`, plus a manual check of each page signed out, as a wallet account and as an email account
 - Files: `app/profile/page.tsx`, `components/lists/ContestBrowser.tsx`, `components/lists/MyListsDashboard.tsx`, `components/lists/ReviewQueue.tsx`, `components/lists/ContestPlay.tsx`
 - Depends: 10. Size: M
+- Result: All five files dropped wagmi `useAccount` as the signed-in source, gating on `useSession()`'s
+  `account` instead.
+  `app/profile/page.tsx`: no longer imports wagmi at all. The created-quizzes fetch is still
+  wallet-keyed (`getUserQuizzes(walletAddress)`, unchanged, out of scope per Task 8's note) but now
+  reads `account.wallet` instead of the connected `address` — an email-only account (no wallet) skips
+  the fetch and shows the empty state instead of spinning forever, rather than crashing or hanging.
+  `handleExport`'s guard and backup filename moved from `address` to `account`/`account.wallet ||
+  account.id`.
+  `ContestBrowser.tsx` and `ReviewQueue.tsx`: mechanical swap, `!isConnected`/`wallet` gate ->
+  `!account`, copy changed from "Connect your wallet" to "Sign in" since email accounts (Task 12) will
+  reach these pages too.
+  `MyListsDashboard.tsx`: same swap for the top-level "sign in to manage lists" gate and `refresh`'s
+  guard. In `ListCard.handleStartContest` (the one on-chain write in this file, funding a contest):
+  after `ensureSession()` succeeds, added an explicit check that `account.wallet` exists and that
+  wagmi's connected `address` matches it (case-insensitive), asking the player to switch wallets
+  otherwise, before computing `contestId` (now built from `account.wallet`, replacing the old
+  `address || list.owner_wallet` fallback that could silently compute the wrong contest ID if a
+  different wallet happened to be connected).
+  `ContestPlay.tsx`: added the same connected-wallet-matches-`account.wallet` check in `handleClaim`,
+  before the on-chain `claimReward` write (the voucher's `recipient` is `account.wallet`, signed
+  server-side; submitting from a mismatched connected wallet is now blocked client-side with a
+  "switch your connected wallet" message instead of silently proceeding).
+  No component test files exist yet for `ContestBrowser`/`MyListsDashboard`/`ReviewQueue`/`ContestPlay`
+  (consistent with every prior task touching them — Tasks 6 and 9 both noted their client gating was
+  "untouched, moves in Tasks 10-11" with no component tests added); Task 11's own Verify line only
+  names `tests/profile-page.test.tsx`, so no new component test files were added for the other four.
+  Rewrote `tests/profile-page.test.tsx`: replaced the `wagmi`/`useAccount` mock with a controllable
+  `useSession` mock (`vi.fn()`, was previously an un-configurable static return, which would have made
+  every existing test render Access Denied once the page stopped reading wagmi); added a new test for
+  the signed-in-with-no-wallet case (empty state shown, `getUserQuizzes` never called) and a
+  `beforeEach(vi.clearAllMocks())` so that assertion isn't polluted by earlier tests' call counts.
+  9 tests total (was 8), all passing.
+  Mutation-tested the new `!account?.wallet` gate in the profile fetch effect (inverted to
+  `account?.wallet`) — caught by 6/9 tests; restored via job-tmp backup, confirmed 9/9 green after.
+  Gate: 154/154 tests pass, `tsc`/eslint/gitleaks/depcruise clean, 68.12% line coverage (floor 54%);
+  `page.tsx`'s new lines are covered — the file's three uncovered ranges (53-56, 82-83, 95) are
+  pre-existing catch blocks and an `ensureSession`-false branch this task didn't touch.
 
-### Task 12: Email code sign-in
+### Task 12: Email code sign-in — done
+- Result: `lib/rewards-copy.ts` is new: one exported `NO_WALLET_DISCLOSURE` string, the exact
+  copy from `docs/specs/rewards-no-wallet-payee.md` (single source; Task 23 wires it into
+  `RewardsModal` and the header). `lib/supabase.ts`'s anon client now sets
+  `auth: { persistSession: false, autoRefreshToken: false }` (the "non-persisting client" the
+  spec asks for) — checked first that every importer is server-only or a server action, so this
+  couldn't affect a browser session anywhere.
+  `lib/users.ts` gained `ensureAccountForAuthUser(authUserId)`, same upsert-then-select shape as
+  `ensureAccountForWallet` (`onConflict: 'auth_user_id'`, default display name `Player-<first 4
+  of authUserId>`).
+  `lib/actions/auth-actions.ts`: `requestEmailCode(email)` validates format locally and calls
+  `supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })` only for a
+  well-formed address, always returning `{ sent: true }` either way (no enumeration signal).
+  `verifyEmailCode(email, code)` calls `supabase.auth.verifyOtp({ email, token: code, type:
+  'email' })`; on success it calls `ensureAccountForAuthUser` and sets `quiz_session` with
+  `wallet: null` (a fresh email account never has one yet); a wrong/expired code, or the account
+  failing to create, returns `{ ok: false }` without touching the session.
+  `SignInModal.tsx` now has 3 steps (`choose` → `email` → `code`): the existing RainbowKit button
+  stays, plus a new "Continue with email" button that shows the disclosure and an email field,
+  then a 6-digit code field. On a verified code it calls `refresh()` and closes.
+  `refresh` is passed into `SignInModal` as a prop from `SessionProvider`, not read via
+  `useSession()` inside the modal — importing the hook there would close a cycle
+  (`use-session.tsx` renders `SignInModal`, which would import back into `use-session.tsx`),
+  caught by `check:architecture`'s `no-circular` rule on first run; fixed by having the one file
+  that already renders `SignInModal` hand it the callback instead of the modal reaching up for it.
+  Tests: added `requestEmailCode`/`verifyEmailCode` cases to `tests/identity-accounts.test.ts`
+  (well-formed vs malformed email, valid code, wrong/expired code, account-creation failure) —
+  19 tests total in that file (was 6), 159/159 across the suite.
+  Mutation-tested `verifyEmailCode`'s final `accountId !== null && setSessionAccount(...)` guard
+  (flipped to `===`) — caught by 2/19; restored via job-tmp backup, confirmed 19/19 green after.
+  Gate: 159/159 tests, `tsc`/eslint/gitleaks clean, `check:architecture` clean (0 violations after
+  the prop fix), 68.25% line coverage (floor 54%); the two new uncovered lines in
+  `auth-actions.ts` (101-102) are `verifyEmailCode`'s catch block, matching the same
+  never-exercised pattern as `signInWithWallet`'s own catch block (78-79) already in that file.
+  Not done here (manual step, needs a Supabase branch with email OTP configured): signing in with
+  a real email.
 - Acceptance:
   - `requestEmailCode` returns the same result for known and unknown emails
   - `verifyEmailCode` creates the account by `auth_user_id` and sets the session; a wrong or expired code does not
@@ -202,13 +348,23 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/actions/auth-actions.ts`, `lib/users.ts`, `components/auth/SignInModal.tsx`, `lib/rewards-copy.ts`, tests
 - Depends: 10. Size: M
 
-### Task 13: Add a wallet to an email account
+### Task 13: Add a wallet to an email account — done
+- Result:
+  - `lib/users.ts`: new `linkWalletToAccount(accountId, walletAddress)` — looks up the wallet first (existing row on the same account is a no-op success, on another account is `'in_use'`), otherwise `UPDATE`s the account row with `wallet_address`/`wallet_linked_at`; a unique-violation from that update (two signatures racing for the same new wallet) is also mapped to `'in_use'`, not `'error'`.
+  - `lib/actions/auth-actions.ts`: new `linkWallet(message, signature)` — same SIWE challenge/verify shape as `signInWithWallet`, gated on `getSessionAccount()` having no wallet yet; returns `{ ok: false, code: 'WALLET_IN_USE' }` on a taken wallet, `{ ok: true }` and re-sets `quiz_session` with the new wallet on success.
+  - `lib/auth-adapter.ts`: `verify()` is now session-aware — one wallet-connect flow for the whole app, not two code paths. It calls `getSessionInfo()` first: a session with no wallet yet routes the signature to `linkWallet`; anyone else (no session, or already has a wallet) goes to `signInWithWallet` as before. Because every `ConnectButton` in the app (header, `SignInModal`) shares this one `RainbowKitAuthenticationProvider` adapter, this single change wires "Add wallet" everywhere without touching `SignInModal.tsx` — no duplicate modal or bespoke wallet-connect code needed there.
+  - `components/layout/Header.tsx`: the header's `ConnectButton` label switches to "Add wallet" when `account && !account.wallet`, else "Connect" (unchanged for guests and wallet accounts). No new modal; clicking it runs the same RainbowKit connect+sign flow, which the adapter now resolves as a link.
+  - Full disclosure text next to "Add wallet" is left to Task 23 (todo.md's acceptance for this task doesn't require it; the full spec's UI note about showing it is more naturally done once Task 23 revisits `SignInModal`/`Header` together, per `plan.md`'s parallelization note).
+  - Tests: `tests/identity-accounts.test.ts` — 24 tests now (was 19), new `linkWallet` describe covers: sets wallet + re-signs session; `WALLET_IN_USE` for another account's wallet (no update call); refuses when the session's account already has a wallet; `WALLET_IN_USE` on the update-race unique-violation path; refuses on a bad signature. `tests/auth-adapter.test.ts` updated to mock the two new `auth-actions` exports (`getSessionInfo`, `linkWallet`) and gained one test asserting `verify` delegates to `linkWallet` when the session has no wallet.
+  - Mutation-tested `linkWallet`'s `if (!account || account.wallet) return { ok: false };` guard (dropped the `account.wallet` half) — caught by 1/24 ("refuses an account that already has a wallet"). Restored, re-confirmed 24/24 green.
+  - Gate: 165/165 tests, `tsc --noEmit` clean, eslint clean (same pre-existing unrelated `coverage/block-navigation.js` warning as prior tasks), `depcruise` clean (311 dependencies, no cycles), gitleaks clean.
+  - Not done: manual add-wallet click-through on a real Supabase/wallet session (needs you, same as Task 12's manual email check).
 - Acceptance:
   - `linkWallet` sets the wallet and `wallet_linked_at` after a valid SIWE signature for an account without a wallet
   - it returns `WALLET_IN_USE` for a wallet on another account
   - the header shows "Add wallet" only for accounts without one
 - Verify: `npx vitest run tests/identity-accounts.test.ts`
-- Files: `lib/actions/auth-actions.ts`, `components/auth/SignInModal.tsx`, `components/layout/Header.tsx`, tests
+- Files: `lib/actions/auth-actions.ts`, `lib/users.ts`, `lib/auth-adapter.ts`, `components/layout/Header.tsx`, tests
 - Depends: 12. Size: S
 
 ### Checkpoint: Identity

@@ -5,7 +5,10 @@ import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
 import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
-import { ensureAccountForWallet } from '@/lib/users';
+import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/users';
+import { supabase } from '@/lib/supabase';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -77,8 +80,75 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
   }
 }
 
+// Same { sent: true } whether or not the email has an account, so a caller can't
+// use this to enumerate registered emails. shouldCreateUser lets a first-time
+// email register itself right here, with no separate registration step.
+export async function requestEmailCode(email: string): Promise<{ sent: boolean }> {
+  const trimmed = email.trim();
+  if (EMAIL_RE.test(trimmed)) {
+    await supabase.auth.signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
+  }
+  return { sent: true };
+}
+
+export async function verifyEmailCode(email: string, code: string): Promise<{ ok: boolean }> {
+  try {
+    const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
+    if (error || !data.user) return { ok: false };
+    const accountId = await ensureAccountForAuthUser(data.user.id);
+    return { ok: accountId !== null && (await setSessionAccount({ id: accountId, wallet: null })) };
+  } catch (err) {
+    console.error('verifyEmailCode error:', err);
+    return { ok: false };
+  }
+}
+
+// Adds a wallet to the signed-in account (it must not have one yet). Same SIWE
+// challenge/verify as signInWithWallet, but updates the existing account instead
+// of finding or creating one.
+export async function linkWallet(
+  message: string,
+  signature: `0x${string}`
+): Promise<{ ok: boolean; code?: 'WALLET_IN_USE' }> {
+  try {
+    const account = await getSessionAccount();
+    if (!account || account.wallet) return { ok: false };
+
+    const store = await cookies();
+    const nonce = store.get(CHALLENGE_COOKIE)?.value;
+    store.delete(CHALLENGE_COOKIE); // one attempt per challenge
+    if (!nonce) return { ok: false };
+
+    const { address, chainId } = parseSiweMessage(message);
+    const client = chainId ? publicClientFor(chainId) : null;
+    if (!address || !client) return { ok: false };
+
+    const valid = await client.verifySiweMessage({
+      message,
+      signature,
+      domain: (await requestOrigin()).host,
+      nonce,
+    });
+    if (!valid) return { ok: false };
+
+    const wallet = address.toLowerCase();
+    const result = await linkWalletToAccount(account.id, wallet);
+    if (result === 'in_use') return { ok: false, code: 'WALLET_IN_USE' };
+    if (result !== 'ok') return { ok: false };
+
+    return { ok: await setSessionAccount({ id: account.id, wallet }) };
+  } catch (err) {
+    console.error('linkWallet error:', err);
+    return { ok: false };
+  }
+}
+
 export async function getSignedInWallet(): Promise<string | null> {
   return (await getSessionAccount())?.wallet ?? null;
+}
+
+export async function getSessionInfo(): Promise<{ id: string; wallet: string | null } | null> {
+  return getSessionAccount();
 }
 
 export async function signOutWallet(): Promise<void> {

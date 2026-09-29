@@ -3,7 +3,13 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 
 vi.mock('wagmi', () => ({ useAccount: () => ({ address: '0x' + 'a'.repeat(40), isConnected: true }) }));
-vi.mock('../hooks/shared/use-wallet-session', () => ({ useWalletSession: () => vi.fn().mockResolvedValue(true) }));
+vi.mock('../hooks/shared/use-session', () => ({
+  useSession: () => ({
+    account: { id: 'acct-1', wallet: '0x' + 'a'.repeat(40) },
+    refresh: vi.fn(),
+    requireSignIn: vi.fn().mockResolvedValue(true),
+  }),
+}));
 vi.mock('../lib/audio', () => ({
   soundEngine: { playFlip: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(), playTick: vi.fn(), playPowerup: vi.fn() },
 }));

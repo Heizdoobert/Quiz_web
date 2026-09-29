@@ -15,7 +15,7 @@ import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { soundEngine } from '@/lib/audio';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 
 export type ActiveModal =
   | 'intro'
@@ -37,7 +37,7 @@ export function useQuizLogic({
   initialLeaderboard = [],
 }: UseQuizLogicOptions = {}) {
   const { address, isConnected } = useAccount();
-  const ensureSession = useWalletSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   // Quiz state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -100,26 +100,26 @@ export function useQuizLogic({
   const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
 
   const refreshStats = useCallback(async () => {
-    if (!address) return;
+    if (!account) return;
     const userStats = await getUserStats();
     setStats(userStats);
-  }, [address]);
+  }, [account]);
 
   const refreshRewards = useCallback(async () => {
-    if (!address) return;
-    const data = await getClaimableRewards(address);
+    if (!account) return;
+    const data = await getClaimableRewards();
     setClaimableRewards(data);
-  }, [address]);
+  }, [account]);
 
-  // Loads the signed-in wallet's saved answers so history and the "already answered"
-  // set survive a reload; a wallet with no session yet gets [] back.
+  // Loads the signed-in account's saved answers so history and the "already answered"
+  // set survive a reload; an account with no session yet gets [] back.
   const refreshHistory = useCallback(async () => {
-    if (!address) return;
+    if (!account) return;
     const saved = await getAnswerHistory();
     if (saved.length === 0) return;
     setHistory(saved);
     setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
-  }, [address]);
+  }, [account]);
 
   const loadLeaderboards = useCallback(
     async (overrideGroupId?: string) => {
@@ -226,13 +226,13 @@ export function useQuizLogic({
 
   // Initial stats and history fetch (the account itself is created at sign-in)
   useEffect(() => {
-    if (isConnected && address) {
+    if (account) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       refreshStats();
       refreshRewards();
       refreshHistory();
     }
-  }, [isConnected, address, refreshStats, refreshRewards, refreshHistory]);
+  }, [account, refreshStats, refreshRewards, refreshHistory]);
 
   // Only fetch initial question and leaderboards if not supplied via SSR
   useEffect(() => {
