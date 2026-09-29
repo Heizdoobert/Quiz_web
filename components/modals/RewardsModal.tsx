@@ -36,6 +36,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
     handleMintBadge,
     formatTokens,
     explorerUrl,
+    targetChainName,
   } = useRewardsModal({ isOpen, walletAddress });
 
   return (
@@ -43,7 +44,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
       {/* Chain warning */}
       {isWrongChain && (
         <div className="mb-5 p-4 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-[#FF4757] text-sm flex items-center justify-between">
-          <span className="font-medium">Switch to Base Sepolia to claim rewards</span>
+          <span className="font-medium">Switch to {targetChainName} to claim rewards</span>
           <button
             type="button"
             onClick={handleSwitchChain}

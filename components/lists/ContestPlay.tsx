@@ -8,10 +8,8 @@ import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
+import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
 import { ArrowLeft, Loader2, Trophy, Coins, CheckCircle2, XCircle } from 'lucide-react';
-
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
 
@@ -167,7 +165,7 @@ export default function ContestPlay({
             onClick={() => switchChain({ chainId: TARGET_CHAIN_ID })}
             className="px-4 py-2 bg-[#FF4757] text-white rounded-xl font-bold text-sm cursor-pointer"
           >
-            Switch to Base Sepolia
+            Switch to {TARGET_CHAIN_NAME}
           </button>
         ) : claimStep === 'done' ? (
           <p className="text-[#00FFCC] font-bold text-sm flex items-center justify-center gap-1.5">

@@ -13,6 +13,8 @@ const jetbrainsMono = JetBrains_Mono({
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://quickquiz.xyz';
 
+const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
+
 export const viewport: Viewport = {
   themeColor: '#00FFCC',
   width: 'device-width',
@@ -46,17 +48,26 @@ export const metadata: Metadata = {
   applicationName: 'Quick Quiz',
   category: 'game',
   classification: 'Educational Web3 Game',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  robots: isPreview
+    ? {
+        index: false,
+        follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
+      }
+    : {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
   alternates: {
     canonical: '/',
   },

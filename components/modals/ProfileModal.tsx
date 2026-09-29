@@ -6,6 +6,7 @@ import Modal from '../Modal';
 import { useProfileModal } from '@/hooks/modals/use-profile-modal';
 import Link from 'next/link';
 import { UserStats, ClaimableRewards, BADGE_NAMES, BADGE_ICONS } from '@/lib/types';
+import { TARGET_CHAIN_NAME, TARGET_EXPLORER_URL } from '@/lib/contracts/addresses';
 import {
   User,
   Copy,
@@ -83,12 +84,12 @@ export default function ProfileModal({
                 )}
                 {address && (
                   <a
-                    href={`https://sepolia.basescan.org/address/${address}`}
+                    href={`${TARGET_EXPLORER_URL}/address/${address}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-1 rounded-lg hover:bg-[#25284D] text-slate-400 hover:text-[#6C5CE7] transition-colors cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#6C5CE7]"
-                    title="View on BaseScan"
-                    aria-label="View on BaseScan"
+                    title="View on Explorer"
+                    aria-label="View on Explorer"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
@@ -101,7 +102,7 @@ export default function ProfileModal({
                 >
                   {tier.title}
                 </span>
-                <span className="text-[10px] text-slate-500 font-mono">Base Sepolia</span>
+                <span className="text-[10px] text-slate-500 font-mono">{TARGET_CHAIN_NAME}</span>
               </div>
             </div>
           </div>
