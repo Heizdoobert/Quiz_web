@@ -478,7 +478,15 @@ Result:
 - Files: `lib/sql/community.sql`, `lib/actions/community-actions.ts`, `tests/community.test.ts`
 - Depends: 14. Size: M
 
-### Task 20: Ratings, comments and suggestions on the card back
+### Task 20: Ratings, comments and suggestions on the card back — done
+- Result:
+  - `components/community/RatingStars.tsx`: Displays average rating and rating count. Signed-in players can hover and tap to rate 1-5 stars calling `rateQuestion(questionId, star)`. Guests see the average rating and count without interactive buttons.
+  - `components/community/CommentList.tsx`: Renders comments newest first with author name, relative timestamp, and plain text comment body (React-escaped, safe from XSS/HTML execution). Own comments render a delete button calling `deleteComment(commentId)`. Signed-in players get a 500-char max textarea with live character counter; guests see "Sign in to rate and comment" linking to `requireSignIn()`.
+  - `components/community/SuggestionForm.tsx`: Renders "Suggest a fix to the author" toggle that expands a private suggestion form (500 chars max, counter) calling `addComment(questionId, body, 'suggestion')`, displaying confirmation on submission.
+  - `components/quiz/AnswerBack.tsx`: Integrated Community discussion box below the explanation, loading ratings and comments asynchronously with `getQuestionDiscussion(question.id)`. Handles real-time rating updates, comment additions, and comment deletions.
+  - `vitest.config.ts`: Configured `maxWorkers: 2` to prevent memory contention and worker timeouts under heavy system load.
+  - Tests (`tests/community-ui.test.tsx`): 9 tests covering rating tap-to-rate, guest read-only view, plain text XSS safety, 500-character counter, comment deletion, suggestion form toggle and submit, and AnswerBack integration for signed-in and guest users. Updated `tests/AnswerBack.test.tsx` with session mock.
+  - Gate: 227/227 tests pass across 26 test files, `tsc`/eslint/gitleaks clean, `depcruise` clean (0 violations), total line coverage 70.71% (above 61.3% ratchet). Next.js production build succeeds with all routes valid.
 - Acceptance:
   - after answering, `AnswerBack` shows the average and count, tap-to-rate stars, comments newest first with a 500-character box, and "Suggest a fix to the author"
   - guests see the average and comments without inputs

@@ -87,7 +87,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 
 ### Phase 4: Community
 - [x] Task 19: Community tables and server actions
-- [ ] Task 20: Ratings, comments and suggestions on the card back
+- [x] Task 20: Ratings, comments and suggestions on the card back
 - [ ] Task 21: Suggestions for authors on `/profile`
 
 ### Checkpoint: Discovery and Community
