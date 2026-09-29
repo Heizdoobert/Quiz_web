@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import confetti from 'canvas-confetti';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
 import AnswerBack from './AnswerBack';
@@ -51,11 +50,14 @@ export default function QuizCard({
   // Fire confetti if result is correct
   React.useEffect(() => {
     if (isFlipped && result?.isCorrect) {
-      confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#00FFCC', '#6C5CE7', '#FFD166', '#FF4757'],
+      import('canvas-confetti').then((module) => {
+        const confetti = module.default;
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#00FFCC', '#6C5CE7', '#FFD166', '#FF4757'],
+        });
       });
     }
   }, [isFlipped, result]);
