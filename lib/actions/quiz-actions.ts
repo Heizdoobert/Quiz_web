@@ -90,8 +90,8 @@ export async function submitAnswer(params: {
 
     // Only a signed-in account's answers count; guests still see the result.
     if (!account) return { ...revealed, recorded: false, notSavedReason: 'signed-out' };
-    // Nobody scores on a question they wrote (question creation is still wallet-keyed until Task 5).
-    if (account.wallet && qData.created_by === account.wallet) {
+    // Nobody scores on a question they wrote.
+    if (qData.created_by_user === account.id) {
       return { ...revealed, recorded: false, notSavedReason: 'own-question' };
     }
 

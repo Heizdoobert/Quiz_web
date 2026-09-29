@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { submitAnswer, getAnswerHistory } from '../lib/actions/quiz-actions';
+import { createQuestion, disputeQuestion } from '../lib/actions/question-actions';
 import {
   createList,
   confirmList,
@@ -36,6 +37,8 @@ vi.mock('../lib/chain', () => ({
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 const ACCOUNT = { id: ACCOUNT_ID, wallet: WALLET };
+const EMAIL_ACCOUNT_ID = '00000000-0000-4000-8000-0000000000e1';
+const EMAIL_ACCOUNT = { id: EMAIL_ACCOUNT_ID, wallet: null };
 const LIST_ID = '00000000-0000-4000-8000-000000000001';
 const Q_ID = '00000000-0000-4000-8000-000000000002';
 
@@ -48,7 +51,7 @@ function mockTables(
   (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation((table: string) => {
     const t = tables[table] ?? {};
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'neq', 'in', 'order', 'limit']) chain[m] = () => chain;
+    for (const m of ['select', 'eq', 'neq', 'in', 'order', 'limit', 'gte']) chain[m] = () => chain;
     chain.single = async () => ({ data: t.row ?? null, error: t.row ? null : { code: 'PGRST116' } });
     chain.maybeSingle = async () => ({ data: t.row ?? null, error: null });
     chain.insert = async (row: unknown) => {
@@ -129,10 +132,12 @@ describe('submitAnswer guards', () => {
     expect(res.notSavedReason).toBe('error');
   });
 
-  it('does not score an account on a question its wallet wrote', async () => {
+  it('does not score an account on a question it wrote', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({
-      questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: WALLET } },
+      questions: {
+        row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by_user: ACCOUNT_ID },
+      },
     });
     const res = await submitAnswer({ questionId: Q_ID, answerIndex: 1 });
     expect(res.isCorrect).toBe(true);
@@ -304,6 +309,81 @@ describe('question list guards', () => {
     expect(res.correctCount).toBe(3);
     const expectedReward = (BigInt(6) * BigInt(10) ** BigInt(18)).toString();
     expect(res.rewardAmount).toBe(expectedReward);
+  });
+});
+
+describe('createQuestion guards', () => {
+  beforeEach(() => vi.resetAllMocks());
+  const params = {
+    prompt: 'A valid question prompt?',
+    options: ['a', 'b', 'c', 'd'],
+    correctIndex: 0,
+    explanation: 'An explanation that is long enough.',
+  };
+
+  it('refuses without a signed-in account, before touching the database', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    const res = await createQuestion(params);
+    expect(res.success).toBe(false);
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+  });
+
+  it('creates a question for an email account with no wallet, keyed by account id', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(EMAIL_ACCOUNT);
+    const inserts = mockTables({ questions: { count: 0 } });
+    const res = await createQuestion(params);
+    expect(res.success).toBe(true);
+    expect(inserts.questions![0]).toMatchObject({ created_by_user: EMAIL_ACCOUNT_ID, created_by: null });
+  });
+
+  it('enforces the 5-per-day cap by account id', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ questions: { count: 5 } });
+    const res = await createQuestion(params);
+    expect(res).toEqual({ success: false, error: 'You can add up to 5 questions per day.' });
+  });
+});
+
+describe('disputeQuestion guards', () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it('refuses without a signed-in account, before touching the database', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
+    expect(res.success).toBe(false);
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+  });
+
+  it('refuses to report a question the account never answered', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ quiz_results: {} });
+    const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
+    expect(res).toEqual({ success: false, error: 'Answer this question before reporting it.' });
+  });
+
+  it('records a dispute keyed by account id and quarantines at the threshold', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      quiz_results: { row: { id: 'r1' } },
+      question_disputes: { count: 3 },
+    });
+    const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
+    expect(res).toEqual({ success: true, quarantined: true });
+    expect(inserts.question_disputes![0]).toMatchObject({
+      question_id: Q_ID,
+      reporter_user: ACCOUNT_ID,
+      reporter_wallet: WALLET,
+    });
+  });
+
+  it('reports an already-reported error instead of a generic one on a duplicate insert', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({
+      quiz_results: { row: { id: 'r1' } },
+      question_disputes: { insertError: { code: '23505' } },
+    });
+    const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
+    expect(res).toEqual({ success: false, error: 'You have already reported this question.' });
   });
 });
 

@@ -100,10 +100,16 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/sql/stats-functions.sql`, `lib/actions/leaderboard-actions.ts`, `lib/types.ts`, `components/leaderboard/GlobalLeaderboard.tsx`, `GroupLeaderboard.tsx`, `lib/actions/reward-actions.ts`, `tests/sql/20-snapshot.sql`, `tests/sql/30-checks.sql`, `tests/leaderboard-actions.test.ts` (new), `tests/get-claimable-rewards.test.ts`
 - Depends: 3. Size: S
 
-### Task 5: Question creation and disputes on `user_id`
+### Task 5: Question creation and disputes on `user_id` — done
+- Result: `createQuestion`/`disputeQuestion` now read `getSessionAccount()` instead of `getSessionWallet()` — any signed-in account, wallet or email, can create and dispute. The daily-cap count and the answered-before-reporting check moved from `.eq('created_by'|'wallet_address', wallet)` to `.eq('created_by_user'|'user_id', account.id)`. Inserts write `created_by_user`/`reporter_user` plus `created_by`/`reporter_wallet: account.wallet` (`null` for an email account) — same explicit both-columns-written pattern `quiz-actions.ts` already uses for `quiz_results`, so old-column readers stay correct until Task 25; the bridge trigger from Task 1 would fill it in either way.
+  - Also fixed `quiz-actions.ts`'s own-question guard in `submitAnswer`, which its comment flagged as blocked on this task: `account.wallet && qData.created_by === account.wallet` only ever fired for wallet accounts, so an email account could score on a question it wrote itself. Now compares `qData.created_by_user === account.id`, covering both.
+  - 5-per-day and 3-dispute-quarantine thresholds unchanged.
+  - Tests: added `createQuestion guards` and `disputeQuestion guards` to `tests/answer-and-list-guards.test.ts` (no session, email-account creation with `created_by: null`, 5-per-day cap, unanswered-question report rejection, quarantine at 3, duplicate-report `23505` handling); updated the existing own-question test to key on `created_by_user`. Extended the shared `mockTables` chain stub with `.gte` (createQuestion's day-window filter).
+  - Mutation-tested both changed guards: inverted `qData.created_by_user === account.id` to `!==` (4 tests failed, as expected) and `disputeCount >= QUARANTINE_AT` to `>` (quarantine test failed), then restored both.
+  - Gate: 98/98 tests pass, `tsc`/`eslint` clean, coverage 54.93% lines (floor 54%); every changed line in both files is covered per `coverage-final.json` (confirmed via `git diff` line numbers cross-referenced against `statementMap`) — the file-level low percentages shown in the terminal table are pre-existing untested code in `fetchRandomQuestion`/`get5050EliminatedIndices`, outside this task's diff.
 - Acceptance: `createQuestion` and `disputeQuestion` use `getSessionAccount()`, write `created_by_user` / `reporter_user`, and check the recorded answer by `user_id`; the 5-per-day and 3-dispute rules are unchanged.
 - Verify: `npx vitest run tests/answer-and-list-guards.test.ts`
-- Files: `lib/actions/question-actions.ts`, tests
+- Files: `lib/actions/question-actions.ts`, `lib/actions/quiz-actions.ts`, tests
 - Depends: 2. Size: S
 
 ### Task 6: Lists and contests on `user_id`

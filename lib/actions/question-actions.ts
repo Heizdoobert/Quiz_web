@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionWallet } from '@/lib/wallet-session';
+import { getSessionAccount } from '@/lib/session';
 import { ClientQuestion } from '@/lib/types';
 import { isUuid, validateQuestionInput } from '@/lib/validation';
 
@@ -18,19 +18,19 @@ export async function createQuestion(params: {
   explanation?: string;
 }): Promise<{ success: boolean; error?: string }> {
   try {
-    const wallet = await getSessionWallet();
-    if (!wallet) return { success: false, error: 'Sign in with your wallet to add questions.' };
+    const account = await getSessionAccount();
+    if (!account) return { success: false, error: 'Sign in to add questions.' };
     if (!supabaseAdmin) return { success: false, error: 'Adding questions is unavailable right now.' };
 
     const validated = validateQuestionInput(params);
     if (!validated.valid) return { success: false, error: validated.error };
 
-    // New questions go live at once and are moderated by disputes, so cap how fast one wallet adds them.
+    // New questions go live at once and are moderated by disputes, so cap how fast one account adds them.
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
     const { count, error: countErr } = await supabaseAdmin
       .from('questions')
       .select('id', { count: 'exact', head: true })
-      .eq('created_by', wallet)
+      .eq('created_by_user', account.id)
       .gte('created_at', since);
     if (countErr) {
       console.error('createQuestion count error:', countErr);
@@ -40,13 +40,16 @@ export async function createQuestion(params: {
       return { success: false, error: `You can add up to ${QUESTIONS_PER_DAY} questions per day.` };
     }
 
+    // wallet_address (created_by) is written directly too, same as quiz-actions.ts's quiz_results
+    // insert, so readers of the old column stay correct until it's dropped in Task 25.
     const { error } = await supabaseAdmin.from('questions').insert({
       prompt: validated.prompt,
       options: validated.options,
       correct_index: validated.correctIndex,
       category: validated.category,
       explanation: validated.explanation,
-      created_by: wallet,
+      created_by_user: account.id,
+      created_by: account.wallet,
       status: 'verified',
       dispute_count: 0,
     });
@@ -144,16 +147,16 @@ export async function disputeQuestion(params: {
     if (reason.length > MAX_DISPUTE_REASON) {
       return { success: false, error: `Dispute reason must be at most ${MAX_DISPUTE_REASON} characters.` };
     }
-    const wallet = await getSessionWallet();
-    if (!wallet) return { success: false, error: 'Sign in with your wallet to report questions.' };
+    const account = await getSessionAccount();
+    if (!account) return { success: false, error: 'Sign in to report questions.' };
     if (!supabaseAdmin) return { success: false, error: 'Reporting is unavailable right now.' };
 
     // Only players whose answer to this question was recorded may report it,
-    // so a quarantine takes signed-in wallets that actually played it.
+    // so a quarantine takes signed-in accounts that actually played it.
     const { data: answered, error: answeredErr } = await supabaseAdmin
       .from('quiz_results')
       .select('id')
-      .eq('wallet_address', wallet)
+      .eq('user_id', account.id)
       .eq('question_id', params.questionId)
       .limit(1);
     if (answeredErr) {
@@ -166,7 +169,8 @@ export async function disputeQuestion(params: {
 
     const { error: disputeErr } = await supabaseAdmin.from('question_disputes').insert({
       question_id: params.questionId,
-      reporter_wallet: wallet,
+      reporter_user: account.id,
+      reporter_wallet: account.wallet,
       reason,
     });
     if (disputeErr) {
