@@ -82,7 +82,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [ ] Gates pass; guests see no write controls; database topics in `CategoryBar`; no sample prompt served
 
 ### Phase 3: Discovery
-- [ ] Task 17: Question search
+- [x] Task 17: Question search (your Supabase-branch run of `lib/sql/search.sql` still pending)
 - [ ] Task 18: Topic pages and single-question play
 
 ### Phase 4: Community

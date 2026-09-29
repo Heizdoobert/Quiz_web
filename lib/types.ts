@@ -104,6 +104,15 @@ export interface AnswerSubmissionResult {
   notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'error';
 }
 
+export interface SearchResult {
+  id: string;
+  prompt: string;
+  category: string;
+  authorName: string;
+  createdAt: string;
+  score: number;
+}
+
 export interface HistoryItem {
   questionId: string;
   prompt: string;
