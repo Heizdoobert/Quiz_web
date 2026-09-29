@@ -478,7 +478,15 @@ Result:
 - Files: `lib/sql/community.sql`, `lib/actions/community-actions.ts`, `tests/community.test.ts`
 - Depends: 14. Size: M
 
-### Task 20: Ratings, comments and suggestions on the card back
+### Task 20: Ratings, comments and suggestions on the card back — done
+- Result:
+  - `components/community/RatingStars.tsx`: Displays average rating and rating count. Signed-in players can hover and tap to rate 1-5 stars calling `rateQuestion(questionId, star)`. Guests see the average rating and count without interactive buttons.
+  - `components/community/CommentList.tsx`: Renders comments newest first with author name, relative timestamp, and plain text comment body (React-escaped, safe from XSS/HTML execution). Own comments render a delete button calling `deleteComment(commentId)`. Signed-in players get a 500-char max textarea with live character counter; guests see "Sign in to rate and comment" linking to `requireSignIn()`.
+  - `components/community/SuggestionForm.tsx`: Renders "Suggest a fix to the author" toggle that expands a private suggestion form (500 chars max, counter) calling `addComment(questionId, body, 'suggestion')`, displaying confirmation on submission.
+  - `components/quiz/AnswerBack.tsx`: Integrated Community discussion box below the explanation, loading ratings and comments asynchronously with `getQuestionDiscussion(question.id)`. Handles real-time rating updates, comment additions, and comment deletions.
+  - `vitest.config.ts`: Configured `maxWorkers: 2` to prevent memory contention and worker timeouts under heavy system load.
+  - Tests (`tests/community-ui.test.tsx`): 9 tests covering rating tap-to-rate, guest read-only view, plain text XSS safety, 500-character counter, comment deletion, suggestion form toggle and submit, and AnswerBack integration for signed-in and guest users. Updated `tests/AnswerBack.test.tsx` with session mock.
+  - Gate: 227/227 tests pass across 26 test files, `tsc`/eslint/gitleaks clean, `depcruise` clean (0 violations), total line coverage 70.71% (above 61.3% ratchet). Next.js production build succeeds with all routes valid.
 - Acceptance:
   - after answering, `AnswerBack` shows the average and count, tap-to-rate stars, comments newest first with a 500-character box, and "Suggest a fix to the author"
   - guests see the average and comments without inputs
@@ -487,8 +495,14 @@ Result:
 - Files: `components/community/RatingStars.tsx`, `CommentList.tsx`, `SuggestionForm.tsx`, `components/quiz/AnswerBack.tsx`, tests
 - Depends: 16, 19. Size: M
 
-### Task 21: Suggestions for authors on `/profile`
-- Acceptance: `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
+### Task 21: Suggestions for authors on `/profile` — done
+- Result:
+  - `components/community/AuthorSuggestions.tsx`: Displays "Suggestions for your questions" list on `/profile`. Each card displays the question's prompt, suggestion body, sender display name, and relative creation time. Provides a "Mark done" action button that calls `resolveSuggestion(commentId)` and removes resolved suggestions from the view in real-time. Shows empty state if the author has no open suggestions.
+  - `app/profile/page.tsx`: Integrated `<AuthorSuggestions accountId={account.id} />` in the profile dashboard below the created questions section, rendered for all authenticated session accounts.
+  - Tests: Added unit tests in `tests/community-ui.test.tsx` verifying suggestion rendering, mark-done resolution, and empty state. Added integration test in `tests/profile-page.test.tsx` verifying author suggestions display and interactive resolution on `/profile`.
+  - Gate: 230/230 tests pass across 26 test files, `check:fast` clean, `check:architecture` clean (0 violations, 346 dependencies cruised), total line coverage 70.97% (above 61.3% ratchet).
+- Acceptance:
+  - `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
 - Verify: `npx vitest run tests/community-ui.test.tsx tests/profile-page.test.tsx`
 - Files: `components/community/AuthorSuggestions.tsx`, `app/profile/page.tsx`, tests
 - Depends: 19. Size: S
@@ -499,7 +513,14 @@ Result:
 
 ## Phase 5: Rewards — spec `docs/specs/rewards-no-wallet-payee.md`
 
-### Task 22: Payee rule and treasury sweep
+### Task 22: Payee rule and treasury sweep — done
+- Result:
+  - `lib/sql/reward-payee.sql`: Added `treasury_swept_count` column to `users` with check constraint `>= 0`. Created `sweep_to_treasury()` SECURITY DEFINER function taking answers > 180 days old from accounts with `wallet IS NULL`, incrementing `treasury_swept_count` idempotently and never decreasing. Created `get_treasury_entitled_count()` SECURITY DEFINER function returning the total pool count. Both functions revoke public EXECUTE and grant to `service_role`.
+  - `lib/types.ts`: Extended `ClaimableRewards` with optional `heldTokens?: string` and `sweepsAt?: string | null`.
+  - `lib/actions/reward-actions.ts`: Updated `getClaimableRewards`, `generateTokenVoucher`, and `generateBadgeVoucher`. Enforces that accounts without a wallet return `claimableTokens: '0'`, populate `heldTokens` with pending tokens, and calculate `sweepsAt` for the oldest unswept answer. When `account.wallet === process.env.TREASURY_WALLET_ADDRESS`, triggers `sweep_to_treasury()` and adds `get_treasury_entitled_count()` pool to total earned. Vouchers fail early with `WALLET_REQUIRED` for accounts without a wallet.
+  - Tests (`tests/rewards-payee.test.ts`, `tests/get-claimable-rewards.test.ts`): Unit tests covering wallet-less accounts (held tokens, sweepsAt, voucher blocking with WALLET_REQUIRED), wallet accounts with previous swept count deduction, treasury sweep trigger and entitlement pool aggregation, and unset TREASURY_WALLET_ADDRESS behavior.
+  - Gate: 234/234 tests pass across 27 test files, `check:fast` clean, `check:architecture` clean (0 violations), total line coverage 71.63% (above 61.3% ratchet).
+  - Not done: running `lib/sql/reward-payee.sql` on a Supabase branch (needs user).
 - Acceptance:
   - claimable = 10 × (correct − `treasury_swept_count`) − claimed, for accounts with a wallet only
   - `sweep_to_treasury()` takes only answers over 180 days old from accounts without a wallet, is idempotent, and never lowers counts

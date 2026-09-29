@@ -87,15 +87,15 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 
 ### Phase 4: Community
 - [x] Task 19: Community tables and server actions (your Supabase-branch run of `lib/sql/community.sql` still pending)
-- [ ] Task 20: Ratings, comments and suggestions on the card back
-- [ ] Task 21: Suggestions for authors on `/profile`
+- [x] Task 20: Ratings, comments and suggestions on the card back
+- [x] Task 21: Suggestions for authors on `/profile`
 
 ### Checkpoint: Discovery and Community
 - [ ] Gates pass; first-load JS ≤ 150 kB per route (Discovery's 3 new routes not yet measured — you)
 - [ ] Manual: search signed out, topics, rate, comment and suggest after answering
 
 ### Phase 5: Rewards
-- [ ] Task 22: Payee rule and treasury sweep
+- [x] Task 22: Payee rule and treasury sweep
 - [ ] Task 23: Disclosure, held balance and contest wallet requirement
 
 ### Checkpoint: Code complete

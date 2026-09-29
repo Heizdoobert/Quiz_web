@@ -95,8 +95,37 @@ export async function getClaimableRewards(): Promise<ClaimableRewards> {
       );
     }
 
+    let treasurySweptCount = 0;
+    if (supabaseAdmin) {
+      const q = supabaseAdmin
+        .from('users')
+        .select('treasury_swept_count')
+        .eq('id', account.id);
+      const res = typeof q.maybeSingle === 'function' ? await q.maybeSingle() : await q;
+      const userRow = Array.isArray(res?.data) ? res.data[0] : res?.data;
+      if (userRow?.treasury_swept_count) {
+        treasurySweptCount = Number(userRow.treasury_swept_count) || 0;
+      }
+    }
+
+    const treasuryAddress = process.env.TREASURY_WALLET_ADDRESS?.trim().toLowerCase();
+    const isTreasury = Boolean(
+      treasuryAddress && account.wallet && account.wallet.toLowerCase() === treasuryAddress
+    );
+
+    let treasuryPoolEntitlement = BigInt(0);
+    if (isTreasury && supabaseAdmin) {
+      await supabaseAdmin.rpc('sweep_to_treasury');
+      const { data: poolCount } = await supabaseAdmin.rpc('get_treasury_entitled_count');
+      if (poolCount) {
+        treasuryPoolEntitlement = BigInt(poolCount) * TOKENS_PER_CORRECT;
+      }
+    }
+
     const stats = await statsForAccount(account.id);
-    const totalEarned = BigInt(stats.score) * TOKENS_PER_CORRECT;
+    const effectiveCorrect = Math.max(0, stats.score - treasurySweptCount);
+    const ownEarned = BigInt(effectiveCorrect) * TOKENS_PER_CORRECT;
+    const totalEarned = ownEarned + (isTreasury ? treasuryPoolEntitlement : BigInt(0));
 
     // Get total already-claimed tokens. Read as text: JSON numbers lose precision past 2^53.
     const { data: claims, error: cErr } = await supabase
@@ -113,7 +142,41 @@ export async function getClaimableRewards(): Promise<ClaimableRewards> {
       }
     }
 
-    const claimableTokens = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
+    let claimableTokens = BigInt(0);
+    let heldTokens: string | undefined = undefined;
+    let sweepsAt: string | null | undefined = undefined;
+
+    if (account.wallet) {
+      claimableTokens = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
+    } else {
+      // Accounts without a wallet: 0 claimable tokens; earnings held until wallet is added
+      claimableTokens = BigInt(0);
+      const held = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
+      heldTokens = held.toString();
+
+      // Find when the oldest unswept correct answer will sweep (180 days after answered_at)
+      sweepsAt = null;
+      if (supabaseAdmin) {
+        const { data } = await supabaseAdmin
+          .from('quiz_results')
+          .select('answered_at')
+          .eq('user_id', account.id)
+          .eq('is_correct', true)
+          .order('answered_at', { ascending: true })
+          .range(treasurySweptCount, treasurySweptCount)
+          .maybeSingle();
+
+        const oldestAns = Array.isArray(data)
+          ? (data[0] as { answered_at?: string } | undefined)
+          : (data as { answered_at?: string } | null);
+
+        if (oldestAns?.answered_at) {
+          const d = new Date(oldestAns.answered_at);
+          d.setDate(d.getDate() + 180);
+          sweepsAt = d.toISOString();
+        }
+      }
+    }
 
     // Check badge eligibility. Leaderboard rows are keyed by account id.
     const leaderboard = await getGlobalLeaderboard(3);
@@ -148,6 +211,8 @@ export async function getClaimableRewards(): Promise<ClaimableRewards> {
       alreadyClaimedBadges,
       totalEarned: totalEarned.toString(),
       totalClaimed: totalClaimed.toString(),
+      heldTokens,
+      sweepsAt,
     };
   } catch (err) {
     console.error('getClaimableRewards error:', err);
