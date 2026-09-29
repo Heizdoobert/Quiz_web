@@ -1,39 +1,18 @@
-# Implementation Plan: Automatic Wallet Authentication & User Persistence
+# Implementation Plan: Accounts, Discovery, Answer Persistence & SIWE Authentication
 
 ## Overview
-Implement an automatic Sign-In with Ethereum (SIWE) authentication flow using RainbowKit's native authentication adapter (`RainbowKitAuthenticationProvider` / `createAuthenticationAdapter`). When a player connects their crypto wallet, they are prompted for a SIWE signature; upon verification, a secure HTTP-only session cookie is issued and basic user profile information (`wallet_address`, truncated `display_name`, `created_at`) is automatically registered in Supabase.
+This integrated plan consolidates:
+1. **Accounts, Discovery & Community Architecture**: Introducing explicit account identities (`users.id` UUID) with wallet linking, session account resolution, and account-keyed trivia/leaderboard models.
+2. **Production Answer Persistence**: Ensuring every answer from a signed-in player is reliably persisted to Supabase, with Streak, History, and Leaderboard surviving page reloads, and clear reasons displayed when an answer cannot be saved.
+3. **Automatic SIWE Authentication & Profile Persistence**: Automatically orchestrating Sign-In with Ethereum (SIWE) on wallet connect using RainbowKit's native authentication adapter (`RainbowKitAuthenticationProvider` / `createAuthenticationAdapter`), maintaining session cookies and syncing identity.
 
 ## Architecture Decisions
-- **RainbowKit Native SIWE Adapter:** Integrate `RainbowKitAuthenticationProvider` with `createAuthenticationAdapter` in `components/Providers.tsx`. This automatically orchestrates the SIWE sign-in prompt upon wallet connection and handles sign-out when disconnected.
-- **Server Action Synchronization:** `signInWithWallet` verifies the SIWE message via RPC node, sets the encrypted session cookie (`wallet_session`), and automatically calls `getOrCreateUser(address)` to ensure user persistence in Supabase.
-- **Session Lifecycle & Disconnect:** Introduce `clearSessionWallet` / `signOutWallet` so disconnecting a wallet or switching accounts invalidates the server session cookie immediately.
-- **Database Resilience:** `getOrCreateUser` leverages `supabaseAdmin || supabase` for reliable write capabilities under RLS without requiring schema changes or migrations.
-- **Backward Compatibility:** Existing `useWalletSession`'s `ensureSession()` continues to act as a fallback guard for protected user actions.
+- **Account-Centric Data Model:** All domain records (`quiz_results`, `questions`, `question_lists`, `groups`) are keyed by account UUID (`users.id`), decoupling identity from single wallet addresses.
+- **Server creates account for proven wallet:** Server-only helper `ensureAccountForWallet(wallet)` in `lib/users.ts` upserts via `supabaseAdmin` upon verified SIWE signature, linking the wallet and creating the account.
+- **Session Tokens:** Signed HMAC session cookie (`quiz_session`) stores `{ id: accountId, wallet }`, verifiable server-side without database round-trips.
+- **RainbowKit Native SIWE Adapter:** Integrated `createAuthenticationAdapter` in `components/Providers.tsx`, prompting signature verification on connect and clearing session on disconnect.
+- **Answer result explanation:** `AnswerSubmissionResult` returns `notSavedReason: 'signed-out' | 'already-answered' | 'own-question' | 'error'` whenever `recorded` is false.
+- **History reads bound to session:** Server action `getAnswerHistory()` returns the last 20 answers via `supabaseAdmin` for the authenticated session account, seeding `answeredIds` to prevent duplicate questions after reload.
 
-## Task List
-
-### Phase 1: Foundation
-- [x] Task 1: Server-side Auth Session & User Auto-Creation
-- [x] Task 2: RainbowKit SIWE Authentication Adapter & State Hook
-
-### Checkpoint: Foundation
-- [x] Unit tests for session management and adapter pass
-- [x] Type check and lint are clean
-
-### Phase 2: UI Integration
-- [x] Task 3: Wire RainbowKitAuthenticationProvider into Providers & Header
-
-### Phase 3: Verification & Quality Gates
-- [x] Task 4: Full System Verification & Constraint Validation
-
-### Checkpoint: Complete
-- [x] All tests pass with >= 80% coverage on changed lines and project coverage >= 60%
-- [x] Zero TypeScript and ESLint errors
-- [x] Production build succeeds and bundle size stays within limits
-
-## Risks and Mitigations
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| User rejects signature request | Medium | Status remains `unauthenticated`; user can still browse read-only and retry sign-in via `ConnectButton` or contextual action guards. |
-| Account switching in wallet | Low | Auth adapter tracks account changes and resets status to prompt verification for the new address. |
-| Supabase write failure during connect | Low | `getOrCreateUser` fails open with an in-memory fallback user object so app remains functional even if database is temporarily unreachable. |
+## Status & Tracking
+See `tasks/accounts-discovery-community/plan.md` and `tasks/accounts-discovery-community/todo.md` for in-depth per-task specifications and historical notes.

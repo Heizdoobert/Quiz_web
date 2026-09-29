@@ -12,11 +12,15 @@ import {
 } from '@/lib/actions/reward-actions';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
-import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
+import {
+  QUIZ_TOKEN_ADDRESS,
+  QUIZ_BADGE_ADDRESS,
+  TARGET_CHAIN_ID,
+  TARGET_CHAIN_NAME,
+  TARGET_EXPLORER_URL,
+} from '@/lib/contracts/addresses';
 
 export type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
-
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 interface UseRewardsModalOptions {
   isOpen: boolean;
@@ -328,7 +332,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     return (wei / (BigInt(10) ** BigInt(18))).toString();
   };
 
-  const explorerUrl = txHash ? `https://sepolia.basescan.org/tx/${txHash}` : null;
+  const explorerUrl = txHash ? `${TARGET_EXPLORER_URL}/tx/${txHash}` : null;
 
   return {
     tab,
@@ -345,5 +349,6 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     handleMintBadge,
     formatTokens,
     explorerUrl,
+    targetChainName: TARGET_CHAIN_NAME,
   };
 }

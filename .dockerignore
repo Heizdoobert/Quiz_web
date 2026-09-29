@@ -7,3 +7,13 @@ contracts/artifacts
 contracts/cache
 contracts/typechain-types
 contracts/node_modules
+contracts
+docs
+tasks
+tests
+scripts
+.agents
+.github
+coverage
+*.md
+!README.md

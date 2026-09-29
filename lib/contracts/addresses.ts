@@ -2,3 +2,7 @@
 export const QUIZ_TOKEN_ADDRESS = (process.env.NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS || '0x03070FC61f971f62544dFD10d93636eb2Ac080B1') as `0x${string}`;
 export const QUIZ_BADGE_ADDRESS = (process.env.NEXT_PUBLIC_QUIZ_BADGE_ADDRESS || '0x662D5111D970eB9C9E993407AA3426C82e83A65f') as `0x${string}`;
 export const CONTEST_ESCROW_ADDRESS = (process.env.NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS || '0xDF4334aBF06e1930B1b037ECDeD52f1bBe2bBd5d') as `0x${string}`;
+
+export const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
+export const TARGET_CHAIN_NAME = TARGET_CHAIN_ID === 8453 ? 'Base' : 'Base Sepolia';
+export const TARGET_EXPLORER_URL = TARGET_CHAIN_ID === 8453 ? 'https://basescan.org' : 'https://sepolia.basescan.org';

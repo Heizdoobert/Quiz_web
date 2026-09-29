@@ -4,8 +4,8 @@ import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
-import { getSessionWallet, setSessionWallet, clearSessionWallet, shouldUseSecureCookies } from '@/lib/wallet-session';
-import { getOrCreateUser } from '@/lib/actions/user-actions';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
+import { ensureAccountForWallet } from '@/lib/users';
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -68,11 +68,9 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
     });
     if (!valid) return false;
 
-    const sessionOk = await setSessionWallet(address);
-    if (sessionOk) {
-      await getOrCreateUser(address);
-    }
-    return sessionOk;
+    const wallet = address.toLowerCase();
+    const accountId = await ensureAccountForWallet(wallet);
+    return accountId !== null && (await setSessionAccount({ id: accountId, wallet }));
   } catch (err) {
     console.error('signInWithWallet error:', err);
     return false;
@@ -80,9 +78,9 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
 }
 
 export async function getSignedInWallet(): Promise<string | null> {
-  return getSessionWallet();
+  return (await getSessionAccount())?.wallet ?? null;
 }
 
 export async function signOutWallet(): Promise<void> {
-  await clearSessionWallet();
+  await clearSessionAccount();
 }

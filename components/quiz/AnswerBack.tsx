@@ -20,6 +20,13 @@ export default function AnswerBack({
 }: AnswerBackProps) {
   const letters = ['A', 'B', 'C', 'D'];
 
+  const notSavedMessage: Record<NonNullable<AnswerSubmissionResult['notSavedReason']>, string> = {
+    'signed-out': 'Sign in with your wallet so this counts.',
+    'already-answered': 'Already answered — this one only counts once.',
+    'own-question': "You wrote this question, so it doesn't count for you.",
+    error: 'Not saved — something went wrong, try again.',
+  };
+
   // Advance to next question on Enter or Space
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -55,11 +62,11 @@ export default function AnswerBack({
             {result.isCorrect ? 'Correct! Well Done!' : 'Incorrect! Keep Going!'}
           </h3>
           <p className="text-xs font-semibold opacity-90">
-            {!result.recorded
-              ? 'Not saved — connect a wallet so progress counts'
-              : result.isCorrect
+            {result.recorded
+              ? result.isCorrect
                 ? '+1 Score point & tokens earned'
-                : 'Streak reset to 0'}
+                : 'Streak reset to 0'
+              : notSavedMessage[result.notSavedReason ?? 'error']}
           </p>
         </div>
       </div>

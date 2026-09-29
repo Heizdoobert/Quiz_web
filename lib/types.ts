@@ -1,9 +1,3 @@
-export interface User {
-  wallet_address: string;
-  display_name: string | null;
-  created_at: string;
-}
-
 export interface Question {
   id: string;
   category: string;
@@ -92,7 +86,8 @@ export interface UserStats {
 }
 
 export interface LeaderboardEntry {
-  wallet_address: string;
+  user_id: string;
+  wallet_address: string | null;
   display_name: string | null;
   score: number;
   accuracy: number;
@@ -105,6 +100,14 @@ export interface AnswerSubmissionResult {
   explanation: string | null;
   // False when the answer didn't count: not signed in, or the question was already answered.
   recorded: boolean;
+  // Set only when recorded is false, so the UI can say why instead of claiming a point was earned.
+  notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'error';
+}
+
+export interface HistoryItem {
+  questionId: string;
+  prompt: string;
+  isCorrect: boolean;
 }
 
 export interface ClaimableRewards {
