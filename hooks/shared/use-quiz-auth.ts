@@ -36,16 +36,12 @@ export function useQuizAuth() {
 
       if (cancelled) return;
 
-      if (signedInWallet === currentWallet) {
-        prevAddressRef.current = currentWallet;
-        setAuthStatus('authenticated');
-      } else {
-        if (prevAddressRef.current && prevAddressRef.current !== currentWallet) {
-          await signOutWallet();
-        }
-        prevAddressRef.current = currentWallet;
-        setAuthStatus('unauthenticated');
+      const isMatch = signedInWallet === currentWallet;
+      if (!isMatch && prevAddressRef.current && prevAddressRef.current !== currentWallet) {
+        await signOutWallet();
       }
+      prevAddressRef.current = currentWallet;
+      setAuthStatus(isMatch ? 'authenticated' : 'unauthenticated');
     }
 
     void checkAuth();

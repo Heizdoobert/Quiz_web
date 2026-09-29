@@ -50,8 +50,7 @@ export default function QuizCard({
   // Fire confetti if result is correct
   React.useEffect(() => {
     if (isFlipped && result?.isCorrect) {
-      import('canvas-confetti').then((module) => {
-        const confetti = module.default;
+      import('canvas-confetti').then(({ default: confetti }) => {
         confetti({
           particleCount: 80,
           spread: 70,

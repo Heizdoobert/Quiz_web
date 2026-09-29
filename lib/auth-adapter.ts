@@ -12,22 +12,20 @@ export interface QuizAuthAdapterOptions {
 
 export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
   return createAuthenticationAdapter({
-    getNonce: async () => {
-      return await getAuthNonce();
-    },
+    getNonce: getAuthNonce,
     createMessage: ({ nonce, address, chainId }) => {
       const now = new Date();
-      const expirationTime = new Date(now.getTime() + 10 * 60 * 1000);
+      const loc = typeof window !== 'undefined' ? window.location : null;
       return createSiweMessage({
-        domain: typeof window !== 'undefined' && window.location ? window.location.host : 'localhost',
+        domain: loc?.host || 'localhost',
         address: getAddress(address),
         statement: 'Sign in to Quick Quiz so your answers count. This costs no gas.',
-        uri: typeof window !== 'undefined' && window.location ? window.location.origin : 'http://localhost',
+        uri: loc?.origin || 'http://localhost',
         version: '1',
         chainId,
         nonce,
         issuedAt: now,
-        expirationTime,
+        expirationTime: new Date(now.getTime() + 10 * 60 * 1000),
       });
     },
     verify: async ({ message, signature }) => {
