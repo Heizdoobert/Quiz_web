@@ -56,9 +56,7 @@ function questionToFormValues(q: Question): QuestionFormValues {
 }
 
 export default function MyListsDashboard() {
-  const { address, isConnected } = useAccount();
-  const wallet = address || null;
-  const { requireSignIn: ensureSession } = useSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,11 +66,11 @@ export default function MyListsDashboard() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!wallet) return;
+    if (!account) return;
     setLoading(true);
     setLists(await getMyLists());
     setLoading(false);
-  }, [wallet]);
+  }, [account]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -81,7 +79,7 @@ export default function MyListsDashboard() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wallet) return;
+    if (!account) return;
     setMessage(null);
     if (!(await ensureSession())) {
       setMessage({ type: 'error', text: SIGN_IN_ERROR });
@@ -98,10 +96,10 @@ export default function MyListsDashboard() {
     refresh();
   };
 
-  if (!isConnected) {
+  if (!account) {
     return (
       <div className="max-w-2xl mx-auto mt-16 text-center text-slate-400">
-        Connect your wallet to create and manage your question lists.
+        Sign in to create and manage your question lists.
       </div>
     );
   }
@@ -190,7 +188,7 @@ function ListCard({
   onToggle: () => void;
   onChanged: () => void;
 }) {
-  const { requireSignIn: ensureSession } = useSession();
+  const { account, requireSignIn: ensureSession } = useSession();
   // Runs a list action as the signed-in wallet, asking for the one-time signature first.
   const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
     (await ensureSession()) ? action() : { success: false, error: SIGN_IN_ERROR };
@@ -255,7 +253,6 @@ function ListCard({
   };
 
   const { address } = useAccount();
-  const wallet = address || list.owner_wallet;
 
   const handleStartContest = async () => {
     const amount = parseFloat(poolAmount);
@@ -265,6 +262,14 @@ function ListCard({
     }
     if (!(await ensureSession())) {
       setError(SIGN_IN_ERROR);
+      return;
+    }
+    if (!account?.wallet) {
+      setError('Add a wallet to your account to start contests.');
+      return;
+    }
+    if (!address || address.toLowerCase() !== account.wallet.toLowerCase()) {
+      setError(`Switch your connected wallet to ${account.wallet} to start this contest.`);
       return;
     }
     if (chainId !== TARGET_CHAIN_ID) {
@@ -280,7 +285,7 @@ function ListCard({
     setError(null);
     try {
       const amountWei = BigInt(Math.floor(amount)) * (BigInt(10) ** BigInt(18));
-      const contestId = getContestId(list.id, wallet);
+      const contestId = getContestId(list.id, account.wallet);
 
       let alreadyFunded = false;
       try {

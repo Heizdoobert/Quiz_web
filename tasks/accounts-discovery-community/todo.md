@@ -259,13 +259,50 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   `use-session.tsx` itself is 100% line-covered (only the "used outside a provider" throw guard, line 80,
   is statement-uncovered).
 
-### Task 11: Session-based gating on list, contest and profile pages
+### Task 11: Session-based gating on list, contest and profile pages — done
 - Acceptance:
   - `/profile`, `/my-lists`, `/review` and the contest browser decide "signed in" from `useSession()`, not wagmi `useAccount`
   - on-chain actions check that the connected wallet equals `account.wallet`, otherwise they ask the player to switch wallets
 - Verify: `npx vitest run tests/profile-page.test.tsx`, plus a manual check of each page signed out, as a wallet account and as an email account
 - Files: `app/profile/page.tsx`, `components/lists/ContestBrowser.tsx`, `components/lists/MyListsDashboard.tsx`, `components/lists/ReviewQueue.tsx`, `components/lists/ContestPlay.tsx`
 - Depends: 10. Size: M
+- Result: All five files dropped wagmi `useAccount` as the signed-in source, gating on `useSession()`'s
+  `account` instead.
+  `app/profile/page.tsx`: no longer imports wagmi at all. The created-quizzes fetch is still
+  wallet-keyed (`getUserQuizzes(walletAddress)`, unchanged, out of scope per Task 8's note) but now
+  reads `account.wallet` instead of the connected `address` — an email-only account (no wallet) skips
+  the fetch and shows the empty state instead of spinning forever, rather than crashing or hanging.
+  `handleExport`'s guard and backup filename moved from `address` to `account`/`account.wallet ||
+  account.id`.
+  `ContestBrowser.tsx` and `ReviewQueue.tsx`: mechanical swap, `!isConnected`/`wallet` gate ->
+  `!account`, copy changed from "Connect your wallet" to "Sign in" since email accounts (Task 12) will
+  reach these pages too.
+  `MyListsDashboard.tsx`: same swap for the top-level "sign in to manage lists" gate and `refresh`'s
+  guard. In `ListCard.handleStartContest` (the one on-chain write in this file, funding a contest):
+  after `ensureSession()` succeeds, added an explicit check that `account.wallet` exists and that
+  wagmi's connected `address` matches it (case-insensitive), asking the player to switch wallets
+  otherwise, before computing `contestId` (now built from `account.wallet`, replacing the old
+  `address || list.owner_wallet` fallback that could silently compute the wrong contest ID if a
+  different wallet happened to be connected).
+  `ContestPlay.tsx`: added the same connected-wallet-matches-`account.wallet` check in `handleClaim`,
+  before the on-chain `claimReward` write (the voucher's `recipient` is `account.wallet`, signed
+  server-side; submitting from a mismatched connected wallet is now blocked client-side with a
+  "switch your connected wallet" message instead of silently proceeding).
+  No component test files exist yet for `ContestBrowser`/`MyListsDashboard`/`ReviewQueue`/`ContestPlay`
+  (consistent with every prior task touching them — Tasks 6 and 9 both noted their client gating was
+  "untouched, moves in Tasks 10-11" with no component tests added); Task 11's own Verify line only
+  names `tests/profile-page.test.tsx`, so no new component test files were added for the other four.
+  Rewrote `tests/profile-page.test.tsx`: replaced the `wagmi`/`useAccount` mock with a controllable
+  `useSession` mock (`vi.fn()`, was previously an un-configurable static return, which would have made
+  every existing test render Access Denied once the page stopped reading wagmi); added a new test for
+  the signed-in-with-no-wallet case (empty state shown, `getUserQuizzes` never called) and a
+  `beforeEach(vi.clearAllMocks())` so that assertion isn't polluted by earlier tests' call counts.
+  9 tests total (was 8), all passing.
+  Mutation-tested the new `!account?.wallet` gate in the profile fetch effect (inverted to
+  `account?.wallet`) — caught by 6/9 tests; restored via job-tmp backup, confirmed 9/9 green after.
+  Gate: 154/154 tests pass, `tsc`/eslint/gitleaks/depcruise clean, 68.12% line coverage (floor 54%);
+  `page.tsx`'s new lines are covered — the file's three uncovered ranges (53-56, 82-83, 95) are
+  pre-existing catch blocks and an `ensureSession`-false branch this task didn't touch.
 
 ### Task 12: Email code sign-in
 - Acceptance:

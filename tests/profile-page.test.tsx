@@ -1,17 +1,14 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React from 'react';
 import ProfilePage from '../app/profile/page';
 
 // Hoist mock setup
-vi.mock('wagmi', () => {
-  const useAccountMock = vi.fn();
-  return {
-    useAccount: useAccountMock,
-  };
-});
+vi.mock('../hooks/shared/use-session', () => ({
+  useSession: vi.fn(),
+}));
 
-import { useAccount } from 'wagmi';
+import { useSession } from '../hooks/shared/use-session';
 import { getUserQuizzes } from '../lib/actions/profile-actions';
 
 // Mock Header
@@ -25,23 +22,33 @@ vi.mock('../lib/actions/profile-actions', () => ({
   exportUserData: vi.fn(),
 }));
 
-// The sign-in signature is covered by the server actions; here it always succeeds.
-vi.mock('../hooks/shared/use-session', () => ({
-  useSession: () => ({ account: null, refresh: vi.fn(), requireSignIn: async () => true }),
-}));
-
+function mockSignedInAs(wallet: string | null) {
+  (useSession as import("vitest").Mock).mockReturnValue({
+    account: { id: 'acct-1', wallet },
+    refresh: vi.fn(),
+    requireSignIn: async () => true,
+  });
+}
 
 describe('ProfilePage', () => {
-  it('renders Access Denied when wallet is disconnected', () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: false, address: undefined });
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders Access Denied when signed out', () => {
+    (useSession as import("vitest").Mock).mockReturnValue({
+      account: null,
+      refresh: vi.fn(),
+      requireSignIn: async () => true,
+    });
 
     render(<ProfilePage />);
 
     expect(screen.getByText('Access Denied')).toBeDefined();
   });
 
-  it('renders loading state then empty state for connected wallet with no quizzes', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+  it('renders empty state for a wallet account with no quizzes', async () => {
+    mockSignedInAs('0x123');
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [] });
 
     render(<ProfilePage />);
@@ -50,8 +57,18 @@ describe('ProfilePage', () => {
     expect(emptyState).toBeDefined();
   });
 
+  it('renders empty state for a signed-in email account with no wallet, without spinning forever', async () => {
+    mockSignedInAs(null);
+
+    render(<ProfilePage />);
+
+    const emptyState = await screen.findByText('No Quizzes Created');
+    expect(emptyState).toBeDefined();
+    expect(getUserQuizzes as import("vitest").Mock).not.toHaveBeenCalled();
+  });
+
   it('renders quizzes and backup button when quizzes are present', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    mockSignedInAs('0x123');
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [{ id: '1', prompt: 'First Quiz' }] });
 
     render(<ProfilePage />);
@@ -63,7 +80,7 @@ describe('ProfilePage', () => {
   });
 
   it('renders error recovery state with retry button when fetching quizzes fails', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    mockSignedInAs('0x123');
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: false,
       error: 'Network timeout loading quizzes',
@@ -80,7 +97,7 @@ describe('ProfilePage', () => {
   });
 
   it('recovers and displays quizzes when user clicks retry button', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    mockSignedInAs('0x123');
     const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
 
     mockGetUserQuizzes
@@ -108,7 +125,7 @@ describe('ProfilePage', () => {
   });
 
   it('triggers backup data download on export button click', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    mockSignedInAs('0x123');
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: true,
       quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
@@ -144,7 +161,7 @@ describe('ProfilePage', () => {
   });
 
   it('displays error banner when export fails and allows user to dismiss it', async () => {
-    (useAccount as import("vitest").Mock).mockReturnValue({ isConnected: true, address: '0x123' });
+    mockSignedInAs('0x123');
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: true,
       quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
@@ -173,11 +190,10 @@ describe('ProfilePage', () => {
     expect(screen.queryByText('Export rate limit reached')).toBeNull();
   });
 
-  it('fetches new quizzes and resets state when wallet address changes', async () => {
-    const mockUseAccount = useAccount as import("vitest").Mock;
+  it('fetches new quizzes and resets state when the signed-in account changes', async () => {
     const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
 
-    mockUseAccount.mockReturnValue({ isConnected: true, address: '0x1111111111111111111111111111111111111111' });
+    mockSignedInAs('0x1111111111111111111111111111111111111111');
     mockGetUserQuizzes.mockResolvedValueOnce({
       success: true,
       quizzes: [{ id: 'q1', prompt: 'First Account Quiz' }],
@@ -193,7 +209,7 @@ describe('ProfilePage', () => {
       count: 1,
     });
 
-    mockUseAccount.mockReturnValue({ isConnected: true, address: '0x2222222222222222222222222222222222222222' });
+    mockSignedInAs('0x2222222222222222222222222222222222222222');
     rerender(<ProfilePage />);
 
     expect(await screen.findByText('Second Account Quiz')).toBeDefined();

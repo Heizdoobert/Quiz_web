@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
 import { useSession } from '@/hooks/shared/use-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
@@ -43,8 +43,9 @@ export default function ContestPlay({
   const { switchChain } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
+  const { address } = useAccount();
 
-  const { requireSignIn: ensureSession } = useSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   useEffect(() => {
     // Contest answers only count for the signed-in wallet that started the attempt.
@@ -103,6 +104,11 @@ export default function ContestPlay({
 
   const handleClaim = async () => {
     setClaimError(null);
+    if (account?.wallet && address && address.toLowerCase() !== account.wallet.toLowerCase()) {
+      setClaimError(`Switch your connected wallet to ${account.wallet} to claim this reward.`);
+      setClaimStep('error');
+      return;
+    }
     setClaimStep('signing');
     const voucher: RewardVoucher | { error: string } = await claimListReward(list.id);
     if ('error' in voucher) {
