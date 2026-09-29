@@ -463,7 +463,13 @@ Result:
 
 ## Phase 4: Community — spec `docs/specs/community.md`
 
-### Task 19: Community tables and server actions
+### Task 19: Community tables and server actions — done
+- Result:
+  - `lib/sql/community.sql`: creates `question_ratings` (PK on `(question_id, user_id)`, rating 1-5, cascade deletes) and `question_comments` (PK on `id`, kind `comment`|`suggestion`, 1-500 chars body, created_at index), both with RLS enabled and zero public policies (reads and writes mediated by server actions using `supabaseAdmin`). Also defines `get_rating_summary(p_question_id)` SECURITY DEFINER RPC returning average and count.
+  - `lib/actions/community-actions.ts`: implements `rateQuestion`, `addComment`, `deleteComment`, `resolveSuggestion`, `getQuestionDiscussion`, and `getSuggestionsForAuthor`. Each write enforces session authentication (`getSessionAccount()`), public question (`status = 'verified' AND list_id IS NULL`), recorded answer in `quiz_results`, not-author restriction for ratings and suggestions (authors can comment on own questions), and 20 comments/suggestions per account per 24 hours. Fixed result codes: `UNAUTHORIZED`, `NOT_ANSWERED`, `NOT_ALLOWED`, `INVALID`, `RATE_LIMITED`, `FAILED`. `getQuestionDiscussion` only returns `kind = 'comment'`; suggestions are strictly private to author and sender.
+  - Tests (`tests/community.test.ts`): 19 comprehensive unit tests covering all gates, bound checks, rate limits, deletion, and author suggestions privacy.
+  - Gate: 218/218 tests passing, tsc/eslint/gitleaks clean, `depcruise` clean with zero boundary or circular violations, line coverage at 71% (project ratchet ≥ 61.3%).
+  - Not done: running `lib/sql/community.sql` on a Supabase branch (needs user).
 - Acceptance:
   - `community.sql` creates `question_ratings` and `question_comments` with RLS on and no public policies
   - every action enforces signed in, public question, recorded answer, not-author (for ratings and suggestions), and 20 per day, returning fixed codes

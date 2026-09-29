@@ -86,7 +86,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [x] Task 18: Topic pages and single-question play
 
 ### Phase 4: Community
-- [ ] Task 19: Community tables and server actions
+- [x] Task 19: Community tables and server actions
 - [ ] Task 20: Ratings, comments and suggestions on the card back
 - [ ] Task 21: Suggestions for authors on `/profile`
 
