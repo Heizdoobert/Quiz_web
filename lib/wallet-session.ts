@@ -9,7 +9,3 @@ export async function getSessionWallet(): Promise<string | null> {
 export async function clearSessionWallet(): Promise<void> {
   await clearSessionAccount();
 }
-
-export async function clearSessionWallet(): Promise<void> {
-  (await cookies()).delete(SESSION_COOKIE);
-}
