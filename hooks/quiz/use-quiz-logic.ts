@@ -121,6 +121,16 @@ export function useQuizLogic({
     setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
   }, [account]);
 
+  // Loads the signed-in wallet's saved answers so history and the "already answered"
+  // set survive a reload; a wallet with no session yet gets [] back.
+  const refreshHistory = useCallback(async () => {
+    if (!address) return;
+    const saved = await getAnswerHistory();
+    if (saved.length === 0) return;
+    setHistory(saved);
+    setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
+  }, [address]);
+
   const loadLeaderboards = useCallback(
     async (overrideGroupId?: string) => {
       const gid = overrideGroupId ?? selectedGroupId;

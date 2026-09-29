@@ -1,5 +1,5 @@
-// Baseline security headers. A script-restricting CSP is left out on purpose:
-// wallet connectors and ad scripts need a report-only rollout before enforcing one.
+const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
+
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
   { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -8,6 +8,7 @@ const securityHeaders = [
   { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
   { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
   { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  ...(isPreview ? [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] : []),
 ];
 
 /** @type {import('next').NextConfig} */
