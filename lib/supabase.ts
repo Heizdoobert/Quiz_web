@@ -20,4 +20,10 @@ const supabaseAnonKey =
     ? rawAnonKey
     : 'placeholder-anon-key';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// persistSession/autoRefreshToken off: this client only ever runs server-side
+// (every importer is 'server-only' or a server action), and email-code sign-in
+// (lib/actions/auth-actions.ts) must not leave a Supabase Auth session behind —
+// the account's identity is the quiz_session cookie, not a Supabase token.
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});

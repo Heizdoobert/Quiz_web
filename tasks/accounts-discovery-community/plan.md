@@ -61,11 +61,11 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [x] Task 6: Lists and contests on account ids
 - [x] Task 7: Groups on account ids
 - [x] Task 8: Profile export on account ids
-- [ ] Task 9: Rewards on account ids; delete `lib/wallet-session.ts`
-- [ ] Task 10: Client session provider and sign-in modal (wallet)
-- [ ] Task 11: Session-based gating on list, contest and profile pages
-- [ ] Task 12: Email code sign-in
-- [ ] Task 13: Add a wallet to an email account
+- [x] Task 9: Rewards on account ids; delete `lib/wallet-session.ts`
+- [x] Task 10: Client session provider and sign-in modal (wallet)
+- [x] Task 11: Session-based gating on list, contest and profile pages
+- [x] Task 12: Email code sign-in
+- [x] Task 13: Add a wallet to an email account
 
 ### Checkpoint: Identity
 - [ ] Gates and build pass; grep finds 0 uses of `getSessionWallet` and `useWalletSession`

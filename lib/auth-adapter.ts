@@ -3,7 +3,7 @@
 import { createAuthenticationAdapter } from '@rainbow-me/rainbowkit';
 import { createSiweMessage } from 'viem/siwe';
 import { getAddress } from 'viem';
-import { getAuthNonce, signInWithWallet, signOutWallet } from '@/lib/actions/auth-actions';
+import { getAuthNonce, getSessionInfo, linkWallet, signInWithWallet, signOutWallet } from '@/lib/actions/auth-actions';
 
 export interface QuizAuthAdapterOptions {
   onSignIn?: () => void;
@@ -28,8 +28,14 @@ export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
         expirationTime: new Date(now.getTime() + 10 * 60 * 1000),
       });
     },
+    // One wallet-connect flow for the whole app: a signed-in account with no
+    // wallet yet links this one (add-wallet); anyone else signs in with it.
     verify: async ({ message, signature }) => {
-      const ok = await signInWithWallet(message, signature as `0x${string}`);
+      const session = await getSessionInfo();
+      const ok =
+        session && !session.wallet
+          ? (await linkWallet(message, signature as `0x${string}`)).ok
+          : await signInWithWallet(message, signature as `0x${string}`);
       if (ok) {
         options?.onSignIn?.();
       }

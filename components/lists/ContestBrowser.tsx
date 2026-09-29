@@ -1,15 +1,14 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { getLiveLists } from '@/lib/actions/question-list-actions';
 import { QuestionListWithMeta } from '@/lib/types';
+import { useSession } from '@/hooks/shared/use-session';
 import ContestPlay from '@/components/lists/ContestPlay';
 import { Coins, ListChecks, Play } from 'lucide-react';
 
 export default function ContestBrowser() {
-  const { address, isConnected } = useAccount();
-  const wallet = address || null;
+  const { account } = useSession();
 
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,10 +25,10 @@ export default function ContestBrowser() {
     refresh();
   }, [refresh]);
 
-  if (!isConnected || !wallet) {
+  if (!account) {
     return (
       <div className="max-w-2xl mx-auto mt-16 text-center text-slate-400">
-        Connect your wallet to play live contests and claim rewards.
+        Sign in to play live contests and claim rewards.
       </div>
     );
   }
@@ -38,7 +37,6 @@ export default function ContestBrowser() {
     return (
       <ContestPlay
         list={selected}
-        wallet={wallet}
         onExit={() => {
           setSelected(null);
           refresh();

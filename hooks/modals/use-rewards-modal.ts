@@ -96,7 +96,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const loadRewards = useCallback(async () => {
     if (!walletAddress) return;
     setLoading(true);
-    const data = await getClaimableRewards(walletAddress);
+    const data = await getClaimableRewards();
     setRewards(data);
     setLoading(false);
   }, [walletAddress]);
@@ -144,7 +144,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     async (nonce: string, txHashString: string) => {
       if (!walletAddress) return;
       try {
-        const res = await confirmRewardClaim(walletAddress, nonce, txHashString);
+        const res = await confirmRewardClaim(nonce, txHashString);
         if (res?.success) {
           setTxHash(txHashString);
           setClaimStep('done');
@@ -206,7 +206,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('signing');
     setClaimError(null);
 
-    const voucher: RewardVoucher | { error: string } = await generateTokenVoucher(walletAddress);
+    const voucher: RewardVoucher | { error: string } = await generateTokenVoucher();
     if ('error' in voucher) {
       setClaimError(voucher.error);
       setClaimStep('error');
@@ -271,7 +271,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('signing');
     setClaimError(null);
 
-    const voucher = await generateBadgeVoucher(walletAddress, badgeType);
+    const voucher = await generateBadgeVoucher(badgeType);
     if ('error' in voucher) {
       setClaimError(voucher.error);
       setClaimStep('error');

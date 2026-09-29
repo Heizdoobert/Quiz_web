@@ -17,8 +17,9 @@ import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon, optimism, arbitrum, base, baseSepolia } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuizAuth } from '@/hooks/shared/use-quiz-auth';
+import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 
 // Configure Coinbase Wallet to support Coinbase Smart Wallet (passkeys / EIP-5792).
 // In @rainbow-me/rainbowkit, static property assignment on the wallet factory
@@ -48,6 +49,14 @@ const config = getDefaultConfig({
 
 function RainbowAuthWrapper({ children }: { children: React.ReactNode }) {
   const { adapter, status } = useQuizAuth();
+  const { refresh } = useSession();
+
+  // The wallet's sign-in/out lives in RainbowKit's auth status; the session
+  // cookie changes alongside it (auth-actions.ts), so re-read it here too.
+  useEffect(() => {
+    void refresh();
+  }, [status, refresh]);
+
   return (
     <RainbowKitAuthenticationProvider adapter={adapter} status={status}>
       <RainbowKitProvider theme={darkTheme()}>{children}</RainbowKitProvider>
@@ -62,7 +71,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <MotionConfig reducedMotion="user">
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
-          <RainbowAuthWrapper>{children}</RainbowAuthWrapper>
+          <SessionProvider>
+            <RainbowAuthWrapper>{children}</RainbowAuthWrapper>
+          </SessionProvider>
         </QueryClientProvider>
       </WagmiProvider>
     </MotionConfig>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createQuestion } from '@/lib/actions/question-actions';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 
 interface UseQuestionFormOptions {
   walletAddress: string | null;
@@ -20,7 +20,7 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
   const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(
     null
   );
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
 
   const handleOptionChange = (idx: number, val: string) => {
     const updated = [...options];

@@ -1,7 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { clearSessionWallet, getSessionWallet } from '../lib/wallet-session';
-import { setSessionAccount } from '../lib/session';
-import { getAuthNonce, requestSignIn, signInWithWallet, signOutWallet } from '../lib/actions/auth-actions';
+import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/session';
+import {
+  getAuthNonce,
+  requestSignIn,
+  signInWithWallet,
+  signOutWallet,
+  getSessionInfo,
+} from '../lib/actions/auth-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { publicClientFor } from '../lib/chain';
 
@@ -56,24 +61,30 @@ describe('Auth & Session Foundations', () => {
     process.env.SUPABASE_SECRET_KEY = TEST_SECRET;
   });
 
-  describe('wallet-session', () => {
-    it('sets and retrieves session wallet correctly', async () => {
+  describe('session', () => {
+    it('sets and retrieves the session account correctly', async () => {
       const ok = await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
       expect(ok).toBe(true);
 
-      const wallet = await getSessionWallet();
-      expect(wallet).toBe(TEST_WALLET.toLowerCase());
+      const account = await getSessionAccount();
+      expect(account).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
     });
 
-    it('clearSessionWallet deletes the session cookie', async () => {
+    it('clearSessionAccount deletes the session cookie', async () => {
       await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
       expect(cookieStore.has('quiz_session')).toBe(true);
 
-      await clearSessionWallet();
+      await clearSessionAccount();
       expect(cookieStore.has('quiz_session')).toBe(false);
 
-      const wallet = await getSessionWallet();
-      expect(wallet).toBeNull();
+      const account = await getSessionAccount();
+      expect(account).toBeNull();
+    });
+
+    it('getSessionInfo returns the same account as getSessionAccount', async () => {
+      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      const info = await getSessionInfo();
+      expect(info).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
     });
   });
 
