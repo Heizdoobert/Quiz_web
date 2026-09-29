@@ -57,6 +57,40 @@ export async function ensureAccountForAuthUser(authUserId: string): Promise<stri
   return data.id;
 }
 
+// Attach a wallet to an existing account (add-wallet flow). Never call this
+// without a session confirming the account has no wallet yet and a verified
+// SIWE signature for the new address.
+export async function linkWalletToAccount(
+  accountId: string,
+  walletAddress: string
+): Promise<'ok' | 'in_use' | 'error'> {
+  if (!supabaseAdmin) {
+    console.error('linkWalletToAccount: SUPABASE_SECRET_KEY is not set');
+    return 'error';
+  }
+  const wallet = walletAddress.toLowerCase();
+  const { data: existing, error: lookupError } = await supabaseAdmin
+    .from('users')
+    .select('id')
+    .eq('wallet_address', wallet)
+    .maybeSingle();
+  if (lookupError) {
+    console.error('linkWalletToAccount lookup error:', lookupError);
+    return 'error';
+  }
+  if (existing) return existing.id === accountId ? 'ok' : 'in_use';
+
+  const { error: updateError } = await supabaseAdmin
+    .from('users')
+    .update({ wallet_address: wallet, wallet_linked_at: new Date().toISOString() })
+    .eq('id', accountId);
+  if (updateError) {
+    console.error('linkWalletToAccount update error:', updateError);
+    return (updateError as { code?: string }).code === '23505' ? 'in_use' : 'error';
+  }
+  return 'ok';
+}
+
 // Read-only lookup for a caller that still only has a wallet, not a session
 // (reward-actions, until Task 9). Public key: `id` is readable by anon.
 export async function accountIdForWallet(walletAddress: string): Promise<string | null> {

@@ -91,7 +91,7 @@ export default function Header({
           </button>
         )}
 
-        <ConnectButton label="Connect" showBalance={false} />
+        <ConnectButton label={account && !account.wallet ? 'Add wallet' : 'Connect'} showBalance={false} />
       </div>
     </header>
   );

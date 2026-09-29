@@ -65,7 +65,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [x] Task 10: Client session provider and sign-in modal (wallet)
 - [x] Task 11: Session-based gating on list, contest and profile pages
 - [x] Task 12: Email code sign-in
-- [ ] Task 13: Add a wallet to an email account
+- [x] Task 13: Add a wallet to an email account
 
 ### Checkpoint: Identity
 - [ ] Gates and build pass; grep finds 0 uses of `getSessionWallet` and `useWalletSession`

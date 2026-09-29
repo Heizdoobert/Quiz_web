@@ -348,13 +348,23 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/actions/auth-actions.ts`, `lib/users.ts`, `components/auth/SignInModal.tsx`, `lib/rewards-copy.ts`, tests
 - Depends: 10. Size: M
 
-### Task 13: Add a wallet to an email account
+### Task 13: Add a wallet to an email account — done
+- Result:
+  - `lib/users.ts`: new `linkWalletToAccount(accountId, walletAddress)` — looks up the wallet first (existing row on the same account is a no-op success, on another account is `'in_use'`), otherwise `UPDATE`s the account row with `wallet_address`/`wallet_linked_at`; a unique-violation from that update (two signatures racing for the same new wallet) is also mapped to `'in_use'`, not `'error'`.
+  - `lib/actions/auth-actions.ts`: new `linkWallet(message, signature)` — same SIWE challenge/verify shape as `signInWithWallet`, gated on `getSessionAccount()` having no wallet yet; returns `{ ok: false, code: 'WALLET_IN_USE' }` on a taken wallet, `{ ok: true }` and re-sets `quiz_session` with the new wallet on success.
+  - `lib/auth-adapter.ts`: `verify()` is now session-aware — one wallet-connect flow for the whole app, not two code paths. It calls `getSessionInfo()` first: a session with no wallet yet routes the signature to `linkWallet`; anyone else (no session, or already has a wallet) goes to `signInWithWallet` as before. Because every `ConnectButton` in the app (header, `SignInModal`) shares this one `RainbowKitAuthenticationProvider` adapter, this single change wires "Add wallet" everywhere without touching `SignInModal.tsx` — no duplicate modal or bespoke wallet-connect code needed there.
+  - `components/layout/Header.tsx`: the header's `ConnectButton` label switches to "Add wallet" when `account && !account.wallet`, else "Connect" (unchanged for guests and wallet accounts). No new modal; clicking it runs the same RainbowKit connect+sign flow, which the adapter now resolves as a link.
+  - Full disclosure text next to "Add wallet" is left to Task 23 (todo.md's acceptance for this task doesn't require it; the full spec's UI note about showing it is more naturally done once Task 23 revisits `SignInModal`/`Header` together, per `plan.md`'s parallelization note).
+  - Tests: `tests/identity-accounts.test.ts` — 24 tests now (was 19), new `linkWallet` describe covers: sets wallet + re-signs session; `WALLET_IN_USE` for another account's wallet (no update call); refuses when the session's account already has a wallet; `WALLET_IN_USE` on the update-race unique-violation path; refuses on a bad signature. `tests/auth-adapter.test.ts` updated to mock the two new `auth-actions` exports (`getSessionInfo`, `linkWallet`) and gained one test asserting `verify` delegates to `linkWallet` when the session has no wallet.
+  - Mutation-tested `linkWallet`'s `if (!account || account.wallet) return { ok: false };` guard (dropped the `account.wallet` half) — caught by 1/24 ("refuses an account that already has a wallet"). Restored, re-confirmed 24/24 green.
+  - Gate: 165/165 tests, `tsc --noEmit` clean, eslint clean (same pre-existing unrelated `coverage/block-navigation.js` warning as prior tasks), `depcruise` clean (311 dependencies, no cycles), gitleaks clean.
+  - Not done: manual add-wallet click-through on a real Supabase/wallet session (needs you, same as Task 12's manual email check).
 - Acceptance:
   - `linkWallet` sets the wallet and `wallet_linked_at` after a valid SIWE signature for an account without a wallet
   - it returns `WALLET_IN_USE` for a wallet on another account
   - the header shows "Add wallet" only for accounts without one
 - Verify: `npx vitest run tests/identity-accounts.test.ts`
-- Files: `lib/actions/auth-actions.ts`, `components/auth/SignInModal.tsx`, `components/layout/Header.tsx`, tests
+- Files: `lib/actions/auth-actions.ts`, `lib/users.ts`, `lib/auth-adapter.ts`, `components/layout/Header.tsx`, tests
 - Depends: 12. Size: S
 
 ### Checkpoint: Identity

@@ -2,7 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { createQuizAuthAdapter } from '../lib/auth-adapter';
 import { useQuizAuth } from '../hooks/shared/use-quiz-auth';
-import { getAuthNonce, signInWithWallet, signOutWallet, getSignedInWallet } from '../lib/actions/auth-actions';
+import {
+  getAuthNonce,
+  signInWithWallet,
+  signOutWallet,
+  getSignedInWallet,
+  getSessionInfo,
+  linkWallet,
+} from '../lib/actions/auth-actions';
 import { useAccount } from 'wagmi';
 
 vi.mock('../lib/actions/auth-actions', () => ({
@@ -10,6 +17,8 @@ vi.mock('../lib/actions/auth-actions', () => ({
   signInWithWallet: vi.fn(),
   signOutWallet: vi.fn(),
   getSignedInWallet: vi.fn(),
+  getSessionInfo: vi.fn(),
+  linkWallet: vi.fn(),
 }));
 
 vi.mock('wagmi', () => ({
@@ -35,6 +44,7 @@ describe('RainbowKit SIWE Authentication Adapter (Task 2)', () => {
       status: 'disconnected',
     });
     (getSignedInWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (getSessionInfo as ReturnType<typeof vi.fn>).mockResolvedValue(null);
   });
 
   describe('createQuizAuthAdapter', () => {
@@ -89,6 +99,20 @@ describe('RainbowKit SIWE Authentication Adapter (Task 2)', () => {
 
       expect(result).toBe(false);
       expect(onSignIn).not.toHaveBeenCalled();
+    });
+
+    it('verify delegates to linkWallet when the session has no wallet yet', async () => {
+      (getSessionInfo as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'acc-1', wallet: null });
+      (linkWallet as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
+      const onSignIn = vi.fn();
+      const adapter = createQuizAuthAdapter({ onSignIn });
+
+      const result = await adapter.verify({ message: 'test-siwe-message', signature: '0xsignature' });
+
+      expect(result).toBe(true);
+      expect(linkWallet).toHaveBeenCalledWith('test-siwe-message', '0xsignature');
+      expect(signInWithWallet).not.toHaveBeenCalled();
+      expect(onSignIn).toHaveBeenCalledTimes(1);
     });
 
     it('signOut delegates to signOutWallet and triggers onSignOut', async () => {

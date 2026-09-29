@@ -1,7 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { getSessionAccount, setSessionAccount } from '../lib/session';
 import { ensureAccountForWallet } from '../lib/users';
-import { signInWithWallet, getSignedInWallet, requestEmailCode, verifyEmailCode } from '../lib/actions/auth-actions';
+import {
+  signInWithWallet,
+  getSignedInWallet,
+  requestEmailCode,
+  verifyEmailCode,
+  linkWallet,
+} from '../lib/actions/auth-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { supabase } from '../lib/supabase';
 
@@ -39,6 +45,16 @@ function mockUsersTable(lookup: { data: { id: string } | null; error: unknown },
   const eq = vi.fn(() => ({ single }));
   (supabaseAdmin!.from as Mock).mockReturnValue({ upsert, select: () => ({ eq }) });
   return { upsert, eq };
+}
+
+function mockLinkWallet(existing: { id: string } | null, updateError: unknown = null) {
+  const maybeSingle = vi.fn().mockResolvedValue({ data: existing, error: null });
+  const update = vi.fn(() => ({ eq: vi.fn().mockResolvedValue({ error: updateError }) }));
+  (supabaseAdmin!.from as Mock).mockReturnValue({
+    select: () => ({ eq: () => ({ maybeSingle }) }),
+    update,
+  });
+  return { update };
 }
 
 beforeEach(() => {
@@ -227,5 +243,65 @@ describe('verifyEmailCode', () => {
 
     expect(res).toEqual({ ok: false });
     expect(await getSessionAccount()).toBeNull();
+  });
+});
+
+describe('linkWallet', () => {
+  beforeEach(async () => {
+    state.jar.set('wallet_challenge', 'nonce');
+    await setSessionAccount({ id: ACCOUNT_ID, wallet: null });
+  });
+
+  it("sets the wallet and wallet_linked_at once the signature verifies", async () => {
+    const { update } = mockLinkWallet(null);
+
+    const res = await linkWallet('message', ('0x' + 'c'.repeat(130)) as `0x${string}`);
+
+    expect(res).toEqual({ ok: true });
+    expect(update).toHaveBeenCalledWith(
+      expect.objectContaining({ wallet_address: WALLET, wallet_linked_at: expect.any(String) })
+    );
+    expect(await getSessionAccount()).toEqual({ id: ACCOUNT_ID, wallet: WALLET });
+  });
+
+  it('returns WALLET_IN_USE and changes nothing for a wallet on another account', async () => {
+    const { update } = mockLinkWallet({ id: OTHER_ID });
+
+    const res = await linkWallet('message', ('0x' + 'c'.repeat(130)) as `0x${string}`);
+
+    expect(res).toEqual({ ok: false, code: 'WALLET_IN_USE' });
+    expect(update).not.toHaveBeenCalled();
+    expect(await getSessionAccount()).toEqual({ id: ACCOUNT_ID, wallet: null });
+  });
+
+  it('refuses an account that already has a wallet', async () => {
+    await setSessionAccount({ id: ACCOUNT_ID, wallet: WALLET });
+    const { update } = mockLinkWallet(null);
+
+    const res = await linkWallet('message', ('0x' + 'c'.repeat(130)) as `0x${string}`);
+
+    expect(res).toEqual({ ok: false });
+    expect(update).not.toHaveBeenCalled();
+  });
+
+  it('reports WALLET_IN_USE when two signatures race for the same new wallet', async () => {
+    const { update } = mockLinkWallet(null, { code: '23505', message: 'duplicate key' });
+
+    const res = await linkWallet('message', ('0x' + 'c'.repeat(130)) as `0x${string}`);
+
+    expect(res).toEqual({ ok: false, code: 'WALLET_IN_USE' });
+    expect(update).toHaveBeenCalled();
+    expect(await getSessionAccount()).toEqual({ id: ACCOUNT_ID, wallet: null });
+  });
+
+  it('does not link when the signature fails to verify', async () => {
+    const { update } = mockLinkWallet(null);
+    state.siweValid = false;
+
+    const res = await linkWallet('message', ('0x' + 'c'.repeat(130)) as `0x${string}`);
+
+    expect(res).toEqual({ ok: false });
+    expect(update).not.toHaveBeenCalled();
+    expect(await getSessionAccount()).toEqual({ id: ACCOUNT_ID, wallet: null });
   });
 });
