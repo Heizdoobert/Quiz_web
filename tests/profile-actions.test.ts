@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
 import { supabase } from '../lib/supabase';
 import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionWallet } from '../lib/wallet-session';
+import { getSessionAccount } from '../lib/session';
 
 // Mock the supabase module
 vi.mock('../lib/supabase', () => ({
@@ -17,13 +17,15 @@ vi.mock('../lib/supabase-admin', () => ({
     from: vi.fn(),
   },
 }));
-vi.mock('../lib/wallet-session', () => ({
-  getSessionWallet: vi.fn(),
+vi.mock('../lib/session', () => ({
+  getSessionAccount: vi.fn(),
 }));
 
 // Valid Ethereum address for testing (40 hex chars after 0x)
 const VALID_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678';
 const VALID_ADDRESS_CHECKSUMMED = '0x1234567890ABCDEF1234567890abcdef12345678';
+const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
+const ACCOUNT = { id: ACCOUNT_ID, wallet: VALID_ADDRESS };
 
 describe('profile-actions', () => {
   beforeEach(() => {
@@ -126,39 +128,19 @@ describe('profile-actions', () => {
 
   describe('exportUserData', () => {
     beforeEach(() => {
-      (getSessionWallet as import("vitest").Mock).mockResolvedValue(VALID_ADDRESS);
+      (getSessionAccount as import("vitest").Mock).mockResolvedValue(ACCOUNT);
     });
 
-    it('refuses to export a wallet that is not the signed-in one', async () => {
-      (getSessionWallet as import("vitest").Mock).mockResolvedValue(null);
-      const guest = await exportUserData(VALID_ADDRESS);
+    it('refuses to export without a session', async () => {
+      (getSessionAccount as import("vitest").Mock).mockResolvedValue(null);
+      const result = await exportUserData();
 
-      (getSessionWallet as import("vitest").Mock).mockResolvedValue('0x' + 'b'.repeat(40));
-      const otherWallet = await exportUserData(VALID_ADDRESS);
-
-      for (const result of [guest, otherWallet]) {
-        expect(result.success).toBe(false);
-        if (!result.success) expect(result.code).toBe('UNAUTHORIZED');
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error).toBe('Sign in to export your data.');
+        expect(result.code).toBe('UNAUTHORIZED');
       }
       expect(supabaseAdmin!.from).not.toHaveBeenCalled();
-    });
-
-    it('returns an error with code INVALID_ADDRESS if walletAddress is empty', async () => {
-      const result = await exportUserData('');
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe('A valid wallet address is required for security.');
-        expect(result.code).toBe('INVALID_ADDRESS');
-      }
-    });
-
-    it('returns an error if walletAddress is invalid', async () => {
-      const result = await exportUserData('0xinvalid');
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe('A valid wallet address is required for security.');
-        expect(result.code).toBe('INVALID_ADDRESS');
-      }
     });
 
     it('returns sanitized error with code EXPORT_FAILED when statsResponse fails (no DB leak)', async () => {
@@ -178,7 +160,7 @@ describe('profile-actions', () => {
         };
       });
 
-      const result = await exportUserData(VALID_ADDRESS);
+      const result = await exportUserData();
       expect(result.success).toBe(false);
       if (!result.success) {
         // Must NOT leak internal database table/constraint names
@@ -187,36 +169,42 @@ describe('profile-actions', () => {
       }
     });
 
-    it('exports data successfully with schema version and normalized address', async () => {
+    it('exports data keyed by account id, with schema version and wallet from the session', async () => {
       const mockQuizzes = [{ id: '1', prompt: 'Q1' }];
       const mockStats = [{ id: 's1', score: 100 }];
+      const eqCalls: Array<[string, string]> = [];
 
       let callCount = 0;
       (supabaseAdmin!.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
         return {
           select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              limit: vi.fn().mockResolvedValue(
-                callCount === 1
-                  ? { data: mockQuizzes, error: null }
-                  : { data: mockStats, error: null }
-              ),
+            eq: vi.fn().mockImplementation((col: string, val: string) => {
+              eqCalls.push([col, val]);
+              return {
+                limit: vi.fn().mockResolvedValue(
+                  callCount === 1
+                    ? { data: mockQuizzes, error: null }
+                    : { data: mockStats, error: null }
+                ),
+              };
             }),
           }),
         };
       });
 
-      const result = await exportUserData(VALID_ADDRESS_CHECKSUMMED);
+      const result = await exportUserData();
 
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('questions');
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('quiz_results');
+      expect(eqCalls).toContainEqual(['created_by_user', ACCOUNT_ID]);
+      expect(eqCalls).toContainEqual(['user_id', ACCOUNT_ID]);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.version).toBe('1.0');
         expect(result.data.quizzes).toEqual(mockQuizzes);
         expect(result.data.stats).toEqual(mockStats);
-        expect(result.data.walletAddress).toBe(VALID_ADDRESS_CHECKSUMMED.toLowerCase());
+        expect(result.data.walletAddress).toBe(VALID_ADDRESS);
         expect(result.data.isTruncated).toBe(false);
       }
     });
@@ -239,7 +227,7 @@ describe('profile-actions', () => {
         };
       });
 
-      const result = await exportUserData(VALID_ADDRESS);
+      const result = await exportUserData();
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.isTruncated).toBe(true);

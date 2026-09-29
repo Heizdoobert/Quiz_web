@@ -145,11 +145,28 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   statement lines in `group-actions.ts` covered (verified via `coverage-final.json` cross-referenced
   against `git diff` hunks).
 
-### Task 8: Profile export on `user_id`
+### Task 8: Profile export on `user_id` — done
 - Acceptance: `exportUserData()` takes no address and exports only the session account's data; the `/profile` page is updated.
 - Verify: `npx vitest run tests/profile-actions.test.ts tests/profile-page.test.tsx`
 - Files: `lib/actions/profile-actions.ts`, `app/profile/page.tsx`, tests
 - Depends: 2. Size: S
+- Result: `exportUserData()` now takes no argument; gated by `getSessionAccount()` (was `getSessionWallet()`
+  equality check). Reads move to account-id columns: `questions.created_by_user` and
+  `quiz_results.user_id`, both already present from Task 1's migration. Backup's `walletAddress` field
+  now comes from `account.wallet` (empty string for wallet-less accounts) instead of the caller-supplied
+  address. `getUserQuizzes()` is untouched — it's a public read keyed by an arbitrary wallet address, not
+  session-gated, out of this task's scope (acceptance criteria named only `exportUserData`). `/profile`
+  page's one call site updated (`exportUserData(address)` -> `exportUserData()`); its wagmi-based
+  `address`/`isConnected` gating is untouched pending Task 10/11.
+  `tests/profile-actions.test.ts`: rewrote the `exportUserData` suite for the new signature (9 tests:
+  not-signed-in guard, stats-fetch-failure, success keyed by account id with `created_by_user`/`user_id`
+  asserted, truncation flag); `getUserQuizzes` suite (6 tests) untouched. `tests/profile-page.test.tsx`
+  (8 tests) needed no change — it only mocks `exportUserData`'s return value, not its call signature.
+  Mutation-tested the `if (!account)` gate (inverted to `if (account)`) — caught by 4/9 `exportUserData`
+  tests; restored via job-tmp backup, confirmed 17/17 green in both files after.
+  Gate: 118/118 tests pass, `tsc`/eslint clean, 60.59% line coverage (floor 54%), every changed executable
+  line in both files covered (verified via `coverage-final.json` cross-referenced against `git diff`
+  hunks).
 
 ### Task 9: Rewards on `user_id`; delete `lib/wallet-session.ts`
 - Acceptance:
