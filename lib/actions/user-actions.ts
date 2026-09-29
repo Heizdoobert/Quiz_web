@@ -1,14 +1,16 @@
 'use server';
 
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import { User } from '@/lib/types';
 
 export async function getOrCreateUser(walletAddress: string): Promise<User | null> {
   if (!walletAddress) return null;
   const normalized = walletAddress.toLowerCase();
+  const db = supabaseAdmin || supabase;
 
   try {
-    const { data: existingUser, error: fetchError } = await supabase
+    const { data: existingUser, error: fetchError } = await db
       .from('users')
       .select('*')
       .eq('wallet_address', normalized)
@@ -29,7 +31,7 @@ export async function getOrCreateUser(walletAddress: string): Promise<User | nul
       created_at: new Date().toISOString(),
     };
 
-    const { data: inserted, error: insertError } = await supabase
+    const { data: inserted, error: insertError } = await db
       .from('users')
       .insert(newUser)
       .select()

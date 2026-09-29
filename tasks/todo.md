@@ -1,135 +1,102 @@
-# Tasks: On-Chain Contest Escrow Smart Contract
+# Tasks: Automatic Wallet Authentication & User Persistence
 
-## Task 1: Implement `ContestEscrow.sol`
-**Description:** Implement the `ContestEscrow` Solidity contract inheriting OpenZeppelin's `Ownable`, `ReentrancyGuard`, and `EIP712`. Allows creators to lock `$QUIZ` tokens in escrow, players to claim rewards with EIP-712 vouchers, and creators to refund remaining tokens post-expiry.
+## Task 1: Server-side Auth Session & User Auto-Creation
+**Description:** Add session clearing functionality and update `signInWithWallet` to automatically register/fetch the user profile in Supabase upon successful SIWE verification. Update `getOrCreateUser` to use `supabaseAdmin || supabase`.
 
 **Acceptance criteria:**
-- [x] Contract compiles with Solidity ^0.8.24
-- [x] `createContest` locks ERC-20 tokens via `SafeERC20.safeTransferFrom`
-- [x] `claimReward` verifies EIP-712 signature from `authorizedSigner`, prevents replay, and transfers tokens
-- [x] `refundRemaining` returns unearned tokens to creator after `expiresAt`
+- [x] `lib/wallet-session.ts` exports `clearSessionWallet(): Promise<void>` which deletes `SESSION_COOKIE`
+- [x] `lib/actions/auth-actions.ts` exports `signOutWallet(): Promise<void>`
+- [x] `lib/actions/auth-actions.ts` `signInWithWallet` calls `getOrCreateUser(address)` on successful signature verification
+- [x] `lib/actions/user-actions.ts` `getOrCreateUser` uses `supabaseAdmin || supabase`
+- [x] Unit tests in `tests/auth-actions.test.ts` verify session creation, clearing, and user persistence trigger
 
 **Verification:**
-- [x] `npm --prefix contracts run compile` succeeds with 0 errors
+- [x] Tests pass: `npx vitest run tests/auth-actions.test.ts`
+- [x] Types pass: `npm run type-check`
 
 **Dependencies:** None
 **Files likely touched:**
-- `contracts/contracts/ContestEscrow.sol`
-**Estimated scope:** Medium
+- `lib/wallet-session.ts`
+- `lib/actions/auth-actions.ts`
+- `lib/actions/user-actions.ts`
+- `tests/auth-actions.test.ts`
+**Estimated scope:** Medium (3-4 files)
 
 ---
 
-## Task 2: Hardhat Test Suite for `ContestEscrow.sol`
-**Description:** Write unit and scenario tests covering all execution paths and failure modes of `ContestEscrow.sol`.
+## Task 2: RainbowKit SIWE Authentication Adapter & State Hook
+**Description:** Implement the RainbowKit v2 `AuthenticationAdapter` and a React hook or state manager for authentication status (`'loading' | 'unauthenticated' | 'authenticated'`) that synchronizes with wallet address and server session state.
 
 **Acceptance criteria:**
-- [x] Tests contest creation, deposit balance, and event emission
-- [x] Tests valid EIP-712 reward claim and recipient token receipt
-- [x] Tests replay protection (reverting on reused nonce)
-- [x] Tests deadline enforcement (reverting on expired voucher)
-- [x] Tests signature verification (reverting on tampered contestId, recipient, amount, or nonce)
-- [x] Tests pool bounds (reverting if claim exceeds remaining pool)
-- [x] Tests refund authorization and timing (reverts before `expiresAt`, succeeds after `expiresAt`)
+- [x] `lib/auth-adapter.ts` exports `createQuizAuthAdapter` implementing `getNonce`, `createMessage`, `verify`, and `signOut`
+- [x] React hook / helper manages `AuthenticationStatus` tracking wallet connect/disconnect/account changes
+- [x] Server action `getNonce` endpoint/action provides challenges for `createSiweMessage`
+- [x] Unit tests in `tests/auth-adapter.test.ts` test adapter methods and status transitions
 
 **Verification:**
-- [x] `npm --prefix contracts test` passes 100%
+- [x] Tests pass: `npx vitest run tests/auth-adapter.test.ts`
+- [x] Types pass: `npm run type-check`
 
 **Dependencies:** Task 1
 **Files likely touched:**
-- `contracts/test/ContestEscrow.test.ts`
-**Estimated scope:** Medium
+- `lib/actions/auth-actions.ts`
+- `lib/auth-adapter.ts`
+- `tests/auth-adapter.test.ts`
+**Estimated scope:** Medium (2-3 files)
 
 ---
 
-## Task 3: Export ABI and Contract Addresses
-**Description:** Generate typed ABI and address constants for `ContestEscrow` in the web application codebase.
+## Checkpoint: Foundation
+- [x] Server auth actions and RainbowKit adapter unit tests pass
+- [x] `npm run type-check` and `npm run lint` clean
+- [x] Review foundation before UI wiring
+
+---
+
+## Task 3: Wire RainbowKitAuthenticationProvider into Providers & Header
+**Description:** Wrap `RainbowKitAuthenticationProvider` around `RainbowKitProvider` in `components/Providers.tsx` and ensure `useWalletSession` seamlessly works with the newly authenticated session.
 
 **Acceptance criteria:**
-- [x] `lib/contracts/ContestEscrowABI.ts` contains the generated ABI
-- [x] `lib/contracts/addresses.ts` exports `CONTEST_ESCROW_ADDRESS`
-- [x] `contracts/scripts/sync-abi.ts` updated to include `ContestEscrow`
+- [x] `components/Providers.tsx` includes `RainbowKitAuthenticationProvider` with adapter and dynamic status
+- [x] Connecting wallet prompts SIWE signature dialog automatically
+- [x] When signed in, `ConnectButton` displays account info; when signed out, session is cleared
+- [x] `useWalletSession` in `hooks/shared/use-wallet-session.ts` leverages existing session without duplicate prompts
+- [x] Component integration tests in `tests/Providers.test.tsx` or `tests/auth-integration.test.tsx` pass
 
 **Verification:**
-- [x] TypeScript compiles cleanly: `npm run type-check`
+- [x] Tests pass: `npm test`
+- [x] Build succeeds: `npm run build`
 
-**Dependencies:** Task 1
+**Dependencies:** Task 1, Task 2
 **Files likely touched:**
-- `contracts/scripts/sync-abi.ts`
-- `lib/contracts/ContestEscrowABI.ts`
-- `lib/contracts/addresses.ts`
-**Estimated scope:** Small
+- `components/Providers.tsx`
+- `hooks/shared/use-wallet-session.ts`
+- `tests/auth-integration.test.tsx`
+**Estimated scope:** Small (2-3 files)
 
 ---
 
-## Task 4: Unpause & Implement `claimListReward` Server Action
-**Description:** Unpause the `claimListReward` Server Action in `lib/actions/question-list-actions.ts`, signing EIP-712 `ClaimContestReward` vouchers for `ContestEscrow`.
+## Checkpoint: UI Integration
+- [x] Connecting wallet triggers SIWE sign-in prompt
+- [x] Disconnecting wallet calls `signOutWallet` and clears session cookie
+- [x] End-to-end flow connects, signs in, and persists user in Supabase
+
+---
+
+## Task 4: Full System Verification & Constraint Validation
+**Description:** Run the full test suite with coverage checks, verify changed lines coverage >= 80%, project coverage ratchet >= 54%, and ensure lint, type-check, and bundle budget constraints are met.
 
 **Acceptance criteria:**
-- [x] Requires signed-in wallet via `getSessionWallet()`
-- [x] Verifies contest completion in `list_entries`
-- [x] Calculates earned tokens and issues valid EIP-712 voucher targeting `ContestEscrow`
-- [x] Records pending claim in `reward_claims`
-- [x] Unit tests updated in `tests/answer-and-list-guards.test.ts`
+- [x] `npx vitest run tests/ --coverage` passes with changed lines >= 80% and total lines >= 54%
+- [x] `npm run type-check` passes with 0 errors
+- [x] `npm run lint` passes with 0 errors
+- [x] `npm run build` succeeds with route bundle <= 150 kB gzip
+- [x] Zero new `@ts-ignore` or `eslint-disable` comments added
 
 **Verification:**
-- [x] `npm test` passes all tests
+- [x] `npm run check:task` and `npm run check:fast` exit with code 0
 
-**Dependencies:** Task 3
+**Dependencies:** Tasks 1-3
 **Files likely touched:**
-- `lib/actions/question-list-actions.ts`
-- `lib/types.ts`
-- `tests/answer-and-list-guards.test.ts`
-**Estimated scope:** Medium
-
----
-
-## Task 5: Connect Contest Play & Claim UI
-**Description:** Update `components/lists/ContestPlay.tsx` to execute `claimReward` on `ContestEscrow` instead of `QuizToken`.
-
-**Acceptance criteria:**
-- [x] Calls `claimReward` on `CONTEST_ESCROW_ADDRESS` using `ContestEscrowABI`
-- [x] Handles transaction submission, receipt waiting, and state transitions
-- [x] Calls `markListRewardClaimed` upon receipt confirmation
-
-**Verification:**
-- [x] `npm run type-check` and `npm run build` succeed
-
-**Dependencies:** Task 3, Task 4
-**Files likely touched:**
-- `components/lists/ContestPlay.tsx`
-**Estimated scope:** Small
-
----
-
-## Task 6: Connect Creator Contest Funding UI
-**Description:** Update `components/lists/MyListsDashboard.tsx` to handle ERC-20 approval and `createContest` call when a creator launches a contest.
-
-**Acceptance criteria:**
-- [x] Prompt creator to approve token spend and create contest on-chain if pool > 0
-- [x] Updates list state on successful transaction
-
-**Verification:**
-- [x] `npm run type-check` and `npm run build` succeed
-
-**Dependencies:** Task 3, Task 5
-**Files likely touched:**
-- `components/lists/MyListsDashboard.tsx`
-**Estimated scope:** Medium
-
----
-
-## Task 7: Full System Verification & Quality Gates
-**Description:** Run the complete suite of tests and checks across both the smart contract and web application environments.
-
-**Acceptance criteria:**
-- [x] Hardhat tests pass 100% (`npm --prefix contracts test`)
-- [x] Web application unit tests pass 100% (`npm test`)
-- [x] `npm run lint` clean
-- [x] `npm run type-check` clean
-- [x] `npm run build` production build succeeds
-
-**Verification:**
-- [x] All check commands exit with code 0
-
-**Dependencies:** Tasks 1-6
+- None (verification only)
 **Estimated scope:** Small
