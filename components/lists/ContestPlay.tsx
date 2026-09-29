@@ -1,17 +1,15 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
+import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
 import { ArrowLeft, Loader2, Trophy, Coins, CheckCircle2, XCircle } from 'lucide-react';
-
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
 
@@ -22,11 +20,9 @@ function formatTokens(weiStr: string): string {
 
 export default function ContestPlay({
   list,
-  wallet,
   onExit,
 }: {
   list: QuestionListWithMeta;
-  wallet: string;
   onExit: () => void;
 }) {
   const [questions, setQuestions] = useState<ClientQuestion[] | null>(null);
@@ -45,8 +41,9 @@ export default function ContestPlay({
   const { switchChain } = useSwitchChain();
   const { writeContractAsync } = useWriteContract();
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
+  const { address } = useAccount();
 
-  const ensureSession = useWalletSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   useEffect(() => {
     // Contest answers only count for the signed-in wallet that started the attempt.
@@ -66,7 +63,7 @@ export default function ContestPlay({
 
   useEffect(() => {
     if (txConfirmed && currentNonce && txHash) {
-      confirmRewardClaim(wallet, currentNonce, txHash).then((res) => {
+      confirmRewardClaim(currentNonce, txHash).then((res) => {
         if (res?.success) {
           setClaimStep('done');
         } else {
@@ -76,7 +73,7 @@ export default function ContestPlay({
         setCurrentNonce(null);
       });
     }
-  }, [txConfirmed, currentNonce, txHash, wallet]);
+  }, [txConfirmed, currentNonce, txHash]);
 
   const isWrongChain = chainId !== TARGET_CHAIN_ID;
 
@@ -105,6 +102,11 @@ export default function ContestPlay({
 
   const handleClaim = async () => {
     setClaimError(null);
+    if (account?.wallet && address && address.toLowerCase() !== account.wallet.toLowerCase()) {
+      setClaimError(`Switch your connected wallet to ${account.wallet} to claim this reward.`);
+      setClaimStep('error');
+      return;
+    }
     setClaimStep('signing');
     const voucher: RewardVoucher | { error: string } = await claimListReward(list.id);
     if ('error' in voucher) {
@@ -163,7 +165,7 @@ export default function ContestPlay({
             onClick={() => switchChain({ chainId: TARGET_CHAIN_ID })}
             className="px-4 py-2 bg-[#FF4757] text-white rounded-xl font-bold text-sm cursor-pointer"
           >
-            Switch to Base Sepolia
+            Switch to {TARGET_CHAIN_NAME}
           </button>
         ) : claimStep === 'done' ? (
           <p className="text-[#00FFCC] font-bold text-sm flex items-center justify-center gap-1.5">

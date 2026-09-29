@@ -1,11 +1,10 @@
 'use client';
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { useAccount } from 'wagmi';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
 import { ClientQuestion } from '@/lib/types';
 import { downloadJson } from '@/lib/utils';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';
 import CreatorQuizCard from '@/components/profile/CreatorQuizCard';
@@ -16,8 +15,7 @@ import AccessDeniedView from '@/components/profile/AccessDeniedView';
 import { AlertCircle } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { address, isConnected } = useAccount();
-  const ensureSession = useWalletSession();
+  const { account, requireSignIn: ensureSession } = useSession();
   const [quizzes, setQuizzes] = useState<ClientQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -29,13 +27,18 @@ export default function ProfilePage() {
   useEffect(() => {
     let isCancelled = false;
 
-    if (!isConnected || !address) {
+    // Created-quiz lookup is still wallet-keyed (out of Task 11's scope); an email-only
+    // account has nothing to look up, so show the dashboard empty instead of spinning forever.
+    if (!account?.wallet) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setLoading(false);
       return;
     }
+    const wallet = account.wallet;
 
     async function load() {
       try {
-        const res = await getUserQuizzes(address as string);
+        const res = await getUserQuizzes(wallet);
         if (!isCancelled) {
           if (res.success) {
             setQuizzes(res.quizzes);
@@ -60,7 +63,7 @@ export default function ProfilePage() {
     return () => {
       isCancelled = true;
     };
-  }, [address, isConnected, reloadTrigger]);
+  }, [account, reloadTrigger]);
 
   const handleRetry = useCallback(() => {
     setLoading(true);
@@ -69,7 +72,7 @@ export default function ProfilePage() {
   }, []);
 
   const handleExport = async () => {
-    if (!address || exporting) return;
+    if (!account || exporting) return;
     setExporting(true);
     setExportSuccess(false);
     setActionError(null);
@@ -79,9 +82,10 @@ export default function ProfilePage() {
         setActionError('Sign the message in your wallet to export your data.');
         return;
       }
-      const res = await exportUserData(address);
+      const res = await exportUserData();
       if (res.success) {
-        downloadJson(`quick-quiz-backup-${address.slice(0, 8)}.json`, res.data);
+        const label = account.wallet ? account.wallet.slice(0, 8) : account.id.slice(0, 8);
+        downloadJson(`quick-quiz-backup-${label}.json`, res.data);
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 4000);
       } else {
@@ -96,13 +100,13 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col selection:bg-[#00FFCC] selection:text-[#0A1128]">
-      <Header isConnected={isConnected} />
+      <Header />
 
       <main
-        key={address || 'disconnected'}
+        key={account?.id || 'disconnected'}
         className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-16"
       >
-        {!isConnected || !address ? (
+        {!account ? (
           <AccessDeniedView />
         ) : (
           <>

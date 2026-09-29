@@ -1,24 +1,19 @@
 import type { Metadata, Viewport } from 'next';
-import { Orbitron, Exo_2 } from 'next/font/google';
+import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { FAQ_DATA } from '@/lib/seo-data';
 
-const orbitron = Orbitron({
+const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
-  variable: '--font-orbitron',
+  variable: '--font-jetbrains-mono',
   display: 'swap',
-  weight: ['400', '500', '600', '700', '800', '900'],
-});
-
-const exo2 = Exo_2({
-  subsets: ['latin'],
-  variable: '--font-exo2',
-  display: 'swap',
-  weight: ['300', '400', '500', '600', '700'],
+  weight: ['400', '600', '700'],
 });
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://quickquiz.xyz';
+
+const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
 export const viewport: Viewport = {
   themeColor: '#00FFCC',
@@ -53,17 +48,26 @@ export const metadata: Metadata = {
   applicationName: 'Quick Quiz',
   category: 'game',
   classification: 'Educational Web3 Game',
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
+  robots: isPreview
+    ? {
+        index: false,
+        follow: false,
+        googleBot: {
+          index: false,
+          follow: false,
+        },
+      }
+    : {
+        index: true,
+        follow: true,
+        googleBot: {
+          index: true,
+          follow: true,
+          'max-video-preview': -1,
+          'max-image-preview': 'large',
+          'max-snippet': -1,
+        },
+      },
   alternates: {
     canonical: '/',
   },
@@ -162,7 +166,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${exo2.variable} ${orbitron.variable} ${exo2.className} bg-[#0A1128] text-slate-100 min-h-screen antialiased selection:bg-[#00FFCC] selection:text-[#0A1128]`}
+        className={`${jetbrainsMono.variable} font-sans bg-[#0A1128] text-slate-100 min-h-screen antialiased selection:bg-[#00FFCC] selection:text-[#0A1128]`}
       >
         <Providers>{children}</Providers>
       </body>

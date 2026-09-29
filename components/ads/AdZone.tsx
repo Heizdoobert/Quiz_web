@@ -30,7 +30,7 @@ export default function AdZone({ variant, slot, className = '', children }: AdZo
             <span className="font-bold font-heading text-white">Hot Web3 Deals</span>
             <span className="text-[11px] text-slate-400 mt-1">Tools & Cloud Offers</span>
             <a
-              href="https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde"
+              href="https://go.isclix.com/deep_link/v5/7070248909883604470/6648523843406889655?sub4=oneatweb&url_enc=aHR0cHM6Ly93d3cudGlrdG9rLmNvbS8%3D"
               target="_blank"
               rel="noopener noreferrer sponsored"
               className="mt-4 px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] text-[#0A1128] font-black font-heading rounded-lg text-[11px] shadow transition-all cursor-pointer"
@@ -57,7 +57,7 @@ export default function AdZone({ variant, slot, className = '', children }: AdZo
       </div>
       {children || (
         <a
-          href="https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde"
+          href="https://shorten.asia/JXUXW4Fv"
           target="_blank"
           rel="noopener noreferrer sponsored"
           className="flex items-center justify-between p-3.5 rounded-xl bg-[#0A1128]/70 hover:bg-[#25284D]/70 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#2D305A]/70 transition-all group"

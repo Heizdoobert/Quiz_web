@@ -124,6 +124,13 @@ describe("ContestEscrow", function () {
         escrow.connect(creator).createContest(contestId, poolAmount, 1800)
       ).to.be.revertedWith("Duration too short");
     });
+
+    it("should revert on zero contestId", async function () {
+      const { escrow, creator } = await loadFixture(deployContestEscrowFixture);
+      await expect(
+        escrow.connect(creator).createContest(ethers.ZeroHash, poolAmount, duration)
+      ).to.be.revertedWith("Invalid contestId");
+    });
   });
 
   describe("Claiming Rewards", function () {
@@ -253,6 +260,114 @@ describe("ContestEscrow", function () {
         escrow.connect(player1).claimReward(contestId, player1.address, excessiveReward, nonce, deadline, sig)
       ).to.be.revertedWith("Insufficient pool balance");
     });
+
+    it("should deactivate contest when remaining pool reaches zero", async function () {
+      const { escrow, signer, player1, player2 } = await loadFixture(contestCreatedFixture);
+
+      const nonce1 = 101n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      const sig1 = await signClaimVoucher(
+        escrow,
+        signer,
+        contestId,
+        player1.address,
+        poolAmount,
+        nonce1,
+        deadline
+      );
+
+      await expect(
+        escrow.connect(player1).claimReward(contestId, player1.address, poolAmount, nonce1, deadline, sig1)
+      ).to.emit(escrow, "ContestRewardClaimed");
+
+      const contest = await escrow.contests(contestId);
+      expect(contest.remainingPool).to.equal(0n);
+      expect(contest.active).to.be.false;
+
+      // Further claim reverts because contest is deactivated
+      const nonce2 = 102n;
+      const sig2 = await signClaimVoucher(
+        escrow,
+        signer,
+        contestId,
+        player2.address,
+        1n,
+        nonce2,
+        deadline
+      );
+      await expect(
+        escrow.connect(player2).claimReward(contestId, player2.address, 1n, nonce2, deadline, sig2)
+      ).to.be.revertedWith("Contest not active");
+    });
+
+    it("should revert if signature is used on a different contestId (cross-contest replay attack)", async function () {
+      const { escrow, creator, signer, player1 } = await loadFixture(contestCreatedFixture);
+
+      // Create a second contest
+      const contestId2 = ethers.keccak256(ethers.toUtf8Bytes("contest-uuid-5678"));
+      await escrow.connect(creator).createContest(contestId2, poolAmount, duration);
+
+      const reward = ethers.parseEther("50");
+      const nonce = 103n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      // Signed for contestId
+      const sig = await signClaimVoucher(escrow, signer, contestId, player1.address, reward, nonce, deadline);
+
+      // Attempt to claim against contestId2 with voucher for contestId
+      await expect(
+        escrow.connect(player1).claimReward(contestId2, player1.address, reward, nonce, deadline, sig)
+      ).to.be.revertedWith("Invalid signature");
+    });
+
+    it("should revert if reward amount is tampered in claim call", async function () {
+      const { escrow, signer, player1 } = await loadFixture(contestCreatedFixture);
+
+      const reward = ethers.parseEther("50");
+      const nonce = 104n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      const sig = await signClaimVoucher(escrow, signer, contestId, player1.address, reward, nonce, deadline);
+
+      // Submit tampered amount 60 ETH instead of 50 ETH
+      await expect(
+        escrow.connect(player1).claimReward(contestId, player1.address, ethers.parseEther("60"), nonce, deadline, sig)
+      ).to.be.revertedWith("Invalid signature");
+    });
+
+    it("should revert if recipient is tampered in claim call", async function () {
+      const { escrow, signer, player1, player2 } = await loadFixture(contestCreatedFixture);
+
+      const reward = ethers.parseEther("50");
+      const nonce = 105n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      const sig = await signClaimVoucher(escrow, signer, contestId, player1.address, reward, nonce, deadline);
+
+      // Claim as player2 with voucher signed for player1
+      await expect(
+        escrow.connect(player2).claimReward(contestId, player2.address, reward, nonce, deadline, sig)
+      ).to.be.revertedWith("Invalid signature");
+    });
+
+    it("should revert on zero claim amount", async function () {
+      const { escrow, signer, player1 } = await loadFixture(contestCreatedFixture);
+      const nonce = 106n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      const sig = await signClaimVoucher(escrow, signer, contestId, player1.address, 0n, nonce, deadline);
+
+      await expect(
+        escrow.connect(player1).claimReward(contestId, player1.address, 0n, nonce, deadline, sig)
+      ).to.be.revertedWith("Amount must be > 0");
+    });
+
+    it("should revert on zero recipient address", async function () {
+      const { escrow, signer, player1 } = await loadFixture(contestCreatedFixture);
+      const nonce = 107n;
+      const deadline = BigInt(await time.latest()) + 3600n;
+      const sig = await signClaimVoucher(escrow, signer, contestId, ethers.ZeroAddress, 50n, nonce, deadline);
+
+      await expect(
+        escrow.connect(player1).claimReward(contestId, ethers.ZeroAddress, 50n, nonce, deadline, sig)
+      ).to.be.revertedWith("Invalid recipient");
+    });
   });
 
   describe("Refund Remaining Tokens", function () {
@@ -324,6 +439,14 @@ describe("ContestEscrow", function () {
       await expect(
         escrow.connect(other).setAuthorizedSigner(other.address)
       ).to.be.revertedWithCustomError(escrow, "OwnableUnauthorizedAccount");
+    });
+
+    it("should revert if setting authorized signer to zero address", async function () {
+      const { escrow, owner } = await loadFixture(deployContestEscrowFixture);
+
+      await expect(
+        escrow.connect(owner).setAuthorizedSigner(ethers.ZeroAddress)
+      ).to.be.revertedWith("Invalid signer address");
     });
   });
 });

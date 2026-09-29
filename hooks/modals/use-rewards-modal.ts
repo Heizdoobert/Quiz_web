@@ -12,11 +12,15 @@ import {
 } from '@/lib/actions/reward-actions';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
-import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
+import {
+  QUIZ_TOKEN_ADDRESS,
+  QUIZ_BADGE_ADDRESS,
+  TARGET_CHAIN_ID,
+  TARGET_CHAIN_NAME,
+  TARGET_EXPLORER_URL,
+} from '@/lib/contracts/addresses';
 
 export type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
-
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 interface UseRewardsModalOptions {
   isOpen: boolean;
@@ -92,7 +96,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const loadRewards = useCallback(async () => {
     if (!walletAddress) return;
     setLoading(true);
-    const data = await getClaimableRewards(walletAddress);
+    const data = await getClaimableRewards();
     setRewards(data);
     setLoading(false);
   }, [walletAddress]);
@@ -140,7 +144,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     async (nonce: string, txHashString: string) => {
       if (!walletAddress) return;
       try {
-        const res = await confirmRewardClaim(walletAddress, nonce, txHashString);
+        const res = await confirmRewardClaim(nonce, txHashString);
         if (res?.success) {
           setTxHash(txHashString);
           setClaimStep('done');
@@ -202,7 +206,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('signing');
     setClaimError(null);
 
-    const voucher: RewardVoucher | { error: string } = await generateTokenVoucher(walletAddress);
+    const voucher: RewardVoucher | { error: string } = await generateTokenVoucher();
     if ('error' in voucher) {
       setClaimError(voucher.error);
       setClaimStep('error');
@@ -267,7 +271,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     setClaimStep('signing');
     setClaimError(null);
 
-    const voucher = await generateBadgeVoucher(walletAddress, badgeType);
+    const voucher = await generateBadgeVoucher(badgeType);
     if ('error' in voucher) {
       setClaimError(voucher.error);
       setClaimStep('error');
@@ -328,7 +332,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     return (wei / (BigInt(10) ** BigInt(18))).toString();
   };
 
-  const explorerUrl = txHash ? `https://sepolia.basescan.org/tx/${txHash}` : null;
+  const explorerUrl = txHash ? `${TARGET_EXPLORER_URL}/tx/${txHash}` : null;
 
   return {
     tab,
@@ -345,5 +349,6 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     handleMintBadge,
     formatTokens,
     explorerUrl,
+    targetChainName: TARGET_CHAIN_NAME,
   };
 }

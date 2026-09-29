@@ -2,9 +2,10 @@
 
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
+import { getSessionAccount } from '@/lib/session';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { getUserStats } from '@/lib/actions/quiz-actions';
+import { statsForAccount } from '@/lib/stats';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
@@ -27,12 +28,12 @@ type PendingTokenClaim = { nonce: string; amount: string; deadline: string; sign
 // 'claimed', ones past their deadline become 'expired'. Returns the voucher that is
 // still open (at most one, enforced by a unique index), so it can be handed out again
 // instead of signing a second one for the same balance.
-async function settlePendingTokenClaims(wallet: string): Promise<PendingTokenClaim | null> {
+async function settlePendingTokenClaims(accountId: string, wallet: string): Promise<PendingTokenClaim | null> {
   if (!supabaseAdmin) throw new Error('SUPABASE_SECRET_KEY is not set');
   const { data, error } = await supabaseAdmin
     .from('reward_claims')
     .select('id, nonce, amount::text, deadline, signature')
-    .eq('wallet_address', wallet)
+    .eq('user_id', accountId)
     .eq('claim_type', 'token')
     .eq('status', 'pending');
   if (error) throw error;
@@ -74,7 +75,7 @@ function tokenVoucher(wallet: string, claim: PendingTokenClaim): RewardVoucher {
   };
 }
 
-export async function getClaimableRewards(walletAddress: string): Promise<ClaimableRewards> {
+export async function getClaimableRewards(): Promise<ClaimableRewards> {
   const empty: ClaimableRewards = {
     claimableTokens: '0',
     eligibleBadges: [],
@@ -84,24 +85,24 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
   };
 
   try {
-    if (!walletAddress) return empty;
-    const normalized = walletAddress.toLowerCase();
+    const account = await getSessionAccount();
+    if (!account) return empty;
 
-    // Bring claim statuses up to date with the chain before totalling them.
-    await settlePendingTokenClaims(normalized).catch((err) =>
-      console.error('getClaimableRewards settle error:', err)
-    );
+    // Only a wallet account could have vouchers signed on-chain to settle.
+    if (account.wallet) {
+      await settlePendingTokenClaims(account.id, account.wallet).catch((err) =>
+        console.error('getClaimableRewards settle error:', err)
+      );
+    }
 
-    // One stats read covers both the token total and badge checks.
-    // On error getUserStats returns zeros, so nothing becomes claimable.
-    const stats = await getUserStats(walletAddress);
+    const stats = await statsForAccount(account.id);
     const totalEarned = BigInt(stats.score) * TOKENS_PER_CORRECT;
 
     // Get total already-claimed tokens. Read as text: JSON numbers lose precision past 2^53.
     const { data: claims, error: cErr } = await supabase
       .from('reward_claims')
       .select('amount::text')
-      .eq('wallet_address', normalized)
+      .eq('user_id', account.id)
       .eq('claim_type', 'token')
       .eq('status', 'claimed');
 
@@ -114,11 +115,9 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
 
     const claimableTokens = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
 
-    // Check badge eligibility
+    // Check badge eligibility. Leaderboard rows are keyed by account id.
     const leaderboard = await getGlobalLeaderboard(3);
-    const isTop3 = leaderboard.some(
-      (e) => e.wallet_address === normalized && e.rank <= 3
-    );
+    const isTop3 = leaderboard.some((e) => e.user_id === account.id && e.rank <= 3);
 
     const eligibleBadges: number[] = [];
     if (isTop3) eligibleBadges.push(0);
@@ -130,7 +129,7 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     const { data: badgeClaims } = await supabase
       .from('reward_claims')
       .select('badge_type')
-      .eq('wallet_address', normalized)
+      .eq('user_id', account.id)
       .eq('claim_type', 'badge')
       .eq('status', 'claimed');
 
@@ -156,30 +155,29 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
   }
 }
 
-export async function generateTokenVoucher(
-  walletAddress: string
-): Promise<RewardVoucher | { error: string }> {
+export async function generateTokenVoucher(): Promise<RewardVoucher | { error: string; code?: 'WALLET_REQUIRED' }> {
   try {
-    if (!walletAddress) return { error: 'Wallet address required' };
+    const account = await getSessionAccount();
+    if (!account) return { error: 'Sign in first.' };
+    if (!account.wallet) return { error: 'Add a wallet to claim rewards.', code: 'WALLET_REQUIRED' };
+    const wallet = account.wallet;
 
-    const account = getSignerAccount();
-    if (!account || !supabaseAdmin) return { error: 'Reward signing not configured' };
+    const signer = getSignerAccount();
+    if (!signer || !supabaseAdmin) return { error: 'Reward signing not configured' };
 
-    const normalized = walletAddress.toLowerCase();
-
-    // One open voucher per wallet: hand back the unspent one rather than signing
+    // One open voucher per account: hand back the unspent one rather than signing
     // another for the same balance (which would let it be minted twice).
-    const open = await settlePendingTokenClaims(normalized);
-    if (open) return tokenVoucher(normalized, open);
+    const open = await settlePendingTokenClaims(account.id, wallet);
+    if (open) return tokenVoucher(wallet, open);
 
-    const rewards = await getClaimableRewards(walletAddress);
+    const rewards = await getClaimableRewards();
     const claimable = BigInt(rewards.claimableTokens);
     if (claimable <= BigInt(0)) return { error: 'Nothing to claim' };
 
     const nonce = newNonce();
     const deadline = BigInt(Math.floor(Date.now() / 1000) + VOUCHER_TTL_SECONDS);
 
-    const signature = await account.signTypedData({
+    const signature = await signer.signTypedData({
       domain: {
         name: 'QuizToken',
         version: '1',
@@ -196,7 +194,7 @@ export async function generateTokenVoucher(
       },
       primaryType: 'ClaimTokens',
       message: {
-        recipient: normalized as `0x${string}`,
+        recipient: wallet as `0x${string}`,
         amount: claimable,
         nonce,
         deadline,
@@ -211,8 +209,9 @@ export async function generateTokenVoucher(
     };
 
     // A voucher we can't record can never be marked claimed, so don't hand it out.
+    // wallet_address is bridged in from user_id by the DB trigger, so it isn't set here.
     const { error: insertErr } = await supabaseAdmin.from('reward_claims').insert({
-      wallet_address: normalized,
+      user_id: account.id,
       claim_type: 'token',
       status: 'pending',
       ...claim,
@@ -220,14 +219,14 @@ export async function generateTokenVoucher(
     if (insertErr) {
       // A concurrent request recorded its voucher first: serve that one instead.
       if (insertErr.code === '23505') {
-        const winner = await settlePendingTokenClaims(normalized);
-        if (winner) return tokenVoucher(normalized, winner);
+        const winner = await settlePendingTokenClaims(account.id, wallet);
+        if (winner) return tokenVoucher(wallet, winner);
       }
       console.error('generateTokenVoucher record error:', insertErr);
       return { error: 'Failed to generate voucher' };
     }
 
-    return tokenVoucher(normalized, claim);
+    return tokenVoucher(wallet, claim);
   } catch (err) {
     console.error('generateTokenVoucher error:', err);
     return { error: 'Failed to generate voucher' };
@@ -235,26 +234,27 @@ export async function generateTokenVoucher(
 }
 
 export async function generateBadgeVoucher(
-  walletAddress: string,
   badgeType: number
-): Promise<RewardVoucher | { error: string }> {
+): Promise<RewardVoucher | { error: string; code?: 'WALLET_REQUIRED' }> {
   try {
-    if (!walletAddress) return { error: 'Wallet address required' };
+    const account = await getSessionAccount();
+    if (!account) return { error: 'Sign in first.' };
+    if (!account.wallet) return { error: 'Add a wallet to claim rewards.', code: 'WALLET_REQUIRED' };
+    const wallet = account.wallet;
 
-    const account = getSignerAccount();
-    if (!account || !supabaseAdmin) return { error: 'Reward signing not configured' };
+    const signer = getSignerAccount();
+    if (!signer || !supabaseAdmin) return { error: 'Reward signing not configured' };
 
-    const rewards = await getClaimableRewards(walletAddress);
+    const rewards = await getClaimableRewards();
     if (!rewards.eligibleBadges.includes(badgeType)) {
       return { error: 'Badge not eligible or already claimed' };
     }
 
     // Repeat badge vouchers are harmless: the contract mints each badge type once per wallet.
-    const normalized = walletAddress.toLowerCase();
     const nonce = newNonce();
     const deadline = BigInt(Math.floor(Date.now() / 1000) + VOUCHER_TTL_SECONDS);
 
-    const signature = await account.signTypedData({
+    const signature = await signer.signTypedData({
       domain: {
         name: 'QuizBadgeNFT',
         version: '1',
@@ -271,7 +271,7 @@ export async function generateBadgeVoucher(
       },
       primaryType: 'MintBadge',
       message: {
-        recipient: normalized as `0x${string}`,
+        recipient: wallet as `0x${string}`,
         badgeType: BigInt(badgeType),
         nonce,
         deadline,
@@ -279,8 +279,9 @@ export async function generateBadgeVoucher(
     });
 
     // A voucher we can't record can never be marked claimed, so don't hand it out.
+    // wallet_address is bridged in from user_id by the DB trigger, so it isn't set here.
     const { error: insertErr } = await supabaseAdmin.from('reward_claims').insert({
-      wallet_address: normalized,
+      user_id: account.id,
       claim_type: 'badge',
       badge_type: badgeType,
       nonce: nonce.toString(),
@@ -294,7 +295,7 @@ export async function generateBadgeVoucher(
     }
 
     return {
-      recipient: normalized,
+      recipient: wallet,
       amount: '0',
       badgeType,
       nonce: nonce.toString(),
@@ -309,18 +310,19 @@ export async function generateBadgeVoucher(
 }
 
 export async function confirmRewardClaim(
-  walletAddress: string,
   nonce: string,
   txHash: string
 ): Promise<{ success: boolean }> {
   try {
-    if (!walletAddress || !nonce || !txHash || !supabaseAdmin) return { success: false };
-    const normalized = walletAddress.toLowerCase();
+    if (!nonce || !txHash || !supabaseAdmin) return { success: false };
+    const account = await getSessionAccount();
+    if (!account || !account.wallet) return { success: false };
+    const wallet = account.wallet;
 
     const { data: claim } = await supabaseAdmin
       .from('reward_claims')
       .select('id, claim_type, list_id')
-      .eq('wallet_address', normalized)
+      .eq('user_id', account.id)
       .eq('nonce', nonce)
       .eq('status', 'pending')
       .maybeSingle();
@@ -328,11 +330,16 @@ export async function confirmRewardClaim(
 
     // Trust the chain, not the caller: only a spent nonce means the reward was minted / claimed.
     if (claim.list_id) {
-      const contestId = getContestId(claim.list_id);
-      const usedOnEscrow = await isContestVoucherUsed(contestId, normalized, nonce);
+      const { data: qList } = await supabaseAdmin
+        .from('question_lists')
+        .select('owner_wallet')
+        .eq('id', claim.list_id)
+        .maybeSingle();
+      const contestId = getContestId(claim.list_id, qList?.owner_wallet);
+      const usedOnEscrow = await isContestVoucherUsed(contestId, wallet, nonce);
       if (!usedOnEscrow) return { success: false };
     } else {
-      if (!(await isVoucherUsed(claim.claim_type as 'token' | 'badge', normalized, nonce))) return { success: false };
+      if (!(await isVoucherUsed(claim.claim_type as 'token' | 'badge', wallet, nonce))) return { success: false };
     }
 
     const { data, error } = await supabaseAdmin
@@ -349,7 +356,7 @@ export async function confirmRewardClaim(
         .from('list_entries')
         .update({ status: 'claimed' })
         .eq('list_id', claim.list_id)
-        .eq('wallet_address', normalized);
+        .eq('user_id', account.id);
     }
 
     return { success: true };

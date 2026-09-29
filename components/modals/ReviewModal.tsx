@@ -4,12 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
 import { BarChart3, CheckCircle2, XCircle, ArrowLeft } from 'lucide-react';
-
-export interface HistoryItem {
-  questionId: string;
-  prompt: string;
-  isCorrect: boolean;
-}
+import { HistoryItem } from '@/lib/types';
 
 interface ReviewModalProps {
   isOpen: boolean;

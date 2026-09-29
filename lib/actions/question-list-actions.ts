@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionWallet } from '@/lib/wallet-session';
+import { getSessionAccount, SessionAccount } from '@/lib/session';
 import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
 import { isUuid, normalizePrompt, validateQuestionInput } from '@/lib/validation';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
@@ -11,6 +11,7 @@ import {
   REWARD_CHAIN_ID,
   isContestVoucherUsed,
   isContestFundedOnChain,
+  getContestOnChain,
   getSignerAccount,
   newNonce,
   getContestId,
@@ -33,11 +34,22 @@ function toWei(wholeTokens: number): bigint {
   return BigInt(Math.max(0, Math.floor(wholeTokens))) * TOKEN_DECIMALS;
 }
 
-async function signedIn() {
-  const wallet = await getSessionWallet();
-  if (!wallet) return { error: 'Sign in with your wallet first.' } as const;
-  if (!supabaseAdmin) return { error: 'Question lists are unavailable right now.' } as const;
-  return { wallet, db: supabaseAdmin } as const;
+async function signedIn(): Promise<{ error: string } | { account: SessionAccount; db: NonNullable<typeof supabaseAdmin> }> {
+  const account = await getSessionAccount();
+  if (!account) return { error: 'Sign in to manage your lists.' };
+  if (!supabaseAdmin) return { error: 'Question lists are unavailable right now.' };
+  return { account, db: supabaseAdmin };
+}
+
+// Contests pay out on-chain, so their actions need an address to sign for; Task 23 adds
+// the disclosure that fronts this requirement for the player.
+async function signedInWithWallet(): Promise<
+  { error: string } | { account: SessionAccount; wallet: string; db: NonNullable<typeof supabaseAdmin> }
+> {
+  const auth = await signedIn();
+  if ('error' in auth) return { error: auth.error };
+  if (!auth.account.wallet) return { error: 'Add a wallet to your account to play contests.' };
+  return { account: auth.account, wallet: auth.account.wallet, db: auth.db };
 }
 
 function validateListText(params: { title?: string; description?: string }) {
@@ -53,7 +65,7 @@ function validateListText(params: { title?: string; description?: string }) {
   return null;
 }
 
-async function attachListMeta(lists: QuestionList[], viewerWallet?: string | null): Promise<QuestionListWithMeta[]> {
+async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | null): Promise<QuestionListWithMeta[]> {
   return Promise.all(
     lists.map(async (list) => {
       const [questionCount, { data: confirmations }] = await Promise.all([
@@ -64,7 +76,7 @@ async function attachListMeta(lists: QuestionList[], viewerWallet?: string | nul
               .eq('list_id', list.id)
               .then((r) => r.count ?? 0)
           : Promise.resolve(0),
-        supabase.from('question_list_confirmations').select('confirmer_wallet').eq('list_id', list.id),
+        supabase.from('question_list_confirmations').select('confirmer_user').eq('list_id', list.id),
       ]);
 
       const confirmationCount = confirmations?.length ?? 0;
@@ -75,8 +87,8 @@ async function attachListMeta(lists: QuestionList[], viewerWallet?: string | nul
         ...list,
         questionCount,
         confirmationCount,
-        hasConfirmed: viewerWallet
-          ? confirmations?.some((c) => c.confirmer_wallet === viewerWallet) ?? false
+        hasConfirmed: viewerAccountId
+          ? confirmations?.some((c) => c.confirmer_user === viewerAccountId) ?? false
           : undefined,
         perQuestionReward,
       };
@@ -84,11 +96,16 @@ async function attachListMeta(lists: QuestionList[], viewerWallet?: string | nul
   );
 }
 
-// A wallet that has seen a list's answers (reviewers) may never play it.
-async function markReviewer(db: NonNullable<typeof supabaseAdmin>, listId: string, wallet: string) {
+// An account that has seen a list's answers (reviewers) may never play it. wallet_address
+// is written directly too (null for a wallet-less account), same as the other account-id
+// migrated inserts, so readers of the old column stay correct until it's dropped in Task 25.
+async function markReviewer(db: NonNullable<typeof supabaseAdmin>, listId: string, account: SessionAccount) {
   const { error } = await db
     .from('list_entries')
-    .upsert({ list_id: listId, wallet_address: wallet, status: 'reviewer' }, { ignoreDuplicates: true });
+    .upsert(
+      { list_id: listId, user_id: account.id, wallet_address: account.wallet, status: 'reviewer' },
+      { ignoreDuplicates: true }
+    );
   return !error;
 }
 
@@ -105,7 +122,8 @@ export async function createList(params: {
     const { data, error } = await auth.db
       .from('question_lists')
       .insert({
-        owner_wallet: auth.wallet,
+        owner_user: auth.account.id,
+        owner_wallet: auth.account.wallet,
         title: params.title.trim(),
         description: params.description?.trim() || null,
       })
@@ -129,11 +147,11 @@ async function getOwnedDraftList(listId: string) {
   if ('error' in auth) return { error: auth.error } as const;
   const { data: list, error } = await auth.db
     .from('question_lists')
-    .select('id, owner_wallet, status')
+    .select('id, owner_user, status')
     .eq('id', listId)
     .maybeSingle();
   if (error || !list) return { error: 'List not found.' } as const;
-  if (list.owner_wallet !== auth.wallet) return { error: 'Only the owner can modify this list.' } as const;
+  if (list.owner_user !== auth.account.id) return { error: 'Only the owner can modify this list.' } as const;
   if (list.status !== 'draft') return { error: 'Only draft lists can be edited.' } as const;
   return { ...auth, list } as const;
 }
@@ -178,13 +196,14 @@ export async function deleteList(listId: string): Promise<Result> {
   }
 }
 
-export async function getMyLists(ownerWallet: string): Promise<QuestionListWithMeta[]> {
+export async function getMyLists(): Promise<QuestionListWithMeta[]> {
   try {
-    if (!ownerWallet) return [];
+    const account = await getSessionAccount();
+    if (!account) return [];
     const { data: lists, error } = await supabase
       .from('question_lists')
       .select('*')
-      .eq('owner_wallet', ownerWallet.toLowerCase())
+      .eq('owner_user', account.id)
       .order('created_at', { ascending: false });
     if (error || !lists) return [];
 
@@ -205,8 +224,8 @@ export async function getListDetail(
     const { data: list, error } = await supabase.from('question_lists').select('*').eq('id', listId).maybeSingle();
     if (error || !list) return null;
 
-    const viewer = await getSessionWallet();
-    const isOwner = viewer === list.owner_wallet;
+    const viewer = await getSessionAccount();
+    const isOwner = viewer?.id === list.owner_user;
     let withAnswers = isOwner;
     if (viewer && !isOwner && list.status === 'submitted') {
       withAnswers = await markReviewer(supabaseAdmin, listId, viewer);
@@ -218,7 +237,7 @@ export async function getListDetail(
       .eq('list_id', listId)
       .order('created_at', { ascending: true });
 
-    const [withMeta] = await attachListMeta([list as QuestionList], viewer);
+    const [withMeta] = await attachListMeta([list as QuestionList], viewer?.id);
     return { list: withMeta, questions: (questions as unknown as Question[]) || [] };
   } catch (err) {
     console.error('getListDetail error:', err);
@@ -271,7 +290,8 @@ export async function addListQuestion(
         correct_index: validated.correctIndex,
         category: validated.category,
         explanation: validated.explanation,
-        created_by: owned.wallet,
+        created_by_user: owned.account.id,
+        created_by: owned.account.wallet,
         list_id: listId,
         status: 'pending',
       })
@@ -386,19 +406,19 @@ export async function submitListForReview(listId: string): Promise<Result> {
   }
 }
 
-export async function getListsPendingReview(viewerWallet: string): Promise<QuestionListWithMeta[]> {
+export async function getListsPendingReview(): Promise<QuestionListWithMeta[]> {
   try {
-    if (!viewerWallet) return [];
-    const normalized = viewerWallet.toLowerCase();
+    const account = await getSessionAccount();
+    if (!account) return [];
     const { data: lists, error } = await supabase
       .from('question_lists')
       .select('*')
       .eq('status', 'submitted')
-      .neq('owner_wallet', normalized)
+      .neq('owner_user', account.id)
       .order('submitted_at', { ascending: true });
     if (error || !lists) return [];
 
-    return await attachListMeta(lists as QuestionList[], normalized);
+    return await attachListMeta(lists as QuestionList[], account.id);
   } catch (err) {
     console.error('getListsPendingReview error:', err);
     return [];
@@ -413,19 +433,19 @@ export async function confirmList(listId: string): Promise<{ success: boolean; a
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('owner_wallet, status')
+      .select('owner_user, status')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list) return { success: false, error: 'List not found.' };
     if (list.status !== 'submitted') return { success: false, error: 'This list is not awaiting review.' };
-    if (list.owner_wallet === auth.wallet) return { success: false, error: 'You cannot confirm your own list.' };
+    if (list.owner_user === auth.account.id) return { success: false, error: 'You cannot confirm your own list.' };
 
-    if (!(await markReviewer(auth.db, listId, auth.wallet))) {
+    if (!(await markReviewer(auth.db, listId, auth.account))) {
       return { success: false, error: 'Failed to confirm list.' };
     }
     const { error: insertErr } = await auth.db
       .from('question_list_confirmations')
-      .insert({ list_id: listId, confirmer_wallet: auth.wallet });
+      .insert({ list_id: listId, confirmer_user: auth.account.id, confirmer_wallet: auth.account.wallet });
     if (insertErr) {
       if (insertErr.code === '23505') return { success: false, error: 'You have already confirmed this list.' };
       console.error('confirmList insert error:', insertErr);
@@ -454,7 +474,11 @@ export async function confirmList(listId: string): Promise<{ success: boolean; a
   }
 }
 
-export async function startContest(listId: string, rewardPoolWholeTokens: number): Promise<Result> {
+export async function startContest(
+  listId: string,
+  rewardPoolWholeTokens: number,
+  maxParticipants: number = 10
+): Promise<Result> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'List not found.' };
     if (
@@ -464,22 +488,23 @@ export async function startContest(listId: string, rewardPoolWholeTokens: number
     ) {
       return { success: false, error: `Reward pool must be between 1 and ${MAX_POOL_WHOLE_TOKENS} tokens.` };
     }
-    const auth = await signedIn();
+    const auth = await signedInWithWallet();
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('owner_wallet, status')
+      .select('owner_user, status')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list) return { success: false, error: 'List not found.' };
-    if (list.owner_wallet !== auth.wallet) return { success: false, error: 'Only the owner can start this contest.' };
+    if (list.owner_user !== auth.account.id) return { success: false, error: 'Only the owner can start this contest.' };
     if (list.status !== 'approved') {
       return { success: false, error: `List must be approved by ${REQUIRED_CONFIRMATIONS} reviewers before starting.` };
     }
 
+    const safeParticipants = Math.max(1, Math.min(1000, Math.floor(maxParticipants || 10)));
     const minPoolWei = toWei(rewardPoolWholeTokens);
-    const contestId = getContestId(listId);
+    const contestId = getContestId(listId, auth.wallet);
     const isFunded = await isContestFundedOnChain(contestId, auth.wallet, minPoolWei);
     if (!isFunded) {
       return { success: false, error: 'Contest pool has not been funded on-chain.' };
@@ -490,6 +515,7 @@ export async function startContest(listId: string, rewardPoolWholeTokens: number
       .update({
         status: 'live',
         reward_pool_tokens: minPoolWei.toString(),
+        max_participants: safeParticipants,
         started_at: new Date().toISOString(),
       })
       .eq('id', listId)
@@ -527,22 +553,22 @@ export async function startListAttempt(
 ): Promise<{ success: boolean; questions?: ClientQuestion[]; error?: string }> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'This contest is not live.' };
-    const auth = await signedIn();
+    const auth = await signedInWithWallet();
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('status, owner_wallet')
+      .select('status, owner_user, max_participants')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list || list.status !== 'live') return { success: false, error: 'This contest is not live.' };
-    if (list.owner_wallet === auth.wallet) return { success: false, error: 'You cannot play your own contest.' };
+    if (list.owner_user === auth.account.id) return { success: false, error: 'You cannot play your own contest.' };
 
     const { data: entry } = await auth.db
       .from('list_entries')
       .select('status')
       .eq('list_id', listId)
-      .eq('wallet_address', auth.wallet)
+      .eq('user_id', auth.account.id)
       .maybeSingle();
 
     if (entry?.status === 'reviewer') {
@@ -552,9 +578,20 @@ export async function startListAttempt(
       return { success: false, error: 'You have already completed this contest.' };
     }
     if (!entry) {
+      const maxParticipants = list.max_participants || 10;
+      const { count } = await auth.db
+        .from('list_entries')
+        .select('user_id', { count: 'exact', head: true })
+        .eq('list_id', listId)
+        .neq('status', 'reviewer');
+
+      if ((count ?? 0) >= maxParticipants) {
+        return { success: false, error: 'This contest has reached its participant limit.' };
+      }
+
       const { error: insertErr } = await auth.db
         .from('list_entries')
-        .insert({ list_id: listId, wallet_address: auth.wallet });
+        .insert({ list_id: listId, user_id: auth.account.id, wallet_address: auth.wallet });
       if (insertErr && insertErr.code !== '23505') {
         console.error('startListAttempt entry error:', insertErr);
         return { success: false, error: 'Failed to start contest.' };
@@ -589,12 +626,12 @@ export async function completeListAttempt(
 ): Promise<{ success: boolean; correctCount?: number; rewardAmount?: string; error?: string }> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'List not found.' };
-    const auth = await signedIn();
+    const auth = await signedInWithWallet();
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('reward_pool_tokens')
+      .select('reward_pool_tokens, max_participants')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list) return { success: false, error: 'List not found.' };
@@ -606,11 +643,13 @@ export async function completeListAttempt(
     const { data: results } = await auth.db
       .from('quiz_results')
       .select('is_correct')
-      .eq('wallet_address', auth.wallet)
+      .eq('user_id', auth.account.id)
       .in('question_id', questionIds);
 
     const correctCount = (results || []).filter((r) => r.is_correct).length;
-    const perQuestionReward = BigInt(list.reward_pool_tokens || '0') / BigInt(questionIds.length);
+    const maxParticipants = BigInt(list.max_participants || 10);
+    const poolPerParticipant = BigInt(list.reward_pool_tokens || '0') / maxParticipants;
+    const perQuestionReward = poolPerParticipant / BigInt(questionIds.length);
     const rewardAmount = perQuestionReward * BigInt(correctCount);
 
     const { data: updated, error } = await auth.db
@@ -622,7 +661,7 @@ export async function completeListAttempt(
         completed_at: new Date().toISOString(),
       })
       .eq('list_id', listId)
-      .eq('wallet_address', auth.wallet)
+      .eq('user_id', auth.account.id)
       .eq('status', 'in_progress')
       .select('list_id');
 
@@ -660,17 +699,17 @@ function toContestVoucher(
 export async function claimListReward(listId: string): Promise<RewardVoucher | { error: string }> {
   try {
     if (!isUuid(listId)) return { error: 'Invalid contest ID.' };
-    const auth = await signedIn();
-    if ('error' in auth) return { error: auth.error || 'Sign in with your wallet first.' };
+    const auth = await signedInWithWallet();
+    if ('error' in auth) return { error: auth.error };
 
-    const account = getSignerAccount();
-    if (!account) return { error: 'Reward signing not configured' };
+    const signer = getSignerAccount();
+    if (!signer) return { error: 'Reward signing not configured' };
 
     const { data: entry, error: entryErr } = await auth.db
       .from('list_entries')
       .select('status, reward_amount')
       .eq('list_id', listId)
-      .eq('wallet_address', auth.wallet)
+      .eq('user_id', auth.account.id)
       .maybeSingle();
 
     if (entryErr || !entry) return { error: 'Contest entry not found.' };
@@ -680,13 +719,31 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     const amount = BigInt(entry.reward_amount || '0');
     if (amount <= BigInt(0)) return { error: 'No rewards earned for this contest.' };
 
-    const contestId = getContestId(listId);
+    const { data: list, error: listErr } = await auth.db
+      .from('question_lists')
+      .select('owner_wallet, status')
+      .eq('id', listId)
+      .maybeSingle();
+
+    if (listErr || !list) return { error: 'Contest not found.' };
+    const contestId = getContestId(listId, list.owner_wallet);
+
+    // Verify on-chain contest status if deployed
+    const onChain = await getContestOnChain(contestId);
+    if (onChain) {
+      if (!onChain.active || onChain.remainingPool < amount) {
+        return { error: 'Contest reward pool has been exhausted or closed.' };
+      }
+      if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
+        return { error: 'Contest has expired.' };
+      }
+    }
 
     // Reuse unexpired open voucher if already generated
     const { data: pendingClaims } = await auth.db
       .from('reward_claims')
       .select('id, nonce, amount::text, deadline, signature')
-      .eq('wallet_address', auth.wallet)
+      .eq('user_id', auth.account.id)
       .eq('list_id', listId)
       .eq('status', 'pending');
 
@@ -712,7 +769,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
               .from('list_entries')
               .update({ status: 'claimed' })
               .eq('list_id', listId)
-              .eq('wallet_address', auth.wallet);
+              .eq('user_id', auth.account.id);
             return { error: 'Reward has already been claimed.' };
           }
         } else {
@@ -731,9 +788,11 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     }
 
     const nonce = newNonce();
-    const deadline = BigInt(now + VOUCHER_TTL_SECONDS);
+    const ttlDeadline = now + VOUCHER_TTL_SECONDS;
+    const effectiveDeadline = onChain ? Math.min(ttlDeadline, Number(onChain.expiresAt)) : ttlDeadline;
+    const deadline = BigInt(effectiveDeadline);
 
-    const signature = await account.signTypedData({
+    const signature = await signer.signTypedData({
       domain: {
         name: 'ContestEscrow',
         version: '1',
@@ -760,6 +819,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     });
 
     const { error: insertErr } = await auth.db.from('reward_claims').insert({
+      user_id: auth.account.id,
       wallet_address: auth.wallet,
       claim_type: 'contest',
       status: 'pending',
@@ -771,6 +831,27 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     });
 
     if (insertErr) {
+      if (insertErr.code === '23505') {
+        const { data: existing } = await auth.db
+          .from('reward_claims')
+          .select('id, nonce, amount::text, deadline, signature')
+          .eq('user_id', auth.account.id)
+          .eq('list_id', listId)
+          .eq('status', 'pending')
+          .maybeSingle();
+        if (existing) {
+          return toContestVoucher(
+            auth.wallet,
+            {
+              amount: existing.amount,
+              nonce: existing.nonce,
+              deadline: String(existing.deadline),
+              signature: existing.signature,
+            },
+            contestId,
+          );
+        }
+      }
       console.error('claimListReward insert error:', insertErr);
       return { error: 'Failed to record reward voucher.' };
     }

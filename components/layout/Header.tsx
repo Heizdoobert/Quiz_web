@@ -5,21 +5,21 @@ import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Gift, Zap, Volume2, VolumeX, User, Trophy } from 'lucide-react';
 import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
+import { useSession } from '@/hooks/shared/use-session';
 
 interface HeaderProps {
   onOpenRewards?: () => void;
   onOpenProfile?: () => void;
   hasClaimable?: boolean;
-  isConnected?: boolean;
 }
 
 export default function Header({
   onOpenRewards,
   onOpenProfile,
   hasClaimable,
-  isConnected,
 }: HeaderProps) {
   const { isMuted, handleToggleSound } = useSoundToggle();
+  const { account } = useSession();
 
   return (
     <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] sticky top-0 z-30 shadow-lg">
@@ -63,7 +63,7 @@ export default function Header({
         </Link>
 
         {/* Profile Button */}
-        {isConnected && onOpenProfile && (
+        {account && onOpenProfile && (
           <button
             type="button"
             onClick={onOpenProfile}
@@ -76,7 +76,7 @@ export default function Header({
         )}
 
         {/* Rewards Button */}
-        {isConnected && onOpenRewards && (
+        {account && onOpenRewards && (
           <button
             type="button"
             onClick={onOpenRewards}
@@ -91,7 +91,7 @@ export default function Header({
           </button>
         )}
 
-        <ConnectButton label="Connect" showBalance={false} />
+        <ConnectButton label={account && !account.wallet ? 'Add wallet' : 'Connect'} showBalance={false} />
       </div>
     </header>
   );

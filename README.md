@@ -35,6 +35,7 @@ Copy `.env.example` to `.env.local` and configure your credentials:
 1. Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to initialize tables, constraints, and initial seed questions.
 2. Run [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) to install server-side leaderboard and stats aggregations.
 3. Run [`lib/sql/lock-down-public-writes.sql`](lib/sql/lock-down-public-writes.sql) and [`lib/sql/question-lists.sql`](lib/sql/question-lists.sql) to apply the strict Row-Level Security lockdowns.
+4. Run [`lib/sql/accounts.sql`](lib/sql/accounts.sql) to key every table by account id (`users.id`) so a wallet is optional. It is safe to re-run.
 
 ### Testing & Quality Gates
 

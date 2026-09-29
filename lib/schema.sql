@@ -65,7 +65,6 @@ ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 CREATE POLICY "Allow public read for users" ON users FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for users" ON users FOR INSERT WITH CHECK (true);
 
 -- Groups, questions and disputes are written by the server (secret key) for the signed-in wallet.
 CREATE POLICY "Allow public read for groups" ON groups FOR SELECT USING (true);
@@ -136,6 +135,7 @@ CREATE TABLE IF NOT EXISTS question_lists (
   description TEXT,
   status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'live', 'rejected')),
   reward_pool_tokens NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals), NUMERIC to avoid BIGINT overflow at token scale
+  max_participants INT NOT NULL DEFAULT 10,
   submitted_at TIMESTAMPTZ,
   started_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW()

@@ -8,15 +8,14 @@ import {
   LeaderboardEntry,
   UserStats,
   ClaimableRewards,
+  HistoryItem,
 } from '@/lib/types';
-import { getOrCreateUser } from '@/lib/actions/user-actions';
 import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/question-actions';
-import { getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
+import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
-import { HistoryItem } from '@/components/modals/ReviewModal';
 import { soundEngine } from '@/lib/audio';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 
 export type ActiveModal =
   | 'intro'
@@ -38,7 +37,7 @@ export function useQuizLogic({
   initialLeaderboard = [],
 }: UseQuizLogicOptions = {}) {
   const { address, isConnected } = useAccount();
-  const ensureSession = useWalletSession();
+  const { account, requireSignIn: ensureSession } = useSession();
 
   // Quiz state
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -101,16 +100,26 @@ export function useQuizLogic({
   const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
 
   const refreshStats = useCallback(async () => {
-    if (!address) return;
-    const userStats = await getUserStats(address);
+    if (!account) return;
+    const userStats = await getUserStats();
     setStats(userStats);
-  }, [address]);
+  }, [account]);
 
   const refreshRewards = useCallback(async () => {
-    if (!address) return;
-    const data = await getClaimableRewards(address);
+    if (!account) return;
+    const data = await getClaimableRewards();
     setClaimableRewards(data);
-  }, [address]);
+  }, [account]);
+
+  // Loads the signed-in account's saved answers so history and the "already answered"
+  // set survive a reload; an account with no session yet gets [] back.
+  const refreshHistory = useCallback(async () => {
+    if (!account) return;
+    const saved = await getAnswerHistory();
+    if (saved.length === 0) return;
+    setHistory(saved);
+    setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
+  }, [account]);
 
   const loadLeaderboards = useCallback(
     async (overrideGroupId?: string) => {
@@ -191,8 +200,9 @@ export function useQuizLogic({
         ...prev,
       ]);
 
-      // Optimistically update local session stats (a connected wallet's stats only move when the answer counted)
-      if (res.recorded || !isConnected) setStats((prev) => {
+      // Optimistically update local session stats, but only when the answer was
+      // actually recorded — otherwise the score is phantom and vanishes on reload.
+      if (res.recorded) setStats((prev) => {
         const nextTotal = prev.totalAnswered + 1;
         const nextScore = res.isCorrect ? prev.score + 1 : prev.score;
         const nextStreak = res.isCorrect ? prev.streak + 1 : 0;
@@ -214,15 +224,15 @@ export function useQuizLogic({
     [currentQuestion, isSubmitting, isFlipped, isConnected, ensureSession, loadLeaderboards, refreshRewards]
   );
 
-  // Initial user sync & stats fetch
+  // Initial stats and history fetch (the account itself is created at sign-in)
   useEffect(() => {
-    if (isConnected && address) {
-      getOrCreateUser(address).then(() => {
-        refreshStats();
-        refreshRewards();
-      });
+    if (account) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      refreshStats();
+      refreshRewards();
+      refreshHistory();
     }
-  }, [isConnected, address, refreshStats, refreshRewards]);
+  }, [account, refreshStats, refreshRewards, refreshHistory]);
 
   // Only fetch initial question and leaderboards if not supplied via SSR
   useEffect(() => {

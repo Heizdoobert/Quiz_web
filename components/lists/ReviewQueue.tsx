@@ -1,37 +1,35 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAccount } from 'wagmi';
 import { confirmList, getListDetail, getListsPendingReview } from '@/lib/actions/question-list-actions';
 import { REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import { CheckCircle2, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 
 export default function ReviewQueue() {
-  const { address, isConnected } = useAccount();
-  const wallet = address || null;
+  const { account } = useSession();
 
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
-    if (!wallet) return;
+    if (!account) return;
     setLoading(true);
-    setLists(await getListsPendingReview(wallet));
+    setLists(await getListsPendingReview());
     setLoading(false);
-  }, [wallet]);
+  }, [account]);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh();
   }, [refresh]);
 
-  if (!isConnected) {
+  if (!account) {
     return (
       <div className="max-w-2xl mx-auto mt-16 text-center text-slate-400">
-        Connect your wallet to review lists submitted by other players.
+        Sign in to review lists submitted by other players.
       </div>
     );
   }
@@ -79,7 +77,7 @@ function ReviewCard({
   onToggle: () => void;
   onChanged: () => void;
 }) {
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);
