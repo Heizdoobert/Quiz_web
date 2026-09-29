@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
 import { getSessionAccount, setSessionAccount } from '../lib/session';
-import { getSessionWallet } from '../lib/wallet-session';
 import { ensureAccountForWallet } from '../lib/users';
 import { signInWithWallet, getSignedInWallet } from '../lib/actions/auth-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
@@ -95,20 +94,6 @@ describe('session cookie', () => {
 
     expect(await setSessionAccount({ id: ACCOUNT_ID, wallet: WALLET })).toBe(false);
     expect(await getSessionAccount()).toBeNull();
-  });
-});
-
-describe('getSessionWallet', () => {
-  it("returns the session account's wallet", async () => {
-    await setSessionAccount({ id: ACCOUNT_ID, wallet: WALLET });
-
-    expect(await getSessionWallet()).toBe(WALLET);
-  });
-
-  it('returns null for an account without a wallet', async () => {
-    await setSessionAccount({ id: ACCOUNT_ID, wallet: null });
-
-    expect(await getSessionWallet()).toBeNull();
   });
 });
 

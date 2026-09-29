@@ -22,11 +22,9 @@ function formatTokens(weiStr: string): string {
 
 export default function ContestPlay({
   list,
-  wallet,
   onExit,
 }: {
   list: QuestionListWithMeta;
-  wallet: string;
   onExit: () => void;
 }) {
   const [questions, setQuestions] = useState<ClientQuestion[] | null>(null);
@@ -66,7 +64,7 @@ export default function ContestPlay({
 
   useEffect(() => {
     if (txConfirmed && currentNonce && txHash) {
-      confirmRewardClaim(wallet, currentNonce, txHash).then((res) => {
+      confirmRewardClaim(currentNonce, txHash).then((res) => {
         if (res?.success) {
           setClaimStep('done');
         } else {
@@ -76,7 +74,7 @@ export default function ContestPlay({
         setCurrentNonce(null);
       });
     }
-  }, [txConfirmed, currentNonce, txHash, wallet]);
+  }, [txConfirmed, currentNonce, txHash]);
 
   const isWrongChain = chainId !== TARGET_CHAIN_ID;
 

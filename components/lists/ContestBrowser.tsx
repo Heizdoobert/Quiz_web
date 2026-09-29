@@ -38,7 +38,6 @@ export default function ContestBrowser() {
     return (
       <ContestPlay
         list={selected}
-        wallet={wallet}
         onExit={() => {
           setSelected(null);
           refresh();

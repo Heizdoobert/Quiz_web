@@ -107,7 +107,7 @@ export function useQuizLogic({
 
   const refreshRewards = useCallback(async () => {
     if (!address) return;
-    const data = await getClaimableRewards(address);
+    const data = await getClaimableRewards();
     setClaimableRewards(data);
   }, [address]);
 

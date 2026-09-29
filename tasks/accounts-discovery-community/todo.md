@@ -168,13 +168,42 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   line in both files covered (verified via `coverage-final.json` cross-referenced against `git diff`
   hunks).
 
-### Task 9: Rewards on `user_id`; delete `lib/wallet-session.ts`
+### Task 9: Rewards on `user_id`; delete `lib/wallet-session.ts` — done
 - Acceptance:
   - `getClaimableRewards()`, the vouchers and `confirmRewardClaim()` take no wallet argument; the recipient is `account.wallet`, and `WALLET_REQUIRED` is returned without one
   - `lib/wallet-session.ts` is deleted, and grep finds `getSessionWallet` 0 times
 - Verify: `npx vitest run tests/` plus grep
 - Files: `lib/actions/reward-actions.ts`, `hooks/modals/use-rewards-modal.ts`, `hooks/quiz/use-quiz-logic.ts`, `components/lists/ContestPlay.tsx`, `lib/wallet-session.ts` (deleted)
 - Depends: 3-8. Size: M
+- Result: All four reward actions in `reward-actions.ts` are now session-gated via `getSessionAccount()`
+  instead of a `getSessionWallet()` equality check, and no longer take a wallet argument:
+  `getClaimableRewards()`, `generateTokenVoucher()`, `generateBadgeVoucher(badgeType)`,
+  `confirmRewardClaim(nonce, txHash)`. Reads/writes moved to `reward_claims.user_id` (present since
+  Task 1); on insert only `user_id` is written and the DB's `bridge_wallet_account` trigger backfills
+  `wallet_address` when the account has one, so it's no longer set from application code. Voucher
+  recipient is `account.wallet`; missing a wallet returns `{ error, code: 'WALLET_REQUIRED' }` from the
+  two voucher functions (on-chain signing needs a real address). `getClaimableRewards()` no longer needs
+  `accountIdForWallet()` at all — the session already carries the account id, so that lookup and its
+  `lib/users` import are gone from this file. `confirmRewardClaim`'s `list_entries` update also moved to
+  `user_id`. Deleted `lib/wallet-session.ts`; grep confirms 0 remaining uses of `getSessionWallet`
+  (`hooks/shared/use-wallet-session.ts`'s client-side `useWalletSession` SIWE-signing hook is a different,
+  unrelated module and is untouched, per Task 10's scope).
+  Callers updated to the new signatures: `hooks/modals/use-rewards-modal.ts` (4 call sites),
+  `hooks/quiz/use-quiz-logic.ts` (1), `components/lists/ContestPlay.tsx` (1). Their wagmi-based
+  `walletAddress`/`address` client gating is untouched, pending Task 10/11. `ContestPlay`'s `wallet` prop
+  became fully unused once its one caller (`confirmRewardClaim`) dropped the argument, so it and its
+  passed-in value in `components/lists/ContestBrowser.tsx` were removed too (kept lint clean, no dead
+  prop threading).
+  Rewrote `tests/get-claimable-rewards.test.ts` for the session-based signature (5 tests, incl. a
+  no-wallet-account case) and added `tests/reward-actions.test.ts` (13 tests: session/wallet guards,
+  a signed voucher keyed by `user_id`, the open-voucher-reuse path, badge eligibility, and
+  `confirmRewardClaim`'s token/contest branches) — these three functions had zero prior test coverage.
+  Removed `tests/identity-accounts.test.ts`'s `getSessionWallet` describe block (module deleted).
+  Mutation-tested the `if (!account.wallet)` guard in `generateTokenVoucher` (inverted) — caught by
+  3/13 `reward-actions.test.ts` tests; restored via job-tmp backup, confirmed 18/18 green after.
+  Gate: 130/130 tests pass, tsc/eslint clean, 62.45% line coverage (floor 54%); every changed executable
+  line in `reward-actions.ts` covered (the two uncovered ranges the coverage report names, 307-308 and
+  364-365, are unchanged catch-block lines, not part of this diff).
 
 ### Task 10: Client session provider and sign-in modal (wallet)
 - Acceptance:
