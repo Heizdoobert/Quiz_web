@@ -495,8 +495,14 @@ Result:
 - Files: `components/community/RatingStars.tsx`, `CommentList.tsx`, `SuggestionForm.tsx`, `components/quiz/AnswerBack.tsx`, tests
 - Depends: 16, 19. Size: M
 
-### Task 21: Suggestions for authors on `/profile`
-- Acceptance: `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
+### Task 21: Suggestions for authors on `/profile` — done
+- Result:
+  - `components/community/AuthorSuggestions.tsx`: Displays "Suggestions for your questions" list on `/profile`. Each card displays the question's prompt, suggestion body, sender display name, and relative creation time. Provides a "Mark done" action button that calls `resolveSuggestion(commentId)` and removes resolved suggestions from the view in real-time. Shows empty state if the author has no open suggestions.
+  - `app/profile/page.tsx`: Integrated `<AuthorSuggestions accountId={account.id} />` in the profile dashboard below the created questions section, rendered for all authenticated session accounts.
+  - Tests: Added unit tests in `tests/community-ui.test.tsx` verifying suggestion rendering, mark-done resolution, and empty state. Added integration test in `tests/profile-page.test.tsx` verifying author suggestions display and interactive resolution on `/profile`.
+  - Gate: 230/230 tests pass across 26 test files, `check:fast` clean, `check:architecture` clean (0 violations, 346 dependencies cruised), total line coverage 70.97% (above 61.3% ratchet).
+- Acceptance:
+  - `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
 - Verify: `npx vitest run tests/community-ui.test.tsx tests/profile-page.test.tsx`
 - Files: `components/community/AuthorSuggestions.tsx`, `app/profile/page.tsx`, tests
 - Depends: 19. Size: S

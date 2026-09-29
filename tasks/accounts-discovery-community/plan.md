@@ -88,7 +88,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 ### Phase 4: Community
 - [x] Task 19: Community tables and server actions
 - [x] Task 20: Ratings, comments and suggestions on the card back
-- [ ] Task 21: Suggestions for authors on `/profile`
+- [x] Task 21: Suggestions for authors on `/profile`
 
 ### Checkpoint: Discovery and Community
 - [ ] Gates pass; first-load JS ≤ 150 kB per route (Discovery's 3 new routes not yet measured — you)

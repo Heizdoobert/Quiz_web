@@ -5,12 +5,15 @@ import AnswerBack from '../components/quiz/AnswerBack';
 import RatingStars from '../components/community/RatingStars';
 import CommentList from '../components/community/CommentList';
 import SuggestionForm from '../components/community/SuggestionForm';
+import AuthorSuggestions from '../components/community/AuthorSuggestions';
 import { useSession } from '../hooks/shared/use-session';
 import {
   getQuestionDiscussion,
   rateQuestion,
   addComment,
   deleteComment,
+  getSuggestionsForAuthor,
+  resolveSuggestion,
 } from '../lib/actions/community-actions';
 import { ClientQuestion, AnswerSubmissionResult } from '../lib/types';
 
@@ -23,6 +26,8 @@ vi.mock('../lib/actions/community-actions', () => ({
   rateQuestion: vi.fn(),
   addComment: vi.fn(),
   deleteComment: vi.fn(),
+  getSuggestionsForAuthor: vi.fn(),
+  resolveSuggestion: vi.fn(),
 }));
 
 const mockQuestion: ClientQuestion = {
@@ -336,5 +341,51 @@ describe('AnswerBack Integration', () => {
     expect(screen.getByText(/sign in to rate and comment/i)).toBeDefined();
     expect(screen.queryByPlaceholderText(/add a comment/i)).toBeNull();
     expect(screen.queryByRole('button', { name: /suggest a fix to the author/i })).toBeNull();
+  });
+});
+
+describe('AuthorSuggestions', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('renders suggestions for the author and marks done on click', async () => {
+    (getSuggestionsForAuthor as ReturnType<typeof vi.fn>).mockResolvedValue([
+      {
+        id: 'sugg-1',
+        questionId: 'q-1',
+        prompt: 'What is the speed of light?',
+        body: 'Option B has a typo in units (km/h vs m/s)',
+        senderName: 'Physicist',
+        createdAt: new Date().toISOString(),
+        resolvedAt: null,
+      },
+    ]);
+    (resolveSuggestion as ReturnType<typeof vi.fn>).mockResolvedValue({ ok: true });
+
+    render(<AuthorSuggestions accountId="author-1" />);
+
+    expect(await screen.findByText('Suggestions for your questions')).toBeDefined();
+    expect(screen.getByText('What is the speed of light?')).toBeDefined();
+    expect(screen.getByText('Option B has a typo in units (km/h vs m/s)')).toBeDefined();
+    expect(screen.getByText(/Physicist/)).toBeDefined();
+
+    const markDoneBtn = screen.getByRole('button', { name: /mark done/i });
+    expect(markDoneBtn).toBeDefined();
+
+    fireEvent.click(markDoneBtn);
+
+    await waitFor(() => {
+      expect(resolveSuggestion).toHaveBeenCalledWith('sugg-1');
+      expect(screen.queryByText('Option B has a typo in units (km/h vs m/s)')).toBeNull();
+    });
+  });
+
+  it('renders empty message when author has no suggestions', async () => {
+    (getSuggestionsForAuthor as ReturnType<typeof vi.fn>).mockResolvedValue([]);
+
+    render(<AuthorSuggestions accountId="author-1" />);
+
+    expect(await screen.findByText(/no suggestions yet for your questions/i)).toBeDefined();
   });
 });
