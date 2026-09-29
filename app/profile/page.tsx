@@ -79,7 +79,7 @@ export default function ProfilePage() {
         setActionError('Sign the message in your wallet to export your data.');
         return;
       }
-      const res = await exportUserData(address);
+      const res = await exportUserData();
       if (res.success) {
         downloadJson(`quick-quiz-backup-${address.slice(0, 8)}.json`, res.data);
         setExportSuccess(true);

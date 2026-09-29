@@ -2,7 +2,7 @@
 
 import { supabase } from '../supabase';
 import { supabaseAdmin } from '../supabase-admin';
-import { getSessionWallet } from '../wallet-session';
+import { getSessionAccount } from '../session';
 import {
   Question,
   ClientQuestion,
@@ -86,24 +86,15 @@ export async function getUserQuizzes(
   }
 }
 
-export async function exportUserData(walletAddress: string): Promise<ExportUserDataResult> {
+export async function exportUserData(): Promise<ExportUserDataResult> {
   try {
-    if (!walletAddress || !isValidEthAddress(walletAddress)) {
-      return {
-        success: false,
-        error: 'A valid wallet address is required for security.',
-        code: 'INVALID_ADDRESS',
-      };
-    }
-
-    const normalized = walletAddress.toLowerCase();
-
     // The backup holds correct answers and every recorded answer, which the public key
-    // can't read, so it's read with the secret key and only for the signed-in wallet.
-    if ((await getSessionWallet()) !== normalized) {
+    // can't read, so it's read with the secret key and only for the signed-in account.
+    const account = await getSessionAccount();
+    if (!account) {
       return {
         success: false,
-        error: 'Sign in with this wallet to export its data.',
+        error: 'Sign in to export your data.',
         code: 'UNAUTHORIZED',
       };
     }
@@ -113,8 +104,8 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
     }
 
     const [quizzesResponse, statsResponse] = await Promise.all([
-      supabaseAdmin.from('questions').select('*').eq('created_by', normalized).limit(MAX_EXPORT_QUIZZES),
-      supabaseAdmin.from('quiz_results').select('*').eq('wallet_address', normalized).limit(MAX_EXPORT_STATS),
+      supabaseAdmin.from('questions').select('*').eq('created_by_user', account.id).limit(MAX_EXPORT_QUIZZES),
+      supabaseAdmin.from('quiz_results').select('*').eq('user_id', account.id).limit(MAX_EXPORT_STATS),
     ]);
 
     if (quizzesResponse.error) {
@@ -140,7 +131,7 @@ export async function exportUserData(walletAddress: string): Promise<ExportUserD
     const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
 
     const exportData: UserBackupData = {
-      walletAddress: normalized,
+      walletAddress: account.wallet ?? '',
       exportedAt: new Date().toISOString(),
       version: BACKUP_SCHEMA_VERSION,
       quizzes,

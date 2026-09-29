@@ -65,7 +65,6 @@ ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
 CREATE POLICY "Allow public read for users" ON users FOR SELECT USING (true);
-CREATE POLICY "Allow public insert for users" ON users FOR INSERT WITH CHECK (true);
 
 -- Groups, questions and disputes are written by the server (secret key) for the signed-in wallet.
 CREATE POLICY "Allow public read for groups" ON groups FOR SELECT USING (true);

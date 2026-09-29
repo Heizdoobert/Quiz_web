@@ -6,15 +6,23 @@ import { isUuid } from '@/lib/validation';
 
 // Rows come pre-aggregated and pre-sorted from Postgres (lib/sql/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
-type LeaderboardRow = { wallet_address: string; score: number; accuracy: number };
+// wallet_address is null for an email account with no wallet.
+type LeaderboardRow = {
+  user_id: string;
+  display_name: string | null;
+  wallet_address: string | null;
+  score: number;
+  accuracy: number;
+};
 
 // The SQL functions clamp too, since the public key can call them directly.
 const clampLimit = (limit: number) => Math.min(Math.max(Math.trunc(limit) || 1, 1), 100);
 
 function toEntries(rows: LeaderboardRow[]): LeaderboardEntry[] {
   return rows.map((row, idx) => ({
+    user_id: row.user_id,
     wallet_address: row.wallet_address,
-    display_name: `${row.wallet_address.slice(0, 6)}...${row.wallet_address.slice(-4)}`,
+    display_name: row.display_name,
     score: row.score,
     accuracy: row.accuracy,
     rank: idx + 1,

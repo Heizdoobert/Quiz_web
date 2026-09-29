@@ -28,7 +28,7 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
   const loadGroups = useCallback(async () => {
     if (!walletAddress) return;
     setLoading(true);
-    const list = await getUserGroups(walletAddress);
+    const list = await getUserGroups();
     setGroups(list);
     setLoading(false);
   }, [walletAddress]);

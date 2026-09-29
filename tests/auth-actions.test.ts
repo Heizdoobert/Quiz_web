@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { clearSessionWallet, setSessionWallet, getSessionWallet } from '../lib/wallet-session';
+import { clearSessionWallet, getSessionWallet } from '../lib/wallet-session';
+import { setSessionAccount } from '../lib/session';
 import { getAuthNonce, requestSignIn, signInWithWallet, signOutWallet } from '../lib/actions/auth-actions';
-import { getOrCreateUser } from '../lib/actions/user-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { publicClientFor } from '../lib/chain';
 
@@ -23,13 +23,22 @@ vi.mock('next/headers', () => ({
 
 vi.mock('../lib/supabase', () => ({
   supabase: {
-    from: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
+    })),
   },
 }));
 
 vi.mock('../lib/supabase-admin', () => ({
   supabaseAdmin: {
-    from: vi.fn(),
+    from: vi.fn(() => ({
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
+    })),
   },
 }));
 
@@ -40,7 +49,7 @@ vi.mock('../lib/chain', () => ({
 const TEST_SECRET = 'test-secret-key-12345678901234567890';
 const TEST_WALLET = '0x1234567890123456789012345678901234567890';
 
-describe('Auth & Session Foundations (Task 1)', () => {
+describe('Auth & Session Foundations', () => {
   beforeEach(() => {
     vi.resetAllMocks();
     cookieStore.clear();
@@ -49,7 +58,7 @@ describe('Auth & Session Foundations (Task 1)', () => {
 
   describe('wallet-session', () => {
     it('sets and retrieves session wallet correctly', async () => {
-      const ok = await setSessionWallet(TEST_WALLET);
+      const ok = await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
       expect(ok).toBe(true);
 
       const wallet = await getSessionWallet();
@@ -57,92 +66,14 @@ describe('Auth & Session Foundations (Task 1)', () => {
     });
 
     it('clearSessionWallet deletes the session cookie', async () => {
-      await setSessionWallet(TEST_WALLET);
-      expect(cookieStore.has('wallet_session')).toBe(true);
+      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      expect(cookieStore.has('quiz_session')).toBe(true);
 
       await clearSessionWallet();
-      expect(cookieStore.has('wallet_session')).toBe(false);
+      expect(cookieStore.has('quiz_session')).toBe(false);
 
       const wallet = await getSessionWallet();
       expect(wallet).toBeNull();
-    });
-  });
-
-  describe('user-actions: getOrCreateUser', () => {
-    it('returns null if no walletAddress provided', async () => {
-      const user = await getOrCreateUser('');
-      expect(user).toBeNull();
-    });
-
-    it('returns existing user if already found in database', async () => {
-      const existing = {
-        wallet_address: TEST_WALLET.toLowerCase(),
-        display_name: 'ExistingUser',
-        created_at: '2026-01-01T00:00:00Z',
-      };
-
-      const chain = {
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data: existing, error: null }),
-      };
-      (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue(chain);
-
-      const user = await getOrCreateUser(TEST_WALLET);
-      expect(user).toEqual(existing);
-      expect(supabaseAdmin!.from).toHaveBeenCalledWith('users');
-    });
-
-    it('inserts and returns new user if not found in database', async () => {
-      let callCount = 0;
-      const inserted = {
-        wallet_address: TEST_WALLET.toLowerCase(),
-        display_name: `${TEST_WALLET.slice(0, 6)}...${TEST_WALLET.slice(-4)}`.toLowerCase(),
-        created_at: new Date().toISOString(),
-      };
-
-      (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-          };
-        }
-        return {
-          insert: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: inserted, error: null }),
-        };
-      });
-
-      const user = await getOrCreateUser(TEST_WALLET);
-      expect(user?.wallet_address).toBe(TEST_WALLET.toLowerCase());
-      expect(user?.display_name).toContain('...');
-    });
-
-    it('falls back to in-memory user if insert error occurs', async () => {
-      let callCount = 0;
-      (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation(() => {
-        callCount++;
-        if (callCount === 1) {
-          return {
-            select: vi.fn().mockReturnThis(),
-            eq: vi.fn().mockReturnThis(),
-            maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
-          };
-        }
-        return {
-          insert: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
-          single: vi.fn().mockResolvedValue({ data: null, error: { message: 'DB down' } }),
-        };
-      });
-
-      const user = await getOrCreateUser(TEST_WALLET);
-      expect(user?.wallet_address).toBe(TEST_WALLET.toLowerCase());
-      expect(user?.display_name).toContain('...');
     });
   });
 
@@ -161,12 +92,12 @@ describe('Auth & Session Foundations (Task 1)', () => {
       expect(cookieStore.has('wallet_challenge')).toBe(true);
     });
 
-    it('signOutWallet calls clearSessionWallet', async () => {
-      await setSessionWallet(TEST_WALLET);
-      expect(cookieStore.has('wallet_session')).toBe(true);
+    it('signOutWallet calls clearSessionAccount', async () => {
+      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      expect(cookieStore.has('quiz_session')).toBe(true);
 
       await signOutWallet();
-      expect(cookieStore.has('wallet_session')).toBe(false);
+      expect(cookieStore.has('quiz_session')).toBe(false);
     });
 
     it('signInWithWallet returns false if challenge cookie is missing', async () => {
@@ -174,7 +105,7 @@ describe('Auth & Session Foundations (Task 1)', () => {
       expect(ok).toBe(false);
     });
 
-    it('signInWithWallet verifies signature, sets session cookie, and calls getOrCreateUser', async () => {
+    it('signInWithWallet verifies signature, sets session cookie, and calls ensureAccountForWallet', async () => {
       const message = await requestSignIn(TEST_WALLET, 1);
 
       const mockClient = {
@@ -182,21 +113,23 @@ describe('Auth & Session Foundations (Task 1)', () => {
       };
       (publicClientFor as ReturnType<typeof vi.fn>).mockReturnValue(mockClient);
 
-      const existingUser = {
-        wallet_address: TEST_WALLET.toLowerCase(),
-        display_name: 'AuthUser',
-        created_at: new Date().toISOString(),
-      };
+      const upsertMock = vi.fn().mockResolvedValue({ error: null });
+      const selectMock = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
+        }),
+      });
+
       (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue({
-        select: vi.fn().mockReturnThis(),
-        eq: vi.fn().mockReturnThis(),
-        maybeSingle: vi.fn().mockResolvedValue({ data: existingUser, error: null }),
+        upsert: upsertMock,
+        select: selectMock,
       });
 
       const ok = await signInWithWallet(message, '0xdeadbeef' as `0x${string}`);
       expect(ok).toBe(true);
-      expect(cookieStore.has('wallet_session')).toBe(true);
+      expect(cookieStore.has('quiz_session')).toBe(true);
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('users');
+      expect(upsertMock).toHaveBeenCalled();
     });
   });
 });
