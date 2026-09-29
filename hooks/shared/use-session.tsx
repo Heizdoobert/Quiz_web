@@ -70,7 +70,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   return (
     <SessionContext.Provider value={{ account, refresh, requireSignIn }}>
       {children}
-      <SignInModal isOpen={modalOpen} onClose={cancelSignIn} />
+      <SignInModal isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />
     </SessionContext.Provider>
   );
 }
