@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
+import { useSession } from '@/hooks/shared/use-session';
 import GlobalLeaderboard from './GlobalLeaderboard';
 import GroupLeaderboard from './GroupLeaderboard';
 import { Shield, Trophy, Users } from 'lucide-react';
@@ -22,6 +23,7 @@ export default function LeaderboardPanel({
   className = '',
 }: LeaderboardPanelProps) {
   const [activeTab, setActiveTab] = useState<'global' | 'group'>('global');
+  const { account } = useSession();
 
   return (
     <section
@@ -54,14 +56,16 @@ export default function LeaderboardPanel({
           </button>
         </div>
 
-        <button
-          type="button"
-          onClick={onOpenGroupModal}
-          className="p-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#00FFCC] hover:text-white transition-all cursor-pointer shadow-sm active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
-          title="Create or Join Groups"
-        >
-          <Shield className="w-3.5 h-3.5" />
-        </button>
+        {account && (
+          <button
+            type="button"
+            onClick={onOpenGroupModal}
+            className="p-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] border border-[#3A3E70] text-[#00FFCC] hover:text-white transition-all cursor-pointer shadow-sm active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+            title="Create or Join Groups"
+          >
+            <Shield className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
 
       {activeTab === 'global' ? (

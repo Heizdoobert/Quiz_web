@@ -408,7 +408,11 @@ Result:
 - Files: `lib/sql/topics.sql`, `lib/actions/question-actions.ts`, `components/quiz/CategoryBar.tsx`, tests
 - Depends: 14. Size: M
 
-### Task 16: Signed-in creation and read-only guests
+### Task 16: Signed-in creation and read-only guests — done
+- Result: `QuizLayout` now calls `useSession()` and renders `QuestionForm` only when `account` is set; guests get the exact spec empty state ("No questions yet. Sign in to add the first one.") with a button calling `requireSignIn()`. The dispute button was already fully optional end-to-end (`AnswerBack` renders a placeholder `<div />` when `onOpenDispute` is undefined, `QuizCard` just forwards the prop) — so the guest gate is one line at the single call site: `onOpenDispute={account ? () => openModal('dispute') : undefined}`. `LeaderboardPanel` and `ListsNav` each call `useSession()` directly (same pattern already used by `ContestBrowser`/`MyListsDashboard`/`ReviewQueue`): the group-create/join button is hidden for guests, and `ListsNav` drops the "My Lists"/"Review Queue" links for guests while keeping "Contests" (whose own page already fully gates behind sign-in from Task 11). `createQuestion`'s server-side `getSessionAccount()` check and 5/day cap were already in place from earlier tasks — no change needed there. `ContestBrowser` was already gated end-to-end (whole page requires `account`) — no change needed.
+  New test file `tests/quiz-layout-guest-access.test.tsx` (8 tests): `QuizLayout` guest vs signed-in (empty state / QuestionForm, dispute handler wired or not), `LeaderboardPanel` guest vs signed-in (group button), `ListsNav` guest vs signed-in (tab list). Mutation-tested the `account ?` gate in `QuizLayout` by forcing both branches to the truthy path — 2/8 tests caught it (the two `QuizLayout` guest-specific assertions), confirming the gate is enforced. Restored, 8/8 green.
+  Full gate: 187/187 tests (was 179), tsc/eslint/gitleaks clean, `check:architecture` clean at 316 dependencies (+3, expected: `LeaderboardPanel`/`ListsNav`/`QuizLayout` each gained one `use-session` import edge).
+  Not done this turn: the manual signed-out click-through check the spec also calls for (yours, same as every other manual browser check in this plan).
 - Acceptance:
   - `QuestionForm` renders only for a session account, and the empty state asks guests to sign in
   - guests see no dispute button (`AnswerBack`), no "Create or Join Groups" (`LeaderboardPanel`), no My Lists or Review links (`ListsNav`), and no contest join (`ContestBrowser`)
