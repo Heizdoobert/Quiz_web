@@ -76,33 +76,57 @@ export default function SeoFaqSection() {
           return (
             <div
               key={idx}
-              className="glass glass-border border border-transparent rounded-2xl overflow-hidden transition-colors hover:border-[#6C5CE7]/60"
+              className={`rounded-2xl overflow-hidden border transition-all duration-300 ${
+                isOpen
+                  ? 'bg-gradient-to-b from-[#00FFCC]/[0.07] to-[#1A1B35] border-[#00FFCC]/40 shadow-lg shadow-[#00FFCC]/10'
+                  : 'glass glass-border border-transparent hover:border-[#6C5CE7]/60 hover:bg-[#14163A]'
+              }`}
             >
               <button
                 type="button"
                 onClick={() => toggleFaq(idx)}
-                className="w-full text-left px-5 py-4 flex items-center justify-between gap-4 text-sm font-medium text-slate-200 hover:text-white focus-visible:outline-none focus-visible:bg-[#1A1B35]"
+                className="w-full text-left px-5 py-4 flex items-center gap-4 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC] focus-visible:ring-inset"
                 aria-expanded={isOpen}
                 aria-controls={`faq-answer-${idx}`}
               >
-                <span>{faq.question}</span>
-                <ChevronDown
-                  className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180 text-[#00FFCC]' : ''
+                <span
+                  className={`font-mono text-[11px] font-bold tabular-nums tracking-wider shrink-0 transition-colors duration-300 ${
+                    isOpen ? 'text-[#00FFCC]' : 'text-slate-500'
                   }`}
-                />
+                >
+                  {String(idx + 1).padStart(2, '0')}
+                </span>
+                <span
+                  className={`flex-1 text-sm font-semibold transition-colors duration-300 ${
+                    isOpen ? 'text-white' : 'text-slate-300'
+                  }`}
+                >
+                  {faq.question}
+                </span>
+                <motion.span
+                  animate={{ rotate: isOpen ? 180 : 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                  className={`p-1.5 rounded-full border shrink-0 transition-colors duration-300 ${
+                    isOpen
+                      ? 'bg-[#00FFCC] border-[#00FFCC] text-[#0A1128]'
+                      : 'border-[#2D305A] text-slate-400'
+                  }`}
+                >
+                  <ChevronDown className="w-3.5 h-3.5" />
+                </motion.span>
               </button>
-              <AnimatePresence>
+              <AnimatePresence initial={false}>
                 {isOpen && (
                   <motion.div
                     id={`faq-answer-${idx}`}
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
+                    role="region"
+                    initial={{ height: 0, opacity: 0, y: -6 }}
+                    animate={{ height: 'auto', opacity: 1, y: 0 }}
                     exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ type: 'spring', stiffness: 260, damping: 32 }}
                     className="overflow-hidden"
                   >
-                    <div className="px-5 pb-4 text-xs text-slate-400 leading-relaxed border-t border-[#2D305A] pt-3">
+                    <div className="mx-5 mb-4 pl-4 border-l-2 border-[#00FFCC]/60 text-[13px] text-slate-300 leading-relaxed">
                       {faq.answer}
                     </div>
                   </motion.div>
