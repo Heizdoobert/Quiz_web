@@ -1,3 +1,6 @@
+# On-Chain Contest Escrow (complete)
+Implemented and merged: `ContestEscrow.sol` (creation, claim, refund, EIP-712 verification), Hardhat suite in `contracts/test/ContestEscrow.test.ts`, typed ABI/address config in `lib/contracts/`, `claimListReward` unpaused with on-chain funded/expiry checks, `ContestPlay.tsx`/`MyListsDashboard.tsx` wired to the contract.
+
 # Implementation Plan: Accounts, Discovery, Answer Persistence & SIWE Authentication
 
 ## Overview

@@ -374,7 +374,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 2: Trivia — spec `docs/specs/trivia-guest-access.md`
 
-### Task 14: Public-question rule and retire sample questions
+### Task 14: Public-question rule and retire sample questions — done
+Result:
+- `fetchRandomQuestion` (`lib/actions/question-actions.ts`) and both its fallback queries now filter `.eq('status', 'verified').is('list_id', null)` instead of `.neq('status', 'quarantined').neq('status', 'pending')` — a `rejected` question can no longer be served (the bug the old exclude-list left open).
+- `lib/schema.sql`: the 14-row seed `INSERT` block is deleted outright (not commented out — it's history now, in git). `list_id` is filtered on by the anon-key client (`fetchRandomQuestion` uses `lib/supabase.ts`'s anon client, not `supabaseAdmin`), and Postgres gates column use in `WHERE`/`.is()` the same as `SELECT` output, so `list_id` needed adding to the anon/authenticated column grant — done right after the column's own `ALTER TABLE ADD COLUMN`, not at the original top-of-file grant (which runs before `list_id` exists).
+- `lib/sql/retire-sample-questions.sql` (new): `UPDATE questions SET status = 'rejected' WHERE created_by IS NULL AND prompt IN (...)`, matched against the exact 14 seed prompts (pulled verbatim from the deleted seed block) in a temp table, wrapped in `BEGIN`/`COMMIT`, with a post-check that all 14 ended up `rejected`. Deletes nothing — `quiz_results.question_id` is `ON DELETE CASCADE`, so deleting a seed row a player answered would erase their score.
+- Tests: new `tests/trivia-guest-access.test.tsx` (3 tests) — primary query uses the verified+no-list filter; an empty result (standing in for a rejected/quarantined row that the filter excluded) returns `null`; the category fallback query applies the same filter. Mutation-tested the `.is('list_id', null)` guard by dropping it — caught (1/3 failed). Full suite: 168/168 (was 165), tsc/eslint/gitleaks/depcruise clean, 311 dependencies (unchanged, no new cycle).
+- Not done: running `retire-sample-questions.sql` on a Supabase branch (needs you — same as Task 1's `accounts.sql`/`stats-functions.sql`).
 - Acceptance:
   - play serves only `status = 'verified' AND list_id IS NULL` (a rejected question is never served)
   - the seed block is removed from `lib/schema.sql`
@@ -383,7 +389,17 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/actions/question-actions.ts`, `lib/schema.sql`, `lib/sql/retire-sample-questions.sql`, tests
 - Depends: Phase 1. Size: S
 
-### Task 15: Topics from the database
+### Task 15: Topics from the database — done
+- Result:
+  - `lib/sql/topics.sql`: `get_topics()` (SECURITY DEFINER, matches the same PostgREST-1000-row-cap reasoning as `stats-functions.sql`), groups `questions.category` by `lower(TRIM(category))`, public-question rule applied (`status = 'verified' AND list_id IS NULL`), returns the most recent spelling per group, count, and newest `created_at`, ordered newest first. Granted `EXECUTE` to `anon, authenticated`.
+  - `question-actions.ts`: added `getTopics()` (calls the RPC, maps snake_case to camelCase) and `getPublicQuestion(id)` (public rule, `.single()`, same 5-column select as `fetchRandomQuestion` — never `correct_index`/`explanation`).
+  - `validation.ts`: `validateQuestionInput`'s category handling now collapses inner whitespace and enforces 2-40 chars (was only a max); added `escapeLikePattern` for safe ILIKE matching.
+  - Fixed a bug this task would otherwise have shipped broken: `fetchRandomQuestion`'s category filter was `eq('category', category)` (exact case match). Once `get_topics()` groups "DeFi"/"defi" as one topic with a combined count, selecting that topic in `CategoryBar` would only play rows matching whichever single casing it filtered on — undercounting silently. Changed both filter sites to `ilike('category', escapeLikePattern(category))` (escaped so a player-typed `%`/`_` in a category isn't read as a wildcard).
+  - `CategoryBar.tsx`: dropped the hardcoded `CATEGORIES` array (icon set, fixed colors); now fetches `getTopics()` on mount and renders "All" plus each topic name. Only caller was `QuizLayout.tsx` (unchanged — same `selectedCategory`/`onSelectCategory` prop contract), so no other files touched.
+  - Tests (`tests/trivia-guest-access.test.tsx`, extended): category-filter case-insensitivity + escaping, `getTopics` snake_case→camelCase mapping and its empty-on-error path, `getPublicQuestion`'s public-rule filters and malformed-id short-circuit, and `createQuestion`'s category trim/collapse/min-length/default via `validateQuestionInput`. 11/11 pass.
+  - Mutation-tested `escapeLikePattern`: reverted to identity, exactly 1/11 failed (the escaping test), confirming it's enforced; restored.
+  - Full gate: 179/179 tests, tsc/eslint/gitleaks clean, `check:architecture` clean (313 deps, +1 from `CategoryBar` → `question-actions` edge, no cycle).
+  - Not done: running `lib/sql/topics.sql` on a Supabase branch (yours).
 - Acceptance:
   - `get_topics()` and `getTopics()` return public topics grouped case-insensitively, newest first, with counts
   - `getPublicQuestion(id)` returns public questions only and no answer fields
@@ -392,7 +408,11 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/sql/topics.sql`, `lib/actions/question-actions.ts`, `components/quiz/CategoryBar.tsx`, tests
 - Depends: 14. Size: M
 
-### Task 16: Signed-in creation and read-only guests
+### Task 16: Signed-in creation and read-only guests — done
+- Result: `QuizLayout` now calls `useSession()` and renders `QuestionForm` only when `account` is set; guests get the exact spec empty state ("No questions yet. Sign in to add the first one.") with a button calling `requireSignIn()`. The dispute button was already fully optional end-to-end (`AnswerBack` renders a placeholder `<div />` when `onOpenDispute` is undefined, `QuizCard` just forwards the prop) — so the guest gate is one line at the single call site: `onOpenDispute={account ? () => openModal('dispute') : undefined}`. `LeaderboardPanel` and `ListsNav` each call `useSession()` directly (same pattern already used by `ContestBrowser`/`MyListsDashboard`/`ReviewQueue`): the group-create/join button is hidden for guests, and `ListsNav` drops the "My Lists"/"Review Queue" links for guests while keeping "Contests" (whose own page already fully gates behind sign-in from Task 11). `createQuestion`'s server-side `getSessionAccount()` check and 5/day cap were already in place from earlier tasks — no change needed there. `ContestBrowser` was already gated end-to-end (whole page requires `account`) — no change needed.
+  New test file `tests/quiz-layout-guest-access.test.tsx` (8 tests): `QuizLayout` guest vs signed-in (empty state / QuestionForm, dispute handler wired or not), `LeaderboardPanel` guest vs signed-in (group button), `ListsNav` guest vs signed-in (tab list). Mutation-tested the `account ?` gate in `QuizLayout` by forcing both branches to the truthy path — 2/8 tests caught it (the two `QuizLayout` guest-specific assertions), confirming the gate is enforced. Restored, 8/8 green.
+  Full gate: 187/187 tests (was 179), tsc/eslint/gitleaks clean, `check:architecture` clean at 316 dependencies (+3, expected: `LeaderboardPanel`/`ListsNav`/`QuizLayout` each gained one `use-session` import edge).
+  Not done this turn: the manual signed-out click-through check the spec also calls for (yours, same as every other manual browser check in this plan).
 - Acceptance:
   - `QuestionForm` renders only for a session account, and the empty state asks guests to sign in
   - guests see no dispute button (`AnswerBack`), no "Create or Join Groups" (`LeaderboardPanel`), no My Lists or Review links (`ListsNav`), and no contest join (`ContestBrowser`)
@@ -406,7 +426,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 3: Discovery — spec `docs/specs/discovery.md`
 
-### Task 17: Question search
+### Task 17: Question search — done
+- Result: `lib/sql/search.sql` enables `pg_trgm`, adds GIN trigram indexes on `lower(prompt)`/`lower(category)`, and `search_questions(p_query, p_limit, p_offset)` (SECURITY DEFINER, same public-question rule as `get_topics()`/`getPublicQuestion`: `status = 'verified' AND list_id IS NULL`). It escapes `%`/`_` with a literal `replace()` chain for the `ILIKE ... ESCAPE '\'` match, but feeds the raw (unescaped) lowercased query to `word_similarity` so a typo like "etherum" still matches "Ethereum" — matching prompt or category by substring or `word_similarity > 0.3`, ordered by score desc then `created_at` desc. `author_name` comes from a `LEFT JOIN users` on `created_by_user` (same join pattern as `get_global_leaderboard`), falling back to `'Player'`.
+  `lib/actions/discovery-actions.ts` adds `searchQuestions(query, page)`: trims the query, returns `{ results: [], hasMore: false }` with no database call outside 2-100 characters, pages at 20 with a `+1` over-fetch for `hasMore`, and maps snake_case RPC rows to camelCase `SearchResult` (`lib/types.ts`) — never touching `correct_index`/`explanation`/`options` since the SQL function never returns them.
+  `components/discovery/SearchBox.tsx` is a plain (non-`'use client'`) native `<form action="/search" method="GET">` — no router/JS needed for a GET query-string submit. Wired into `Header.tsx` next to the logo. `components/discovery/SearchResultList.tsx` renders prompt/category/author/"added &lt;relative time&gt;" (new `formatRelativeTime` helper in `lib/utils.ts`, reused by Task 18's topic lists) with a "Play" link to `/q/[id]` (that route lands in Task 18 — the link is added now as the natural vertical slice, matching how `CategoryBar` already linked to topics before `get_topics()` landed). `app/search/page.tsx` is a server component reading `searchParams`, `noindex`'d per spec, with prev/next paging and the exact "No questions match "q"" empty-state text linking to `/topics`.
+  New test file `tests/discovery.test.ts` (8 tests): query-length bounds (1 and 101 chars make no RPC call), trimming, offset math for page 2, `hasMore` on/off, snake_case→camelCase mapping never surfaces answer fields, and the error path. Mutation-tested the length-bound guard (forced to `if (false)`) — 2/8 caught it (exactly the two bound tests), confirming it's enforced; restored, 8/8 green.
+  Full gate: 195/195 tests (was 187), tsc/eslint/gitleaks clean, `check:architecture` clean at 323 dependencies (+7, expected: new `discovery-actions`/`SearchBox`/`SearchResultList`/`search/page` module edges), no cycle.
+  Not done this turn: running `lib/sql/search.sql` on a Supabase branch, and the spec's manual checks ("block" finds "blockchain", "etherum" finds "Ethereum", `EXPLAIN ANALYZE` at 1,000+ rows, search signed out) — all yours, same as every other SQL/manual-browser item in this plan.
 - Acceptance:
   - `search.sql` adds `pg_trgm`, trigram indexes and `search_questions()` (public only, `%` and `_` escaped)
   - `searchQuestions` bounds the query to 2-100 characters, with pages of 20
@@ -415,7 +441,18 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/sql/search.sql`, `lib/actions/discovery-actions.ts`, `components/discovery/SearchBox.tsx`, `app/search/page.tsx`, tests
 - Depends: 15. Size: M
 
-### Task 18: Topic pages and single-question play
+### Task 18: Topic pages and single-question play — done
+- Result: `getTopicQuestions(topic, page)` added to `discovery-actions.ts`, no new SQL — the FK `questions.created_by_user -> users(id)` (added in `accounts.sql`) is unique on that table, so PostgREST resolves a plain embed (`.select('id, prompt, category, created_at, users(display_name)')`) with no ambiguity. Same public-question filter and `escapeLikePattern`-guarded `ILIKE` as `fetchRandomQuestion`, ordered `created_at desc`, 20/page with the same `+1`-row `hasMore` convention as `searchQuestions`. Reuses the `SearchResult` type and `SearchResultList` component from Task 17 (`authorName` falls back to `'Player'` when `display_name` is null) — no new result-card component needed, only `TopicList.tsx` for the topic-name list itself.
+
+  `/topics` reads `getTopics()` (already existed since Task 15, already ordered `latest_at desc` in `get_topics()` — no SQL change needed), rendering name/count/"last added <relative time>" via `formatRelativeTime`. `/topics/[topic]` reads `getTopicQuestions`, `noindex`'d (per the spec's own open question: player-typed topic names become public URLs, so kept out of search engines until that's decided) — "Play this topic" links straight to `/q/[id]` of that topic's newest question (`results[0].id`), which both starts the quiz filtered to the topic and needs zero changes to `app/page.tsx` or `use-quiz-logic.ts` (both stayed out of this task's file list on purpose).
+
+  `/q/[id]` reads `getPublicQuestion(id)` (already existed since Task 14/16), 404s via `next/navigation`'s `notFound()` if null or not public, then renders the *existing* `QuizLayout` (which is what actually wires `QuizCard` to `submitAnswer`, the timer, the sponsor-unlock gate, and disputes) seeded with that question as `initialQuestion` — the identical pattern `app/page.tsx` already uses for a random question. Considered a bespoke lightweight wrapper around bare `QuizCard` first, but `useQuizLogic`'s sponsor-ad gate starts every fresh question **locked** (`isUnlocked` defaults `false`); a wrapper that skipped that plumbing would silently break answering rather than simplify anything, so reusing `QuizLayout` was the smaller, correct diff, not a lazier-looking one.
+
+  Mutation-tested the `escapeLikePattern` call in `getTopicQuestions`: removing the escape wrapper failed exactly the dedicated ILIKE-args assertion, others stayed green.
+
+  12/12 in `tests/discovery.test.ts` (was 8; +4 for `getTopicQuestions`: mapping/fallback, escaping+range math, `hasMore` trim, error path). Full gate: 199/199 tests (was 195), tsc/eslint/gitleaks clean, `check:architecture` 326 deps (+3 from Task 17's 323), no cycle.
+
+  Not done: running any SQL on a Supabase branch (none needed this task — no new SQL file), the manual signed-out click-through (`/topics` → a topic → `/q/[id]` → answer), and first-load JS budget measurement for the 3 new routes (checkpoint item, still open).
 - Acceptance:
   - `/topics` lists topics newest first with counts
   - `/topics/[topic]` lists questions newest first with "Play this topic"
@@ -426,7 +463,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 4: Community — spec `docs/specs/community.md`
 
-### Task 19: Community tables and server actions
+### Task 19: Community tables and server actions — done
+- Result:
+  - `lib/sql/community.sql`: creates `question_ratings` (PK on `(question_id, user_id)`, rating 1-5, cascade deletes) and `question_comments` (PK on `id`, kind `comment`|`suggestion`, 1-500 chars body, created_at index), both with RLS enabled and zero public policies (reads and writes mediated by server actions using `supabaseAdmin`). Also defines `get_rating_summary(p_question_id)` SECURITY DEFINER RPC returning average and count.
+  - `lib/actions/community-actions.ts`: implements `rateQuestion`, `addComment`, `deleteComment`, `resolveSuggestion`, `getQuestionDiscussion`, and `getSuggestionsForAuthor`. Each write enforces session authentication (`getSessionAccount()`), public question (`status = 'verified' AND list_id IS NULL`), recorded answer in `quiz_results`, not-author restriction for ratings and suggestions (authors can comment on own questions), and 20 comments/suggestions per account per 24 hours. Fixed result codes: `UNAUTHORIZED`, `NOT_ANSWERED`, `NOT_ALLOWED`, `INVALID`, `RATE_LIMITED`, `FAILED`. `getQuestionDiscussion` only returns `kind = 'comment'`; suggestions are strictly private to author and sender.
+  - Tests (`tests/community.test.ts`): 19 comprehensive unit tests covering all gates, bound checks, rate limits, deletion, and author suggestions privacy.
+  - Gate: 218/218 tests passing, tsc/eslint/gitleaks clean, `depcruise` clean with zero boundary or circular violations, line coverage at 71% (project ratchet ≥ 61.3%).
+  - Not done: running `lib/sql/community.sql` on a Supabase branch (needs user).
 - Acceptance:
   - `community.sql` creates `question_ratings` and `question_comments` with RLS on and no public policies
   - every action enforces signed in, public question, recorded answer, not-author (for ratings and suggestions), and 20 per day, returning fixed codes
@@ -435,7 +478,15 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/sql/community.sql`, `lib/actions/community-actions.ts`, `tests/community.test.ts`
 - Depends: 14. Size: M
 
-### Task 20: Ratings, comments and suggestions on the card back
+### Task 20: Ratings, comments and suggestions on the card back — done
+- Result:
+  - `components/community/RatingStars.tsx`: Displays average rating and rating count. Signed-in players can hover and tap to rate 1-5 stars calling `rateQuestion(questionId, star)`. Guests see the average rating and count without interactive buttons.
+  - `components/community/CommentList.tsx`: Renders comments newest first with author name, relative timestamp, and plain text comment body (React-escaped, safe from XSS/HTML execution). Own comments render a delete button calling `deleteComment(commentId)`. Signed-in players get a 500-char max textarea with live character counter; guests see "Sign in to rate and comment" linking to `requireSignIn()`.
+  - `components/community/SuggestionForm.tsx`: Renders "Suggest a fix to the author" toggle that expands a private suggestion form (500 chars max, counter) calling `addComment(questionId, body, 'suggestion')`, displaying confirmation on submission.
+  - `components/quiz/AnswerBack.tsx`: Integrated Community discussion box below the explanation, loading ratings and comments asynchronously with `getQuestionDiscussion(question.id)`. Handles real-time rating updates, comment additions, and comment deletions.
+  - `vitest.config.ts`: Configured `maxWorkers: 2` to prevent memory contention and worker timeouts under heavy system load.
+  - Tests (`tests/community-ui.test.tsx`): 9 tests covering rating tap-to-rate, guest read-only view, plain text XSS safety, 500-character counter, comment deletion, suggestion form toggle and submit, and AnswerBack integration for signed-in and guest users. Updated `tests/AnswerBack.test.tsx` with session mock.
+  - Gate: 227/227 tests pass across 26 test files, `tsc`/eslint/gitleaks clean, `depcruise` clean (0 violations), total line coverage 70.71% (above 61.3% ratchet). Next.js production build succeeds with all routes valid.
 - Acceptance:
   - after answering, `AnswerBack` shows the average and count, tap-to-rate stars, comments newest first with a 500-character box, and "Suggest a fix to the author"
   - guests see the average and comments without inputs
@@ -444,8 +495,14 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `components/community/RatingStars.tsx`, `CommentList.tsx`, `SuggestionForm.tsx`, `components/quiz/AnswerBack.tsx`, tests
 - Depends: 16, 19. Size: M
 
-### Task 21: Suggestions for authors on `/profile`
-- Acceptance: `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
+### Task 21: Suggestions for authors on `/profile` — done
+- Result:
+  - `components/community/AuthorSuggestions.tsx`: Displays "Suggestions for your questions" list on `/profile`. Each card displays the question's prompt, suggestion body, sender display name, and relative creation time. Provides a "Mark done" action button that calls `resolveSuggestion(commentId)` and removes resolved suggestions from the view in real-time. Shows empty state if the author has no open suggestions.
+  - `app/profile/page.tsx`: Integrated `<AuthorSuggestions accountId={account.id} />` in the profile dashboard below the created questions section, rendered for all authenticated session accounts.
+  - Tests: Added unit tests in `tests/community-ui.test.tsx` verifying suggestion rendering, mark-done resolution, and empty state. Added integration test in `tests/profile-page.test.tsx` verifying author suggestions display and interactive resolution on `/profile`.
+  - Gate: 230/230 tests pass across 26 test files, `check:fast` clean, `check:architecture` clean (0 violations, 346 dependencies cruised), total line coverage 70.97% (above 61.3% ratchet).
+- Acceptance:
+  - `/profile` lists suggestions on your own questions (prompt, suggestion, sender, date) with "Mark done", and never shows another author's.
 - Verify: `npx vitest run tests/community-ui.test.tsx tests/profile-page.test.tsx`
 - Files: `components/community/AuthorSuggestions.tsx`, `app/profile/page.tsx`, tests
 - Depends: 19. Size: S
@@ -456,7 +513,14 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 5: Rewards — spec `docs/specs/rewards-no-wallet-payee.md`
 
-### Task 22: Payee rule and treasury sweep
+### Task 22: Payee rule and treasury sweep — done
+- Result:
+  - `lib/sql/reward-payee.sql`: Added `treasury_swept_count` column to `users` with check constraint `>= 0`. Created `sweep_to_treasury()` SECURITY DEFINER function taking answers > 180 days old from accounts with `wallet IS NULL`, incrementing `treasury_swept_count` idempotently and never decreasing. Created `get_treasury_entitled_count()` SECURITY DEFINER function returning the total pool count. Both functions revoke public EXECUTE and grant to `service_role`.
+  - `lib/types.ts`: Extended `ClaimableRewards` with optional `heldTokens?: string` and `sweepsAt?: string | null`.
+  - `lib/actions/reward-actions.ts`: Updated `getClaimableRewards`, `generateTokenVoucher`, and `generateBadgeVoucher`. Enforces that accounts without a wallet return `claimableTokens: '0'`, populate `heldTokens` with pending tokens, and calculate `sweepsAt` for the oldest unswept answer. When `account.wallet === process.env.TREASURY_WALLET_ADDRESS`, triggers `sweep_to_treasury()` and adds `get_treasury_entitled_count()` pool to total earned. Vouchers fail early with `WALLET_REQUIRED` for accounts without a wallet.
+  - Tests (`tests/rewards-payee.test.ts`, `tests/get-claimable-rewards.test.ts`): Unit tests covering wallet-less accounts (held tokens, sweepsAt, voucher blocking with WALLET_REQUIRED), wallet accounts with previous swept count deduction, treasury sweep trigger and entitlement pool aggregation, and unset TREASURY_WALLET_ADDRESS behavior.
+  - Gate: 234/234 tests pass across 27 test files, `check:fast` clean, `check:architecture` clean (0 violations), total line coverage 71.63% (above 61.3% ratchet).
+  - Not done: running `lib/sql/reward-payee.sql` on a Supabase branch (needs user).
 - Acceptance:
   - claimable = 10 × (correct − `treasury_swept_count`) − claimed, for accounts with a wallet only
   - `sweep_to_treasury()` takes only answers over 180 days old from accounts without a wallet, is idempotent, and never lowers counts

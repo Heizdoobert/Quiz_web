@@ -27,7 +27,7 @@ vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 // No pending vouchers to settle, and no already-claimed rows: an empty result for every query.
 function emptyChain() {
   const chain: Record<string, unknown> = {};
-  for (const m of ['select', 'eq']) chain[m] = () => chain;
+  for (const m of ['select', 'eq', 'maybeSingle', 'single', 'order', 'range']) chain[m] = () => chain;
   chain.then = (resolve: (v: unknown) => unknown) => resolve({ data: [], error: null });
   return chain;
 }

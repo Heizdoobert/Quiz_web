@@ -104,6 +104,15 @@ export interface AnswerSubmissionResult {
   notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'error';
 }
 
+export interface SearchResult {
+  id: string;
+  prompt: string;
+  category: string;
+  authorName: string;
+  createdAt: string;
+  score?: number;
+}
+
 export interface HistoryItem {
   questionId: string;
   prompt: string;
@@ -116,6 +125,8 @@ export interface ClaimableRewards {
   alreadyClaimedBadges: number[];
   totalEarned: string;
   totalClaimed: string;
+  heldTokens?: string;
+  sweepsAt?: string | null;
 }
 
 export interface RewardVoucher {
@@ -179,3 +190,36 @@ export type GetUserQuizzesResult =
 export type ExportUserDataResult =
   | { success: true; data: UserBackupData }
   | { success: false; error: string; code: ProfileErrorCode };
+
+export type CommunityErrorCode =
+  | 'UNAUTHORIZED'
+  | 'NOT_ANSWERED'
+  | 'NOT_ALLOWED'
+  | 'INVALID'
+  | 'RATE_LIMITED'
+  | 'FAILED';
+
+export type CommunityResult = { ok: true } | { ok: false; code: CommunityErrorCode };
+
+export interface RatingSummary {
+  average: number | null;
+  count: number;
+}
+
+export interface CommentView {
+  id: string;
+  body: string;
+  authorName: string;
+  createdAt: string;
+  mine: boolean;
+}
+
+export interface SuggestionView {
+  id: string;
+  questionId: string;
+  questionPrompt: string;
+  body: string;
+  senderName: string;
+  createdAt: string;
+  resolvedAt: string | null;
+}
