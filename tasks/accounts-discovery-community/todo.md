@@ -304,7 +304,42 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   `page.tsx`'s new lines are covered — the file's three uncovered ranges (53-56, 82-83, 95) are
   pre-existing catch blocks and an `ensureSession`-false branch this task didn't touch.
 
-### Task 12: Email code sign-in
+### Task 12: Email code sign-in — done
+- Result: `lib/rewards-copy.ts` is new: one exported `NO_WALLET_DISCLOSURE` string, the exact
+  copy from `docs/specs/rewards-no-wallet-payee.md` (single source; Task 23 wires it into
+  `RewardsModal` and the header). `lib/supabase.ts`'s anon client now sets
+  `auth: { persistSession: false, autoRefreshToken: false }` (the "non-persisting client" the
+  spec asks for) — checked first that every importer is server-only or a server action, so this
+  couldn't affect a browser session anywhere.
+  `lib/users.ts` gained `ensureAccountForAuthUser(authUserId)`, same upsert-then-select shape as
+  `ensureAccountForWallet` (`onConflict: 'auth_user_id'`, default display name `Player-<first 4
+  of authUserId>`).
+  `lib/actions/auth-actions.ts`: `requestEmailCode(email)` validates format locally and calls
+  `supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true } })` only for a
+  well-formed address, always returning `{ sent: true }` either way (no enumeration signal).
+  `verifyEmailCode(email, code)` calls `supabase.auth.verifyOtp({ email, token: code, type:
+  'email' })`; on success it calls `ensureAccountForAuthUser` and sets `quiz_session` with
+  `wallet: null` (a fresh email account never has one yet); a wrong/expired code, or the account
+  failing to create, returns `{ ok: false }` without touching the session.
+  `SignInModal.tsx` now has 3 steps (`choose` → `email` → `code`): the existing RainbowKit button
+  stays, plus a new "Continue with email" button that shows the disclosure and an email field,
+  then a 6-digit code field. On a verified code it calls `refresh()` and closes.
+  `refresh` is passed into `SignInModal` as a prop from `SessionProvider`, not read via
+  `useSession()` inside the modal — importing the hook there would close a cycle
+  (`use-session.tsx` renders `SignInModal`, which would import back into `use-session.tsx`),
+  caught by `check:architecture`'s `no-circular` rule on first run; fixed by having the one file
+  that already renders `SignInModal` hand it the callback instead of the modal reaching up for it.
+  Tests: added `requestEmailCode`/`verifyEmailCode` cases to `tests/identity-accounts.test.ts`
+  (well-formed vs malformed email, valid code, wrong/expired code, account-creation failure) —
+  19 tests total in that file (was 6), 159/159 across the suite.
+  Mutation-tested `verifyEmailCode`'s final `accountId !== null && setSessionAccount(...)` guard
+  (flipped to `===`) — caught by 2/19; restored via job-tmp backup, confirmed 19/19 green after.
+  Gate: 159/159 tests, `tsc`/eslint/gitleaks clean, `check:architecture` clean (0 violations after
+  the prop fix), 68.25% line coverage (floor 54%); the two new uncovered lines in
+  `auth-actions.ts` (101-102) are `verifyEmailCode`'s catch block, matching the same
+  never-exercised pattern as `signInWithWallet`'s own catch block (78-79) already in that file.
+  Not done here (manual step, needs a Supabase branch with email OTP configured): signing in with
+  a real email.
 - Acceptance:
   - `requestEmailCode` returns the same result for known and unknown emails
   - `verifyEmailCode` creates the account by `auth_user_id` and sets the session; a wrong or expired code does not

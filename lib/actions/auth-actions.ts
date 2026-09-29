@@ -5,7 +5,10 @@ import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
 import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
-import { ensureAccountForWallet } from '@/lib/users';
+import { ensureAccountForWallet, ensureAccountForAuthUser } from '@/lib/users';
+import { supabase } from '@/lib/supabase';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -74,6 +77,29 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
   } catch (err) {
     console.error('signInWithWallet error:', err);
     return false;
+  }
+}
+
+// Same { sent: true } whether or not the email has an account, so a caller can't
+// use this to enumerate registered emails. shouldCreateUser lets a first-time
+// email register itself right here, with no separate registration step.
+export async function requestEmailCode(email: string): Promise<{ sent: boolean }> {
+  const trimmed = email.trim();
+  if (EMAIL_RE.test(trimmed)) {
+    await supabase.auth.signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
+  }
+  return { sent: true };
+}
+
+export async function verifyEmailCode(email: string, code: string): Promise<{ ok: boolean }> {
+  try {
+    const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
+    if (error || !data.user) return { ok: false };
+    const accountId = await ensureAccountForAuthUser(data.user.id);
+    return { ok: accountId !== null && (await setSessionAccount({ id: accountId, wallet: null })) };
+  } catch (err) {
+    console.error('verifyEmailCode error:', err);
+    return { ok: false };
   }
 }
 
