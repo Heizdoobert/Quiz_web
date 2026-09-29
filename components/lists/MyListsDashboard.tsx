@@ -18,10 +18,8 @@ import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants
 import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
-import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS } from '@/lib/contracts/addresses';
+import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
 import { useWalletSession } from '@/hooks/shared/use-wallet-session';
-
-const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
 const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
 import { Question, QuestionListWithMeta } from '@/lib/types';
@@ -268,7 +266,7 @@ function ListCard({
       return;
     }
     if (chainId !== TARGET_CHAIN_ID) {
-      setError('Switch to Base Sepolia to fund the contest on-chain.');
+      setError(`Switch to ${TARGET_CHAIN_NAME} to fund the contest on-chain.`);
       switchChain({ chainId: TARGET_CHAIN_ID });
       return;
     }
