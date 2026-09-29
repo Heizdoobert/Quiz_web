@@ -19,7 +19,7 @@ import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS } from '@/lib/contracts/addresses';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 
 const TARGET_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
 
@@ -58,7 +58,7 @@ function questionToFormValues(q: Question): QuestionFormValues {
 export default function MyListsDashboard() {
   const { address, isConnected } = useAccount();
   const wallet = address || null;
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
 
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
@@ -190,7 +190,7 @@ function ListCard({
   onToggle: () => void;
   onChanged: () => void;
 }) {
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
   // Runs a list action as the signed-in wallet, asking for the one-time signature first.
   const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
     (await ensureSession()) ? action() : { success: false, error: SIGN_IN_ERROR };

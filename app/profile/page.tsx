@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
 import { ClientQuestion } from '@/lib/types';
 import { downloadJson } from '@/lib/utils';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';
 import CreatorQuizCard from '@/components/profile/CreatorQuizCard';
@@ -17,7 +17,7 @@ import { AlertCircle } from 'lucide-react';
 
 export default function ProfilePage() {
   const { address, isConnected } = useAccount();
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
   const [quizzes, setQuizzes] = useState<ClientQuestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
@@ -96,7 +96,7 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col selection:bg-[#00FFCC] selection:text-[#0A1128]">
-      <Header isConnected={isConnected} />
+      <Header />
 
       <main
         key={address || 'disconnected'}

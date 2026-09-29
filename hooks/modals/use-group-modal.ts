@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Group } from '@/lib/types';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 
 const SIGN_IN_ERROR = { type: 'error', text: 'Sign the message in your wallet to manage groups.' } as const;
 
@@ -23,7 +23,7 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
   const [groupName, setGroupName] = useState('');
   const [groupDesc, setGroupDesc] = useState('');
   const [joinId, setJoinId] = useState('');
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
 
   const loadGroups = useCallback(async () => {
     if (!walletAddress) return;

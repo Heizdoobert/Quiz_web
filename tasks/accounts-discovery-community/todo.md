@@ -205,7 +205,7 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
   line in `reward-actions.ts` covered (the two uncovered ranges the coverage report names, 307-308 and
   364-365, are unchanged catch-block lines, not part of this diff).
 
-### Task 10: Client session provider and sign-in modal (wallet)
+### Task 10: Client session provider and sign-in modal (wallet) — done
 - Acceptance:
   - `getSessionInfo()` feeds a `SessionProvider` exposing `{ account, refresh, requireSignIn }`
   - `requireSignIn()` replaces `useWalletSession()`: it resolves `true` when signed in, otherwise opens `SignInModal` (wallet connect and SIWE for now) and resolves when done
@@ -213,6 +213,51 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Verify: `npx vitest run tests/use-quiz-logic-history.test.tsx`, plus manual wallet sign-in, reload, sign-out
 - Files: `hooks/shared/use-session.ts` (replaces `use-wallet-session.ts`), `components/auth/SignInModal.tsx`, `components/Providers.tsx`, `components/layout/Header.tsx`, `hooks/quiz/use-quiz-logic.ts`; the other 7 `useWalletSession` call sites get a mechanical rename
 - Depends: 9. Size: M
+- Result: Added `lib/actions/auth-actions.ts#getSessionInfo()`, a thin server-action wrapper over
+  `getSessionAccount()` (client components can't import the `server-only` module directly). New
+  `hooks/shared/use-session.tsx` (`.tsx`, not `.ts` — it renders JSX) exports `SessionProvider` and
+  `useSession()`. `SessionProvider` fetches `getSessionInfo()` on mount into `account` state, and
+  `requireSignIn()` re-checks it: returns `true` immediately if already signed in, otherwise opens
+  `SignInModal` and returns a promise that a later `refresh()` call settles once an account appears
+  (or `false` if the player cancels the modal). No polling: `refresh()` itself resolves the pending
+  promise inline when it finds an account while one is waiting, so there's only one effect in the
+  whole provider (the mount fetch).
+  `components/auth/SignInModal.tsx` is deliberately thin: wraps the existing `Modal` shell around
+  RainbowKit's own `<ConnectButton />`, reusing PR #11's already-shipped `RainbowKitAuthenticationProvider`
+  + `useQuizAuth` auto-SIWE flow instead of re-implementing `signMessageAsync`/`requestSignIn`/
+  `signInWithWallet` by hand (that's what the old `useWalletSession` did). `components/Providers.tsx`
+  now wraps the tree in `SessionProvider` and calls `refresh()` whenever `useQuizAuth()`'s `status`
+  changes, so the session catches up right after the wallet's auto sign-in/sign-out completes.
+  `components/layout/Header.tsx` drops its `isConnected` prop and reads `account` from `useSession()`
+  directly to gate the Profile/Rewards buttons; its existing RainbowKit `<ConnectButton />` already
+  renders "Connect"/address+disconnect once wired to that auth provider, satisfying "Sign in or account
+  menu with sign-out" without new UI. Both call sites (`QuizLayout.tsx`, `app/profile/page.tsx`) updated
+  to drop the now-gone prop.
+  `hooks/quiz/use-quiz-logic.ts`: `refreshStats`/`refreshRewards`/`refreshHistory` and the initial-fetch
+  effect now gate on `account` (from `useSession()`) instead of wagmi `address`/`isConnected` — correct
+  for a future email account, which has no wagmi connection at all. `handleAnswerSubmit`'s
+  `if (isConnected) await ensureSession()` is untouched: that's a wallet-specific "connected but maybe
+  not yet signed" check, distinct from the general signed-in concept, and out of this task's scope.
+  `address`/`isConnected` are still returned from the hook for `QuizLayout`'s other wallet-address
+  prop-threading (`QuestionForm`, `GroupModal`, `RewardsModal`, `ProfileModal`, `DisputeModal`), which
+  Task 11 owns.
+  Mechanical rename (`useWalletSession()` -> `const { requireSignIn: ensureSession } = useSession();`,
+  call sites otherwise untouched) across the other 7 callers: `hooks/quiz/use-question-form.ts`,
+  `hooks/modals/use-group-modal.ts`, `hooks/modals/use-dispute-modal.ts`,
+  `components/lists/MyListsDashboard.tsx` (2 sites), `components/lists/ReviewQueue.tsx`,
+  `components/lists/ContestPlay.tsx`, `app/profile/page.tsx`. Deleted `hooks/shared/use-wallet-session.ts`;
+  grep confirms 0 remaining uses of `useWalletSession`/`use-wallet-session`.
+  Tests: rewrote `tests/auth-integration.test.tsx` for the new `SessionProvider`/`useSession` contract
+  (3 tests: resolves immediately when signed in, opens the modal and resolves true once a session
+  appears, resolves false on cancel — `SignInModal` mocked out so no RainbowKit/wagmi context is
+  needed); updated the `use-wallet-session` mocks in `tests/use-quiz-logic-history.test.tsx` and
+  `tests/profile-page.test.tsx` to mock `use-session` instead; added a one-line `getSessionInfo` test
+  to `tests/auth-actions.test.ts`. Mutation-tested `requireSignIn`'s `if (info) return true` guard
+  (inverted to `if (!info)`) — caught by 3/3 `auth-integration.test.tsx` tests; restored via job-tmp
+  backup, confirmed 13/13 green after.
+  Gate: 153/153 tests pass, `tsc`/eslint/`gitleaks`/`depcruise` clean, 68.07% line coverage (floor 54%);
+  `use-session.tsx` itself is 100% line-covered (only the "used outside a provider" throw guard, line 80,
+  is statement-uncovered).
 
 ### Task 11: Session-based gating on list, contest and profile pages
 - Acceptance:

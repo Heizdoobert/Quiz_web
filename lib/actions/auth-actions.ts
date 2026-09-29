@@ -81,6 +81,10 @@ export async function getSignedInWallet(): Promise<string | null> {
   return (await getSessionAccount())?.wallet ?? null;
 }
 
+export async function getSessionInfo(): Promise<{ id: string; wallet: string | null } | null> {
+  return getSessionAccount();
+}
+
 export async function signOutWallet(): Promise<void> {
   await clearSessionAccount();
 }

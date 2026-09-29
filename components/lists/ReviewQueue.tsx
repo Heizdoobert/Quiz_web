@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import { confirmList, getListDetail, getListsPendingReview } from '@/lib/actions/question-list-actions';
 import { REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import { CheckCircle2, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';
 
@@ -79,7 +79,7 @@ function ReviewCard({
   onToggle: () => void;
   onChanged: () => void;
 }) {
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [error, setError] = useState<string | null>(null);

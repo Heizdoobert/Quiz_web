@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/session';
-import { getAuthNonce, requestSignIn, signInWithWallet, signOutWallet } from '../lib/actions/auth-actions';
+import {
+  getAuthNonce,
+  requestSignIn,
+  signInWithWallet,
+  signOutWallet,
+  getSessionInfo,
+} from '../lib/actions/auth-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { publicClientFor } from '../lib/chain';
 
@@ -73,6 +79,12 @@ describe('Auth & Session Foundations', () => {
 
       const account = await getSessionAccount();
       expect(account).toBeNull();
+    });
+
+    it('getSessionInfo returns the same account as getSessionAccount', async () => {
+      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      const info = await getSessionInfo();
+      expect(info).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
     });
   });
 

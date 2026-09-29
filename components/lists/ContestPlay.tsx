@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
 import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
-import { useWalletSession } from '@/hooks/shared/use-wallet-session';
+import { useSession } from '@/hooks/shared/use-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
@@ -44,7 +44,7 @@ export default function ContestPlay({
   const { writeContractAsync } = useWriteContract();
   const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
 
-  const ensureSession = useWalletSession();
+  const { requireSignIn: ensureSession } = useSession();
 
   useEffect(() => {
     // Contest answers only count for the signed-in wallet that started the attempt.

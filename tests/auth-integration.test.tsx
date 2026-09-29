@@ -1,86 +1,107 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { renderHook, act } from '@testing-library/react';
-import { useWalletSession } from '../hooks/shared/use-wallet-session';
-import { getSignedInWallet, requestSignIn, signInWithWallet } from '../lib/actions/auth-actions';
-import { useAccount, useSignMessage } from 'wagmi';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
+import { SessionProvider, useSession } from '../hooks/shared/use-session';
+import { getSessionInfo } from '../lib/actions/auth-actions';
 
 vi.mock('../lib/actions/auth-actions', () => ({
-  getSignedInWallet: vi.fn(),
-  requestSignIn: vi.fn(),
-  signInWithWallet: vi.fn(),
+  getSessionInfo: vi.fn(),
 }));
 
-vi.mock('wagmi', () => ({
-  useAccount: vi.fn(),
-  useSignMessage: vi.fn(),
+vi.mock('../components/auth/SignInModal', () => ({
+  default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
+    isOpen ? (
+      <div data-testid="sign-in-modal">
+        <button type="button" onClick={onClose}>
+          Cancel
+        </button>
+      </div>
+    ) : null,
 }));
 
-const TEST_WALLET = '0x1234567890123456789012345678901234567890';
+const ACCOUNT = { id: 'acct-1', wallet: '0x' + 'a'.repeat(40) };
 
-describe('Auth Integration & Session Fallback (Task 3)', () => {
-  const signMessageAsyncMock = vi.fn();
+function TestConsumer({ onResult }: { onResult: (ok: boolean) => void }) {
+  const { account, requireSignIn, refresh } = useSession();
+  return (
+    <div>
+      <span data-testid="account">{account ? account.id : 'none'}</span>
+      <button type="button" onClick={() => void requireSignIn().then(onResult)}>
+        Require sign in
+      </button>
+      <button type="button" onClick={() => void refresh()}>
+        Refresh
+      </button>
+    </div>
+  );
+}
+
+describe('SessionProvider / useSession', () => {
+  const getSessionInfoMock = getSessionInfo as ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.resetAllMocks();
-    (useSignMessage as ReturnType<typeof vi.fn>).mockReturnValue({
-      signMessageAsync: signMessageAsyncMock,
-    });
   });
 
-  it('useWalletSession returns false if not connected', async () => {
-    (useAccount as ReturnType<typeof vi.fn>).mockReturnValue({
-      address: undefined,
-      chainId: undefined,
-    });
+  it('requireSignIn resolves true immediately when already signed in', async () => {
+    getSessionInfoMock.mockResolvedValue(ACCOUNT);
+    const onResult = vi.fn();
 
-    const { result } = renderHook(() => useWalletSession());
-    let ok = false;
-    await act(async () => {
-      ok = await result.current();
-    });
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={onResult} />
+      </SessionProvider>
+    );
 
-    expect(ok).toBe(false);
-    expect(requestSignIn).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByTestId('account').textContent).toBe('acct-1'));
+    fireEvent.click(screen.getByText('Require sign in'));
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
   });
 
-  it('useWalletSession reuses active server session without prompting for signature', async () => {
-    (useAccount as ReturnType<typeof vi.fn>).mockReturnValue({
-      address: TEST_WALLET,
-      chainId: 84532,
-    });
-    (getSignedInWallet as ReturnType<typeof vi.fn>).mockResolvedValue(TEST_WALLET.toLowerCase());
+  it('opens SignInModal when signed out, and resolves true once a session appears', async () => {
+    getSessionInfoMock.mockResolvedValue(null);
+    const onResult = vi.fn();
 
-    const { result } = renderHook(() => useWalletSession());
-    let ok = false;
-    await act(async () => {
-      ok = await result.current();
-    });
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={onResult} />
+      </SessionProvider>
+    );
 
-    expect(ok).toBe(true);
-    // Because already signed in, no new sign-in request or message signing is triggered
-    expect(requestSignIn).not.toHaveBeenCalled();
-    expect(signMessageAsyncMock).not.toHaveBeenCalled();
+    await waitFor(() => expect(screen.getByTestId('account').textContent).toBe('none'));
+    fireEvent.click(screen.getByText('Require sign in'));
+
+    await waitFor(() => expect(screen.getByTestId('sign-in-modal')).toBeDefined());
+    expect(onResult).not.toHaveBeenCalled();
+
+    // Simulate the wallet's auto sign-in completing elsewhere and Providers.tsx
+    // reacting by calling refresh() — here done directly via the test consumer.
+    getSessionInfoMock.mockResolvedValue(ACCOUNT);
+    fireEvent.click(screen.getByText('Refresh'));
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
   });
 
-  it('useWalletSession prompts for signature and completes sign-in when not already authenticated', async () => {
-    (useAccount as ReturnType<typeof vi.fn>).mockReturnValue({
-      address: TEST_WALLET,
-      chainId: 84532,
-    });
-    (getSignedInWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-    (requestSignIn as ReturnType<typeof vi.fn>).mockResolvedValue('siwe-message');
-    signMessageAsyncMock.mockResolvedValue('0xvalidsig');
-    (signInWithWallet as ReturnType<typeof vi.fn>).mockResolvedValue(true);
+  it('resolves false and closes the modal when the player cancels sign-in', async () => {
+    getSessionInfoMock.mockResolvedValue(null);
+    const onResult = vi.fn();
 
-    const { result } = renderHook(() => useWalletSession());
-    let ok = false;
-    await act(async () => {
-      ok = await result.current();
-    });
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={onResult} />
+      </SessionProvider>
+    );
 
-    expect(ok).toBe(true);
-    expect(requestSignIn).toHaveBeenCalledWith(TEST_WALLET, 84532);
-    expect(signMessageAsyncMock).toHaveBeenCalledWith({ message: 'siwe-message' });
-    expect(signInWithWallet).toHaveBeenCalledWith('siwe-message', '0xvalidsig');
+    await waitFor(() => expect(screen.getByTestId('account').textContent).toBe('none'));
+    fireEvent.click(screen.getByText('Require sign in'));
+    await waitFor(() => expect(screen.getByTestId('sign-in-modal')).toBeDefined());
+
+    fireEvent.click(screen.getByText('Cancel'));
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(false));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
   });
 });
