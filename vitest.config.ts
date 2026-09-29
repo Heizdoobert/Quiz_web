@@ -12,5 +12,12 @@ export default defineConfig({
       'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
     },
     exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      thresholds: {
+        lines: 61.3,
+      },
+    },
   },
 });

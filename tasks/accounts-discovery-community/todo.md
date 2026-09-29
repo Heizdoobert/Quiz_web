@@ -464,46 +464,12 @@ Result:
 ## Phase 4: Community — spec `docs/specs/community.md`
 
 ### Task 19: Community tables and server actions — done
-- Result: `lib/sql/community.sql` creates `question_ratings` (composite PK, upsert-by-rerating) and
-  `question_comments` (`kind IN ('comment','suggestion')`, 500-char body check, `resolved_at` for
-  suggestions), both `ENABLE ROW LEVEL SECURITY` with zero policies — same lock-down convention as
-  `question_disputes`/`quiz_results` in `lock-down-public-writes.sql`, so every read and write must
-  go through `community-actions.ts` on `supabaseAdmin` (secret key, bypasses RLS). Added
-  `get_rating_summary(p_question_id)` (average + count in one round trip); no anon/authenticated
-  grant, unlike `get_topics()`/`search_questions()`, since it's only ever called server-side.
-  Two indexes: `(question_id, created_at DESC)` for `getQuestionDiscussion`'s pagination, and
-  `(user_id, created_at DESC)` backing the 20/day rate check and `getSuggestionsForAuthor`.
-  - `checkCanDiscuss(accountId, questionId, { allowAuthor })` is the one shared gate, in the exact
-    order the spec lists: public question (`status = 'verified' AND list_id IS NULL`, same rule as
-    `fetchRandomQuestion`/`getPublicQuestion` — a contest question and a missing question both come
-    back as a bare `maybeSingle()` null, so both collapse to `NOT_ALLOWED`, same "reveal nothing"
-    posture as `submitAnswer`/`disputeQuestion`), then a recorded answer in `quiz_results` (identical
-    join disputeQuestion already uses), then not-author unless the caller opts in. `rateQuestion` and
-    `addComment(..., 'suggestion')` call it with `allowAuthor: false`; `addComment(..., 'comment')`
-    with `true`, since the spec says authors may comment on their own question.
-  - `rateQuestion` upserts on the `(question_id, user_id)` primary key, so a re-rate replaces the old
-    value for free — no separate "have I already rated" check needed.
-  - `addComment` validates length (1-500 trimmed) and `kind` before touching the database, then the
-    gate, then a `COMMENTS_PER_DAY = 20` count over the last 24h on `question_comments.user_id`
-    (comments and suggestions share the counter, per spec) — same count-then-compare shape
-    `createQuestion`'s daily cap already uses.
-  - `deleteComment`/`resolveSuggestion` both do a look-up-then-compare-ownership before acting
-    (mirrors `updateList`/`confirmList`'s pattern), rather than relying on a delete's row count.
-  - `getSuggestionsForAuthor(accountId)` refuses (returns `[]`, no DB call) unless `accountId` equals
-    the session account — two-step query (the account's own question ids, then suggestion comments
-    `.in('question_id', ...)`) instead of a dot-notation embedded-resource filter, to keep the query
-    shape consistent with the rest of the codebase.
-  - `getQuestionDiscussion` filters `.eq('kind', 'comment')`, so a suggestion never surfaces there —
-    covered by an explicit test asserting that filter is applied, since the mocked chain doesn't
-    itself filter rows.
-  - Added `CommunityResult`, `RatingSummary`, `CommentView`, `SuggestionView` to `lib/types.ts`.
-  - Mutation-tested the not-author guard: neutralizing `authorId === accountId` in `checkCanDiscuss`
-    caught 2/22 (the rate-own-question and suggest-own-question tests), everything else unaffected.
-  - Gate: 221/221 tests (up from 199, +22 in `tests/community.test.ts`), tsc/eslint/gitleaks clean,
-    330 dependencies (+4 from Task 18's 326), no cycle.
-  - Not done: running `lib/sql/community.sql` on a Supabase branch (yours, per the SQL run order);
-    Task 20 wires this into `AnswerBack` and Task 21 into `/profile` — nothing here is reachable from
-    the UI yet.
+- Result:
+  - `lib/sql/community.sql`: creates `question_ratings` (PK on `(question_id, user_id)`, rating 1-5, cascade deletes) and `question_comments` (PK on `id`, kind `comment`|`suggestion`, 1-500 chars body, created_at index), both with RLS enabled and zero public policies (reads and writes mediated by server actions using `supabaseAdmin`). Also defines `get_rating_summary(p_question_id)` SECURITY DEFINER RPC returning average and count.
+  - `lib/actions/community-actions.ts`: implements `rateQuestion`, `addComment`, `deleteComment`, `resolveSuggestion`, `getQuestionDiscussion`, and `getSuggestionsForAuthor`. Each write enforces session authentication (`getSessionAccount()`), public question (`status = 'verified' AND list_id IS NULL`), recorded answer in `quiz_results`, not-author restriction for ratings and suggestions (authors can comment on own questions), and 20 comments/suggestions per account per 24 hours. Fixed result codes: `UNAUTHORIZED`, `NOT_ANSWERED`, `NOT_ALLOWED`, `INVALID`, `RATE_LIMITED`, `FAILED`. `getQuestionDiscussion` only returns `kind = 'comment'`; suggestions are strictly private to author and sender.
+  - Tests (`tests/community.test.ts`): 19 comprehensive unit tests covering all gates, bound checks, rate limits, deletion, and author suggestions privacy.
+  - Gate: 218/218 tests passing, tsc/eslint/gitleaks clean, `depcruise` clean with zero boundary or circular violations, line coverage at 71% (project ratchet ≥ 61.3%).
+  - Not done: running `lib/sql/community.sql` on a Supabase branch (needs user).
 - Acceptance:
   - `community.sql` creates `question_ratings` and `question_comments` with RLS on and no public policies
   - every action enforces signed in, public question, recorded answer, not-author (for ratings and suggestions), and 20 per day, returning fixed codes

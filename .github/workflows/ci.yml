@@ -1,18 +1,27 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [main]
   push:
-    branches: [main]
+    branches: [main, preview]
+  pull_request:
+    branches: [main, preview]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   quality:
+    name: Lint, Types & Architecture
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: 'npm'
@@ -20,18 +29,79 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Lint
-        run: npm run lint
+      - name: Install Gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | sudo tar -xz -C /usr/local/bin gitleaks
 
-      - name: Type check
+      - name: Check Secrets (Gitleaks)
+        run: gitleaks detect --redact --verbose
+
+      - name: TypeScript Type Check
         run: npm run type-check
 
-      - name: Test
-        run: npm test
+      - name: ESLint
+        run: npm run lint
 
-      - name: Build
+      - name: Architecture Boundary Check
+        run: npm run check:architecture
+
+  test:
+    name: Unit & Integration Tests (Coverage Ratchet)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Run Tests with Coverage
+        run: npm run test:coverage
+
+  build:
+    name: Next.js Production Build
+    needs: [quality, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Build Next.js Application
         run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+          NODE_ENV: production
 
-      - name: Security audit
-        run: npm audit --audit-level=high
-        continue-on-error: true
+  security:
+    name: Security & Dependencies Audit
+    needs: [quality]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Audit Production Dependencies
+        run: |
+          echo "Scanning dependencies against production runtime risk..."
+          npm run check:deps || echo "::warning::Transitive dependency advisory detected (documented in CONSTRAINTS.md Exception W1)."
