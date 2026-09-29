@@ -125,11 +125,25 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/actions/question-list-actions.ts`, `components/lists/MyListsDashboard.tsx`, `components/lists/ReviewQueue.tsx`, tests
 - Depends: 2. Size: M
 
-### Task 7: Groups on `user_id`
+### Task 7: Groups on `user_id` — done
 - Acceptance: group actions use `getSessionAccount()` and `user_id`; `getUserGroups()` takes no address.
 - Verify: a new `tests/group-actions.test.ts` (create, join, list own)
 - Files: `lib/actions/group-actions.ts`, `hooks/modals/use-group-modal.ts`, tests
 - Depends: 2. Size: S
+- Result: `signedIn()` (renamed from `signedInWriter()`) now built on `getSessionAccount()`, same shape as
+  Task 6's helper. `groups.owner_user`/`group_members.user_id` written on every insert/query alongside
+  the old wallet columns (`owner_wallet`/`wallet_address`, still populated for the bridge trigger and
+  any remaining wallet-keyed reads). `leaveGroup` and `getUserGroups` filter by `user_id` instead of
+  `wallet_address`. `getUserGroups()` takes no argument; its one caller (`use-group-modal.ts`) updated —
+  the `walletAddress` client-side gate on the modal itself is untouched (client "signed in" state moves
+  off wagmi in Task 10).
+  New `tests/group-actions.test.ts`: 10 tests (not-signed-in guard, create, duplicate-name conflict,
+  join, duplicate-join conflict, malformed-uuid guard, leave, and `getUserGroups` empty/own-groups).
+  Mutation-tested the `signedIn()` gate (inverted the `if (!account)` check) — caught by 7/10 tests;
+  restored via job-tmp backup, confirmed 10/10 green after.
+  Gate: 129/129 tests pass, `tsc`/eslint clean, 60.66% line coverage (floor 54%), 16/16 changed
+  statement lines in `group-actions.ts` covered (verified via `coverage-final.json` cross-referenced
+  against `git diff` hunks).
 
 ### Task 8: Profile export on `user_id`
 - Acceptance: `exportUserData()` takes no address and exports only the session account's data; the `/profile` page is updated.
