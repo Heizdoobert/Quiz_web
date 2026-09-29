@@ -374,7 +374,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 2: Trivia — spec `docs/specs/trivia-guest-access.md`
 
-### Task 14: Public-question rule and retire sample questions
+### Task 14: Public-question rule and retire sample questions — done
+Result:
+- `fetchRandomQuestion` (`lib/actions/question-actions.ts`) and both its fallback queries now filter `.eq('status', 'verified').is('list_id', null)` instead of `.neq('status', 'quarantined').neq('status', 'pending')` — a `rejected` question can no longer be served (the bug the old exclude-list left open).
+- `lib/schema.sql`: the 14-row seed `INSERT` block is deleted outright (not commented out — it's history now, in git). `list_id` is filtered on by the anon-key client (`fetchRandomQuestion` uses `lib/supabase.ts`'s anon client, not `supabaseAdmin`), and Postgres gates column use in `WHERE`/`.is()` the same as `SELECT` output, so `list_id` needed adding to the anon/authenticated column grant — done right after the column's own `ALTER TABLE ADD COLUMN`, not at the original top-of-file grant (which runs before `list_id` exists).
+- `lib/sql/retire-sample-questions.sql` (new): `UPDATE questions SET status = 'rejected' WHERE created_by IS NULL AND prompt IN (...)`, matched against the exact 14 seed prompts (pulled verbatim from the deleted seed block) in a temp table, wrapped in `BEGIN`/`COMMIT`, with a post-check that all 14 ended up `rejected`. Deletes nothing — `quiz_results.question_id` is `ON DELETE CASCADE`, so deleting a seed row a player answered would erase their score.
+- Tests: new `tests/trivia-guest-access.test.tsx` (3 tests) — primary query uses the verified+no-list filter; an empty result (standing in for a rejected/quarantined row that the filter excluded) returns `null`; the category fallback query applies the same filter. Mutation-tested the `.is('list_id', null)` guard by dropping it — caught (1/3 failed). Full suite: 168/168 (was 165), tsc/eslint/gitleaks/depcruise clean, 311 dependencies (unchanged, no new cycle).
+- Not done: running `retire-sample-questions.sql` on a Supabase branch (needs you — same as Task 1's `accounts.sql`/`stats-functions.sql`).
 - Acceptance:
   - play serves only `status = 'verified' AND list_id IS NULL` (a rejected question is never served)
   - the seed block is removed from `lib/schema.sql`

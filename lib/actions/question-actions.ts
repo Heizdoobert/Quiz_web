@@ -70,11 +70,13 @@ export async function fetchRandomQuestion(
   category?: string
 ): Promise<ClientQuestion | null> {
   try {
+    // Public-question rule: verified and not part of a question list (a list's
+    // questions stay hidden until played through that list).
     let query = supabase
       .from('questions')
       .select('id, category, prompt, options, created_by, status')
-      .neq('status', 'quarantined')
-      .neq('status', 'pending'); // list-contest questions stay hidden until their list goes live
+      .eq('status', 'verified')
+      .is('list_id', null);
 
     // Only well-formed ids reach the filter string; the newest 200 are enough to avoid repeats.
     const ids = (Array.isArray(excludeIds) ? excludeIds : []).filter(isUuid).slice(-200);
@@ -93,8 +95,8 @@ export async function fetchRandomQuestion(
       const fallbackQuery = supabase
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
-        .neq('status', 'quarantined')
-        .neq('status', 'pending')
+        .eq('status', 'verified')
+        .is('list_id', null)
         .eq('category', category)
         .limit(20);
       const fallbackRes = await fallbackQuery;
@@ -109,8 +111,8 @@ export async function fetchRandomQuestion(
       const generalQuery = await supabase
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
-        .neq('status', 'quarantined')
-        .neq('status', 'pending')
+        .eq('status', 'verified')
+        .is('list_id', null)
         .limit(20);
       if (generalQuery.data && generalQuery.data.length > 0) {
         data = generalQuery.data;
