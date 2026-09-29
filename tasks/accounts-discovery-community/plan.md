@@ -95,7 +95,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [ ] Manual: search signed out, topics, rate, comment and suggest after answering
 
 ### Phase 5: Rewards
-- [ ] Task 22: Payee rule and treasury sweep
+- [x] Task 22: Payee rule and treasury sweep
 - [ ] Task 23: Disclosure, held balance and contest wallet requirement
 
 ### Checkpoint: Code complete

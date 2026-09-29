@@ -513,7 +513,14 @@ Result:
 
 ## Phase 5: Rewards — spec `docs/specs/rewards-no-wallet-payee.md`
 
-### Task 22: Payee rule and treasury sweep
+### Task 22: Payee rule and treasury sweep — done
+- Result:
+  - `lib/sql/reward-payee.sql`: Added `treasury_swept_count` column to `users` with check constraint `>= 0`. Created `sweep_to_treasury()` SECURITY DEFINER function taking answers > 180 days old from accounts with `wallet IS NULL`, incrementing `treasury_swept_count` idempotently and never decreasing. Created `get_treasury_entitled_count()` SECURITY DEFINER function returning the total pool count. Both functions revoke public EXECUTE and grant to `service_role`.
+  - `lib/types.ts`: Extended `ClaimableRewards` with optional `heldTokens?: string` and `sweepsAt?: string | null`.
+  - `lib/actions/reward-actions.ts`: Updated `getClaimableRewards`, `generateTokenVoucher`, and `generateBadgeVoucher`. Enforces that accounts without a wallet return `claimableTokens: '0'`, populate `heldTokens` with pending tokens, and calculate `sweepsAt` for the oldest unswept answer. When `account.wallet === process.env.TREASURY_WALLET_ADDRESS`, triggers `sweep_to_treasury()` and adds `get_treasury_entitled_count()` pool to total earned. Vouchers fail early with `WALLET_REQUIRED` for accounts without a wallet.
+  - Tests (`tests/rewards-payee.test.ts`, `tests/get-claimable-rewards.test.ts`): Unit tests covering wallet-less accounts (held tokens, sweepsAt, voucher blocking with WALLET_REQUIRED), wallet accounts with previous swept count deduction, treasury sweep trigger and entitlement pool aggregation, and unset TREASURY_WALLET_ADDRESS behavior.
+  - Gate: 234/234 tests pass across 27 test files, `check:fast` clean, `check:architecture` clean (0 violations), total line coverage 71.63% (above 61.3% ratchet).
+  - Not done: running `lib/sql/reward-payee.sql` on a Supabase branch (needs user).
 - Acceptance:
   - claimable = 10 × (correct − `treasury_swept_count`) − claimed, for accounts with a wallet only
   - `sweep_to_treasury()` takes only answers over 180 days old from accounts without a wallet, is idempotent, and never lowers counts
