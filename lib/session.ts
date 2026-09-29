@@ -74,3 +74,7 @@ export async function getSessionAccount(): Promise<SessionAccount | null> {
   if (Number(exp) < Date.now() / 1000) return null;
   return { id, wallet: wallet === NO_WALLET ? null : wallet };
 }
+
+export async function clearSessionAccount(): Promise<void> {
+  (await cookies()).delete(SESSION_COOKIE);
+}
