@@ -57,13 +57,47 @@ Acceptance:
 - Files: `lib/actions/quiz-actions.ts`, `lib/actions/user-actions.ts` (deleted), `lib/stats.ts` (new), `lib/users.ts`, `lib/sql/accounts.sql`, `lib/sql/stats-functions.sql`, `hooks/quiz/use-quiz-logic.ts`, `lib/actions/reward-actions.ts`, tests
 - Depends: 2. Size: M
 
-### Task 4: Leaderboards on `user_id`
+### Task 4: Leaderboards on `user_id` — done
+Result: `get_global_leaderboard(p_limit)` and `get_group_leaderboard(p_group_id, p_limit)` are re-keyed
+to `user_id`, joined against `users` for `display_name`/`wallet_address`, returning
+`user_id, display_name, wallet_address, score, accuracy`. Unlike `get_user_stats` (Task 3), the
+argument list here is unchanged (`p_limit INT`), so `CREATE OR REPLACE` can't add columns to an
+existing return type — both functions are `DROP FUNCTION IF EXISTS` + `CREATE FUNCTION`. This is a
+one-shot breaking change to the RPC contract (no old/new overload can coexist), so `lib/actions/leaderboard-actions.ts`
+moves in lockstep. `LeaderboardEntry` gains `user_id`, and `wallet_address` becomes nullable (an
+email account with no wallet still appears, keyed by account and showing its `display_name`).
+`GlobalLeaderboard.tsx`/`GroupLeaderboard.tsx` key their row by `user_id` and fall back to
+`display_name` -> wallet slice -> `'Player'` (wallet can be null now). `reward-actions.ts`'s top-3
+badge check (still wallet-based until Task 9) now compares `leaderboard.some(e => e.user_id === accountId)`
+using the `accountId` already resolved in Task 3, instead of comparing wallet strings — more
+correct (matches by identity, not by string) and was going to break anyway once `wallet_address`
+could be null.
+
+`tests/sql/20-snapshot.sql`'s leaderboard rows previously did `row_to_json(l)`, which would make the
+before/after migration diff fail solely because the shape gained columns — not because data changed.
+Narrowed to project `wallet_address, score, accuracy` (the columns present in both the old and new
+shape) so the diff still checks the real invariant. `tests/sql/30-checks.sql` adds explicit
+`user_id`-keyed assertions, including that the email test account (Task 3's `email_id`, no wallet)
+appears on the global leaderboard with `wallet_address IS NULL`.
+
+New `tests/leaderboard-actions.test.ts` (previously no test file existed for this module at all)
+covers `toEntries` mapping, rpc argument passing, limit clamping, and the `isUuid` guard. Extended
+`tests/get-claimable-rewards.test.ts` with two cases for the `isTop3` account-id match. Mutation-tested:
+broke the SQL join (`u.wallet_address = u.wallet_address` instead of `u.id = t.user_id`) — caught by
+both the snapshot diff and a 30-checks assertion; broke `toEntries`' field mapping — caught; inverted
+the `isTop3` comparison — caught by both new reward-action test cases.
+
+91/91 tests pass. `npm run check:fast` clean. `npm run test:coverage`: 56.38% overall (above the 54%
+floor); `leaderboard-actions.ts`'s changed lines (the `toEntries` body) fully covered — the file's
+77.77%-lines figure reflects pre-existing untested catch/validation branches this task didn't touch,
+not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both branches.
+
 - Acceptance:
   - `get_global_leaderboard` and `get_group_leaderboard` group by `user_id` and return `user_id, display_name, wallet_address, score, accuracy`
   - email accounts appear on leaderboards
   - rows are keyed by `user_id` in the UI
 - Verify: an existing leaderboard test is extended if present, else a new `tests/leaderboard-actions.test.ts`
-- Files: `lib/sql/stats-functions.sql`, `lib/actions/leaderboard-actions.ts`, `lib/types.ts`, `components/leaderboard/GlobalLeaderboard.tsx`, `GroupLeaderboard.tsx`
+- Files: `lib/sql/stats-functions.sql`, `lib/actions/leaderboard-actions.ts`, `lib/types.ts`, `components/leaderboard/GlobalLeaderboard.tsx`, `GroupLeaderboard.tsx`, `lib/actions/reward-actions.ts`, `tests/sql/20-snapshot.sql`, `tests/sql/30-checks.sql`, `tests/leaderboard-actions.test.ts` (new), `tests/get-claimable-rewards.test.ts`
 - Depends: 3. Size: S
 
 ### Task 5: Question creation and disputes on `user_id`

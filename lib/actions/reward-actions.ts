@@ -119,11 +119,9 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
 
     const claimableTokens = totalEarned > totalClaimed ? totalEarned - totalClaimed : BigInt(0);
 
-    // Check badge eligibility
+    // Check badge eligibility. Leaderboard rows are keyed by account id.
     const leaderboard = await getGlobalLeaderboard(3);
-    const isTop3 = leaderboard.some(
-      (e) => e.wallet_address === normalized && e.rank <= 3
-    );
+    const isTop3 = !!accountId && leaderboard.some((e) => e.user_id === accountId && e.rank <= 3);
 
     const eligibleBadges: number[] = [];
     if (isTop3) eligibleBadges.push(0);

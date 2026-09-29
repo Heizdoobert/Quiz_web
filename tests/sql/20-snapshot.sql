@@ -15,5 +15,9 @@ SELECT 'count ' || t || ' ' || n FROM (
 SELECT 'stats ' || left(w, 4) || ' ' || row_to_json(s)::text
 FROM unnest(ARRAY['0x' || repeat('a', 40), '0x' || repeat('b', 40), '0x' || repeat('c', 40)]) w,
      LATERAL get_user_stats(w) s ORDER BY w;
-SELECT 'global ' || row_to_json(l)::text FROM get_global_leaderboard(50) l;
-SELECT 'group ' || row_to_json(l)::text FROM groups g, LATERAL get_group_leaderboard(g.id, 50) l;
+-- Projected to the columns stable across the leaderboard re-key (Task 4 adds user_id
+-- and display_name, and can't keep the old wallet-keyed overload alongside since the
+-- argument list is unchanged); this is the data invariant that must survive either way.
+SELECT 'global ' || l.wallet_address || ' ' || l.score || ' ' || l.accuracy FROM get_global_leaderboard(50) l;
+SELECT 'group ' || l.wallet_address || ' ' || l.score || ' ' || l.accuracy
+FROM groups g, LATERAL get_group_leaderboard(g.id, 50) l;

@@ -61,4 +61,28 @@ describe('getClaimableRewards', () => {
     expect(rewards.totalEarned).toBe('0');
     expect(rewards.claimableTokens).toBe('0');
   });
+
+  it('grants the leaderboard badge when the account id matches a top-3 row', async () => {
+    (accountIdForWallet as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT_ID);
+    (statsForAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ZERO_STATS);
+    (getGlobalLeaderboard as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { user_id: ACCOUNT_ID, wallet_address: WALLET, display_name: 'Me', score: 9, accuracy: 90, rank: 1 },
+    ]);
+
+    const rewards = await getClaimableRewards(WALLET);
+
+    expect(rewards.eligibleBadges).toContain(0);
+  });
+
+  it('does not grant the leaderboard badge for a different account id', async () => {
+    (accountIdForWallet as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT_ID);
+    (statsForAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ZERO_STATS);
+    (getGlobalLeaderboard as ReturnType<typeof vi.fn>).mockResolvedValue([
+      { user_id: 'someone-else', wallet_address: WALLET, display_name: 'Not me', score: 9, accuracy: 90, rank: 1 },
+    ]);
+
+    const rewards = await getClaimableRewards(WALLET);
+
+    expect(rewards.eligibleBadges).not.toContain(0);
+  });
 });

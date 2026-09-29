@@ -43,9 +43,14 @@ $$;
 -- Accuracy is FLOOR(x + 0.5) on float8 so it matches JS Math.round((correct / total) * 100)
 -- bit for bit (exact numeric rounding differs on values like 57/200).
 
--- Top players across all results, ranked by score then accuracy.
-CREATE OR REPLACE FUNCTION get_global_leaderboard(p_limit INT)
-RETURNS TABLE (wallet_address TEXT, score INT, accuracy INT)
+-- Top players across all results, ranked by score then accuracy. Re-keyed to the account
+-- id (unlike get_user_stats, the argument list here is unchanged, so the old wallet-keyed
+-- version can't stay as a separate overload; DROP first since CREATE OR REPLACE refuses
+-- to change a function's return columns). Joins users for display_name/wallet_address so
+-- an email account (no wallet) still appears.
+DROP FUNCTION IF EXISTS get_global_leaderboard(INT);
+CREATE FUNCTION get_global_leaderboard(p_limit INT)
+RETURNS TABLE (user_id UUID, display_name TEXT, wallet_address TEXT, score INT, accuracy INT)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
@@ -53,21 +58,23 @@ SET search_path = public
 AS $$
   WITH totals AS (
     SELECT
-      r.wallet_address,
+      r.user_id,
       (COUNT(*) FILTER (WHERE r.is_correct))::INT AS score,
       FLOOR((COUNT(*) FILTER (WHERE r.is_correct))::FLOAT8 / COUNT(*) * 100 + 0.5)::INT AS accuracy
     FROM quiz_results r
-    GROUP BY r.wallet_address
+    GROUP BY r.user_id
   )
-  SELECT t.wallet_address, t.score, t.accuracy
+  SELECT u.id, u.display_name, u.wallet_address, t.score, t.accuracy
   FROM totals t
-  ORDER BY t.score DESC, t.accuracy DESC, t.wallet_address
+  JOIN users u ON u.id = t.user_id
+  ORDER BY t.score DESC, t.accuracy DESC, u.id
   LIMIT LEAST(GREATEST(p_limit, 1), 100);
 $$;
 
 -- Group members ranked the same way; members with no answers appear with 0 / 0.
-CREATE OR REPLACE FUNCTION get_group_leaderboard(p_group_id UUID, p_limit INT)
-RETURNS TABLE (wallet_address TEXT, score INT, accuracy INT)
+DROP FUNCTION IF EXISTS get_group_leaderboard(UUID, INT);
+CREATE FUNCTION get_group_leaderboard(p_group_id UUID, p_limit INT)
+RETURNS TABLE (user_id UUID, display_name TEXT, wallet_address TEXT, score INT, accuracy INT)
 LANGUAGE sql
 STABLE
 SECURITY DEFINER
@@ -75,19 +82,20 @@ SET search_path = public
 AS $$
   WITH totals AS (
     SELECT
-      m.wallet_address,
+      m.user_id,
       (COUNT(r.id) FILTER (WHERE r.is_correct))::INT AS score,
       CASE WHEN COUNT(r.id) = 0 THEN 0
         ELSE FLOOR((COUNT(r.id) FILTER (WHERE r.is_correct))::FLOAT8 / COUNT(r.id) * 100 + 0.5)::INT
       END AS accuracy
     FROM group_members m
-    LEFT JOIN quiz_results r ON r.wallet_address = m.wallet_address
+    LEFT JOIN quiz_results r ON r.user_id = m.user_id
     WHERE m.group_id = p_group_id
-    GROUP BY m.wallet_address
+    GROUP BY m.user_id
   )
-  SELECT t.wallet_address, t.score, t.accuracy
+  SELECT u.id, u.display_name, u.wallet_address, t.score, t.accuracy
   FROM totals t
-  ORDER BY t.score DESC, t.accuracy DESC, t.wallet_address
+  JOIN users u ON u.id = t.user_id
+  ORDER BY t.score DESC, t.accuracy DESC, u.id
   LIMIT LEAST(GREATEST(p_limit, 1), 100);
 $$;
 

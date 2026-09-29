@@ -55,7 +55,7 @@ export default function GroupLeaderboard({
 
           return (
             <motion.div
-              key={entry.wallet_address}
+              key={entry.user_id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.04 }}
@@ -80,7 +80,7 @@ export default function GroupLeaderboard({
                   )}
                 </span>
                 <span className={`font-bold ${isTop1 ? 'text-[#FFD166]' : 'text-slate-200'}`}>
-                  {entry.display_name || entry.wallet_address.slice(0, 10)}
+                  {entry.display_name || entry.wallet_address?.slice(0, 10) || 'Player'}
                 </span>
               </div>
               <div className="flex items-center gap-3">

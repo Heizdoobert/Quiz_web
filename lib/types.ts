@@ -86,7 +86,8 @@ export interface UserStats {
 }
 
 export interface LeaderboardEntry {
-  wallet_address: string;
+  user_id: string;
+  wallet_address: string | null;
   display_name: string | null;
   score: number;
   accuracy: number;

@@ -59,6 +59,15 @@ BEGIN
   INSERT INTO quiz_results (user_id, question_id, answer_index, is_correct) VALUES (email_id, q, 1, false);
   ASSERT (SELECT wallet_address IS NULL FROM quiz_results WHERE user_id = email_id), 'email answer has no wallet';
   ASSERT (SELECT total_answered FROM get_user_stats(email_id)) = 1, 'email answer counts in stats';
+
+  -- Leaderboards are keyed by account id, with wallet_address/display_name joined in.
+  ASSERT (SELECT wallet_address FROM get_global_leaderboard(50) WHERE user_id = a_id) = a,
+    'global leaderboard resolves A''s wallet from the account id';
+  ASSERT (SELECT display_name FROM get_global_leaderboard(50) WHERE user_id = email_id) = 'Player-x'
+    AND (SELECT wallet_address FROM get_global_leaderboard(50) WHERE user_id = email_id) IS NULL,
+    'email account appears on the global leaderboard with no wallet';
+  ASSERT (SELECT count(*) FROM groups g, LATERAL get_group_leaderboard(g.id, 50) l WHERE l.user_id = a_id) = 1,
+    'A appears on the group leaderboard keyed by account id';
   BEGIN
     INSERT INTO quiz_results (user_id, question_id, answer_index, is_correct) VALUES (email_id, q, 0, true);
     RAISE EXCEPTION 'second answer should have failed';
