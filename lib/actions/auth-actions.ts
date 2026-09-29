@@ -4,7 +4,7 @@ import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
 import { publicClientFor } from '@/lib/chain';
-import { getSessionAccount, setSessionAccount, shouldUseSecureCookies } from '@/lib/session';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
 import { ensureAccountForWallet } from '@/lib/users';
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
@@ -19,8 +19,7 @@ async function requestOrigin() {
   return { host, uri: `${proto}://${host}` };
 }
 
-export async function requestSignIn(address: string, chainId: number): Promise<string> {
-  const { host, uri } = await requestOrigin();
+export async function getAuthNonce(): Promise<string> {
   const nonce = generateSiweNonce();
   (await cookies()).set(CHALLENGE_COOKIE, nonce, {
     httpOnly: true,
@@ -29,6 +28,12 @@ export async function requestSignIn(address: string, chainId: number): Promise<s
     path: '/',
     maxAge: CHALLENGE_TTL_SECONDS,
   });
+  return nonce;
+}
+
+export async function requestSignIn(address: string, chainId: number): Promise<string> {
+  const { host, uri } = await requestOrigin();
+  const nonce = await getAuthNonce();
   const now = new Date();
   return createSiweMessage({
     address: getAddress(address),
@@ -62,6 +67,7 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
       nonce,
     });
     if (!valid) return false;
+
     const wallet = address.toLowerCase();
     const accountId = await ensureAccountForWallet(wallet);
     return accountId !== null && (await setSessionAccount({ id: accountId, wallet }));
@@ -73,4 +79,8 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
 
 export async function getSignedInWallet(): Promise<string | null> {
   return (await getSessionAccount())?.wallet ?? null;
+}
+
+export async function signOutWallet(): Promise<void> {
+  await clearSessionAccount();
 }
