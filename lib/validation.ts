@@ -11,6 +11,7 @@ export function isUuid(value: unknown): value is string {
 const MAX_PROMPT = 300;
 const MAX_OPTION = 120;
 const MAX_EXPLANATION = 1000;
+const MIN_CATEGORY = 2;
 const MAX_CATEGORY = 40;
 
 export function validateQuestionInput(params: {
@@ -49,9 +50,11 @@ export function validateQuestionInput(params: {
     return { valid: false, error: 'Correct option must be between 0 and 3.' };
   }
 
-  const category = (typeof params.category === 'string' && params.category.trim()) || 'General';
-  if (category.length > MAX_CATEGORY) {
-    return { valid: false, error: `Category must be at most ${MAX_CATEGORY} characters.` };
+  // Collapsed to single spaces so "DeFi" and "De  Fi" don't become distinct topics.
+  const rawCategory = typeof params.category === 'string' ? params.category.trim().replace(/\s+/g, ' ') : '';
+  const category = rawCategory || 'General';
+  if (category.length < MIN_CATEGORY || category.length > MAX_CATEGORY) {
+    return { valid: false, error: `Category must be between ${MIN_CATEGORY} and ${MAX_CATEGORY} characters.` };
   }
 
   const trimmedExplanation = typeof params.explanation === 'string' ? params.explanation.trim() : '';
@@ -80,4 +83,11 @@ export function validateQuestionInput(params: {
 // different spacing/casing still counts as a duplicate.
 export function normalizePrompt(prompt: string): string {
   return prompt.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+// Escapes ILIKE wildcards so a category used as a case-insensitive exact-match
+// pattern (topics are grouped case-insensitively, e.g. "DeFi" and "defi") can't
+// have a stray "%" or "_" in a player-typed category matched as a wildcard.
+export function escapeLikePattern(value: string): string {
+  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
 }

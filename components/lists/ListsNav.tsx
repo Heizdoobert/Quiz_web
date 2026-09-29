@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Zap, ArrowLeft } from 'lucide-react';
+import { useSession } from '@/hooks/shared/use-session';
 
-const TABS = [
+const GUEST_TABS = [{ href: '/contest', label: 'Contests' }];
+const SIGNED_IN_TABS = [
   { href: '/my-lists', label: 'My Lists' },
   { href: '/review', label: 'Review Queue' },
   { href: '/contest', label: 'Contests' },
@@ -14,6 +16,8 @@ const TABS = [
 
 export default function ListsNav() {
   const pathname = usePathname();
+  const { account } = useSession();
+  const tabs = account ? SIGNED_IN_TABS : GUEST_TABS;
 
   return (
     <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-8 py-3.5 border-b border-[#2D305A] bg-[#1A1B35]/90 backdrop-blur-md sticky top-0 z-30 shadow-lg">
@@ -25,7 +29,7 @@ export default function ListsNav() {
           </span>
         </Link>
         <nav className="flex gap-1.5 bg-[#0A1128]/80 border border-[#2D305A] rounded-xl p-1.5">
-          {TABS.map((tab) => (
+          {tabs.map((tab) => (
             <Link
               key={tab.href}
               href={tab.href}

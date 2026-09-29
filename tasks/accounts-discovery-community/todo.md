@@ -374,7 +374,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 2: Trivia — spec `docs/specs/trivia-guest-access.md`
 
-### Task 14: Public-question rule and retire sample questions
+### Task 14: Public-question rule and retire sample questions — done
+Result:
+- `fetchRandomQuestion` (`lib/actions/question-actions.ts`) and both its fallback queries now filter `.eq('status', 'verified').is('list_id', null)` instead of `.neq('status', 'quarantined').neq('status', 'pending')` — a `rejected` question can no longer be served (the bug the old exclude-list left open).
+- `lib/schema.sql`: the 14-row seed `INSERT` block is deleted outright (not commented out — it's history now, in git). `list_id` is filtered on by the anon-key client (`fetchRandomQuestion` uses `lib/supabase.ts`'s anon client, not `supabaseAdmin`), and Postgres gates column use in `WHERE`/`.is()` the same as `SELECT` output, so `list_id` needed adding to the anon/authenticated column grant — done right after the column's own `ALTER TABLE ADD COLUMN`, not at the original top-of-file grant (which runs before `list_id` exists).
+- `lib/sql/retire-sample-questions.sql` (new): `UPDATE questions SET status = 'rejected' WHERE created_by IS NULL AND prompt IN (...)`, matched against the exact 14 seed prompts (pulled verbatim from the deleted seed block) in a temp table, wrapped in `BEGIN`/`COMMIT`, with a post-check that all 14 ended up `rejected`. Deletes nothing — `quiz_results.question_id` is `ON DELETE CASCADE`, so deleting a seed row a player answered would erase their score.
+- Tests: new `tests/trivia-guest-access.test.tsx` (3 tests) — primary query uses the verified+no-list filter; an empty result (standing in for a rejected/quarantined row that the filter excluded) returns `null`; the category fallback query applies the same filter. Mutation-tested the `.is('list_id', null)` guard by dropping it — caught (1/3 failed). Full suite: 168/168 (was 165), tsc/eslint/gitleaks/depcruise clean, 311 dependencies (unchanged, no new cycle).
+- Not done: running `retire-sample-questions.sql` on a Supabase branch (needs you — same as Task 1's `accounts.sql`/`stats-functions.sql`).
 - Acceptance:
   - play serves only `status = 'verified' AND list_id IS NULL` (a rejected question is never served)
   - the seed block is removed from `lib/schema.sql`
@@ -383,7 +389,17 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/actions/question-actions.ts`, `lib/schema.sql`, `lib/sql/retire-sample-questions.sql`, tests
 - Depends: Phase 1. Size: S
 
-### Task 15: Topics from the database
+### Task 15: Topics from the database — done
+- Result:
+  - `lib/sql/topics.sql`: `get_topics()` (SECURITY DEFINER, matches the same PostgREST-1000-row-cap reasoning as `stats-functions.sql`), groups `questions.category` by `lower(TRIM(category))`, public-question rule applied (`status = 'verified' AND list_id IS NULL`), returns the most recent spelling per group, count, and newest `created_at`, ordered newest first. Granted `EXECUTE` to `anon, authenticated`.
+  - `question-actions.ts`: added `getTopics()` (calls the RPC, maps snake_case to camelCase) and `getPublicQuestion(id)` (public rule, `.single()`, same 5-column select as `fetchRandomQuestion` — never `correct_index`/`explanation`).
+  - `validation.ts`: `validateQuestionInput`'s category handling now collapses inner whitespace and enforces 2-40 chars (was only a max); added `escapeLikePattern` for safe ILIKE matching.
+  - Fixed a bug this task would otherwise have shipped broken: `fetchRandomQuestion`'s category filter was `eq('category', category)` (exact case match). Once `get_topics()` groups "DeFi"/"defi" as one topic with a combined count, selecting that topic in `CategoryBar` would only play rows matching whichever single casing it filtered on — undercounting silently. Changed both filter sites to `ilike('category', escapeLikePattern(category))` (escaped so a player-typed `%`/`_` in a category isn't read as a wildcard).
+  - `CategoryBar.tsx`: dropped the hardcoded `CATEGORIES` array (icon set, fixed colors); now fetches `getTopics()` on mount and renders "All" plus each topic name. Only caller was `QuizLayout.tsx` (unchanged — same `selectedCategory`/`onSelectCategory` prop contract), so no other files touched.
+  - Tests (`tests/trivia-guest-access.test.tsx`, extended): category-filter case-insensitivity + escaping, `getTopics` snake_case→camelCase mapping and its empty-on-error path, `getPublicQuestion`'s public-rule filters and malformed-id short-circuit, and `createQuestion`'s category trim/collapse/min-length/default via `validateQuestionInput`. 11/11 pass.
+  - Mutation-tested `escapeLikePattern`: reverted to identity, exactly 1/11 failed (the escaping test), confirming it's enforced; restored.
+  - Full gate: 179/179 tests, tsc/eslint/gitleaks clean, `check:architecture` clean (313 deps, +1 from `CategoryBar` → `question-actions` edge, no cycle).
+  - Not done: running `lib/sql/topics.sql` on a Supabase branch (yours).
 - Acceptance:
   - `get_topics()` and `getTopics()` return public topics grouped case-insensitively, newest first, with counts
   - `getPublicQuestion(id)` returns public questions only and no answer fields
@@ -392,7 +408,11 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 - Files: `lib/sql/topics.sql`, `lib/actions/question-actions.ts`, `components/quiz/CategoryBar.tsx`, tests
 - Depends: 14. Size: M
 
-### Task 16: Signed-in creation and read-only guests
+### Task 16: Signed-in creation and read-only guests — done
+- Result: `QuizLayout` now calls `useSession()` and renders `QuestionForm` only when `account` is set; guests get the exact spec empty state ("No questions yet. Sign in to add the first one.") with a button calling `requireSignIn()`. The dispute button was already fully optional end-to-end (`AnswerBack` renders a placeholder `<div />` when `onOpenDispute` is undefined, `QuizCard` just forwards the prop) — so the guest gate is one line at the single call site: `onOpenDispute={account ? () => openModal('dispute') : undefined}`. `LeaderboardPanel` and `ListsNav` each call `useSession()` directly (same pattern already used by `ContestBrowser`/`MyListsDashboard`/`ReviewQueue`): the group-create/join button is hidden for guests, and `ListsNav` drops the "My Lists"/"Review Queue" links for guests while keeping "Contests" (whose own page already fully gates behind sign-in from Task 11). `createQuestion`'s server-side `getSessionAccount()` check and 5/day cap were already in place from earlier tasks — no change needed there. `ContestBrowser` was already gated end-to-end (whole page requires `account`) — no change needed.
+  New test file `tests/quiz-layout-guest-access.test.tsx` (8 tests): `QuizLayout` guest vs signed-in (empty state / QuestionForm, dispute handler wired or not), `LeaderboardPanel` guest vs signed-in (group button), `ListsNav` guest vs signed-in (tab list). Mutation-tested the `account ?` gate in `QuizLayout` by forcing both branches to the truthy path — 2/8 tests caught it (the two `QuizLayout` guest-specific assertions), confirming the gate is enforced. Restored, 8/8 green.
+  Full gate: 187/187 tests (was 179), tsc/eslint/gitleaks clean, `check:architecture` clean at 316 dependencies (+3, expected: `LeaderboardPanel`/`ListsNav`/`QuizLayout` each gained one `use-session` import edge).
+  Not done this turn: the manual signed-out click-through check the spec also calls for (yours, same as every other manual browser check in this plan).
 - Acceptance:
   - `QuestionForm` renders only for a session account, and the empty state asks guests to sign in
   - guests see no dispute button (`AnswerBack`), no "Create or Join Groups" (`LeaderboardPanel`), no My Lists or Review links (`ListsNav`), and no contest join (`ContestBrowser`)
@@ -406,7 +426,13 @@ not a gap in the diff; `reward-actions.ts`'s changed `isTop3` line hit on both b
 
 ## Phase 3: Discovery — spec `docs/specs/discovery.md`
 
-### Task 17: Question search
+### Task 17: Question search — done
+- Result: `lib/sql/search.sql` enables `pg_trgm`, adds GIN trigram indexes on `lower(prompt)`/`lower(category)`, and `search_questions(p_query, p_limit, p_offset)` (SECURITY DEFINER, same public-question rule as `get_topics()`/`getPublicQuestion`: `status = 'verified' AND list_id IS NULL`). It escapes `%`/`_` with a literal `replace()` chain for the `ILIKE ... ESCAPE '\'` match, but feeds the raw (unescaped) lowercased query to `word_similarity` so a typo like "etherum" still matches "Ethereum" — matching prompt or category by substring or `word_similarity > 0.3`, ordered by score desc then `created_at` desc. `author_name` comes from a `LEFT JOIN users` on `created_by_user` (same join pattern as `get_global_leaderboard`), falling back to `'Player'`.
+  `lib/actions/discovery-actions.ts` adds `searchQuestions(query, page)`: trims the query, returns `{ results: [], hasMore: false }` with no database call outside 2-100 characters, pages at 20 with a `+1` over-fetch for `hasMore`, and maps snake_case RPC rows to camelCase `SearchResult` (`lib/types.ts`) — never touching `correct_index`/`explanation`/`options` since the SQL function never returns them.
+  `components/discovery/SearchBox.tsx` is a plain (non-`'use client'`) native `<form action="/search" method="GET">` — no router/JS needed for a GET query-string submit. Wired into `Header.tsx` next to the logo. `components/discovery/SearchResultList.tsx` renders prompt/category/author/"added &lt;relative time&gt;" (new `formatRelativeTime` helper in `lib/utils.ts`, reused by Task 18's topic lists) with a "Play" link to `/q/[id]` (that route lands in Task 18 — the link is added now as the natural vertical slice, matching how `CategoryBar` already linked to topics before `get_topics()` landed). `app/search/page.tsx` is a server component reading `searchParams`, `noindex`'d per spec, with prev/next paging and the exact "No questions match "q"" empty-state text linking to `/topics`.
+  New test file `tests/discovery.test.ts` (8 tests): query-length bounds (1 and 101 chars make no RPC call), trimming, offset math for page 2, `hasMore` on/off, snake_case→camelCase mapping never surfaces answer fields, and the error path. Mutation-tested the length-bound guard (forced to `if (false)`) — 2/8 caught it (exactly the two bound tests), confirming it's enforced; restored, 8/8 green.
+  Full gate: 195/195 tests (was 187), tsc/eslint/gitleaks clean, `check:architecture` clean at 323 dependencies (+7, expected: new `discovery-actions`/`SearchBox`/`SearchResultList`/`search/page` module edges), no cycle.
+  Not done this turn: running `lib/sql/search.sql` on a Supabase branch, and the spec's manual checks ("block" finds "blockchain", "etherum" finds "Ethereum", `EXPLAIN ANALYZE` at 1,000+ rows, search signed out) — all yours, same as every other SQL/manual-browser item in this plan.
 - Acceptance:
   - `search.sql` adds `pg_trgm`, trigram indexes and `search_questions()` (public only, `%` and `_` escaped)
   - `searchQuestions` bounds the query to 2-100 characters, with pages of 20

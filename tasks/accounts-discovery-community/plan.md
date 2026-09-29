@@ -74,15 +74,15 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [ ] Review before Phase 2
 
 ### Phase 2: Trivia
-- [ ] Task 14: Public-question rule and retire sample questions
-- [ ] Task 15: Topics from the database
-- [ ] Task 16: Signed-in creation and read-only guests
+- [x] Task 14: Public-question rule and retire sample questions (your Supabase-branch run still pending)
+- [x] Task 15: Topics from the database (your Supabase-branch run of `lib/sql/topics.sql` still pending)
+- [x] Task 16: Signed-in creation and read-only guests
 
 ### Checkpoint: Trivia
 - [ ] Gates pass; guests see no write controls; database topics in `CategoryBar`; no sample prompt served
 
 ### Phase 3: Discovery
-- [ ] Task 17: Question search
+- [x] Task 17: Question search (your Supabase-branch run of `lib/sql/search.sql` still pending)
 - [ ] Task 18: Topic pages and single-question play
 
 ### Phase 4: Community
