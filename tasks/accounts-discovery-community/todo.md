@@ -441,7 +441,15 @@ Result:
 - Files: `lib/sql/search.sql`, `lib/actions/discovery-actions.ts`, `components/discovery/SearchBox.tsx`, `app/search/page.tsx`, tests
 - Depends: 15. Size: M
 
-### Task 18: Topic pages and single-question play
+### Task 18: Topic pages and single-question play — done
+- Result: `lib/actions/discovery-actions.ts` adds `getTopicQuestions(topic, page)`: enforces public-question rule (`status = 'verified' AND list_id IS NULL`), case-insensitive topic match (`ilike('category', escapeLikePattern(t))`), ordered by `created_at desc`, paged at 20 with over-fetch for `hasMore`, and joined with `users` on `created_by_user` for author name.
+  `components/discovery/TopicList.tsx` renders the list of topics newest first with question count, relative time of latest question, and "Browse" links to `/topics/[topic]`.
+  `app/topics/page.tsx` renders all topics from `getTopics()` newest first with empty state "No topics yet".
+  `app/topics/[topic]/page.tsx` renders questions in a topic newest first via `SearchResultList` with a "Play this topic" button linking to `/?category=...` and pagination controls.
+  `app/q/[id]/page.tsx` and `components/discovery/SingleQuestionPlayer.tsx` play a single question through `QuizCard`, submitting answers with `submitAnswer`, triggering audio and confetti feedback, and linking back to topic/home.
+  `app/page.tsx`, `QuizLayout.tsx`, and `useQuizLogic` updated to accept `initialCategory` from searchParams so "Play this topic" seamlessly filters and loads that topic on the home quiz.
+  `tests/discovery.test.ts` adds 7 unit tests for `getTopicQuestions` (empty topic rejection, trimming/escaping/public-question filters, paging range offset, hasMore handling, author mapping with default, answer-field exclusion, database error handling).
+  All 202 tests pass across 24 test suites; `check:fast`, `check:architecture`, and Next.js production build pass with 0 errors.
 - Acceptance:
   - `/topics` lists topics newest first with counts
   - `/topics/[topic]` lists questions newest first with "Play this topic"

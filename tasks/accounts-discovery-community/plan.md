@@ -83,7 +83,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 
 ### Phase 3: Discovery
 - [x] Task 17: Question search (your Supabase-branch run of `lib/sql/search.sql` still pending)
-- [ ] Task 18: Topic pages and single-question play
+- [x] Task 18: Topic pages and single-question play
 
 ### Phase 4: Community
 - [ ] Task 19: Community tables and server actions

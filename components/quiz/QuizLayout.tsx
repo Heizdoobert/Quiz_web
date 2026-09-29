@@ -26,11 +26,13 @@ const DisputeModal = dynamic(() => import('../modals/DisputeModal'), { ssr: fals
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
   initialLeaderboard?: LeaderboardEntry[];
+  initialCategory?: string;
 }
 
 export default function QuizLayout({
   initialQuestion = null,
   initialLeaderboard = [],
+  initialCategory,
 }: QuizLayoutProps = {}) {
   const {
     address,
@@ -67,7 +69,7 @@ export default function QuizLayout({
     handleCloseRewards,
     isUnlocked,
     handleUnlock,
-  } = useQuizLogic({ initialQuestion, initialLeaderboard });
+  } = useQuizLogic({ initialQuestion, initialLeaderboard, initialCategory });
   const { account, requireSignIn } = useSession();
 
   return (

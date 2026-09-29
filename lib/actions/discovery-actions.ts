@@ -2,6 +2,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { SearchResult } from '@/lib/types';
+import { escapeLikePattern } from '@/lib/validation';
 
 const PAGE_SIZE = 20;
 
@@ -45,6 +46,57 @@ export async function searchQuestions(
   const rows = data as SearchQuestionRow[];
   return {
     results: rows.slice(0, PAGE_SIZE).map(toSearchResult),
+    hasMore: rows.length > PAGE_SIZE,
+  };
+}
+
+export async function getTopicQuestions(
+  topic: string,
+  page = 1
+): Promise<{ results: SearchResult[]; hasMore: boolean }> {
+  const t = topic.trim();
+  if (!t) return { results: [], hasMore: false };
+
+  const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
+  const { data, error } = await supabase
+    .from('questions')
+    .select(`
+      id,
+      prompt,
+      category,
+      created_at,
+      users:created_by_user(display_name)
+    `)
+    .eq('status', 'verified')
+    .is('list_id', null)
+    .ilike('category', escapeLikePattern(t))
+    .order('created_at', { ascending: false })
+    .range(offset, offset + PAGE_SIZE);
+
+  if (error || !data) {
+    console.error('getTopicQuestions error:', error);
+    return { results: [], hasMore: false };
+  }
+
+  const rows = data as unknown as Array<{
+    id: string;
+    prompt: string;
+    category: string;
+    created_at: string;
+    users?: { display_name?: string | null } | Array<{ display_name?: string | null }> | null;
+  }>;
+
+  return {
+    results: rows.slice(0, PAGE_SIZE).map((r) => {
+      const user = Array.isArray(r.users) ? r.users[0] : r.users;
+      return {
+        id: r.id,
+        prompt: r.prompt,
+        category: r.category,
+        authorName: user?.display_name || 'Player',
+        createdAt: r.created_at,
+      };
+    }),
     hasMore: rows.length > PAGE_SIZE,
   };
 }

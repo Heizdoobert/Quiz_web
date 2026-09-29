@@ -110,7 +110,7 @@ export interface SearchResult {
   category: string;
   authorName: string;
   createdAt: string;
-  score: number;
+  score?: number;
 }
 
 export interface HistoryItem {
