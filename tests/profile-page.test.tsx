@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import ProfilePage from '../app/profile/page';
 
@@ -21,6 +21,13 @@ vi.mock('../lib/actions/profile-actions', () => ({
   getUserQuizzes: vi.fn(),
   exportUserData: vi.fn(),
 }));
+
+vi.mock('../lib/actions/community-actions', () => ({
+  getSuggestionsForAuthor: vi.fn().mockResolvedValue([]),
+  resolveSuggestion: vi.fn().mockResolvedValue({ ok: true }),
+}));
+
+import { getSuggestionsForAuthor, resolveSuggestion } from '../lib/actions/community-actions';
 
 function mockSignedInAs(wallet: string | null) {
   (useSession as import("vitest").Mock).mockReturnValue({
@@ -215,4 +222,37 @@ describe('ProfilePage', () => {
     expect(await screen.findByText('Second Account Quiz')).toBeDefined();
     expect(screen.queryByText('First Account Quiz')).toBeNull();
   });
+
+  it('renders suggestions for author questions and allows marking them done', async () => {
+    mockSignedInAs('0x123');
+    (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [] });
+    (getSuggestionsForAuthor as import("vitest").Mock).mockResolvedValue([
+      {
+        id: 'sugg-1',
+        questionId: 'q-1',
+        prompt: 'What is DeFi?',
+        body: 'Typo in option 2',
+        senderName: 'Carol',
+        createdAt: new Date().toISOString(),
+        resolvedAt: null,
+      },
+    ]);
+    (resolveSuggestion as import("vitest").Mock).mockResolvedValue({ ok: true });
+
+    render(<ProfilePage />);
+
+    expect(await screen.findByText('Suggestions for your questions')).toBeDefined();
+    expect(screen.getByText('What is DeFi?')).toBeDefined();
+    expect(screen.getByText('Typo in option 2')).toBeDefined();
+    expect(screen.getByText(/Carol/)).toBeDefined();
+
+    const markDoneBtn = screen.getByRole('button', { name: /mark done/i });
+    fireEvent.click(markDoneBtn);
+
+    await waitFor(() => {
+      expect(resolveSuggestion).toHaveBeenCalledWith('sugg-1');
+      expect(screen.queryByText('Typo in option 2')).toBeNull();
+    });
+  });
 });
+

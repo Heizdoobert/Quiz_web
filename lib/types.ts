@@ -125,6 +125,8 @@ export interface ClaimableRewards {
   alreadyClaimedBadges: number[];
   totalEarned: string;
   totalClaimed: string;
+  heldTokens?: string;
+  sweepsAt?: string | null;
 }
 
 export interface RewardVoucher {

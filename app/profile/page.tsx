@@ -12,6 +12,7 @@ import CreatorEmptyState from '@/components/profile/CreatorEmptyState';
 import CreatorSkeleton from '@/components/profile/CreatorSkeleton';
 import CreatorErrorState from '@/components/profile/CreatorErrorState';
 import AccessDeniedView from '@/components/profile/AccessDeniedView';
+import AuthorSuggestions from '@/components/community/AuthorSuggestions';
 import { AlertCircle } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -164,6 +165,8 @@ export default function ProfilePage() {
                 </ul>
               </section>
             )}
+
+            <AuthorSuggestions accountId={account.id} />
           </>
         )}
       </main>
