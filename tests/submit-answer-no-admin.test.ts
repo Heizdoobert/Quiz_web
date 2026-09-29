@@ -4,7 +4,7 @@ import { submitAnswer } from '../lib/actions/quiz-actions';
 // Isolated from answer-and-list-guards.test.ts because it needs supabaseAdmin
 // to be null for the whole file, not toggled mid-test.
 vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: null }));
-vi.mock('../lib/wallet-session', () => ({ getSessionWallet: async () => null }));
+vi.mock('../lib/session', () => ({ getSessionAccount: async () => null }));
 
 describe('submitAnswer with no secret key configured', () => {
   it('fails closed instead of signing without the admin client', async () => {

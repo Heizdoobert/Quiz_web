@@ -40,14 +40,21 @@ Result:
 - Files: `lib/session.ts`, `lib/wallet-session.ts`, `lib/users.ts`, `lib/actions/auth-actions.ts`, `tests/identity-accounts.test.ts`
 - Depends: 1. Size: M
 
-### Task 3: Answers, history and personal stats on `user_id`
-Answer, reload, and see your own stats, on account ids.
-- Acceptance:
-  - `submitAnswer` writes `user_id` (plus the wallet while that column exists)
-  - `getAnswerHistory()` and `getUserStats()` take no address; a server-only `statsForAccount(id)` backs both and `reward-actions`; `get_user_stats` is re-keyed to `user_id`
-  - `getOrCreateUser` and its call in `use-quiz-logic` are deleted: sign-in creates the account now. With that `select('*')` gone, the public key's `SELECT` on `users` is limited to `id, wallet_address, display_name, created_at`, so `auth_user_id` is hidden
-- Verify: `npx vitest run tests/answer-and-list-guards.test.ts tests/user-persistence.test.ts tests/use-quiz-logic-history.test.tsx tests/submit-answer-no-admin.test.ts`
-- Files: `lib/actions/quiz-actions.ts`, `lib/actions/user-actions.ts`, `lib/sql/stats-functions.sql`, `hooks/quiz/use-quiz-logic.ts`, `lib/actions/reward-actions.ts` (import only), tests
+### Task 3: Answers, history and personal stats on `user_id` — done
+Result:
+- `getAnswerHistory()` and `getUserStats()` take no argument now; both read `getSessionAccount()`. `submitAnswer` writes `user_id` and `wallet_address` (the trigger would fill the wallet in anyway; writing it directly keeps old readers correct until it's dropped).
+- New `lib/stats.ts`: `statsForAccount(accountId)`, backing `getUserStats()` directly. `reward-actions.getClaimableRewards` still takes a wallet (unmoved until Task 9), so it resolves the account with a new `accountIdForWallet(wallet)` in `lib/users.ts` (public key, read-only) before calling `statsForAccount` — one extra lookup beyond the plan's "import only" note, kept because stats have one source of truth now instead of a second wallet-keyed aggregation path.
+- `get_user_stats` is re-keyed to `p_user UUID`; the old `p_wallet TEXT` overload from prior deploys is untouched dead weight until Task 25 drops it. `lib/sql/accounts.sql` also now hides `auth_user_id` from the public key (`GRANT SELECT (id, wallet_address, display_name, created_at)`).
+- `lib/actions/user-actions.ts` (`getOrCreateUser`) is deleted, and its call in `use-quiz-logic` is gone; sign-in creates the account.
+- `tests/sql/run-accounts-migration.sh` now loads a frozen wallet-keyed `get_user_stats` fixture first (mirroring a real upgrade) and checks stats parity between the two overloads, plus the anon column grant; both checks fail under mutation.
+- 4 new test files (`stats.test.ts`, `account-id-for-wallet.test.ts`, `get-claimable-rewards.test.ts` plus updates to `answer-and-list-guards.test.ts`); 84/84 tests pass, `npm run check:task` clean, changed lines in `quiz-actions.ts`/`lib/stats.ts`/`lib/users.ts` covered, `reward-actions.ts`'s two changed lines covered including both ternary branches.
+
+Acceptance:
+- `submitAnswer` writes `user_id` (plus the wallet while that column exists)
+- `getAnswerHistory()` and `getUserStats()` take no address; a server-only `statsForAccount(id)` backs both and `reward-actions`; `get_user_stats` is re-keyed to `user_id`
+- `getOrCreateUser` and its call in `use-quiz-logic` are deleted: sign-in creates the account now. With that `select('*')` gone, the public key's `SELECT` on `users` is limited to `id, wallet_address, display_name, created_at`, so `auth_user_id` is hidden
+- Verify: `npx vitest run tests/answer-and-list-guards.test.ts tests/use-quiz-logic-history.test.tsx tests/submit-answer-no-admin.test.ts`
+- Files: `lib/actions/quiz-actions.ts`, `lib/actions/user-actions.ts` (deleted), `lib/stats.ts` (new), `lib/users.ts`, `lib/sql/accounts.sql`, `lib/sql/stats-functions.sql`, `hooks/quiz/use-quiz-logic.ts`, `lib/actions/reward-actions.ts`, tests
 - Depends: 2. Size: M
 
 ### Task 4: Leaderboards on `user_id`

@@ -1,9 +1,3 @@
-export interface User {
-  wallet_address: string;
-  display_name: string | null;
-  created_at: string;
-}
-
 export interface Question {
   id: string;
   category: string;

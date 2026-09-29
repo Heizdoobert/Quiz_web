@@ -5,7 +5,8 @@ import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getSessionWallet } from '@/lib/wallet-session';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { getUserStats } from '@/lib/actions/quiz-actions';
+import { statsForAccount } from '@/lib/stats';
+import { accountIdForWallet } from '@/lib/users';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
@@ -94,8 +95,11 @@ export async function getClaimableRewards(walletAddress: string): Promise<Claima
     );
 
     // One stats read covers both the token total and badge checks.
-    // On error getUserStats returns zeros, so nothing becomes claimable.
-    const stats = await getUserStats(walletAddress);
+    // On error or no account, this returns zeros, so nothing becomes claimable.
+    const accountId = await accountIdForWallet(normalized);
+    const stats = accountId
+      ? await statsForAccount(accountId)
+      : { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
     const totalEarned = BigInt(stats.score) * TOKENS_PER_CORRECT;
 
     // Get total already-claimed tokens. Read as text: JSON numbers lose precision past 2^53.

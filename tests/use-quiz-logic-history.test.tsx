@@ -2,14 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 
-const WALLET = '0x' + 'a'.repeat(40);
-
 vi.mock('wagmi', () => ({ useAccount: () => ({ address: '0x' + 'a'.repeat(40), isConnected: true }) }));
 vi.mock('../hooks/shared/use-wallet-session', () => ({ useWalletSession: () => vi.fn().mockResolvedValue(true) }));
 vi.mock('../lib/audio', () => ({
   soundEngine: { playFlip: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(), playTick: vi.fn(), playPowerup: vi.fn() },
 }));
-vi.mock('../lib/actions/user-actions', () => ({ getOrCreateUser: vi.fn().mockResolvedValue({ wallet_address: '0x' + 'a'.repeat(40) }) }));
 vi.mock('../lib/actions/question-actions', () => ({
   fetchRandomQuestion: vi.fn().mockResolvedValue(null),
   get5050EliminatedIndices: vi.fn(),
@@ -43,7 +40,7 @@ describe('useQuizLogic history restore', () => {
     const { result } = renderHook(() => useQuizLogic());
 
     await waitFor(() => expect(result.current.history).toHaveLength(2));
-    expect(getAnswerHistory).toHaveBeenCalledWith(WALLET);
+    expect(getAnswerHistory).toHaveBeenCalledWith();
     expect(result.current.history[0].questionId).toBe('q1');
   });
 

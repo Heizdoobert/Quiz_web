@@ -32,6 +32,15 @@ BEGIN
   ASSERT NOT EXISTS (SELECT 1 FROM questions WHERE created_by IS NULL AND created_by_user IS NOT NULL), 'seed questions stay creatorless';
   ASSERT (SELECT wallet_linked_at IS NOT NULL FROM users WHERE id = a_id), 'wallet_linked_at set';
 
+  -- Stats by account (stats-functions.sql) match the old wallet-keyed function for every wallet.
+  ASSERT (SELECT total_answered FROM get_user_stats(a_id)) = 2, 'A stats by account';
+  ASSERT NOT EXISTS (
+    SELECT 1 FROM users u
+    WHERE u.wallet_address IS NOT NULL
+      AND (SELECT to_jsonb(s) FROM get_user_stats(u.id) s)
+          IS DISTINCT FROM (SELECT to_jsonb(s) FROM get_user_stats(u.wallet_address) s)
+  ), 'account stats match wallet stats';
+
   -- Old code: insert with only a wallet (unknown wallet D) gets an account.
   SELECT id INTO q FROM questions WHERE created_by IS NULL ORDER BY created_at, id OFFSET 5 LIMIT 1;
   INSERT INTO quiz_results (wallet_address, question_id, answer_index, is_correct) VALUES (d, q, 0, true);
@@ -49,6 +58,7 @@ BEGIN
   INSERT INTO users (auth_user_id, display_name) VALUES (email_id, 'Player-x') RETURNING id INTO email_id;
   INSERT INTO quiz_results (user_id, question_id, answer_index, is_correct) VALUES (email_id, q, 1, false);
   ASSERT (SELECT wallet_address IS NULL FROM quiz_results WHERE user_id = email_id), 'email answer has no wallet';
+  ASSERT (SELECT total_answered FROM get_user_stats(email_id)) = 1, 'email answer counts in stats';
   BEGIN
     INSERT INTO quiz_results (user_id, question_id, answer_index, is_correct) VALUES (email_id, q, 0, true);
     RAISE EXCEPTION 'second answer should have failed';
@@ -71,3 +81,13 @@ BEGIN
 
   RAISE NOTICE 'all checks passed';
 END $$;
+
+-- The public key reads display fields, never auth_user_id.
+SET ROLE anon;
+SELECT id, wallet_address, display_name, created_at FROM users LIMIT 1;
+DO $$ BEGIN
+  PERFORM auth_user_id FROM users LIMIT 1;
+  RAISE EXCEPTION 'anon could read auth_user_id';
+EXCEPTION WHEN insufficient_privilege THEN NULL;
+END $$;
+RESET ROLE;

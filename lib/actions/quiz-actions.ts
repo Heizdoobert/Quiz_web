@@ -1,25 +1,25 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionWallet } from '@/lib/wallet-session';
+import { getSessionAccount } from '@/lib/session';
+import { statsForAccount } from '@/lib/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
 
 const HISTORY_LIMIT = 20;
 
-// The session wallet's most recent answers, newest first, so history and answeredIds
-// survive a reload. Never the wrong wallet's, and never answer_index or correct_index
+// The session account's most recent answers, newest first, so history and answeredIds
+// survive a reload. Never anyone else's, and never answer_index or correct_index
 // (that would reveal the correct option).
-export async function getAnswerHistory(walletAddress: string): Promise<HistoryItem[]> {
+export async function getAnswerHistory(): Promise<HistoryItem[]> {
   try {
     if (!supabaseAdmin) return [];
-    const wallet = await getSessionWallet();
-    if (!wallet || wallet !== walletAddress.toLowerCase()) return [];
+    const account = await getSessionAccount();
+    if (!account) return [];
 
     const { data, error } = await supabaseAdmin
       .from('quiz_results')
       .select('question_id, is_correct, answered_at, questions(prompt)')
-      .eq('wallet_address', wallet)
+      .eq('user_id', account.id)
       .order('answered_at', { ascending: false })
       .limit(HISTORY_LIMIT);
 
@@ -69,18 +69,18 @@ export async function submitAnswer(params: {
       console.error('Question not found for answer submission:', qError);
       return failed('error');
     }
-    const wallet = await getSessionWallet();
+    const account = await getSessionAccount();
     // Contest questions stay 'pending' (out of the global pool) and are only answerable
-    // by a wallet playing that contest, so their answers can't be looked up beforehand;
+    // by an account playing that contest, so their answers can't be looked up beforehand;
     // owners and reviewers never get an entry. Other non-verified questions reveal nothing.
     if (!qData.list_id && qData.status !== 'verified') return failed('error');
     if (qData.list_id) {
-      if (!wallet) return failed('signed-out');
+      if (!account?.wallet) return failed('signed-out');
       const { data: entry } = await supabaseAdmin
         .from('list_entries')
         .select('status')
         .eq('list_id', qData.list_id)
-        .eq('wallet_address', wallet)
+        .eq('wallet_address', account.wallet)
         .maybeSingle();
       if (entry?.status !== 'in_progress') return failed('error');
     }
@@ -88,14 +88,19 @@ export async function submitAnswer(params: {
     const isCorrect = params.answerIndex === qData.correct_index;
     const revealed = { isCorrect, correctIndex: qData.correct_index, explanation: qData.explanation };
 
-    // Only a signed-in wallet's answers count; guests still see the result.
-    if (!wallet) return { ...revealed, recorded: false, notSavedReason: 'signed-out' };
-    // Nobody scores on a question they wrote.
-    if (qData.created_by === wallet) return { ...revealed, recorded: false, notSavedReason: 'own-question' };
+    // Only a signed-in account's answers count; guests still see the result.
+    if (!account) return { ...revealed, recorded: false, notSavedReason: 'signed-out' };
+    // Nobody scores on a question they wrote (question creation is still wallet-keyed until Task 5).
+    if (account.wallet && qData.created_by === account.wallet) {
+      return { ...revealed, recorded: false, notSavedReason: 'own-question' };
+    }
 
-    // The first answer to a question is the one that counts (unique per wallet and question).
+    // The first answer to a question is the one that counts (unique per account and question).
+    // wallet_address is written directly too (the bridge trigger would fill it in anyway) so
+    // readers of the old column stay correct until it's dropped in Task 25.
     const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
-      wallet_address: wallet,
+      user_id: account.id,
+      wallet_address: account.wallet,
       question_id: params.questionId,
       answer_index: params.answerIndex,
       is_correct: isCorrect,
@@ -110,30 +115,8 @@ export async function submitAnswer(params: {
   }
 }
 
-export async function getUserStats(walletAddress: string): Promise<UserStats> {
-  try {
-    if (!walletAddress) {
-      return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-    }
-    // Aggregated in Postgres (lib/sql/stats-functions.sql); raw rows are capped at 1000.
-    const { data, error } = await supabase
-      .rpc('get_user_stats', { p_wallet: walletAddress.toLowerCase() })
-      .single<{ total_answered: number; correct_count: number; streak: number; best_streak: number }>();
-
-    if (error) console.error('getUserStats rpc error:', error);
-    if (error || !data || data.total_answered === 0) {
-      return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-    }
-
-    return {
-      score: data.correct_count,
-      streak: data.streak,
-      bestStreak: data.best_streak,
-      accuracy: Math.round((data.correct_count / data.total_answered) * 100),
-      totalAnswered: data.total_answered,
-    };
-  } catch (err) {
-    console.error('getUserStats error:', err);
-    return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
-  }
+export async function getUserStats(): Promise<UserStats> {
+  const account = await getSessionAccount();
+  if (!account) return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
+  return statsForAccount(account.id);
 }

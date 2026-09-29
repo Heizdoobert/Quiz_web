@@ -10,13 +10,17 @@ import {
 } from '../lib/actions/question-list-actions';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { getSessionWallet } from '../lib/wallet-session';
+import { getSessionAccount } from '../lib/session';
 import { validateQuestionInput } from '../lib/validation';
 
 let mockIsContestFunded = true;
 
 vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+// question-list-actions still reads the wallet directly (moves in Task 6); quiz-actions
+// (submitAnswer, getAnswerHistory) reads the account (Task 3).
 vi.mock('../lib/wallet-session', () => ({ getSessionWallet: vi.fn() }));
+vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
@@ -30,6 +34,8 @@ vi.mock('../lib/chain', () => ({
 }));
 
 const WALLET = '0x' + 'a'.repeat(40);
+const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
+const ACCOUNT = { id: ACCOUNT_ID, wallet: WALLET };
 const LIST_ID = '00000000-0000-4000-8000-000000000001';
 const Q_ID = '00000000-0000-4000-8000-000000000002';
 
@@ -65,14 +71,14 @@ describe('submitAnswer guards', () => {
   beforeEach(() => vi.resetAllMocks());
 
   it('reveals nothing when the question does not exist', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({});
     const res = await submitAnswer({ questionId: Q_ID, answerIndex: 0 });
     expect(res).toEqual({ isCorrect: false, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'error' });
   });
 
   it('reports a generic error instead of already-answered on any other insert failure', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
       quiz_results: { insertError: { code: '500', message: 'db unavailable' } },
@@ -83,7 +89,7 @@ describe('submitAnswer guards', () => {
   });
 
   it('fails closed when the exchange throws partway through', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('session lookup blew up'));
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('session lookup blew up'));
     mockTables({
       questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
     });
@@ -92,7 +98,7 @@ describe('submitAnswer guards', () => {
   });
 
   it('reveals nothing for a contest question without an in-progress entry', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({
       questions: { row: { correct_index: 2, explanation: 'secret', status: 'pending', list_id: LIST_ID } },
       list_entries: { row: { status: 'reviewer' } },
@@ -102,8 +108,8 @@ describe('submitAnswer guards', () => {
     expect(inserts.quiz_results).toBeUndefined();
   });
 
-  it('records a contest answer for a wallet playing that contest', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+  it('records a contest answer for an account playing that contest', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({
       questions: { row: { correct_index: 2, explanation: 'why', status: 'pending', list_id: LIST_ID, created_by: '0xowner' } },
       list_entries: { row: { status: 'in_progress' } },
@@ -115,7 +121,7 @@ describe('submitAnswer guards', () => {
   });
 
   it('reveals nothing for a pending question outside any list', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({ questions: { row: { correct_index: 1, explanation: 'secret', status: 'pending', list_id: null } } });
     const res = await submitAnswer({ questionId: Q_ID, answerIndex: 1 });
     expect(res.explanation).toBeNull();
@@ -123,8 +129,8 @@ describe('submitAnswer guards', () => {
     expect(res.notSavedReason).toBe('error');
   });
 
-  it('does not score a wallet on a question it wrote', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+  it('does not score an account on a question its wallet wrote', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({
       questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: WALLET } },
     });
@@ -136,7 +142,7 @@ describe('submitAnswer guards', () => {
   });
 
   it('does not count a guest answer, but still shows the result', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
     const inserts = mockTables({
       questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
     });
@@ -148,7 +154,7 @@ describe('submitAnswer guards', () => {
   });
 
   it('reports already-answered instead of a generic error on a repeat insert', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
       quiz_results: { insertError: { code: '23505', message: 'duplicate key' } },
@@ -162,8 +168,8 @@ describe('submitAnswer guards', () => {
 describe('getAnswerHistory', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('returns the session wallet\'s saved answers, newest first', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+  it('returns the session account\'s saved answers, newest first', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       quiz_results: {
         rows: [
@@ -171,34 +177,27 @@ describe('getAnswerHistory', () => {
         ],
       },
     });
-    const history = await getAnswerHistory(WALLET);
+    const history = await getAnswerHistory();
     expect(history).toEqual([{ questionId: Q_ID, prompt: 'What is Base?', isCorrect: true }]);
   });
 
-  it('returns nothing for an address that is not the session wallet', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
-    mockTables({ quiz_results: { rows: [{ question_id: Q_ID, is_correct: true, questions: { prompt: 'x' } }] } });
-    const history = await getAnswerHistory('0x' + 'b'.repeat(40));
+  it('returns nothing with no session', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    const history = await getAnswerHistory();
     expect(history).toEqual([]);
     expect(supabaseAdmin!.from).not.toHaveBeenCalled();
   });
 
-  it('returns nothing with no session', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-    const history = await getAnswerHistory(WALLET);
-    expect(history).toEqual([]);
-  });
-
   it('returns nothing when the query itself errors', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({ quiz_results: { queryError: { message: 'db unavailable' } } });
-    const history = await getAnswerHistory(WALLET);
+    const history = await getAnswerHistory();
     expect(history).toEqual([]);
   });
 
   it('fails closed when the lookup throws', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('boom'));
-    const history = await getAnswerHistory(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('boom'));
+    const history = await getAnswerHistory();
     expect(history).toEqual([]);
   });
 });

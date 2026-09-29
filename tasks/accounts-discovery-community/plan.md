@@ -55,7 +55,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 ### Phase 1: Identity
 - [x] Task 1: Accounts schema migration script (your Supabase-branch run still pending)
 - [x] Task 2: Account session, and wallet sign-in creates an account
-- [ ] Task 3: Answers, history and personal stats on account ids
+- [x] Task 3: Answers, history and personal stats on account ids
 - [ ] Task 4: Leaderboards on account ids
 - [ ] Task 5: Question creation and disputes on account ids
 - [ ] Task 6: Lists and contests on account ids

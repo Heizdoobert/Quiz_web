@@ -220,5 +220,8 @@ CREATE OR REPLACE TRIGGER question_disputes_bridge_account BEFORE INSERT ON ques
 
 -- Accounts are created by the server with the secret key only.
 DROP POLICY IF EXISTS "Allow public insert for users" ON users;
+-- The public key reads display fields only; auth_user_id links an account to its email.
+REVOKE SELECT ON users FROM anon, authenticated;
+GRANT SELECT (id, wallet_address, display_name, created_at) ON users TO anon, authenticated;
 
 COMMIT;

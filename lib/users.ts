@@ -1,4 +1,5 @@
 import 'server-only';
+import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 
 // The account id for a wallet, creating the account if the wallet has none.
@@ -28,4 +29,19 @@ export async function ensureAccountForWallet(walletAddress: string): Promise<str
     return null;
   }
   return data.id;
+}
+
+// Read-only lookup for a caller that still only has a wallet, not a session
+// (reward-actions, until Task 9). Public key: `id` is readable by anon.
+export async function accountIdForWallet(walletAddress: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id')
+    .eq('wallet_address', walletAddress.toLowerCase())
+    .maybeSingle();
+  if (error) {
+    console.error('accountIdForWallet error:', error);
+    return null;
+  }
+  return data?.id ?? null;
 }
