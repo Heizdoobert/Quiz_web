@@ -389,7 +389,17 @@ Result:
 - Files: `lib/actions/question-actions.ts`, `lib/schema.sql`, `lib/sql/retire-sample-questions.sql`, tests
 - Depends: Phase 1. Size: S
 
-### Task 15: Topics from the database
+### Task 15: Topics from the database — done
+- Result:
+  - `lib/sql/topics.sql`: `get_topics()` (SECURITY DEFINER, matches the same PostgREST-1000-row-cap reasoning as `stats-functions.sql`), groups `questions.category` by `lower(TRIM(category))`, public-question rule applied (`status = 'verified' AND list_id IS NULL`), returns the most recent spelling per group, count, and newest `created_at`, ordered newest first. Granted `EXECUTE` to `anon, authenticated`.
+  - `question-actions.ts`: added `getTopics()` (calls the RPC, maps snake_case to camelCase) and `getPublicQuestion(id)` (public rule, `.single()`, same 5-column select as `fetchRandomQuestion` — never `correct_index`/`explanation`).
+  - `validation.ts`: `validateQuestionInput`'s category handling now collapses inner whitespace and enforces 2-40 chars (was only a max); added `escapeLikePattern` for safe ILIKE matching.
+  - Fixed a bug this task would otherwise have shipped broken: `fetchRandomQuestion`'s category filter was `eq('category', category)` (exact case match). Once `get_topics()` groups "DeFi"/"defi" as one topic with a combined count, selecting that topic in `CategoryBar` would only play rows matching whichever single casing it filtered on — undercounting silently. Changed both filter sites to `ilike('category', escapeLikePattern(category))` (escaped so a player-typed `%`/`_` in a category isn't read as a wildcard).
+  - `CategoryBar.tsx`: dropped the hardcoded `CATEGORIES` array (icon set, fixed colors); now fetches `getTopics()` on mount and renders "All" plus each topic name. Only caller was `QuizLayout.tsx` (unchanged — same `selectedCategory`/`onSelectCategory` prop contract), so no other files touched.
+  - Tests (`tests/trivia-guest-access.test.tsx`, extended): category-filter case-insensitivity + escaping, `getTopics` snake_case→camelCase mapping and its empty-on-error path, `getPublicQuestion`'s public-rule filters and malformed-id short-circuit, and `createQuestion`'s category trim/collapse/min-length/default via `validateQuestionInput`. 11/11 pass.
+  - Mutation-tested `escapeLikePattern`: reverted to identity, exactly 1/11 failed (the escaping test), confirming it's enforced; restored.
+  - Full gate: 179/179 tests, tsc/eslint/gitleaks clean, `check:architecture` clean (313 deps, +1 from `CategoryBar` → `question-actions` edge, no cycle).
+  - Not done: running `lib/sql/topics.sql` on a Supabase branch (yours).
 - Acceptance:
   - `get_topics()` and `getTopics()` return public topics grouped case-insensitively, newest first, with counts
   - `getPublicQuestion(id)` returns public questions only and no answer fields

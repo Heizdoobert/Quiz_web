@@ -75,7 +75,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 
 ### Phase 2: Trivia
 - [x] Task 14: Public-question rule and retire sample questions (your Supabase-branch run still pending)
-- [ ] Task 15: Topics from the database
+- [x] Task 15: Topics from the database (your Supabase-branch run of `lib/sql/topics.sql` still pending)
 - [ ] Task 16: Signed-in creation and read-only guests
 
 ### Checkpoint: Trivia
