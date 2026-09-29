@@ -50,53 +50,46 @@ export async function searchQuestions(
   };
 }
 
+interface TopicQuestionRow {
+  id: string;
+  prompt: string;
+  category: string;
+  created_at: string;
+  users: { display_name: string | null } | null;
+}
+
 export async function getTopicQuestions(
   topic: string,
   page = 1
 ): Promise<{ results: SearchResult[]; hasMore: boolean }> {
-  const t = topic.trim();
-  if (!t) return { results: [], hasMore: false };
-
   const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
+
+  // Public-question rule (status = 'verified' AND list_id IS NULL), same as
+  // fetchRandomQuestion/getPublicQuestion. Topics group categories
+  // case-insensitively (get_topics()), so this must match every casing too.
   const { data, error } = await supabase
     .from('questions')
-    .select(`
-      id,
-      prompt,
-      category,
-      created_at,
-      users:created_by_user(display_name)
-    `)
+    .select('id, prompt, category, created_at, users(display_name)')
     .eq('status', 'verified')
     .is('list_id', null)
-    .ilike('category', escapeLikePattern(t))
+    .ilike('category', escapeLikePattern(topic))
     .order('created_at', { ascending: false })
     .range(offset, offset + PAGE_SIZE);
-
   if (error || !data) {
     console.error('getTopicQuestions error:', error);
     return { results: [], hasMore: false };
   }
 
-  const rows = data as unknown as Array<{
-    id: string;
-    prompt: string;
-    category: string;
-    created_at: string;
-    users?: { display_name?: string | null } | Array<{ display_name?: string | null }> | null;
-  }>;
-
+  const rows = data as unknown as TopicQuestionRow[];
   return {
-    results: rows.slice(0, PAGE_SIZE).map((r) => {
-      const user = Array.isArray(r.users) ? r.users[0] : r.users;
-      return {
-        id: r.id,
-        prompt: r.prompt,
-        category: r.category,
-        authorName: user?.display_name || 'Player',
-        createdAt: r.created_at,
-      };
-    }),
+    results: rows.slice(0, PAGE_SIZE).map((row) => ({
+      id: row.id,
+      prompt: row.prompt,
+      category: row.category,
+      authorName: row.users?.display_name || 'Player',
+      createdAt: row.created_at,
+      score: 0,
+    })),
     hasMore: rows.length > PAGE_SIZE,
   };
 }

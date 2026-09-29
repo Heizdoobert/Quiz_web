@@ -442,14 +442,17 @@ Result:
 - Depends: 15. Size: M
 
 ### Task 18: Topic pages and single-question play — done
-- Result: `lib/actions/discovery-actions.ts` adds `getTopicQuestions(topic, page)`: enforces public-question rule (`status = 'verified' AND list_id IS NULL`), case-insensitive topic match (`ilike('category', escapeLikePattern(t))`), ordered by `created_at desc`, paged at 20 with over-fetch for `hasMore`, and joined with `users` on `created_by_user` for author name.
-  `components/discovery/TopicList.tsx` renders the list of topics newest first with question count, relative time of latest question, and "Browse" links to `/topics/[topic]`.
-  `app/topics/page.tsx` renders all topics from `getTopics()` newest first with empty state "No topics yet".
-  `app/topics/[topic]/page.tsx` renders questions in a topic newest first via `SearchResultList` with a "Play this topic" button linking to `/?category=...` and pagination controls.
-  `app/q/[id]/page.tsx` and `components/discovery/SingleQuestionPlayer.tsx` play a single question through `QuizCard`, submitting answers with `submitAnswer`, triggering audio and confetti feedback, and linking back to topic/home.
-  `app/page.tsx`, `QuizLayout.tsx`, and `useQuizLogic` updated to accept `initialCategory` from searchParams so "Play this topic" seamlessly filters and loads that topic on the home quiz.
-  `tests/discovery.test.ts` adds 7 unit tests for `getTopicQuestions` (empty topic rejection, trimming/escaping/public-question filters, paging range offset, hasMore handling, author mapping with default, answer-field exclusion, database error handling).
-  All 202 tests pass across 24 test suites; `check:fast`, `check:architecture`, and Next.js production build pass with 0 errors.
+- Result: `getTopicQuestions(topic, page)` added to `discovery-actions.ts`, no new SQL — the FK `questions.created_by_user -> users(id)` (added in `accounts.sql`) is unique on that table, so PostgREST resolves a plain embed (`.select('id, prompt, category, created_at, users(display_name)')`) with no ambiguity. Same public-question filter and `escapeLikePattern`-guarded `ILIKE` as `fetchRandomQuestion`, ordered `created_at desc`, 20/page with the same `+1`-row `hasMore` convention as `searchQuestions`. Reuses the `SearchResult` type and `SearchResultList` component from Task 17 (`authorName` falls back to `'Player'` when `display_name` is null) — no new result-card component needed, only `TopicList.tsx` for the topic-name list itself.
+
+  `/topics` reads `getTopics()` (already existed since Task 15, already ordered `latest_at desc` in `get_topics()` — no SQL change needed), rendering name/count/"last added <relative time>" via `formatRelativeTime`. `/topics/[topic]` reads `getTopicQuestions`, `noindex`'d (per the spec's own open question: player-typed topic names become public URLs, so kept out of search engines until that's decided) — "Play this topic" links straight to `/q/[id]` of that topic's newest question (`results[0].id`), which both starts the quiz filtered to the topic and needs zero changes to `app/page.tsx` or `use-quiz-logic.ts` (both stayed out of this task's file list on purpose).
+
+  `/q/[id]` reads `getPublicQuestion(id)` (already existed since Task 14/16), 404s via `next/navigation`'s `notFound()` if null or not public, then renders the *existing* `QuizLayout` (which is what actually wires `QuizCard` to `submitAnswer`, the timer, the sponsor-unlock gate, and disputes) seeded with that question as `initialQuestion` — the identical pattern `app/page.tsx` already uses for a random question. Considered a bespoke lightweight wrapper around bare `QuizCard` first, but `useQuizLogic`'s sponsor-ad gate starts every fresh question **locked** (`isUnlocked` defaults `false`); a wrapper that skipped that plumbing would silently break answering rather than simplify anything, so reusing `QuizLayout` was the smaller, correct diff, not a lazier-looking one.
+
+  Mutation-tested the `escapeLikePattern` call in `getTopicQuestions`: removing the escape wrapper failed exactly the dedicated ILIKE-args assertion, others stayed green.
+
+  12/12 in `tests/discovery.test.ts` (was 8; +4 for `getTopicQuestions`: mapping/fallback, escaping+range math, `hasMore` trim, error path). Full gate: 199/199 tests (was 195), tsc/eslint/gitleaks clean, `check:architecture` 326 deps (+3 from Task 17's 323), no cycle.
+
+  Not done: running any SQL on a Supabase branch (none needed this task — no new SQL file), the manual signed-out click-through (`/topics` → a topic → `/q/[id]` → answer), and first-load JS budget measurement for the 3 new routes (checkpoint item, still open).
 - Acceptance:
   - `/topics` lists topics newest first with counts
   - `/topics/[topic]` lists questions newest first with "Play this topic"

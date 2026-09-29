@@ -1,12 +1,10 @@
 import type { Metadata } from 'next';
-import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import TopicList from '@/components/discovery/TopicList';
 import { getTopics } from '@/lib/actions/question-actions';
 
 export const metadata: Metadata = {
   title: 'Topics',
-  description: 'Browse trivia questions by topic.',
 };
 
 export default async function TopicsPage() {
@@ -16,12 +14,7 @@ export default async function TopicsPage() {
     <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
       <Header />
       <div className="w-full max-w-3xl mx-auto px-4 py-8 flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
-          <h1 className="text-xl font-black font-heading truncate">Browse Topics</h1>
-          <Link href="/" className="text-xs text-slate-400 hover:text-white">
-            ← Home
-          </Link>
-        </div>
+        <h1 className="text-xl font-black font-heading">Topics</h1>
 
         {topics.length === 0 ? (
           <p className="text-sm text-slate-400">No topics yet.</p>
