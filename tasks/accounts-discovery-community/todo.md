@@ -441,7 +441,18 @@ Result:
 - Files: `lib/sql/search.sql`, `lib/actions/discovery-actions.ts`, `components/discovery/SearchBox.tsx`, `app/search/page.tsx`, tests
 - Depends: 15. Size: M
 
-### Task 18: Topic pages and single-question play
+### Task 18: Topic pages and single-question play — done
+- Result: `getTopicQuestions(topic, page)` added to `discovery-actions.ts`, no new SQL — the FK `questions.created_by_user -> users(id)` (added in `accounts.sql`) is unique on that table, so PostgREST resolves a plain embed (`.select('id, prompt, category, created_at, users(display_name)')`) with no ambiguity. Same public-question filter and `escapeLikePattern`-guarded `ILIKE` as `fetchRandomQuestion`, ordered `created_at desc`, 20/page with the same `+1`-row `hasMore` convention as `searchQuestions`. Reuses the `SearchResult` type and `SearchResultList` component from Task 17 (`authorName` falls back to `'Player'` when `display_name` is null) — no new result-card component needed, only `TopicList.tsx` for the topic-name list itself.
+
+  `/topics` reads `getTopics()` (already existed since Task 15, already ordered `latest_at desc` in `get_topics()` — no SQL change needed), rendering name/count/"last added <relative time>" via `formatRelativeTime`. `/topics/[topic]` reads `getTopicQuestions`, `noindex`'d (per the spec's own open question: player-typed topic names become public URLs, so kept out of search engines until that's decided) — "Play this topic" links straight to `/q/[id]` of that topic's newest question (`results[0].id`), which both starts the quiz filtered to the topic and needs zero changes to `app/page.tsx` or `use-quiz-logic.ts` (both stayed out of this task's file list on purpose).
+
+  `/q/[id]` reads `getPublicQuestion(id)` (already existed since Task 14/16), 404s via `next/navigation`'s `notFound()` if null or not public, then renders the *existing* `QuizLayout` (which is what actually wires `QuizCard` to `submitAnswer`, the timer, the sponsor-unlock gate, and disputes) seeded with that question as `initialQuestion` — the identical pattern `app/page.tsx` already uses for a random question. Considered a bespoke lightweight wrapper around bare `QuizCard` first, but `useQuizLogic`'s sponsor-ad gate starts every fresh question **locked** (`isUnlocked` defaults `false`); a wrapper that skipped that plumbing would silently break answering rather than simplify anything, so reusing `QuizLayout` was the smaller, correct diff, not a lazier-looking one.
+
+  Mutation-tested the `escapeLikePattern` call in `getTopicQuestions`: removing the escape wrapper failed exactly the dedicated ILIKE-args assertion, others stayed green.
+
+  12/12 in `tests/discovery.test.ts` (was 8; +4 for `getTopicQuestions`: mapping/fallback, escaping+range math, `hasMore` trim, error path). Full gate: 199/199 tests (was 195), tsc/eslint/gitleaks clean, `check:architecture` 326 deps (+3 from Task 17's 323), no cycle.
+
+  Not done: running any SQL on a Supabase branch (none needed this task — no new SQL file), the manual signed-out click-through (`/topics` → a topic → `/q/[id]` → answer), and first-load JS budget measurement for the 3 new routes (checkpoint item, still open).
 - Acceptance:
   - `/topics` lists topics newest first with counts
   - `/topics/[topic]` lists questions newest first with "Play this topic"

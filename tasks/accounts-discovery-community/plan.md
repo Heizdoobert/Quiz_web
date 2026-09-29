@@ -83,7 +83,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 
 ### Phase 3: Discovery
 - [x] Task 17: Question search (your Supabase-branch run of `lib/sql/search.sql` still pending)
-- [ ] Task 18: Topic pages and single-question play
+- [x] Task 18: Topic pages and single-question play
 
 ### Phase 4: Community
 - [ ] Task 19: Community tables and server actions
@@ -91,7 +91,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [ ] Task 21: Suggestions for authors on `/profile`
 
 ### Checkpoint: Discovery and Community
-- [ ] Gates pass; first-load JS ≤ 150 kB per route
+- [ ] Gates pass; first-load JS ≤ 150 kB per route (Discovery's 3 new routes not yet measured — you)
 - [ ] Manual: search signed out, topics, rate, comment and suggest after answering
 
 ### Phase 5: Rewards
