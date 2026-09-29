@@ -64,3 +64,7 @@ export async function getSessionWallet(): Promise<string | null> {
   if (Number(exp) < Date.now() / 1000) return null;
   return address;
 }
+
+export async function clearSessionWallet(): Promise<void> {
+  (await cookies()).delete(SESSION_COOKIE);
+}
