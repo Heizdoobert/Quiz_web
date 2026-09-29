@@ -2,9 +2,15 @@ import QuizLayout from '@/components/quiz/QuizLayout';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams?: Promise<{ category?: string }>;
+} = {}) {
+  const { category: rawCategory } = (await searchParams) || {};
+  const category = rawCategory ? decodeURIComponent(rawCategory) : undefined;
   const [initialQuestion, initialLeaderboard] = await Promise.all([
-    fetchRandomQuestion(),
+    fetchRandomQuestion([], category),
     getGlobalLeaderboard(50),
   ]);
 
@@ -42,6 +48,7 @@ export default async function Home() {
       <QuizLayout
         initialQuestion={initialQuestion}
         initialLeaderboard={initialLeaderboard}
+        initialCategory={category}
       />
     </main>
   );

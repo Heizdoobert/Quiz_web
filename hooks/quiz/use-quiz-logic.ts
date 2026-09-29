@@ -30,17 +30,19 @@ export type ActiveModal =
 interface UseQuizLogicOptions {
   initialQuestion?: ClientQuestion | null;
   initialLeaderboard?: LeaderboardEntry[];
+  initialCategory?: string;
 }
 
 export function useQuizLogic({
   initialQuestion = null,
   initialLeaderboard = [],
+  initialCategory = 'All',
 }: UseQuizLogicOptions = {}) {
   const { address, isConnected } = useAccount();
   const { account, requireSignIn: ensureSession } = useSession();
 
   // Quiz state
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'All');
   const [currentQuestion, setCurrentQuestion] = useState<ClientQuestion | null>(initialQuestion);
   const [answeredIds, setAnsweredIds] = useState<string[]>([]);
   const [isFlipped, setIsFlipped] = useState(false);

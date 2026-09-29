@@ -6,6 +6,7 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Gift, Zap, Volume2, VolumeX, User, Trophy } from 'lucide-react';
 import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
 import { useSession } from '@/hooks/shared/use-session';
+import SearchBox from '@/components/discovery/SearchBox';
 
 interface HeaderProps {
   onOpenRewards?: () => void;
@@ -35,6 +36,7 @@ export default function Header({
           Quick Quiz
         </span>
       </Link>
+      <SearchBox />
       {/* min-h reserves the Connect button's height; it mounts after hydration and shifted the page */}
       <div className="flex shrink-0 min-h-10 items-center gap-2.5 sm:gap-3">
         {/* Sound FX Toggle Button */}

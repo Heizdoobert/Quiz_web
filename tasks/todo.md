@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Tasks: On-Chain Contest Escrow Smart Contract
 
 ## Task 1: Implement `ContestEscrow.sol`

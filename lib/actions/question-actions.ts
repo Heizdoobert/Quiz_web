@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getSessionAccount } from '@/lib/session';
 import { ClientQuestion } from '@/lib/types';
-import { isUuid, validateQuestionInput } from '@/lib/validation';
+import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/validation';
 
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
@@ -70,11 +70,13 @@ export async function fetchRandomQuestion(
   category?: string
 ): Promise<ClientQuestion | null> {
   try {
+    // Public-question rule: verified and not part of a question list (a list's
+    // questions stay hidden until played through that list).
     let query = supabase
       .from('questions')
       .select('id, category, prompt, options, created_by, status')
-      .neq('status', 'quarantined')
-      .neq('status', 'pending'); // list-contest questions stay hidden until their list goes live
+      .eq('status', 'verified')
+      .is('list_id', null);
 
     // Only well-formed ids reach the filter string; the newest 200 are enough to avoid repeats.
     const ids = (Array.isArray(excludeIds) ? excludeIds : []).filter(isUuid).slice(-200);
@@ -82,8 +84,10 @@ export async function fetchRandomQuestion(
       query = query.not('id', 'in', `(${ids.join(',')})`);
     }
 
+    // Topics group categories case-insensitively (get_topics()), so selecting one
+    // must match every casing in that group, not just the spelling shown.
     if (category && category !== 'All') {
-      query = query.eq('category', category);
+      query = query.ilike('category', escapeLikePattern(category));
     }
 
     let { data, error } = await query.limit(20);
@@ -93,9 +97,9 @@ export async function fetchRandomQuestion(
       const fallbackQuery = supabase
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
-        .neq('status', 'quarantined')
-        .neq('status', 'pending')
-        .eq('category', category)
+        .eq('status', 'verified')
+        .is('list_id', null)
+        .ilike('category', escapeLikePattern(category))
         .limit(20);
       const fallbackRes = await fallbackQuery;
       if (!fallbackRes.error && fallbackRes.data && fallbackRes.data.length > 0) {
@@ -109,8 +113,8 @@ export async function fetchRandomQuestion(
       const generalQuery = await supabase
         .from('questions')
         .select('id, category, prompt, options, created_by, status')
-        .neq('status', 'quarantined')
-        .neq('status', 'pending')
+        .eq('status', 'verified')
+        .is('list_id', null)
         .limit(20);
       if (generalQuery.data && generalQuery.data.length > 0) {
         data = generalQuery.data;
@@ -131,6 +135,46 @@ export async function fetchRandomQuestion(
     };
   } catch (err) {
     console.error('fetchRandomQuestion error:', err);
+    return null;
+  }
+}
+
+export async function getTopics(): Promise<Array<{ name: string; questionCount: number; latestAt: string }>> {
+  try {
+    const { data, error } = await supabase.rpc('get_topics');
+    if (error || !data) return [];
+    return (data as Array<{ name: string; question_count: number; latest_at: string }>).map((row) => ({
+      name: row.name,
+      questionCount: row.question_count,
+      latestAt: row.latest_at,
+    }));
+  } catch (err) {
+    console.error('getTopics error:', err);
+    return [];
+  }
+}
+
+export async function getPublicQuestion(id: string): Promise<ClientQuestion | null> {
+  try {
+    if (!isUuid(id)) return null;
+    const { data, error } = await supabase
+      .from('questions')
+      .select('id, category, prompt, options, created_by, status')
+      .eq('id', id)
+      .eq('status', 'verified')
+      .is('list_id', null)
+      .single();
+    if (error || !data) return null;
+    return {
+      id: data.id,
+      category: data.category,
+      prompt: data.prompt,
+      options: Array.isArray(data.options) ? (data.options as string[]) : [],
+      created_by: data.created_by || null,
+      status: data.status || 'verified',
+    };
+  } catch (err) {
+    console.error('getPublicQuestion error:', err);
     return null;
   }
 }

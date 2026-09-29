@@ -3,6 +3,7 @@
 import React from 'react';
 import { ClientQuestion, LeaderboardEntry } from '@/lib/types';
 import { useQuizLogic } from '@/hooks/quiz/use-quiz-logic';
+import { useSession } from '@/hooks/shared/use-session';
 import Header from '../layout/Header';
 import CategoryBar from './CategoryBar';
 import QuizCard from './QuizCard';
@@ -25,11 +26,13 @@ const DisputeModal = dynamic(() => import('../modals/DisputeModal'), { ssr: fals
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
   initialLeaderboard?: LeaderboardEntry[];
+  initialCategory?: string;
 }
 
 export default function QuizLayout({
   initialQuestion = null,
   initialLeaderboard = [],
+  initialCategory,
 }: QuizLayoutProps = {}) {
   const {
     address,
@@ -66,7 +69,8 @@ export default function QuizLayout({
     handleCloseRewards,
     isUnlocked,
     handleUnlock,
-  } = useQuizLogic({ initialQuestion, initialLeaderboard });
+  } = useQuizLogic({ initialQuestion, initialLeaderboard, initialCategory });
+  const { account, requireSignIn } = useSession();
 
   return (
     <>
@@ -122,16 +126,31 @@ export default function QuizLayout({
                   const form = document.getElementById('custom-form');
                   form?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                onOpenDispute={() => openModal('dispute')}
+                onOpenDispute={account ? () => openModal('dispute') : undefined}
                 isUnlocked={isUnlocked}
                 onUnlock={handleUnlock}
               />
 
               <div id="custom-form" className="w-full mt-4">
-                <QuestionForm
-                  walletAddress={address || null}
-                  onQuestionAdded={loadNextQuestion}
-                />
+                {account ? (
+                  <QuestionForm
+                    walletAddress={address || null}
+                    onQuestionAdded={loadNextQuestion}
+                  />
+                ) : (
+                  <div className="w-full glass glass-border glass-edge rounded-3xl shadow-xl p-6 text-center space-y-3">
+                    <p className="text-sm text-slate-400">
+                      No questions yet. Sign in to add the first one.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => requireSignIn()}
+                      className="px-5 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black font-heading text-xs cursor-pointer"
+                    >
+                      Sign In
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
