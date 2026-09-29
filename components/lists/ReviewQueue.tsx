@@ -19,7 +19,7 @@ export default function ReviewQueue() {
   const refresh = useCallback(async () => {
     if (!wallet) return;
     setLoading(true);
-    setLists(await getListsPendingReview(wallet));
+    setLists(await getListsPendingReview());
     setLoading(false);
   }, [wallet]);
 

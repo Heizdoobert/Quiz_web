@@ -3,24 +3,26 @@ import { submitAnswer, getAnswerHistory } from '../lib/actions/quiz-actions';
 import { createQuestion, disputeQuestion } from '../lib/actions/question-actions';
 import {
   createList,
+  updateList,
   confirmList,
   startContest,
   startListAttempt,
   completeListAttempt,
   claimListReward,
+  getMyLists,
+  getListsPendingReview,
+  getListDetail,
 } from '../lib/actions/question-list-actions';
+import { supabase } from '../lib/supabase';
 import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionWallet } from '../lib/wallet-session';
 import { getSessionAccount } from '../lib/session';
 import { validateQuestionInput } from '../lib/validation';
+import { REQUIRED_CONFIRMATIONS } from '../lib/list-constants';
 
 let mockIsContestFunded = true;
 
 vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
-// question-list-actions still reads the wallet directly (moves in Task 6); quiz-actions
-// (submitAnswer, getAnswerHistory) reads the account (Task 3).
-vi.mock('../lib/wallet-session', () => ({ getSessionWallet: vi.fn() }));
 vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/chain', () => ({
   REWARD_CHAIN_ID: 84532,
@@ -39,16 +41,20 @@ const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 const ACCOUNT = { id: ACCOUNT_ID, wallet: WALLET };
 const EMAIL_ACCOUNT_ID = '00000000-0000-4000-8000-0000000000e1';
 const EMAIL_ACCOUNT = { id: EMAIL_ACCOUNT_ID, wallet: null };
+const OTHER_ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f2';
 const LIST_ID = '00000000-0000-4000-8000-000000000001';
 const Q_ID = '00000000-0000-4000-8000-000000000002';
 
+type TableStubs = Record<
+  string,
+  { row?: unknown; rows?: unknown[]; insertError?: unknown; count?: number; queryError?: unknown }
+>;
+
 // A chainable query stub: every builder method returns the chain, and the terminal
 // calls (single, maybeSingle, insert, await) resolve to what the test gives per table.
-function mockTables(
-  tables: Record<string, { row?: unknown; rows?: unknown[]; insertError?: unknown; count?: number; queryError?: unknown }>
-) {
+function stubFrom(fromMock: ReturnType<typeof vi.fn>, tables: TableStubs) {
   const inserts: Record<string, unknown[]> = {};
-  (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation((table: string) => {
+  fromMock.mockImplementation((table: string) => {
     const t = tables[table] ?? {};
     const chain: Record<string, unknown> = {};
     for (const m of ['select', 'eq', 'neq', 'in', 'order', 'limit', 'gte']) chain[m] = () => chain;
@@ -57,6 +63,10 @@ function mockTables(
     chain.insert = async (row: unknown) => {
       (inserts[table] ??= []).push(row);
       return { error: t.insertError ?? null };
+    };
+    chain.upsert = async (row: unknown) => {
+      (inserts[table] ??= []).push(row);
+      return { error: null };
     };
     chain.update = () => chain;
     chain.then = (resolve: (val: unknown) => unknown) =>
@@ -68,6 +78,15 @@ function mockTables(
     return chain;
   });
   return inserts;
+}
+
+function mockTables(tables: TableStubs) {
+  return stubFrom(supabaseAdmin!.from as ReturnType<typeof vi.fn>, tables);
+}
+
+// getMyLists, getListsPendingReview and getListDetail read through the public client.
+function mockPublicTables(tables: TableStubs) {
+  return stubFrom(supabase.from as ReturnType<typeof vi.fn>, tables);
 }
 
 describe('submitAnswer guards', () => {
@@ -210,26 +229,75 @@ describe('getAnswerHistory', () => {
 describe('question list guards', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('refuses every write without a signed-in wallet, before touching the database', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+  it('refuses every write without a signed-in account, before touching the database', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
     expect((await createList({ title: 'A valid title' })).success).toBe(false);
     expect((await confirmList(LIST_ID)).success).toBe(false);
     expect((await startListAttempt(LIST_ID)).success).toBe(false);
     expect(supabaseAdmin!.from).not.toHaveBeenCalled();
   });
 
-  it('refuses claimListReward without a signed-in wallet', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(null);
-    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Sign in with your wallet first.' });
+  it('confirms a list the account does not own and reports approval once the threshold is met', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      question_lists: { row: { owner_user: OTHER_ACCOUNT_ID, status: 'submitted' } },
+      list_entries: {},
+      question_list_confirmations: { count: REQUIRED_CONFIRMATIONS },
+    });
+    const res = await confirmList(LIST_ID);
+    expect(res).toEqual({ success: true, approved: true });
+    expect(inserts.question_list_confirmations![0]).toMatchObject({
+      list_id: LIST_ID,
+      confirmer_user: ACCOUNT_ID,
+      confirmer_wallet: WALLET,
+    });
+  });
+
+  it('refuses to confirm a list the account owns itself', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ question_lists: { row: { owner_user: ACCOUNT_ID, status: 'submitted' } } });
+    const res = await confirmList(LIST_ID);
+    expect(res).toEqual({ success: false, error: 'You cannot confirm your own list.' });
+  });
+
+  it('refuses updateList for a list owned by a different account', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ question_lists: { row: { id: LIST_ID, owner_user: OTHER_ACCOUNT_ID, status: 'draft' } } });
+    const res = await updateList(LIST_ID, { title: 'A new valid title' });
+    expect(res).toEqual({ success: false, error: 'Only the owner can modify this list.' });
+  });
+
+  it('refuses startContest for a list owned by a different account', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ question_lists: { row: { owner_user: OTHER_ACCOUNT_ID, status: 'approved' } } });
+    const res = await startContest(LIST_ID, 100);
+    expect(res).toEqual({ success: false, error: 'Only the owner can start this contest.' });
+  });
+
+  it('refuses startListAttempt for the account\'s own contest', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ question_lists: { row: { status: 'live', owner_user: ACCOUNT_ID, max_participants: 10 } } });
+    const res = await startListAttempt(LIST_ID);
+    expect(res).toEqual({ success: false, error: 'You cannot play your own contest.' });
+  });
+
+  it('refuses claimListReward without a signed-in account', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Sign in to manage your lists.' });
+  });
+
+  it('refuses claimListReward for an account with no wallet', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(EMAIL_ACCOUNT);
+    expect(await claimListReward(LIST_ID)).toEqual({ error: 'Add a wallet to your account to play contests.' });
   });
 
   it('refuses claimListReward for invalid uuid', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     expect(await claimListReward('not-a-valid-uuid')).toEqual({ error: 'Invalid contest ID.' });
   });
 
   it('refuses claimListReward if contest entry is not completed', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       list_entries: { row: { status: 'in_progress', reward_amount: '10000000000000000000' } },
     });
@@ -237,7 +305,7 @@ describe('question list guards', () => {
   });
 
   it('refuses claimListReward if already claimed', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       list_entries: { row: { status: 'claimed', reward_amount: '10000000000000000000' } },
     });
@@ -245,7 +313,7 @@ describe('question list guards', () => {
   });
 
   it('refuses claimListReward if zero rewards earned', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
       list_entries: { row: { status: 'completed', reward_amount: '0' } },
     });
@@ -253,7 +321,7 @@ describe('question list guards', () => {
   });
 
   it('issues an EIP-712 contest voucher for a completed entry', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({
       question_lists: { row: { owner_wallet: '0xowner', status: 'live' } },
       list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
@@ -262,33 +330,39 @@ describe('question list guards', () => {
     expect(res).toMatchObject({ recipient: WALLET, amount: '10000000000000000000' });
     expect((res as { contestId?: string }).contestId).toBeDefined();
     expect((res as { signature?: string }).signature).toMatch(/^0x/);
-    expect(inserts.reward_claims).toHaveLength(1);
+    expect(inserts.reward_claims![0]).toMatchObject({ user_id: ACCOUNT_ID, wallet_address: WALLET });
   });
 
   it('refuses startContest if contest is not funded on-chain', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = false;
     mockTables({
-      question_lists: { row: { owner_wallet: WALLET, status: 'approved' } },
+      question_lists: { row: { owner_user: ACCOUNT_ID, status: 'approved' } },
     });
     const res = await startContest(LIST_ID, 100);
     expect(res).toEqual({ success: false, error: 'Contest pool has not been funded on-chain.' });
   });
 
   it('allows startContest when contest is verified funded on-chain', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = true;
     mockTables({
-      question_lists: { row: { owner_wallet: WALLET, status: 'approved' } },
+      question_lists: { row: { owner_user: ACCOUNT_ID, status: 'approved' } },
     });
     const res = await startContest(LIST_ID, 100);
     expect(res.success).toBe(true);
   });
 
+  it('refuses startContest for an account with no wallet', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(EMAIL_ACCOUNT);
+    const res = await startContest(LIST_ID, 100);
+    expect(res).toEqual({ success: false, error: 'Add a wallet to your account to play contests.' });
+  });
+
   it('refuses startListAttempt when max participants cap is reached', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({
-      question_lists: { row: { owner_wallet: '0xother', status: 'live', max_participants: 5 } },
+      question_lists: { row: { owner_user: OTHER_ACCOUNT_ID, status: 'live', max_participants: 5 } },
       list_entries: { count: 5 },
     });
     const res = await startListAttempt(LIST_ID);
@@ -296,7 +370,7 @@ describe('question list guards', () => {
   });
 
   it('completeListAttempt divides pool by max_participants to prevent pool drain', async () => {
-    (getSessionWallet as ReturnType<typeof vi.fn>).mockResolvedValue(WALLET);
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const poolTokens = (BigInt(100) * BigInt(10) ** BigInt(18)).toString();
     mockTables({
       question_lists: { row: { reward_pool_tokens: poolTokens, max_participants: 10 } },
@@ -309,6 +383,54 @@ describe('question list guards', () => {
     expect(res.correctCount).toBe(3);
     const expectedReward = (BigInt(6) * BigInt(10) ** BigInt(18)).toString();
     expect(res.rewardAmount).toBe(expectedReward);
+  });
+});
+
+describe('question list reads', () => {
+  beforeEach(() => vi.resetAllMocks());
+
+  it('getMyLists returns nothing without a session', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    expect(await getMyLists()).toEqual([]);
+  });
+
+  it("getMyLists returns the signed-in account's own lists", async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockPublicTables({
+      question_lists: { rows: [{ id: LIST_ID, title: 'Mine', reward_pool_tokens: '0' }] },
+      question_list_confirmations: { rows: [] },
+    });
+    mockTables({ questions: { count: 2 } });
+    const lists = await getMyLists();
+    expect(lists).toMatchObject([{ id: LIST_ID, questionCount: 2 }]);
+  });
+
+  it('getListsPendingReview returns nothing without a session', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    expect(await getListsPendingReview()).toEqual([]);
+  });
+
+  it("getListsPendingReview marks lists the account already confirmed", async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockPublicTables({
+      question_lists: { rows: [{ id: LIST_ID, title: 'Other', reward_pool_tokens: '0' }] },
+      question_list_confirmations: { rows: [{ confirmer_user: ACCOUNT_ID }] },
+    });
+    mockTables({ questions: { count: 3 } });
+    const lists = await getListsPendingReview();
+    expect(lists).toMatchObject([{ id: LIST_ID, hasConfirmed: true }]);
+  });
+
+  it('getListDetail returns full questions for the owner', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockPublicTables({
+      question_lists: { row: { id: LIST_ID, owner_user: ACCOUNT_ID, status: 'draft', reward_pool_tokens: '0' } },
+      question_list_confirmations: { rows: [] },
+    });
+    mockTables({ questions: { rows: [{ id: 'q1', prompt: 'p', correct_index: 0 }], count: 1 } });
+    const detail = await getListDetail(LIST_ID);
+    expect(detail?.list.id).toBe(LIST_ID);
+    expect(detail?.questions).toHaveLength(1);
   });
 });
 

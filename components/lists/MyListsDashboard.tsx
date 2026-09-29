@@ -70,7 +70,7 @@ export default function MyListsDashboard() {
   const refresh = useCallback(async () => {
     if (!wallet) return;
     setLoading(true);
-    setLists(await getMyLists(wallet));
+    setLists(await getMyLists());
     setLoading(false);
   }, [wallet]);
 

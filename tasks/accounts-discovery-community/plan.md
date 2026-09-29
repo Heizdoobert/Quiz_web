@@ -58,7 +58,7 @@ Phase 1 ─ 14 public rule ─┬─ 15 topics ─┬─ 16 guests read-only ─
 - [x] Task 3: Answers, history and personal stats on account ids
 - [x] Task 4: Leaderboards on account ids
 - [x] Task 5: Question creation and disputes on account ids
-- [ ] Task 6: Lists and contests on account ids
+- [x] Task 6: Lists and contests on account ids
 - [ ] Task 7: Groups on account ids
 - [ ] Task 8: Profile export on account ids
 - [ ] Task 9: Rewards on account ids; delete `lib/wallet-session.ts`
