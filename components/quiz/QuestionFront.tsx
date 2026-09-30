@@ -176,7 +176,7 @@ export default function QuestionFront({
                 whileHover={isEliminated || isSubmitting ? {} : { scale: 1.015, filter: 'brightness(1.1)' }}
                 whileTap={isEliminated || isSubmitting ? {} : { scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+                className={`flex items-center gap-3.5 p-4 rounded-2xl border text-left transition-[color,background-color,border-color,opacity,box-shadow] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
                   isEliminated
                     ? 'opacity-20 bg-[#0A1128] border-[#1C1E3A] cursor-not-allowed pointer-events-none'
                     : isClicked && isSubmitting

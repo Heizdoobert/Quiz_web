@@ -29,7 +29,7 @@ export default function Header({
         className="flex items-center gap-2.5 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] rounded-xl group transition-transform active:scale-95"
         aria-label="Quick Quiz Home"
       >
-        <div className="shrink-0 p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] shadow-[0_0_12px_rgba(0,255,204,0.2)] group-hover:scale-105 transition-transform">
+        <div className="shrink-0 p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] group-hover:scale-105 transition-transform">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
         <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">

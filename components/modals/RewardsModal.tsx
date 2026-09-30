@@ -156,7 +156,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
             whileHover={{ scale: 1.015, filter: 'brightness(1.1)' }}
             whileTap={{ scale: 0.985 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+            className="w-full py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-[#0A1128] font-black rounded-xl transition-[color,background-color,border-color,opacity,box-shadow] shadow-lg shadow-[#00FFCC]/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
           >
             {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
             {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
@@ -214,7 +214,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
                     whileHover={{ scale: isMinting ? 1 : 1.02 }}
                     whileTap={{ scale: isMinting ? 1 : 0.98 }}
                     transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166]"
+                    className="w-full py-2 bg-gradient-to-r from-[#FFD166] to-[#FF4757] hover:opacity-95 disabled:bg-[#25284D] disabled:from-transparent disabled:to-transparent text-[#0A1128] text-xs font-black rounded-lg transition-[color,background-color,border-color,opacity,box-shadow] flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166]"
                   >
                     {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-[#0A1128]" /> : null}
                     {isMinting ? 'Minting...' : isGasless ? 'Mint (Gasless)' : 'Mint Badge'}

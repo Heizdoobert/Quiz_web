@@ -10,7 +10,7 @@ export default function AccessDeniedView() {
       role="alert"
       className="flex flex-col items-center justify-center py-16 px-6 text-center border border-[#2D305A] rounded-2xl bg-[#1A1B35]/60 max-w-lg mx-auto shadow-2xl backdrop-blur-sm"
     >
-      <div className="w-16 h-16 rounded-2xl bg-[#FF4757]/10 border border-[#FF4757]/30 flex items-center justify-center mb-5 text-[#FF4757] shadow-[0_0_20px_rgba(255,71,87,0.2)]">
+      <div className="w-16 h-16 rounded-2xl bg-[#FF4757]/10 border border-[#FF4757]/30 flex items-center justify-center mb-5 text-[#FF4757]">
         <ShieldAlert className="w-8 h-8" aria-hidden="true" />
       </div>
 
