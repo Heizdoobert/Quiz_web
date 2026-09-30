@@ -3,6 +3,7 @@ import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import { FAQ_DATA } from '@/lib/seo-data';
+import { getSiteUrl } from '@/lib/site-url';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -11,7 +12,7 @@ const jetbrainsMono = JetBrains_Mono({
   weight: ['400', '600', '700'],
 });
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://quickquiz.xyz';
+const baseUrl = getSiteUrl();
 
 const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
