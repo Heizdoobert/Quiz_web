@@ -54,7 +54,7 @@ export default function CreatorDashboardHeader({
           aria-busy={exporting}
           className={`flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl font-heading font-bold text-xs transition-all border cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A1128] ${
             exportSuccess
-              ? 'bg-[#00FFCC]/20 border-[#00FFCC] text-[#00FFCC] shadow-[0_0_15px_rgba(0,255,204,0.25)]'
+              ? 'bg-[#00FFCC]/20 border-[#00FFCC] text-[#00FFCC]'
               : 'bg-[#25284D] hover:bg-[#2E3260] text-slate-100 hover:text-white border-[#3A3E70] hover:border-[#6C5CE7]/60 shadow-md'
           }`}
           aria-label="Backup your quiz and gameplay data as JSON"

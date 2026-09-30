@@ -61,7 +61,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
     : null;
 
   return (
-    <li className="list-none flex flex-col justify-between p-5 rounded-2xl border border-[#2D305A] bg-[#1A1B35]/50 hover:bg-[#1A1B35]/80 transition-all hover:border-[#6C5CE7]/60 hover:shadow-[0_0_20px_rgba(108,92,231,0.15)] group focus-within:ring-2 focus-within:ring-[#00FFCC]">
+    <li className="list-none flex flex-col justify-between p-5 rounded-2xl border border-[#2D305A] bg-[#1A1B35]/50 hover:bg-[#1A1B35]/80 transition-all hover:border-[#6C5CE7]/60 group focus-within:ring-2 focus-within:ring-[#00FFCC]">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           <span
