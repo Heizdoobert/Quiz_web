@@ -1,0 +1,43 @@
+# components/ads/AdZone.tsx
+lines:85 exports:default
+---
+import React from 'react';
+import { Zap, Rocket } from 'lucide-react';
+import StickyBannerAd from './StickyBannerAd';
+
+interface AdZoneProps {
+  variant: 'skyscraper' | 'banner' | 'sticky-bottom';
+  slot: string;
+  className?: string;
+  children?: React.ReactNode;
+}
+
+export default function AdZone({ variant, slot, className = '', children }: AdZoneProps) {
+  if (variant === 'sticky-bottom') {
+    return <StickyBannerAd />;
+  }
+
+  if (variant === 'skyscraper') {
+    return (
+      <aside
+        data-slot={slot}
+        className={`hidden xl:flex flex-col w-[160px] shrink-0 sticky top-20 self-start p-4 rounded-2xl glass glass-border border border-transparent shadow-xl text-center transition-all hover:border-[#6C5CE7]/60 ${className}`}
+        aria-label="Sponsored Promotions"
+      >
+        <div className="text-[10px] font-bold font-heading uppercase tracking-wider text-slate-400 mb-2 py-0.5 px-2 bg-[#0A1128]/80 rounded-full inline-block mx-auto border border-[#2D305A]">
+          Sponsored
+        </div>
+        {children || (
+          <div className="flex flex-col items-center justify-center min-h-[500px] border border-dashed border-[#2D305A] rounded-xl p-2 bg-[#0A1128]/40 text-slate-500 text-xs">
+            <Zap className="w-6 h-6 text-[#FFD166] mb-2" />
+            <span className="font-bold font-heading text-white">Hot Web3 Deals</span>
+            <span className="text-[11px] text-slate-400 mt-1">Tools & Cloud Offers</span>
+            <a
+              href="https://go.isclix.com/deep_link/v5/7070248909883604470/6648523843406889655?sub4=oneatweb&url_enc=aHR0cHM6Ly93d3cudGlrdG9rLmNvbS8%3D"
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="mt-4 px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] text-[#0A1128] font-black font-heading rounded-lg text-[11px] shadow transition-all cursor-pointer"
+            >
+              Claim Offer →
+            </a>
+          </div>

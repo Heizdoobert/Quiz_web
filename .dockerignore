@@ -17,3 +17,5 @@ scripts
 coverage
 *.md
 !README.md
+coco/.venv
+coco/cocoindex.db*

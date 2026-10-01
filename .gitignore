@@ -46,14 +46,9 @@ contracts/cache/
 contracts/typechain-types/
 contracts/node_modules/
 
-# Python & CocoIndex (local only)
-.venv/
-cocoindex.db/
-main.py
-coco_indexer.py
-search_docs.py
-tests/test_docs_indexer.py
-.agents/skills/cocoindex/
+# Python & CocoIndex (state + venv local; out/ and pipeline checked in)
+coco/cocoindex.db*
+coco/.venv/
 __pycache__/
 *.py[cod]
 *$py.class

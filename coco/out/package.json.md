@@ -1,0 +1,43 @@
+# package.json
+lines:62 exports:
+---
+{
+  "name": "quick-quiz",
+  "version": "0.3.1",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "test": "vitest run tests/",
+    "test:coverage": "vitest run tests/ --coverage",
+    "type-check": "tsc --noEmit",
+    "check:fast": "npm run type-check && npm run lint && gitleaks git --pre-commit --redact --no-banner",
+    "check:architecture": "depcruise --validate app lib components hooks",
+    "check:security": "uvx semgrep scan --config p/default --error app/ lib/ components/ hooks/",
+    "check:a11y": "axe http://localhost:3000 --tags wcag2a,wcag2aa,wcag21aa",
+    "check:perf": "lighthouse http://localhost:3000 --output=json --quiet",
+    "check:task": "npm run check:fast && npm run check:architecture && npm run test:coverage",
+    "check:full": "npm run check:task && npm run check:security && npm run check:deps",
+    "check:deps": "npm audit --omit=dev --audit-level=high",
+    "docker:build": "docker compose build && docker image prune -f",
+    "docker:up": "docker compose up -d --build && docker image prune -f"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.2.11",
+    "@supabase/server": "^1.8.0",
+    "@supabase/supabase-js": "^2.117.2",
+    "@tanstack/react-query": "^5.104.0",
+    "@x402/core": "^2.27.0",
+    "@x402/evm": "^2.27.0",
+    "@x402/svm": "^2.27.0",
+    "canvas-confetti": "^1.9.4",
+    "framer-motion": "^13.4.4",
+    "lucide-react": "^1.47.0",
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "viem": "^2.56.9",
+    "wagmi": "^2.19.5"
+  },
