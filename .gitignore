@@ -46,10 +46,27 @@ contracts/cache/
 contracts/typechain-types/
 contracts/node_modules/
 
-# Python
+# Python & CocoIndex (local only)
+.venv/
+cocoindex.db/
+main.py
+coco_indexer.py
+search_docs.py
+tests/test_docs_indexer.py
+.agents/skills/cocoindex/
 __pycache__/
 *.py[cod]
 *$py.class
 
+# AI Agents & Assistants (local only)
+.agents/
 .claude/
-.agents/plugins/
+.cursor/
+.gemini/
+.copilot/
+.windsurf/
+.cline/
+.roo/
+skills-lock.json
+*.agent.md
+*.local.md
