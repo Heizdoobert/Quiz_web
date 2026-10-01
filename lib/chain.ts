@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { createPublicClient, http, type Chain } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { arbitrum, base, baseSepolia, mainnet, optimism, polygon } from 'viem/chains';
-import { CONTEST_ESCROW_ADDRESS, QUIZ_BADGE_ADDRESS, QUIZ_TOKEN_ADDRESS } from '@/lib/contracts/addresses';
+import { CONTEST_ESCROW_ADDRESS, QUIZ_BADGE_ADDRESS, QUIZ_TOKEN_ADDRESS, TARGET_CHAIN_ID } from '@/lib/contracts/addresses';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
@@ -11,7 +11,7 @@ import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 // The chains the wallet UI offers (components/Providers.tsx).
 const CHAINS: Chain[] = [mainnet, polygon, optimism, arbitrum, base, baseSepolia];
 
-export const REWARD_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || '84532', 10);
+export const REWARD_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || String(TARGET_CHAIN_ID), 10);
 
 export function getSignerAccount() {
   const key = process.env.REWARD_SIGNER_PRIVATE_KEY;

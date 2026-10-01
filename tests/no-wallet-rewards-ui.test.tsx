@@ -20,6 +20,8 @@ vi.mock('../lib/actions/question-list-actions', () => ({
   getLiveLists: vi.fn().mockResolvedValue([
     { id: 'l1', title: 'DeFi basics', questionCount: 5, perQuestionReward: '1000000000000000000' },
   ]),
+  getMyContestEntries: vi.fn().mockResolvedValue([]),
+  getClaimableContests: vi.fn().mockResolvedValue([]),
 }));
 
 const EMAIL_ACCOUNT = { id: 'acc-1', wallet: null };

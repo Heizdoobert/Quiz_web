@@ -33,7 +33,17 @@ vi.mock('../lib/chain', () => ({
   getSignerAccount: () => ({ signTypedData: async () => ('0x' + 's'.repeat(130)) }),
   isContestVoucherUsed: async () => false,
   isContestFundedOnChain: async () => mockIsContestFunded,
-  getContestOnChain: async () => null,
+  getContestOnChain: async () =>
+    mockIsContestFunded
+      ? {
+          creator: WALLET,
+          totalPool: BigInt('1000000000000000000000000'),
+          remainingPool: BigInt('1000000000000000000000000'),
+          createdAt: BigInt(Math.floor(Date.now() / 1000) - 3600),
+          expiresAt: BigInt(Math.floor(Date.now() / 1000) + 86400),
+          active: true,
+        }
+      : null,
 }));
 
 const WALLET = '0x' + 'a'.repeat(40);

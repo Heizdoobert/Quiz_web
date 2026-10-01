@@ -24,5 +24,6 @@ This log is updated after every completed task. Each entry records what was done
 | 10 | 2026-10-01 | Task 10: Navigation Fixes | `components/layout/Header.tsx` | TS Pass | ✅ Done |
 | 11 | 2026-10-01 | Task 11: Hardhat Mainnet Config | `contracts/hardhat.config.ts`, `contracts/scripts/deploy.ts`, `.env.example` | TS/Contracts Pass | ✅ Done |
 | 12 | 2026-10-01 | Task 12: Deploy to Mainnet | `lib/contracts/addresses.ts` | Manual Simulation | ✅ Done |
+| 13 | 2026-10-01 | Task 13: CI/CD & Build Remediation | `lib/contracts/addresses.ts`, `lib/chain.ts`, `tests/no-wallet-rewards-ui.test.tsx`, `tests/answer-and-list-guards.test.ts` | All 29 vitest suites (244 tests), hardhat (38 tests), type-check, lint, build pass | ✅ Done |
 
 ---
