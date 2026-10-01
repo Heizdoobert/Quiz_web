@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
+import { getSiteUrl } from '@/lib/site-url';
 
 export default function robots(): MetadataRoute.Robots {
   const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://quickquiz.xyz';
+  const baseUrl = getSiteUrl();
 
   if (isPreview) {
     return {

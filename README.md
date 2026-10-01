@@ -23,28 +23,50 @@ Visit [http://localhost:3000](http://localhost:3000).
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` and configure your credentials:
+Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your credentials:
 - `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Public Supabase client configuration.
-- `SUPABASE_SECRET_KEY`: Service role secret key used strictly by Server Actions for answer grading and claim recording.
-- `SESSION_SECRET`: Secret key for signing SIWE session cookies.
-- `REWARD_SIGNER_PRIVATE_KEY`: Private key authorized to sign EIP-712 voucher mints.
-- `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`: Reown/WalletConnect project ID for RainbowKit.
+- `SUPABASE_URL` & `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording). The session cookie's HMAC key is derived from `SUPABASE_SECRET_KEY`, so rotating it signs everyone out.
+- `REWARD_SIGNER_PRIVATE_KEY`: Private key authorized to sign EIP-712 reward vouchers.
+- `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`: Reown/WalletConnect project ID for RainbowKit.
+- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain (defaults in `lib/contracts/addresses.ts`).
+- `NEXT_PUBLIC_APP_URL`: Public base URL for canonical links, sitemap and Open Graph tags. Falls back to Vercel's production domain, then `http://localhost:3000`.
+- `TREASURY_WALLET_ADDRESS` (optional): Wallet that receives $QUIZ swept from wallet-less accounts after 180 days. Unset means no sweep.
+- `NEXT_PUBLIC_PAYMASTER_URL` (optional): Paymaster for gasless claims. `NEXT_PUBLIC_SPONSOR_AD_URL` (optional): sponsor link.
+- `NEXT_PUBLIC_APP_ENV=preview` (optional): Marks a non-Vercel deployment as preview (noindex).
 
 ### Database Setup
 
-1. Run [`lib/schema.sql`](lib/schema.sql) in the Supabase SQL Editor to initialize tables, constraints, and initial seed questions.
-2. Run [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) to install server-side leaderboard and stats aggregations.
-3. Run [`lib/sql/lock-down-public-writes.sql`](lib/sql/lock-down-public-writes.sql) and [`lib/sql/question-lists.sql`](lib/sql/question-lists.sql) to apply the strict Row-Level Security lockdowns.
-4. Run [`lib/sql/accounts.sql`](lib/sql/accounts.sql) to key every table by account id (`users.id`) so a wallet is optional. It is safe to re-run.
+Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Every script is idempotent and safe to re-run. This is the order `tests/sql/run-accounts-migration.sh` verifies.
+
+1. [`lib/schema.sql`](lib/schema.sql) — tables and constraints (run it twice on a fresh database: `reward_claims` references `question_lists` before the file creates it).
+2. [`lib/sql/lock-down-public-writes.sql`](lib/sql/lock-down-public-writes.sql) — server-only writes, no public read of answers.
+3. [`lib/sql/question-lists.sql`](lib/sql/question-lists.sql) — peer-reviewed lists and contests.
+4. [`lib/sql/secure-rewards-and-answers.sql`](lib/sql/secure-rewards-and-answers.sql) — one open voucher per account.
+5. [`lib/sql/restrict-quiz-results-insert.sql`](lib/sql/restrict-quiz-results-insert.sql) — only the server records answers.
+6. [`lib/sql/contest-escrow.sql`](lib/sql/contest-escrow.sql) — contest claims in `reward_claims`.
+7. [`lib/sql/widen-reward-claims-amount.sql`](lib/sql/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
+8. [`lib/sql/accounts.sql`](lib/sql/accounts.sql) — key every table by account id (`users.id`), so a wallet is optional.
+9. [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) — stats and leaderboard functions (needs step 8).
+10. [`lib/sql/retire-sample-questions.sql`](lib/sql/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing).
+11. [`lib/sql/topics.sql`](lib/sql/topics.sql) — `get_topics()`.
+12. [`lib/sql/search.sql`](lib/sql/search.sql) — `pg_trgm` search.
+13. [`lib/sql/community.sql`](lib/sql/community.sql) — ratings, comments, suggestions.
+14. [`lib/sql/reward-payee.sql`](lib/sql/reward-payee.sql) — treasury sweep for wallet-less accounts.
+
+Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
 
 ### Testing & Quality Gates
 
 | Command | Purpose |
 |---------|---------|
 | `npm test` | Run Vitest unit & integration test suites |
+| `npm run test:coverage` | Tests with the coverage ratchet from `CONSTRAINTS.md` |
 | `npm run type-check` | Verify TypeScript compilation (`tsc --noEmit`) |
 | `npm run lint` | Run ESLint check |
+| `npm run check:task` | Types, lint, secrets, architecture and coverage in one go |
 | `npm run build` | Generate production build with static prerendering |
+
+CI (`.github/workflows/ci.yml`) runs lint, types, architecture, tests with coverage, the Hardhat contract tests, the production build and the dependency audit on every push and PR to `main` and `preview`.
 
 ### Smart Contracts
 
@@ -56,8 +78,7 @@ npm run test
 ```
 
 Contract addresses on Base Sepolia:
-- **QuizToken (ERC-20)**: See [`lib/contracts/addresses.ts`](lib/contracts/addresses.ts)
-- **QuizBadgeNFT (ERC-721)**: See [`lib/contracts/addresses.ts`](lib/contracts/addresses.ts)
+- **QuizToken (ERC-20)**, **QuizBadgeNFT (ERC-721)**, **ContestEscrow**: See [`lib/contracts/addresses.ts`](lib/contracts/addresses.ts)
 
 ## Architecture & Decisions
 

@@ -28,7 +28,8 @@ const MAX_DESCRIPTION = 500;
 const MAX_POOL_WHOLE_TOKENS = 1_000_000;
 const SAFE_QUESTION_COLUMNS = 'id, category, prompt, options, created_by, status, created_at, list_id';
 
-type Result = { success: boolean; error?: string };
+type WalletRequired = { code?: 'WALLET_REQUIRED' };
+type Result = { success: boolean; error?: string } & WalletRequired;
 
 function toWei(wholeTokens: number): bigint {
   return BigInt(Math.max(0, Math.floor(wholeTokens))) * TOKEN_DECIMALS;
@@ -41,14 +42,14 @@ async function signedIn(): Promise<{ error: string } | { account: SessionAccount
   return { account, db: supabaseAdmin };
 }
 
-// Contests pay out on-chain, so their actions need an address to sign for; Task 23 adds
-// the disclosure that fronts this requirement for the player.
+// Contests pay out on-chain, so their actions need an address to sign for. The UI fronts
+// this with "Add a wallet to join contests"; WALLET_REQUIRED lets it tell this case apart.
 async function signedInWithWallet(): Promise<
-  { error: string } | { account: SessionAccount; wallet: string; db: NonNullable<typeof supabaseAdmin> }
+  ({ error: string } & WalletRequired) | { account: SessionAccount; wallet: string; db: NonNullable<typeof supabaseAdmin> }
 > {
   const auth = await signedIn();
   if ('error' in auth) return { error: auth.error };
-  if (!auth.account.wallet) return { error: 'Add a wallet to your account to play contests.' };
+  if (!auth.account.wallet) return { error: 'Add a wallet to your account to play contests.', code: 'WALLET_REQUIRED' };
   return { account: auth.account, wallet: auth.account.wallet, db: auth.db };
 }
 
@@ -489,7 +490,7 @@ export async function startContest(
       return { success: false, error: `Reward pool must be between 1 and ${MAX_POOL_WHOLE_TOKENS} tokens.` };
     }
     const auth = await signedInWithWallet();
-    if ('error' in auth) return { success: false, error: auth.error };
+    if ('error' in auth) return { success: false, error: auth.error, code: auth.code };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
@@ -550,11 +551,11 @@ export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
 
 export async function startListAttempt(
   listId: string
-): Promise<{ success: boolean; questions?: ClientQuestion[]; error?: string }> {
+): Promise<{ success: boolean; questions?: ClientQuestion[]; error?: string } & WalletRequired> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'This contest is not live.' };
     const auth = await signedInWithWallet();
-    if ('error' in auth) return { success: false, error: auth.error };
+    if ('error' in auth) return { success: false, error: auth.error, code: auth.code };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')

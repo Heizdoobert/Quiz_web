@@ -3,21 +3,26 @@
 import React from 'react';
 import Link from 'next/link';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Gift, Zap, Volume2, VolumeX, User, Trophy } from 'lucide-react';
+import { Gift, Zap, Volume2, VolumeX, User, Trophy, Info } from 'lucide-react';
 import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
 import { useSession } from '@/hooks/shared/use-session';
 import SearchBox from '@/components/discovery/SearchBox';
+import NoWalletNotice from '@/components/rewards/NoWalletNotice';
 
 interface HeaderProps {
   onOpenRewards?: () => void;
   onOpenProfile?: () => void;
   hasClaimable?: boolean;
+  heldTokens?: string;
+  sweepsAt?: string | null;
 }
 
 export default function Header({
   onOpenRewards,
   onOpenProfile,
   hasClaimable,
+  heldTokens,
+  sweepsAt,
 }: HeaderProps) {
   const { isMuted, handleToggleSound } = useSoundToggle();
   const { account } = useSession();
@@ -93,6 +98,20 @@ export default function Header({
           </button>
         )}
 
+        {/* Native <details>: the disclosure next to "Add wallet", no popover JS */}
+        {account && !account.wallet && (
+          <details className="relative">
+            <summary
+              className="list-none p-2 rounded-xl border border-[#3A3E70] bg-[#25284D] text-[#FFD166] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+              aria-label="Why add a wallet?"
+            >
+              <Info className="w-4 h-4" />
+            </summary>
+            <div className="absolute right-0 mt-2 w-72 p-4 rounded-xl border border-[#2D305A] bg-[#14163A] shadow-lg z-40">
+              <NoWalletNotice heldTokens={heldTokens} sweepsAt={sweepsAt} />
+            </div>
+          </details>
+        )}
         <ConnectButton label={account && !account.wallet ? 'Add wallet' : 'Connect'} showBalance={false} />
       </div>
     </header>

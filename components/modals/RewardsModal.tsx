@@ -4,6 +4,8 @@ import React from 'react';
 import Modal from '@/components/Modal';
 import { BADGE_NAMES } from '@/lib/types';
 import { useRewardsModal } from '@/hooks/modals/use-rewards-modal';
+import NoWalletNotice from '@/components/rewards/NoWalletNotice';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { motion } from 'framer-motion';
 import { Gift, Coins, Award, ExternalLink, Loader2, Trophy, Flame, Sparkles, Check, Lock, Target } from 'lucide-react';
 
@@ -25,6 +27,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
     tab,
     setTab,
     rewards,
+    hasNoWallet,
     loading,
     claimStep,
     claimError,
@@ -97,6 +100,13 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
       {loading ? (
         <div className="flex justify-center py-8">
           <Loader2 className="w-6 h-6 text-[#00FFCC] animate-spin" />
+        </div>
+      ) : hasNoWallet ? (
+        <div className="space-y-5 py-2">
+          <NoWalletNotice heldTokens={rewards?.heldTokens} sweepsAt={rewards?.sweepsAt} />
+          <div className="flex justify-center">
+            <ConnectButton label="Add wallet" showBalance={false} />
+          </div>
         </div>
       ) : !walletAddress ? (
         <p className="text-slate-400 text-center py-8">Connect your wallet to view rewards</p>
