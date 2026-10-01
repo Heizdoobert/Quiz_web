@@ -12,6 +12,12 @@ updates:
       # eslint-config-next does not support eslint 10 yet; its majors break `npm run lint`.
       - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
+      # typescript-eslint does not support TypeScript 7 yet.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      # RainbowKit 2 requires wagmi ^2.0.0; wagmi v3 is tracked separately under CONSTRAINTS.md Exception W1.
+      - dependency-name: "wagmi"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "npm"
     directory: "/contracts"
@@ -21,6 +27,14 @@ updates:
     labels:
       - "dependencies"
       - "contracts"
+    ignore:
+      # Hardhat 3 deprecates hardhat-toolbox and requires new runner architecture.
+      - dependency-name: "hardhat"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@nomicfoundation/hardhat-toolbox"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
