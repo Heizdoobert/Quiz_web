@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
+import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental';
 import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
 import { useSession } from '@/hooks/shared/use-session';
 import { confirmRewardClaim } from '@/lib/actions/reward-actions';
@@ -35,15 +36,47 @@ export default function ContestPlay({
   const [claimStep, setClaimStep] = useState<ClaimStep>('idle');
   const [claimError, setClaimError] = useState<string | null>(null);
   const [currentNonce, setCurrentNonce] = useState<string | null>(null);
-  const [txHash, setTxHash] = useState<string | null>(null);
+  
+  const [callId, setCallId] = useState<string | null>(null);
+  const [eoaTxHash, setEoaTxHash] = useState<`0x${string}` | null>(null);
+  const confirmingNonceRef = useRef<string | null>(null);
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  const { writeContractAsync } = useWriteContract();
-  const { isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash as `0x${string}` | undefined });
   const { address } = useAccount();
-
   const { account, requireSignIn: ensureSession } = useSession();
+
+  // EIP-5792 gasless calls
+  const { writeContractsAsync } = useWriteContracts();
+  const { data: capabilities } = useCapabilities();
+
+  // Traditional EOA calls
+  const { writeContractAsync } = useWriteContract();
+  const { isSuccess: isEoaConfirmed, isError: isEoaReceiptError, error: eoaReceiptError } = useWaitForTransactionReceipt({ hash: eoaTxHash ?? undefined });
+
+  const { data: callsStatus, isError: isCallsStatusError, error: callsStatusError } = useCallsStatus({
+    id: callId as string,
+    query: {
+      enabled: Boolean(callId),
+      refetchInterval: (query) =>
+        query.state.data?.status === 'success' || query.state.data?.status === 'failure'
+          ? false
+          : 1000,
+    },
+  });
+
+  const chainCapabilities = capabilities?.[chainId] ?? (capabilities as Record<string, { paymasterService?: { supported?: boolean } }> | undefined)?.[`0x${chainId.toString(16)}`];
+  const isPaymasterSupported = Boolean(chainCapabilities?.paymasterService?.supported);
+  const paymasterUrl = process.env.NEXT_PUBLIC_PAYMASTER_URL;
+
+  const capabilitiesConfig = useMemo(() => {
+    if (isPaymasterSupported && paymasterUrl) {
+      return { paymasterService: { url: paymasterUrl } };
+    }
+    return undefined;
+  }, [isPaymasterSupported, paymasterUrl]);
+
+  const isGasless = Boolean(isPaymasterSupported && paymasterUrl);
 
   useEffect(() => {
     // Contest answers only count for the signed-in wallet that started the attempt.
@@ -57,23 +90,89 @@ export default function ContestPlay({
         setError(res.error || 'Failed to start contest.');
         return;
       }
-      setQuestions(res.questions || []);
+      if (res.result) {
+        setResult({ correctCount: res.result.correctCount, rewardAmount: res.result.rewardAmount });
+        if (res.result.claimed) setClaimStep('done');
+      } else {
+        const answeredCount = res.answeredQuestionIds?.length || 0;
+        setQuestions(res.questions || []);
+        if (res.questions && res.questions.length > 0 && answeredCount >= res.questions.length) {
+          const completeRes = await completeListAttempt(list.id);
+          if (completeRes.success) {
+            setResult({ correctCount: completeRes.correctCount || 0, rewardAmount: completeRes.rewardAmount || '0' });
+          } else {
+            setError(completeRes.error || 'Failed to finalize contest.');
+          }
+        } else {
+          setIndex(answeredCount);
+        }
+      }
     });
   }, [list.id, ensureSession]);
 
+  // Handle failed or reverted call bundle (EIP-5792)
   useEffect(() => {
-    if (txConfirmed && currentNonce && txHash) {
-      confirmRewardClaim(currentNonce, txHash).then((res) => {
-        if (res?.success) {
-          setClaimStep('done');
-        } else {
-          setClaimStep('error');
-          setClaimError('Failed to confirm reward claim with backend');
-        }
-        setCurrentNonce(null);
-      });
+    if (callsStatus?.status === 'failure' || isCallsStatusError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setClaimStep('error');
+      setClaimError(callsStatusError?.message || 'Transaction reverted or failed on-chain');
+      setCurrentNonce(null);
+      setCallId(null);
     }
-  }, [txConfirmed, currentNonce, txHash]);
+  }, [callsStatus?.status, isCallsStatusError, callsStatusError]);
+
+  // Handle reverted EOA transactions
+  useEffect(() => {
+    if (isEoaReceiptError) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setClaimStep('error');
+      setClaimError(eoaReceiptError?.message || 'Transaction reverted on-chain');
+      setCurrentNonce(null);
+      setEoaTxHash(null);
+    }
+  }, [isEoaReceiptError, eoaReceiptError]);
+
+  const confirmClaim = React.useCallback(async (nonce: string, txHashString: string) => {
+    try {
+      const res = await confirmRewardClaim(nonce, txHashString);
+      if (res?.success) {
+        setClaimStep('done');
+      } else {
+        setClaimStep('error');
+        setClaimError('Failed to confirm reward claim with backend');
+      }
+    } catch {
+      setClaimStep('error');
+      setClaimError('Failed to confirm reward claim');
+    } finally {
+      setCurrentNonce(null);
+      setCallId(null);
+      setEoaTxHash(null);
+    }
+  }, []);
+
+  // Confirm on-chain after calls bundle is mined (EIP-5792 gasless path)
+  useEffect(() => {
+    if (callsStatus?.status === 'success' && currentNonce && callId) {
+      const receiptHash = callsStatus.receipts?.[0]?.transactionHash;
+      if (!receiptHash) return;
+
+      if (confirmingNonceRef.current === currentNonce) return;
+      confirmingNonceRef.current = currentNonce;
+
+      confirmClaim(currentNonce, receiptHash);
+    }
+  }, [callsStatus, currentNonce, callId, confirmClaim]);
+
+  // Confirm on-chain after transaction is mined (EOA standard path)
+  useEffect(() => {
+    if (isEoaConfirmed && currentNonce && eoaTxHash) {
+      if (confirmingNonceRef.current === currentNonce) return;
+      confirmingNonceRef.current = currentNonce;
+
+      confirmClaim(currentNonce, eoaTxHash);
+    }
+  }, [isEoaConfirmed, currentNonce, eoaTxHash, confirmClaim]);
 
   const isWrongChain = chainId !== TARGET_CHAIN_ID;
 
@@ -117,20 +216,42 @@ export default function ContestPlay({
     setCurrentNonce(voucher.nonce);
     setClaimStep('submitting');
     try {
-      const hash = await writeContractAsync({
-        address: CONTEST_ESCROW_ADDRESS,
-        abi: ContestEscrowABI,
-        functionName: 'claimReward',
-        args: [
-          voucher.contestId as `0x${string}`,
-          voucher.recipient as `0x${string}`,
-          BigInt(voucher.amount),
-          BigInt(voucher.nonce),
-          BigInt(voucher.deadline),
-          voucher.signature as `0x${string}`,
-        ],
-      });
-      setTxHash(hash);
+      if (isGasless) {
+        const result = await writeContractsAsync({
+          contracts: [
+            {
+              address: CONTEST_ESCROW_ADDRESS,
+              abi: ContestEscrowABI,
+              functionName: 'claimReward',
+              args: [
+                voucher.contestId as `0x${string}`,
+                voucher.recipient as `0x${string}`,
+                BigInt(voucher.amount),
+                BigInt(voucher.nonce),
+                BigInt(voucher.deadline),
+                voucher.signature as `0x${string}`,
+              ],
+            },
+          ],
+          capabilities: capabilitiesConfig,
+        });
+        setCallId(result.id);
+      } else {
+        const hash = await writeContractAsync({
+          address: CONTEST_ESCROW_ADDRESS,
+          abi: ContestEscrowABI,
+          functionName: 'claimReward',
+          args: [
+            voucher.contestId as `0x${string}`,
+            voucher.recipient as `0x${string}`,
+            BigInt(voucher.amount),
+            BigInt(voucher.nonce),
+            BigInt(voucher.deadline),
+            voucher.signature as `0x${string}`,
+          ],
+        });
+        setEoaTxHash(hash);
+      }
       setClaimStep('confirming');
     } catch (err) {
       console.error('Claim tx failed:', err);
@@ -180,7 +301,7 @@ export default function ContestPlay({
             {(claimStep === 'signing' || claimStep === 'submitting' || claimStep === 'confirming') && (
               <Loader2 className="w-4 h-4 animate-spin" />
             )}
-            <Coins className="w-4 h-4" /> Claim Reward
+            <Coins className="w-4 h-4" /> Claim Reward{isGasless ? ' (Gasless)' : ''}
           </button>
         )}
         {claimError && <p className="text-xs text-[#FF4757]">{claimError}</p>}

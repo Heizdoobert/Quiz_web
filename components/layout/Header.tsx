@@ -61,7 +61,7 @@ export default function Header({
 
         {/* Question Lists / Contests */}
         <Link
-          href="/my-lists"
+          href="/contest"
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#00FFCC] font-bold font-heading text-xs transition-all shadow-sm hover:scale-105"
           aria-label="Question Lists & Contests"
         >

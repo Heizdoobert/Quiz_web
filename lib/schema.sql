@@ -133,12 +133,17 @@ CREATE TABLE IF NOT EXISTS question_lists (
   owner_wallet TEXT NOT NULL REFERENCES users(wallet_address) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
-  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'live', 'rejected')),
+  status TEXT NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'submitted', 'approved', 'live', 'completed', 'expired', 'refunded', 'rejected')),
   reward_pool_tokens NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals), NUMERIC to avoid BIGINT overflow at token scale
   max_participants INT NOT NULL DEFAULT 10,
   submitted_at TIMESTAMPTZ,
   started_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  onchain_contest_id TEXT,
+  expires_at TIMESTAMPTZ,
+  funding_tx_hash TEXT,
+  refunded_at TIMESTAMPTZ,
+  refund_tx_hash TEXT
 );
 
 ALTER TABLE questions ADD COLUMN IF NOT EXISTS list_id UUID REFERENCES question_lists(id) ON DELETE CASCADE;
@@ -168,6 +173,7 @@ CREATE TABLE IF NOT EXISTS list_entries (
   reward_amount NUMERIC NOT NULL DEFAULT 0, -- wei-scale (18 decimals)
   completed_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
+  claim_tx_hash TEXT,
   PRIMARY KEY (list_id, wallet_address)
 );
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
+import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract, useReadContract } from 'wagmi';
 import {
   createList,
   updateList,
@@ -13,6 +13,7 @@ import {
   deleteListQuestion,
   submitListForReview,
   startContest,
+  recordContestRefund,
 } from '@/lib/actions/question-list-actions';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
@@ -33,6 +34,8 @@ import {
   ChevronDown,
   ChevronUp,
   ListChecks,
+  Loader2,
+  RefreshCw,
 } from 'lucide-react';
 
 const STATUS_STYLES: Record<string, string> = {
@@ -196,6 +199,7 @@ function ListCard({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [poolAmount, setPoolAmount] = useState('');
+  const [maxParticipants, setMaxParticipants] = useState('10');
   const [funding, setFunding] = useState<null | 'approving' | 'creating'>(null);
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
@@ -204,7 +208,15 @@ function ListCard({
   const [editingList, setEditingList] = useState(false);
   const [editTitle, setEditTitle] = useState(list.title);
   const [editDescription, setEditDescription] = useState(list.description || '');
+  const [onChainState, setOnChainState] = useState<{ active: boolean; remainingPool: string; expiresAt: number } | null>(null);
+  const [refunding, setRefunding] = useState(false);
+  const [now, setNow] = useState(() => Date.now());
   const isDraft = list.status === 'draft';
+
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const loadDetail = useCallback(async () => {
     setLoadingDetail(true);
@@ -212,8 +224,29 @@ function ListCard({
     await ensureSession();
     const detail = await getListDetail(list.id);
     setQuestions(detail?.questions || []);
+    
+    if (list.onchain_contest_id && publicClient) {
+      try {
+        const contestData = await publicClient.readContract({
+          address: CONTEST_ESCROW_ADDRESS,
+          abi: ContestEscrowABI,
+          functionName: 'contests',
+          args: [list.onchain_contest_id as `0x${string}`],
+        });
+        if (contestData) {
+          setOnChainState({
+            active: contestData[5] as boolean,
+            remainingPool: (contestData[2] as bigint).toString(),
+            expiresAt: Number(contestData[4] as bigint),
+          });
+        }
+      } catch (e) {
+        console.error('Failed to fetch on-chain contest', e);
+      }
+    }
+
     setLoadingDetail(false);
-  }, [list.id, ensureSession]);
+  }, [list.id, ensureSession, list.onchain_contest_id, publicClient]);
 
   useEffect(() => {
     if (expanded) {
@@ -250,12 +283,61 @@ function ListCard({
     onChanged();
   };
 
+  const handleRefund = async () => {
+    if (!list.onchain_contest_id) return;
+    if (chainId !== TARGET_CHAIN_ID) {
+      setError(`Switch to ${TARGET_CHAIN_NAME} to refund.`);
+      switchChain({ chainId: TARGET_CHAIN_ID });
+      return;
+    }
+    setRefunding(true);
+    setError(null);
+    try {
+      const hash = await writeContractAsync({
+        address: CONTEST_ESCROW_ADDRESS,
+        abi: ContestEscrowABI,
+        functionName: 'refundRemaining',
+        args: [list.onchain_contest_id as `0x${string}`],
+      });
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash });
+      }
+      await recordContestRefund(list.id, hash);
+      onChanged();
+    } catch (err) {
+      console.error(err);
+      setError('Refund transaction failed or was rejected.');
+    }
+    setRefunding(false);
+  };
+
   const { address } = useAccount();
+
+  const { data: quizBalanceData } = useReadContract({
+    address: QUIZ_TOKEN_ADDRESS,
+    abi: QuizTokenABI,
+    functionName: 'balanceOf',
+    args: address ? [address as `0x${string}`] : undefined,
+    query: {
+      enabled: !!address && list.status === 'approved',
+    }
+  });
+
+  const quizBalance = quizBalanceData ? Number(quizBalanceData) / 1e18 : 0;
 
   const handleStartContest = async () => {
     const amount = parseFloat(poolAmount);
     if (!amount || amount <= 0) {
       setError('Enter a positive reward pool amount (in QUIZ tokens).');
+      return;
+    }
+    if (amount > quizBalance) {
+      setError('Insufficient balance.');
+      return;
+    }
+    const maxP = parseInt(maxParticipants, 10);
+    if (isNaN(maxP) || maxP < 1 || maxP > 1000) {
+      setError('Max participants must be between 1 and 1000.');
       return;
     }
     if (!(await ensureSession())) {
@@ -325,7 +407,7 @@ function ListCard({
       return;
     }
     setFunding(null);
-    const res = await asSignedIn(() => startContest(list.id, amount));
+    const res = await asSignedIn(() => startContest(list.id, amount, maxP));
     if (!res.success) {
       setError(res.error || 'Failed to start contest.');
       return;
@@ -437,7 +519,10 @@ function ListCard({
           {list.status === 'approved' && (
             <div className="flex flex-wrap items-center gap-2 p-3 bg-[#6C5CE7]/10 border border-[#6C5CE7]/30 rounded-xl">
               <Rocket className="w-4 h-4 text-[#6C5CE7]" />
-              <span className="text-xs text-slate-300">Approved! Set a reward pool (QUIZ tokens) and start the contest:</span>
+              <div className="flex flex-col">
+                <span className="text-xs text-slate-300">Approved! Set a reward pool (QUIZ tokens) and start the contest:</span>
+                <span className="text-[10px] text-slate-500">Balance: <span className="font-bold text-[#FFD166]">{quizBalance.toLocaleString()} QUIZ</span></span>
+              </div>
               <input
                 type="number"
                 min={1}
@@ -445,6 +530,15 @@ function ListCard({
                 onChange={(e) => setPoolAmount(e.target.value)}
                 placeholder="e.g. 500"
                 className="w-28 px-2 py-1 bg-[#0A1128] border border-[#2D305A] rounded-lg text-white text-xs"
+              />
+              <span className="text-xs text-slate-300">Max Players:</span>
+              <input
+                type="number"
+                min={1}
+                max={1000}
+                value={maxParticipants}
+                onChange={(e) => setMaxParticipants(e.target.value)}
+                className="w-20 px-2 py-1 bg-[#0A1128] border border-[#2D305A] rounded-lg text-white text-xs"
               />
               <button
                 type="button"
@@ -454,6 +548,30 @@ function ListCard({
               >
                 {funding === 'approving' ? 'Approving QUIZ…' : funding === 'creating' ? 'Funding escrow…' : 'Start Contest'}
               </button>
+            </div>
+          )}
+
+          {(list.status === 'live' || list.status === 'expired') && onChainState && (
+            <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#1A1B35] border border-[#2D305A] rounded-xl">
+              <div>
+                <p className="text-xs text-slate-300">Remaining Pool: <span className="font-bold text-[#FFD166]">{(Number(onChainState.remainingPool) / 1e18).toString()} QUIZ</span></p>
+                <p className="text-[10px] text-slate-500">
+                  {onChainState.expiresAt * 1000 > now 
+                    ? `Expires ${new Date(onChainState.expiresAt * 1000).toLocaleString()}` 
+                    : 'Expired'}
+                </p>
+              </div>
+              {onChainState.active && onChainState.expiresAt * 1000 <= now && BigInt(onChainState.remainingPool) > BigInt(0) && (
+                <button
+                  type="button"
+                  onClick={handleRefund}
+                  disabled={refunding}
+                  className="px-3 py-1.5 bg-[#FF4757]/15 hover:bg-[#FF4757]/30 text-[#FF4757] rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
+                >
+                  {refunding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  Refund Remaining
+                </button>
+              )}
             </div>
           )}
 

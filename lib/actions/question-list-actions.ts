@@ -3,14 +3,13 @@
 import { supabase } from '@/lib/supabase';
 import { supabaseAdmin } from '@/lib/supabase-admin';
 import { getSessionAccount, SessionAccount } from '@/lib/session';
-import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
+import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher, QuestionListStatus, ListEntry } from '@/lib/types';
 import { isUuid, normalizePrompt, validateQuestionInput } from '@/lib/validation';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
 import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
   isContestVoucherUsed,
-  isContestFundedOnChain,
   getContestOnChain,
   getSignerAccount,
   newNonce,
@@ -69,7 +68,7 @@ function validateListText(params: { title?: string; description?: string }) {
 async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | null): Promise<QuestionListWithMeta[]> {
   return Promise.all(
     lists.map(async (list) => {
-      const [questionCount, { data: confirmations }] = await Promise.all([
+      const [questionCount, { data: confirmations }, pCount] = await Promise.all([
         supabaseAdmin
           ? supabaseAdmin
               .from('questions')
@@ -78,6 +77,14 @@ async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | 
               .then((r) => r.count ?? 0)
           : Promise.resolve(0),
         supabase.from('question_list_confirmations').select('confirmer_user').eq('list_id', list.id),
+        (list.status === 'live' || list.status === 'completed' || list.status === 'expired') && supabaseAdmin
+          ? supabaseAdmin
+              .from('list_entries')
+              .select('user_id', { count: 'exact', head: true })
+              .eq('list_id', list.id)
+              .neq('status', 'reviewer')
+              .then((r) => r.count ?? 0)
+          : Promise.resolve(0),
       ]);
 
       const confirmationCount = confirmations?.length ?? 0;
@@ -88,6 +95,7 @@ async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | 
         ...list,
         questionCount,
         confirmationCount,
+        participantCount: pCount || 0,
         hasConfirmed: viewerAccountId
           ? confirmations?.some((c) => c.confirmer_user === viewerAccountId) ?? false
           : undefined,
@@ -506,10 +514,11 @@ export async function startContest(
     const safeParticipants = Math.max(1, Math.min(1000, Math.floor(maxParticipants || 10)));
     const minPoolWei = toWei(rewardPoolWholeTokens);
     const contestId = getContestId(listId, auth.wallet);
-    const isFunded = await isContestFundedOnChain(contestId, auth.wallet, minPoolWei);
-    if (!isFunded) {
+    const onChain = await getContestOnChain(contestId);
+    if (!onChain || !onChain.active || onChain.creator.toLowerCase() !== auth.wallet.toLowerCase() || onChain.totalPool < minPoolWei) {
       return { success: false, error: 'Contest pool has not been funded on-chain.' };
     }
+    const expiresAt = new Date(Number(onChain.expiresAt) * 1000).toISOString();
 
     const { error } = await auth.db
       .from('question_lists')
@@ -518,6 +527,8 @@ export async function startContest(
         reward_pool_tokens: minPoolWei.toString(),
         max_participants: safeParticipants,
         started_at: new Date().toISOString(),
+        onchain_contest_id: contestId,
+        expires_at: expiresAt,
       })
       .eq('id', listId)
       .eq('status', 'approved');
@@ -533,6 +544,43 @@ export async function startContest(
   }
 }
 
+export async function syncContestStatus(listId: string): Promise<void> {
+  if (!isUuid(listId) || !supabaseAdmin) return;
+  
+  const { data: list } = await supabaseAdmin
+    .from('question_lists')
+    .select('status, onchain_contest_id, max_participants')
+    .eq('id', listId)
+    .maybeSingle();
+    
+  if (!list || list.status !== 'live') return;
+
+  let newStatus: QuestionListStatus | null = null;
+
+  const { count } = await supabaseAdmin
+    .from('list_entries')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('list_id', listId)
+    .neq('status', 'reviewer');
+
+  if (count !== null && count >= (list.max_participants || 10)) {
+    newStatus = 'completed';
+  } else if (list.onchain_contest_id) {
+    const onChain = await getContestOnChain(list.onchain_contest_id as `0x${string}`);
+    if (onChain) {
+      if (!onChain.active) {
+        newStatus = onChain.remainingPool === BigInt(0) ? 'completed' : 'refunded';
+      } else if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
+        newStatus = 'expired';
+      }
+    }
+  }
+
+  if (newStatus) {
+    await supabaseAdmin.from('question_lists').update({ status: newStatus }).eq('id', listId);
+  }
+}
+
 export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
   try {
     const { data: lists, error } = await supabase
@@ -542,16 +590,100 @@ export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
       .order('started_at', { ascending: false });
     if (error || !lists) return [];
 
-    return await attachListMeta(lists as QuestionList[]);
+    const now = new Date();
+    const activeLists = [];
+    for (const list of (lists as QuestionList[])) {
+      if (list.expires_at && new Date(list.expires_at) < now) {
+        syncContestStatus(list.id).catch(console.error);
+      } else {
+        activeLists.push(list);
+      }
+    }
+
+    return await attachListMeta(activeLists);
   } catch (err) {
     console.error('getLiveLists error:', err);
     return [];
   }
 }
 
+export async function getMyContestEntries(): Promise<ListEntry[]> {
+  try {
+    const account = await getSessionAccount();
+    if (!account) return [];
+    const { data: entries, error } = await supabase
+      .from('list_entries')
+      .select('*')
+      .eq('user_id', account.id)
+      .order('created_at', { ascending: false });
+    if (error || !entries) return [];
+    return entries as ListEntry[];
+  } catch (err) {
+    console.error('getMyContestEntries error:', err);
+    return [];
+  }
+}
+
+export async function getClaimableContests(): Promise<QuestionListWithMeta[]> {
+  try {
+    const account = await getSessionAccount();
+    if (!account) return [];
+    
+    const { data: entries } = await supabase
+      .from('list_entries')
+      .select('list_id')
+      .eq('user_id', account.id)
+      .eq('status', 'completed');
+      
+    if (!entries?.length) return [];
+    const listIds = entries.map(e => e.list_id);
+    
+    const { data: lists } = await supabase
+      .from('question_lists')
+      .select('*')
+      .in('id', listIds);
+      
+    if (!lists) return [];
+    return await attachListMeta(lists as QuestionList[]);
+  } catch (err) {
+    console.error('getClaimableContests error:', err);
+    return [];
+  }
+}
+
+export async function recordContestRefund(listId: string, txHash: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    if (!isUuid(listId) || !supabaseAdmin) return { success: false, error: 'Invalid request' };
+    const account = await getSessionAccount();
+    if (!account) return { success: false, error: 'Unauthorized' };
+
+    const { data: list } = await supabaseAdmin
+      .from('question_lists')
+      .select('owner_user')
+      .eq('id', listId)
+      .maybeSingle();
+      
+    if (list?.owner_user !== account.id) return { success: false, error: 'Unauthorized' };
+
+    await supabaseAdmin
+      .from('question_lists')
+      .update({
+        status: 'refunded',
+        refund_tx_hash: txHash,
+        refunded_at: new Date().toISOString(),
+      })
+      .eq('id', listId);
+      
+    return { success: true };
+  } catch (err) {
+    console.error('recordContestRefund error:', err);
+    return { success: false, error: 'Failed to record refund' };
+  }
+}
+
 export async function startListAttempt(
   listId: string
-): Promise<{ success: boolean; questions?: ClientQuestion[]; error?: string } & WalletRequired> {
+): Promise<{ success: boolean; questions?: ClientQuestion[]; answeredQuestionIds?: string[]; result?: { correctCount: number; rewardAmount: string; claimed: boolean }; error?: string } & WalletRequired> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'This contest is not live.' };
     const auth = await signedInWithWallet();
@@ -559,15 +691,18 @@ export async function startListAttempt(
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('status, owner_user, max_participants')
+      .select('status, owner_user, max_participants, onchain_contest_id')
       .eq('id', listId)
       .maybeSingle();
-    if (listErr || !list || list.status !== 'live') return { success: false, error: 'This contest is not live.' };
+    // Allow playing/claiming if it's completed, but not if it's draft or rejected.
+    if (listErr || !list || !['live', 'completed', 'expired'].includes(list.status)) {
+      return { success: false, error: 'This contest is not active.' };
+    }
     if (list.owner_user === auth.account.id) return { success: false, error: 'You cannot play your own contest.' };
 
     const { data: entry } = await auth.db
       .from('list_entries')
-      .select('status')
+      .select('status, correct_count, reward_amount')
       .eq('list_id', listId)
       .eq('user_id', auth.account.id)
       .maybeSingle();
@@ -575,8 +710,15 @@ export async function startListAttempt(
     if (entry?.status === 'reviewer') {
       return { success: false, error: 'You reviewed this list, so you cannot play it.' };
     }
-    if (entry && entry.status !== 'in_progress') {
-      return { success: false, error: 'You have already completed this contest.' };
+    if (entry && (entry.status === 'completed' || entry.status === 'claimed')) {
+      return { 
+        success: true, 
+        result: {
+          correctCount: entry.correct_count,
+          rewardAmount: entry.reward_amount,
+          claimed: entry.status === 'claimed'
+        }
+      };
     }
     if (!entry) {
       const maxParticipants = list.max_participants || 10;
@@ -588,6 +730,14 @@ export async function startListAttempt(
 
       if ((count ?? 0) >= maxParticipants) {
         return { success: false, error: 'This contest has reached its participant limit.' };
+      }
+
+      if (list.onchain_contest_id) {
+        const onChain = await getContestOnChain(list.onchain_contest_id as `0x${string}`);
+        if (!onChain || !onChain.active || onChain.remainingPool === BigInt(0)) {
+          await syncContestStatus(listId);
+          return { success: false, error: 'This contest has no remaining reward pool.' };
+        }
       }
 
       const { error: insertErr } = await auth.db
@@ -605,6 +755,14 @@ export async function startListAttempt(
       .eq('list_id', listId);
     if (qErr || !questions) return { success: false, error: 'Failed to load contest questions.' };
 
+    const { data: answeredResults } = await auth.db
+      .from('quiz_results')
+      .select('question_id')
+      .eq('user_id', auth.account.id)
+      .in('question_id', questions.map((q) => q.id));
+
+    const answeredQuestionIds = (answeredResults || []).map((r) => r.question_id);
+
     return {
       success: true,
       questions: questions.map((row) => ({
@@ -615,6 +773,7 @@ export async function startListAttempt(
         created_by: row.created_by || null,
         status: row.status,
       })),
+      answeredQuestionIds,
     };
   } catch (err) {
     console.error('startListAttempt error:', err);
@@ -671,6 +830,9 @@ export async function completeListAttempt(
       return { success: false, error: 'Failed to finish contest.' };
     }
     if (!updated?.length) return { success: false, error: 'No contest in progress for this wallet.' };
+    
+    syncContestStatus(listId).catch(console.error);
+
     return { success: true, correctCount, rewardAmount: rewardAmount.toString() };
   } catch (err) {
     console.error('completeListAttempt error:', err);
@@ -733,9 +895,11 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     const onChain = await getContestOnChain(contestId);
     if (onChain) {
       if (!onChain.active || onChain.remainingPool < amount) {
+        syncContestStatus(listId).catch(console.error);
         return { error: 'Contest reward pool has been exhausted or closed.' };
       }
       if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
+        syncContestStatus(listId).catch(console.error);
         return { error: 'Contest has expired.' };
       }
     }

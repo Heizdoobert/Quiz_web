@@ -46,7 +46,7 @@ export interface Group {
   created_at: string;
 }
 
-export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | 'rejected';
+export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | 'completed' | 'expired' | 'refunded' | 'rejected';
 
 export interface QuestionList {
   id: string;
@@ -59,11 +59,17 @@ export interface QuestionList {
   submitted_at: string | null;
   started_at: string | null;
   created_at: string;
+  onchain_contest_id?: string | null;
+  expires_at?: string | null;
+  funding_tx_hash?: string | null;
+  refunded_at?: string | null;
+  refund_tx_hash?: string | null;
 }
 
 export interface QuestionListWithMeta extends QuestionList {
   questionCount: number;
   confirmationCount: number;
+  participantCount?: number;
   hasConfirmed?: boolean;
   perQuestionReward?: string;
 }
@@ -75,6 +81,7 @@ export interface ListEntry {
   correct_count: number;
   reward_amount: string;
   completed_at: string | null;
+  claim_tx_hash?: string | null;
 }
 
 export interface UserStats {
