@@ -9,7 +9,6 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains-mono',
   display: 'swap',
-  weight: ['400', '600', '700'],
 });
 
 const baseUrl = getSiteUrl();
