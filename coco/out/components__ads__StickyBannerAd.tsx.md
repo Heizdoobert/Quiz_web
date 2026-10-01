@@ -22,7 +22,7 @@ export default function StickyBannerAd({
   title = 'Web3 Cloud & High-Speed Dev RPCs • Claim 20% Extra Credits',
   sponsor = 'RPC NodeX',
   ctaText = 'Claim Deal',
-  href = 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde',
+  href = 'https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=REDACTED',
 }: StickyBannerAdProps) {
   const [isVisible, setIsVisible] = useState(true);
 

@@ -50,6 +50,16 @@ def coco_lifespan(builder: coco.EnvironmentBuilder) -> AsyncIterator[None]:
     yield
 
 
+def _sanitize_head(head: str) -> str:
+    head = re.sub(r"([?&]key=)[a-zA-Z0-9_-]{16,}", r"\g<1>REDACTED", head)
+    head = re.sub(
+        r"(process\.env\.[A-Z0-9_]+\s*\|\|\s*['\"])0x[a-fA-F0-9]{40}(['\"])",
+        r"\g<1>0x0000000000000000000000000000000000000000\g<2>",
+        head,
+    )
+    return head
+
+
 @coco.fn(memo=True)
 async def process_file(file: FileLike, out: pathlib.Path) -> None:
     try:
@@ -58,7 +68,8 @@ async def process_file(file: FileLike, out: pathlib.Path) -> None:
         return
     rel = str(file.file_path.path)
     lines = text.splitlines()
-    head = "\n".join(lines[:MAX_HEAD_LINES])[:MAX_HEAD_CHARS]
+    raw_head = "\n".join(lines[:MAX_HEAD_LINES])[:MAX_HEAD_CHARS]
+    head = _sanitize_head(raw_head)
     exports = _EXPORT_RE.findall(text)
     if "export default" in text:
         exports = [*exports, "default"]
@@ -70,6 +81,7 @@ async def process_file(file: FileLike, out: pathlib.Path) -> None:
         f"# {rel}\nlines:{len(lines)} exports:{','.join(exports[:20])}\n---\n{head}\n",
         create_parent_dirs=True,
     )
+
 
 
 _EXPORT_RE = re.compile(
