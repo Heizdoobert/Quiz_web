@@ -8,6 +8,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 - No unimplemented stubs: `throw new Error("Not implemented")`, empty `catch {}`
 - No skipped or deleted tests without a reason in the commit message
 - No secrets in source
+- No direct pushes or merges to `main` (production): all changes must merge to `preview` first, pass all CI/CD checks (all green), and only then merge to `main`
 - This file does not get weakened to make a change pass
 
 ## Enforced with numbers
@@ -57,5 +58,6 @@ Last reviewed: 2026-09-28 by @alexheiz
 | BUILD (`/build`) | `npm run check:fast` | Types, lint, secrets | under 5s, changed files only |
 | VERIFY (`/test`) | `npm run check:task` | Fast gates + architecture + test coverage | under 90s (measured ~16s) |
 | SHIP (`/ship`) | `npm run check:full` | Task gates + Semgrep + deps audit + bundle + preview runtime checks | CI |
+| RELEASE | Merge `preview` -> `main` | Production deployment (only after preview CI/CD is all green) | Post-CI |
 
 `CONSTRAINTS.md` is canonical. `check:*` scripts mirror it; if they drift, this file wins.
