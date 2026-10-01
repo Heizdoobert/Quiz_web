@@ -5,6 +5,7 @@ import { getLiveLists } from '@/lib/actions/question-list-actions';
 import { QuestionListWithMeta } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import ContestPlay from '@/components/lists/ContestPlay';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Coins, ListChecks, Play } from 'lucide-react';
 
 export default function ContestBrowser() {
@@ -77,13 +78,20 @@ export default function ContestBrowser() {
                   </span>
                 </p>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelected(list)}
-                className="shrink-0 px-4 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black text-sm flex items-center gap-1.5 cursor-pointer"
-              >
-                <Play className="w-4 h-4" /> Play
-              </button>
+              {account.wallet ? (
+                <button
+                  type="button"
+                  onClick={() => setSelected(list)}
+                  className="shrink-0 px-4 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black text-sm flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Play className="w-4 h-4" /> Play
+                </button>
+              ) : (
+                // Contest pools pay out on-chain; the same connect flow links the wallet to this account.
+                <div className="shrink-0">
+                  <ConnectButton label="Add a wallet to join contests" showBalance={false} />
+                </div>
+              )}
             </div>
           ))}
         </div>

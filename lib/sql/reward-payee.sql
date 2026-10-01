@@ -12,6 +12,7 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS treasury_swept_count INT NOT NULL DEF
 CREATE OR REPLACE FUNCTION sweep_to_treasury() RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   cutoff TIMESTAMPTZ := now() - INTERVAL '180 days';
@@ -37,6 +38,7 @@ CREATE OR REPLACE FUNCTION get_treasury_entitled_count() RETURNS bigint
 LANGUAGE sql
 SECURITY DEFINER
 STABLE
+SET search_path = public
 AS $$
   SELECT coalesce(sum(treasury_swept_count), 0)::bigint FROM users;
 $$;

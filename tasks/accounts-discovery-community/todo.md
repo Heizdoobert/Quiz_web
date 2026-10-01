@@ -529,7 +529,13 @@ Result:
 - Files: `lib/sql/reward-payee.sql`, `lib/actions/reward-actions.ts`, `tests/rewards-payee.test.ts`
 - Depends: 9. Size: M
 
-### Task 23: Disclosure, held balance and contest wallet requirement
+### Task 23: Disclosure, held balance and contest wallet requirement — done
+- Result (built under `docs/specs/project-improvements.md`, workstream `no-wallet-rewards`):
+  - `components/rewards/NoWalletNotice.tsx` renders the held $QUIZ, the sweep date and `NO_WALLET_DISCLOSURE`; used by `RewardsModal` (with an "Add wallet" button instead of the claim UI) and by a native `<details>` next to the header's "Add wallet". The email step already showed the disclosure (Task 12).
+  - `use-rewards-modal` loads rewards for any session account, not only a connected wallet, so an email account sees what is held for it.
+  - `signedInWithWallet()` returns `code: 'WALLET_REQUIRED'`; `startContest` and `startListAttempt` pass it through. `ContestBrowser` shows "Add a wallet to join contests" (the shared RainbowKit flow links the wallet) instead of Play.
+  - Badges earned before adding a wallet: eligibility already uses all-time account stats (Task 22), so nothing changed there.
+  - Tests: `tests/no-wallet-rewards-ui.test.tsx` (header, modal, contest list for both account kinds), `WALLET_REQUIRED` cases in `tests/answer-and-list-guards.test.ts`.
 - Acceptance:
   - the disclosure from `lib/rewards-copy.ts` shows in the email step, `RewardsModal` and the header for accounts without a wallet, with the held amount
   - `startContest` returns `WALLET_REQUIRED` without a wallet, and the join button says "Add a wallet to join contests"

@@ -356,7 +356,21 @@ describe('question list guards', () => {
   it('refuses startContest for an account with no wallet', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(EMAIL_ACCOUNT);
     const res = await startContest(LIST_ID, 100);
-    expect(res).toEqual({ success: false, error: 'Add a wallet to your account to play contests.' });
+    expect(res).toEqual({
+      success: false,
+      error: 'Add a wallet to your account to play contests.',
+      code: 'WALLET_REQUIRED',
+    });
+  });
+
+  it('refuses startListAttempt for an account with no wallet', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(EMAIL_ACCOUNT);
+    const res = await startListAttempt(LIST_ID);
+    expect(res).toEqual({
+      success: false,
+      error: 'Add a wallet to your account to play contests.',
+      code: 'WALLET_REQUIRED',
+    });
   });
 
   it('refuses startListAttempt when max participants cap is reached', async () => {

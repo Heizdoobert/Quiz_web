@@ -78,6 +78,8 @@ export default function QuizLayout({
         onOpenRewards={() => openModal('rewards')}
         onOpenProfile={() => openModal('profile')}
         hasClaimable={hasClaimableRewards}
+        heldTokens={claimableRewards?.heldTokens}
+        sweepsAt={claimableRewards?.sweepsAt}
       />
       <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-[84px]' : 'pb-6'}`}>
       <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">

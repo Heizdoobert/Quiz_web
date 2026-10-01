@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSwitchChain, useChainId, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
+import { useSession } from '@/hooks/shared/use-session';
 import {
   getClaimableRewards,
   generateTokenVoucher,
@@ -93,16 +94,20 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
 
   const isGasless = Boolean(isPaymasterSupported && paymasterUrl);
 
+  // Rewards come from the session, so an account without a wallet still sees what is held for it.
+  const { account } = useSession();
+  const accountId = account?.id;
+
   const loadRewards = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!accountId) return;
     setLoading(true);
     const data = await getClaimableRewards();
     setRewards(data);
     setLoading(false);
-  }, [walletAddress]);
+  }, [accountId]);
 
   useEffect(() => {
-    if (isOpen && walletAddress) {
+    if (isOpen && accountId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       loadRewards();
       setClaimStep('idle');
@@ -113,7 +118,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
       setMintingBadge(null);
       confirmingNonceRef.current = null;
     }
-  }, [isOpen, walletAddress, loadRewards]);
+  }, [isOpen, accountId, loadRewards]);
 
   // Handle failed or reverted call bundle (EIP-5792)
   useEffect(() => {
@@ -338,6 +343,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
     tab,
     setTab,
     rewards,
+    hasNoWallet: Boolean(account && !account.wallet),
     loading,
     claimStep,
     claimError,

@@ -43,4 +43,8 @@ USER nextjs
 
 EXPOSE 3000
 
+# robots.txt is static and touches no database, so it checks the server, not Supabase.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
+  CMD curl -fsS http://localhost:3000/robots.txt > /dev/null || exit 1
+
 CMD ["npm", "start"]
