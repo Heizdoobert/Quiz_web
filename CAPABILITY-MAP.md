@@ -28,3 +28,4 @@ Existing specs traced to modules:
 - `docs/specs/profile-dashboard.md` → `profile`
 - `docs/specs/contest-escrow.md` → `rewards` (consumes `lists` interface above)
 - `docs/specs/rewards-no-wallet-payee.md` → `rewards`
+- `docs/specs/project-improvements.md` → cross-cutting (`rewards`, `lists`, CI, docs)
