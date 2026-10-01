@@ -20,7 +20,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | Secrets | Zero secret leaks in diff | `gitleaks git --pre-commit --redact --no-banner` | every edit, `check:fast` |
 | Architecture | Zero boundary or circular dependency violations | `npm run check:architecture` (`npx depcruise`) | task end, `check:task` |
 | Coverage (changed lines) | Changed lines ≥ 80% covered | `npm run test:coverage` + git diff | task end, CI |
-| Coverage (project ratchet) | Lines ≥ 61.3% (measured 61.33% on 2026-09-28) — must not fall | `npm run test:coverage` | CI, `check:task` |
+| Coverage (project ratchet) | Lines ≥ 62.5% (measured 62.56% on 2026-10-01) — must not fall | `npm run test:coverage` | CI, `check:task` |
 | Security: code | Zero high findings | `npm run check:security` (`uvx semgrep scan`) | CI, on-demand |
 | Security: deps | No high+ findings outside Exceptions table | `npm run check:deps` (`npm audit --omit=dev`) | CI, `check:full` |
 | Accessibility | Zero critical or serious axe violations | `npm run check:a11y` (`axe $PREVIEW_URL --tags wcag2a,wcag2aa,wcag21aa`) | preview deploy (warns locally) |
@@ -30,7 +30,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 ### Why these numbers
 
 - **Coverage 80% on changed lines**: High enough to require comprehensive tests for new logic, low enough to accommodate boilerplate and pure types.
-- **Coverage project ratchet (61.3%)**: Measured value today (61.33%). Never relaxed downward; updated upward whenever coverage improves.
+- **Coverage project ratchet (62.5%)**: Measured value today (62.56%). Never relaxed downward; updated upward whenever coverage improves.
 - **Secrets scanning**: Gitleaks pre-commit diff scan guarantees no credentials or private keys leak into commits, running in under 200ms.
 - **Architecture boundaries**: Enforced by dependency-cruiser; prevents `lib/` (business logic) from coupling to `app/` or `components/`, and prevents circular module dependencies.
 - **Security scanning**: Semgrep scans source code for OWASP Top Ten and framework vulnerabilities without slowing down the edit loop.

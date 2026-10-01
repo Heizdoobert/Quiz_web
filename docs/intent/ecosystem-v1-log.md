@@ -25,5 +25,6 @@ This log is updated after every completed task. Each entry records what was done
 | 11 | 2026-10-01 | Task 11: Hardhat Mainnet Config | `contracts/hardhat.config.ts`, `contracts/scripts/deploy.ts`, `.env.example` | TS/Contracts Pass | ✅ Done |
 | 12 | 2026-10-01 | Task 12: Deploy to Mainnet | `lib/contracts/addresses.ts` | Manual Simulation | ✅ Done |
 | 13 | 2026-10-01 | Task 13: CI/CD & Build Remediation | `lib/contracts/addresses.ts`, `lib/chain.ts`, `tests/no-wallet-rewards-ui.test.tsx`, `tests/answer-and-list-guards.test.ts` | All 29 vitest suites (244 tests), hardhat (38 tests), type-check, lint, build pass | ✅ Done |
+| 14 | 2026-10-01 | Task 14: Ecosystem Test Coverage & Quality Gates | `tests/ecosystem-contest-actions.test.ts`, `CONSTRAINTS.md`, `vitest.config.ts` | 19 new tests, line coverage ratcheted to 62.5% (measured 62.56%), check:task passes 100% | ✅ Done |
 
 ---
