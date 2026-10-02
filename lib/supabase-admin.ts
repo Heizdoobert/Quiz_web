@@ -7,12 +7,20 @@ import { createClient } from '@supabase/supabase-js';
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-if (!url || !secretKey) {
+const isBuildPhase =
+  process.env.NEXT_PHASE === 'phase-production-build' ||
+  process.env.BUILDING === 'true';
+
+if (!isBuildPhase && (!url || !secretKey)) {
   throw new Error(
     'Missing SUPABASE_URL and/or SUPABASE_SECRET_KEY. See .env.example.'
   );
 }
 
-export const supabaseAdmin = createClient(url, secretKey, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+export const supabaseAdmin = createClient(
+  url || 'https://placeholder.supabase.co',
+  secretKey || 'placeholder-secret-key',
+  {
+    auth: { persistSession: false, autoRefreshToken: false },
+  }
+);
