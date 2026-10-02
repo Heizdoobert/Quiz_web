@@ -40,7 +40,21 @@ MATCHER = PatternFilePathMatcher(
         "**/*.sol",
         "**/*.json",
     ],
-    excluded_patterns=["**/*.db*", "**/.venv/**", "**/__pycache__/**"],
+    excluded_patterns=[
+        "**/*.db*",
+        "**/.venv/**",
+        "**/__pycache__/**",
+        "coco/**",
+        "main.py",
+        "coco_indexer.py",
+        "search_docs.py",
+        "*docs_indexer*",
+        "*test_docs_indexer*",
+        "contracts/node_modules/**",
+        "contracts/artifacts/**",
+        "contracts/cache/**",
+        "contracts/typechain-types/**",
+    ],
 )
 
 
@@ -66,7 +80,7 @@ async def process_file(file: FileLike, out: pathlib.Path) -> None:
         text = await file.read_text()
     except Exception:
         return
-    rel = str(file.file_path.path)
+    rel = str(file.file_path.path).replace("\\", "/")
     lines = text.splitlines()
     raw_head = "\n".join(lines[:MAX_HEAD_LINES])[:MAX_HEAD_CHARS]
     head = _sanitize_head(raw_head)

@@ -14,7 +14,7 @@ import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 // The chains the wallet UI offers (components/Providers.tsx).
 const CHAINS: Chain[] = [mainnet, polygon, optimism, arbitrum, base, baseSepolia];
 
-export const REWARD_CHAIN_ID = parseInt(process.env.NEXT_PUBLIC_CHAIN_ID || String(TARGET_CHAIN_ID), 10);
+export const REWARD_CHAIN_ID = TARGET_CHAIN_ID;
 
 export function getSignerAccount() {
   const key = process.env.REWARD_SIGNER_PRIVATE_KEY;
