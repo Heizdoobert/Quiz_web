@@ -1,5 +1,5 @@
 # vitest.config.ts
-lines:24 exports:default
+lines:25 exports:default
 ---
 import { defineConfig, configDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     maxWorkers: 2,
+    setupFiles: ['./tests/setup-env.ts'],
     alias: {
       '@': path.resolve(__dirname, './'),
       'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
