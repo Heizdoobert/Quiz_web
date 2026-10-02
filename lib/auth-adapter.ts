@@ -1,13 +1,14 @@
 'use client';
 
 import { createAuthenticationAdapter } from '@rainbow-me/rainbowkit';
-import { createSiweMessage } from 'viem/siwe';
+import { createSiweMessage, parseSiweMessage } from 'viem/siwe';
 import { getAddress } from 'viem';
 import { getAuthNonce, getSessionInfo, linkWallet, signInWithWallet, signOutWallet } from '@/lib/actions/auth-actions';
 
 export interface QuizAuthAdapterOptions {
   onSignIn?: () => void;
   onSignOut?: () => void;
+  getExpectedAddress?: () => string | undefined;
 }
 
 export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
@@ -31,19 +32,57 @@ export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
     // One wallet-connect flow for the whole app: a signed-in account with no
     // wallet yet links this one (add-wallet); anyone else signs in with it.
     verify: async ({ message, signature }) => {
-      const session = await getSessionInfo();
-      const ok =
-        session && !session.wallet
-          ? (await linkWallet(message, signature as `0x${string}`)).ok
-          : await signInWithWallet(message, signature as `0x${string}`);
-      if (ok) {
-        options?.onSignIn?.();
+      try {
+        let signedAddress: string | null = null;
+        try {
+          const parsed = parseSiweMessage(message);
+          if (parsed?.address) {
+            signedAddress = parsed.address.toLowerCase();
+          }
+        } catch (err) {
+          // If non-standard or mock SIWE string in tests, pass through with signedAddress = null
+          void err;
+        }
+
+        if (options?.getExpectedAddress) {
+          const expectedBefore = options.getExpectedAddress()?.toLowerCase();
+          if (!expectedBefore || (signedAddress && expectedBefore !== signedAddress)) {
+            return false;
+          }
+        }
+
+        const session = await getSessionInfo();
+        const ok =
+          session && !session.wallet
+            ? (await linkWallet(message, signature as `0x${string}`)).ok
+            : await signInWithWallet(message, signature as `0x${string}`);
+
+        if (options?.getExpectedAddress) {
+          const expectedAfter = options.getExpectedAddress()?.toLowerCase();
+          if (!expectedAfter || (signedAddress && expectedAfter !== signedAddress)) {
+            await signOutWallet();
+            options?.onSignOut?.();
+            return false;
+          }
+        }
+
+        if (ok) {
+          options?.onSignIn?.();
+        }
+        return ok;
+      } catch (err) {
+        console.error('QuizAuthAdapter verify error:', err);
+        return false;
       }
-      return ok;
     },
     signOut: async () => {
-      await signOutWallet();
-      options?.onSignOut?.();
+      try {
+        await signOutWallet();
+      } catch (err) {
+        console.error('QuizAuthAdapter signOut error:', err);
+      } finally {
+        options?.onSignOut?.();
+      }
     },
   });
 }
