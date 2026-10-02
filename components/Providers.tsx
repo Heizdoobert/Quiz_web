@@ -17,7 +17,7 @@ import { WagmiProvider } from 'wagmi';
 import { mainnet, polygon, optimism, arbitrum, base, baseSepolia } from 'wagmi/chains';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { MotionConfig } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuizAuth } from '@/hooks/shared/use-quiz-auth';
 import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 
@@ -51,8 +51,16 @@ const config = getDefaultConfig({
 });
 
 function RainbowAuthWrapper({ children }: { children: React.ReactNode }) {
-  const { adapter, status } = useQuizAuth();
-  const { refresh } = useSession();
+  const { account, refresh, clearSession } = useSession();
+  const authOptions = useMemo(
+    () => ({
+      sessionAccount: account,
+      onSyncSession: refresh,
+      onSignOut: clearSession,
+    }),
+    [account, refresh, clearSession]
+  );
+  const { adapter, status } = useQuizAuth(authOptions);
 
   // The wallet's sign-in/out lives in RainbowKit's auth status; the session
   // cookie changes alongside it (auth-actions.ts), so re-read it here too.

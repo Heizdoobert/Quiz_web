@@ -33,9 +33,13 @@ export default function ProfilePage() {
     if (!account?.wallet) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
+      setQuizzes([]);
+      setFetchError(null);
       return;
     }
     const wallet = account.wallet;
+    setLoading(true);
+    setFetchError(null);
 
     async function load() {
       try {
