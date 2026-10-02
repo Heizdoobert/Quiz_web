@@ -65,3 +65,4 @@ __pycache__/
 skills-lock.json
 *.agent.md
 *.local.md
+.env.deploy

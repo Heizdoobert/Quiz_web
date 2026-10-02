@@ -26,9 +26,12 @@ import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 // is the documented API pattern (AcceptedCoinbaseWalletParameters interface).
 coinbaseWallet.preference = 'all';
 
-const projectId =
-  process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ||
-  '00000000000000000000000000000000';
+const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
+if (!projectId) {
+  throw new Error(
+    'Missing NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID. Get one at https://cloud.walletconnect.com. See .env.example.'
+  );
+}
 
 const config = getDefaultConfig({
   appName: 'Quick Quiz',
