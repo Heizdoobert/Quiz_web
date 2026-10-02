@@ -9,8 +9,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
-import SignInModal from '@/components/auth/SignInModal';
+
+const SignInModal = dynamic(() => import('@/components/auth/SignInModal'), {
+  ssr: false,
+});
 
 export interface SessionAccount {
   id: string;
