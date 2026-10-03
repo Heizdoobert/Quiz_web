@@ -120,6 +120,32 @@ describe('generateTokenVoucher', () => {
     expect(result).toMatchObject({ recipient: WALLET, nonce: '42', signature: '0xold' });
     expect((getSignerAccount as ReturnType<typeof vi.fn>).mock.results[0]?.value.signTypedData).not.toHaveBeenCalled();
   });
+
+  it('marks a voucher as expired once past deadline and signs a fresh one', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue({ id: ACCOUNT_ID, wallet: WALLET });
+    (statsForAccount as ReturnType<typeof vi.fn>).mockResolvedValue({ ...ZERO_STATS, score: 5 });
+    const signTypedData = vi.fn().mockResolvedValue('0xnewsig');
+    (getSignerAccount as ReturnType<typeof vi.fn>).mockReturnValue({ signTypedData });
+    const expiredClaim = { id: 'c1', nonce: '42', amount: '100', deadline: '1000', signature: '0xold' };
+    (isVoucherUsed as ReturnType<typeof vi.fn>).mockResolvedValue(false);
+
+    const updateCalls: Array<Record<string, unknown>> = [];
+    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation(() => {
+      const c = chain({ selectResult: { data: [expiredClaim], error: null } });
+      const realUpdate = c.update as (payload: Record<string, unknown>) => unknown;
+      c.update = (payload: Record<string, unknown>) => {
+        updateCalls.push(payload);
+        return realUpdate(payload);
+      };
+      return c;
+    });
+
+    const result = await generateTokenVoucher();
+
+    expect(updateCalls).toContainEqual({ status: 'expired' });
+    expect(signTypedData).toHaveBeenCalled();
+    expect(result).toMatchObject({ recipient: WALLET, signature: '0xnewsig' });
+  });
 });
 
 describe('generateBadgeVoucher', () => {
@@ -231,17 +257,32 @@ describe('confirmRewardClaim', () => {
     expect(result).toEqual({ success: false });
   });
 
-  it('confirms a contest claim against the escrow contract', async () => {
+  it('confirms a contest claim against the escrow contract using onchain_contest_id and records claim_tx_hash', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue({ id: ACCOUNT_ID, wallet: WALLET });
     (isContestVoucherUsed as ReturnType<typeof vi.fn>).mockResolvedValue(true);
-    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation(() =>
-      chain({
-        maybeSingleResult: { data: { id: 'c1', claim_type: 'contest', list_id: 'list-1' }, error: null },
-      })
-    );
+    const updates: Record<string, unknown[]> = {};
+    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation((table: string) => {
+      const c = chain({
+        maybeSingleResult: {
+          data:
+            table === 'reward_claims'
+              ? { id: 'c1', claim_type: 'contest', list_id: 'list-1' }
+              : { owner_wallet: null, onchain_contest_id: '0xspecificcontest' },
+          error: null,
+        },
+      });
+      const realUpdate = c.update as (val: unknown) => unknown;
+      c.update = (val: unknown) => {
+        (updates[table] ??= []).push(val);
+        return realUpdate(val);
+      };
+      return c;
+    });
 
     const result = await confirmRewardClaim('42', '0xtx');
 
     expect(result).toEqual({ success: true });
+    expect(isContestVoucherUsed).toHaveBeenCalledWith('0xspecificcontest', WALLET, '42');
+    expect(updates.list_entries).toEqual([{ status: 'claimed', claim_tx_hash: '0xtx' }]);
   });
 });

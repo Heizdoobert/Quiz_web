@@ -77,7 +77,7 @@ CREATE POLICY "Allow public read for group_members" ON group_members FOR SELECT 
 CREATE POLICY "Allow public read for questions" ON questions FOR SELECT USING (true);
 -- Answers and explanations are only readable with the secret key.
 REVOKE SELECT ON questions FROM anon, authenticated;
-GRANT SELECT (id, category, prompt, options, created_by, status, dispute_count, verified_at, created_at)
+GRANT SELECT (id, category, prompt, options, created_by, created_by_user, status, dispute_count, verified_at, created_at)
   ON questions TO anon, authenticated;
 
 -- Secure Client View (omits correct_index and explanation)
