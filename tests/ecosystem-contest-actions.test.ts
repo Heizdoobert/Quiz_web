@@ -320,4 +320,56 @@ describe('startListAttempt ecosystem branches', () => {
     expect(res.success).toBe(false);
     expect(res.error).toBe('This contest has no remaining reward pool.');
   });
+
+  it('handles empty questions list cleanly without throwing', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockOnChainContest = {
+      creator: WALLET,
+      totalPool: BigInt('100000000000000000000'),
+      remainingPool: BigInt('100000000000000000000'),
+      createdAt: BigInt(100),
+      expiresAt: BigInt(Math.floor(Date.now() / 1000) + 3600),
+      active: true,
+    };
+    mockDb({
+      question_lists: {
+        row: {
+          id: LIST_ID,
+          status: 'live',
+          owner_user: 'creator-user',
+          max_participants: 10,
+          onchain_contest_id: '0x123',
+        },
+      },
+      list_entries: { row: null, count: 0 },
+      questions: { rows: [] },
+    });
+    const res = await startListAttempt(LIST_ID);
+    expect(res.success).toBe(true);
+    expect(res.questions).toEqual([]);
+    expect(res.answeredQuestionIds).toEqual([]);
+  });
 });
+
+describe('attachListMeta reward math', () => {
+  it('calculates perQuestionReward dividing pool by max_participants and questionCount', async () => {
+    const list = {
+      id: LIST_ID,
+      title: 'Reward List',
+      status: 'live',
+      reward_pool_tokens: '100000000000000000000', // 100 tokens
+      max_participants: 10,
+      expires_at: new Date(Date.now() + 3600000).toISOString(),
+    };
+    mockDb({
+      question_lists: { rows: [list] },
+      questions: { count: 5 },
+      question_list_confirmations: { rows: [] },
+    });
+    const res = await getLiveLists();
+    expect(res).toHaveLength(1);
+    // 100 tokens / 10 participants / 5 questions = 2 tokens = 2000000000000000000
+    expect(res[0].perQuestionReward).toBe('2000000000000000000');
+  });
+});
+

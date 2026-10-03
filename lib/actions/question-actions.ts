@@ -264,13 +264,15 @@ export async function getQuestionCount(): Promise<number> {
 export async function get5050EliminatedIndices(questionId: string): Promise<number[]> {
   try {
     // correct_index is only readable with the secret key.
-    if (!supabaseAdmin) return [0, 1];
+    if (!supabaseAdmin) return [];
     const { data } = await supabaseAdmin
       .from('questions')
       .select('correct_index')
       .eq('id', questionId)
       .single();
-    if (!data) return [0, 1];
+    if (!data || typeof data.correct_index !== 'number' || data.correct_index < 0 || data.correct_index > 3) {
+      return [];
+    }
     const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
 
     // Deterministic selection based on questionId hash so repeat calls return the exact same 2 wrong answers
@@ -284,6 +286,6 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
     const second = remaining[(hash >>> 4) % remaining.length];
     return [first, second].sort((a, b) => a - b);
   } catch {
-    return [0, 1];
+    return [];
   }
 }

@@ -18,9 +18,6 @@ import {
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
 const VOUCHER_TTL_SECONDS = 3600;
-// An unused voucher past its deadline can never be minted. The margin covers
-// the gap between block time and this server's clock.
-const EXPIRY_MARGIN_SECONDS = 300;
 
 type PendingTokenClaim = { nonce: string; amount: string; deadline: string; signature: `0x${string}` };
 
@@ -43,7 +40,7 @@ async function settlePendingTokenClaims(accountId: string, wallet: string): Prom
   for (const claim of data) {
     let status: 'claimed' | 'expired' | null = null;
     if (await isVoucherUsed('token', wallet, claim.nonce)) status = 'claimed';
-    else if (!claim.deadline || Number(claim.deadline) + EXPIRY_MARGIN_SECONDS < now) status = 'expired';
+    else if (!claim.deadline || Number(claim.deadline) <= now) status = 'expired';
 
     if (status) {
       const { error: updErr } = await supabaseAdmin
@@ -397,10 +394,10 @@ export async function confirmRewardClaim(
     if (claim.list_id) {
       const { data: qList } = await supabaseAdmin
         .from('question_lists')
-        .select('owner_wallet')
+        .select('owner_wallet, onchain_contest_id')
         .eq('id', claim.list_id)
         .maybeSingle();
-      const contestId = getContestId(claim.list_id, qList?.owner_wallet);
+      const contestId = (qList?.onchain_contest_id as `0x${string}`) || getContestId(claim.list_id, qList?.owner_wallet);
       const usedOnEscrow = await isContestVoucherUsed(contestId, wallet, nonce);
       if (!usedOnEscrow) return { success: false };
     } else {
@@ -419,7 +416,7 @@ export async function confirmRewardClaim(
     if (claim.list_id) {
       await supabaseAdmin
         .from('list_entries')
-        .update({ status: 'claimed' })
+        .update({ status: 'claimed', claim_tx_hash: txHash })
         .eq('list_id', claim.list_id)
         .eq('user_id', account.id);
     }

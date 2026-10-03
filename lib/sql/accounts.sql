@@ -223,5 +223,6 @@ DROP POLICY IF EXISTS "Allow public insert for users" ON users;
 -- The public key reads display fields only; auth_user_id links an account to its email.
 REVOKE SELECT ON users FROM anon, authenticated;
 GRANT SELECT (id, wallet_address, display_name, created_at) ON users TO anon, authenticated;
+GRANT SELECT (created_by_user) ON questions TO anon, authenticated;
 
 COMMIT;
