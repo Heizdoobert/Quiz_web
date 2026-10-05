@@ -44,7 +44,7 @@ export default function ListQuestionEditor({
     setValues({ ...values, options: next });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);

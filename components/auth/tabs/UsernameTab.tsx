@@ -15,7 +15,7 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUsernameAuth = async (e: React.FormEvent) => {
+  const handleUsernameAuth = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);

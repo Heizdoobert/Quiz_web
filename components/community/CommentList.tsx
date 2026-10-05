@@ -27,7 +27,7 @@ export default function CommentList({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmed = body.trim();
     if (!trimmed || trimmed.length > 500 || submitting) return;

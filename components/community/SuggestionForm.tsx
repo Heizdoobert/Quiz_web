@@ -15,7 +15,7 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmed = body.trim();
     if (!trimmed || trimmed.length > 500 || submitting) return;

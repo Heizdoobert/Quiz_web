@@ -28,7 +28,7 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
     setOptions(updated);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setFeedback(null);
 

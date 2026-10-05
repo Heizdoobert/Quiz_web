@@ -17,7 +17,7 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSendCode = async (e: React.FormEvent) => {
+  const handleSendCode = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);
@@ -26,7 +26,7 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
     setEmailStep('code');
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
+  const handleVerify = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);
