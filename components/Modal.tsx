@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import React, { useEffect, useSyncExternalStore } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import React, { useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -24,25 +24,25 @@ export default function Modal({
   icon,
   children,
   footer,
-  maxWidth = 'max-w-md',
+  maxWidth = "max-w-md",
 }: ModalProps) {
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
     }
     return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -57,8 +57,14 @@ export default function Modal({
         >
           <motion.div
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1, transition: { duration: 0.2, ease: 'easeOut' } }}
-            exit={{ opacity: 0, transition: { duration: 0.15, ease: 'easeIn' } }}
+            animate={{
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              opacity: 0,
+              transition: { duration: 0.15, ease: "easeIn" },
+            }}
             className="fixed inset-0 bg-black/75 backdrop-blur-xs"
             onClick={onClose}
           />
@@ -77,20 +83,26 @@ export default function Modal({
               opacity: 0,
               scale: 0.96,
               y: 6,
-              transition: { duration: 0.15, ease: 'easeIn' },
+              transition: { duration: 0.15, ease: "easeIn" },
             }}
             className={`glass glass-border glass-edge relative w-full ${maxWidth} rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#2D305A] bg-[#0A1128]/70 select-none">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-cyber-border bg-deep-space/70 select-none">
               <div className="flex items-center gap-2.5">
-                {icon && <span className="text-xl flex items-center justify-center">{icon}</span>}
-                <h2 className="text-lg font-bold text-white tracking-wide">{title}</h2>
+                {icon && (
+                  <span className="text-xl flex items-center justify-center">
+                    {icon}
+                  </span>
+                )}
+                <h2 className="text-lg font-bold text-white tracking-wide">
+                  {title}
+                </h2>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-[#00FFCC] hover:bg-[#25284D] active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] transition-all cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-neo-mint hover:bg-cyber-violet active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint transition-all cursor-pointer"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
@@ -98,11 +110,13 @@ export default function Modal({
             </div>
 
             {/* Body */}
-            <div className="p-6 overflow-y-auto overscroll-contain">{children}</div>
+            <div className="p-6 overflow-y-auto overscroll-contain">
+              {children}
+            </div>
 
             {/* Footer */}
             {footer && (
-              <div className="px-6 py-4 border-t border-[#2D305A] bg-[#0A1128]/70 flex justify-end gap-3">
+              <div className="px-6 py-4 border-t border-cyber-border bg-deep-space/70 flex justify-end gap-3">
                 {footer}
               </div>
             )}
@@ -110,6 +124,6 @@ export default function Modal({
         </div>
       )}
     </AnimatePresence>,
-    document.body
+    document.body,
   );
 }

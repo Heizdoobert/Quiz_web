@@ -114,7 +114,7 @@ function ReviewCard({
   };
 
   return (
-    <div className="bg-[#1A1B35]/90 border border-[#2D305A] rounded-2xl overflow-hidden">
+    <div className="bg-cyber-violet/90 border border-cyber-border rounded-2xl overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
@@ -130,9 +130,9 @@ function ReviewCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-[#2D305A] p-4 space-y-3">
+        <div className="border-t border-cyber-border p-4 space-y-3">
           {error && (
-            <div className="p-2.5 rounded-xl text-xs font-bold bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40">
+            <div className="p-2.5 rounded-xl text-xs font-bold bg-pop-coral/15 text-pop-coral border border-pop-coral/40">
               {error}
             </div>
           )}
@@ -144,7 +144,7 @@ function ReviewCard({
           ) : (
             <div className="space-y-2 max-h-96 overflow-y-auto pr-1">
               {questions.map((q, idx) => (
-                <div key={q.id} className="p-2.5 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl">
+                <div key={q.id} className="p-2.5 bg-deep-space/70 border border-cyber-border rounded-xl">
                   <p className="text-xs text-slate-500 font-mono">#{idx + 1} · {q.category}</p>
                   <p className="text-sm text-white">{q.prompt}</p>
                   <ul className="mt-1.5 grid grid-cols-1 sm:grid-cols-2 gap-1">
@@ -153,8 +153,8 @@ function ReviewCard({
                         key={optIdx}
                         className={`text-xs px-2 py-1 rounded-lg ${
                           optIdx === q.correct_index
-                            ? 'bg-[#00FFCC]/15 text-[#00FFCC]'
-                            : 'bg-[#1A1B35] text-slate-400'
+                            ? 'bg-neo-mint/15 text-neo-mint'
+                            : 'bg-cyber-violet text-slate-400'
                         }`}
                       >
                         {opt}
@@ -170,7 +170,7 @@ function ReviewCard({
             type="button"
             onClick={handleConfirm}
             disabled={confirming || list.hasConfirmed}
-            className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             {list.hasConfirmed ? (
               <>

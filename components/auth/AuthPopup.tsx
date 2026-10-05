@@ -49,7 +49,7 @@ export default function AuthPopup({ isOpen, onClose, refresh }: AuthPopupProps) 
       isOpen={isOpen}
       onClose={onClose}
       title={step === 'choice' ? 'Welcome to Quick Quiz' : (mode === 'login' ? 'Sign In' : 'Create Account')}
-      icon={<Zap className="w-5 h-5 text-[#00FFCC] fill-current" />}
+      icon={<Zap className="w-5 h-5 text-neo-mint fill-current" />}
       maxWidth="max-w-md"
     >
       <div className="relative overflow-hidden">

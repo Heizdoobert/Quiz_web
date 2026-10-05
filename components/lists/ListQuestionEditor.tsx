@@ -59,9 +59,9 @@ export default function ListQuestionEditor({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-[#0A1128]/70 border border-[#2D305A] rounded-2xl">
+    <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-deep-space/70 border border-cyber-border rounded-2xl">
       {error && (
-        <div className="p-2.5 rounded-xl text-xs font-bold bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40">
+        <div className="p-2.5 rounded-xl text-xs font-bold bg-pop-coral/15 text-pop-coral border border-pop-coral/40">
           {error}
         </div>
       )}
@@ -75,7 +75,7 @@ export default function ListQuestionEditor({
           value={values.prompt}
           onChange={(e) => setValues({ ...values, prompt: e.target.value })}
           placeholder="e.g. What does CSS stand for?"
-          className="w-full px-3 py-2 bg-[#1A1B35] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] placeholder:text-slate-500"
+          className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />
       </div>
 
@@ -85,8 +85,8 @@ export default function ListQuestionEditor({
             key={letter}
             className={`flex items-center gap-2 p-2 rounded-xl border transition-all ${
               values.correctIndex === idx
-                ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50'
-                : 'bg-[#1A1B35] border-[#2D305A]'
+                ? 'bg-neo-mint/10 border-neo-mint/50'
+                : 'bg-cyber-violet border-cyber-border'
             }`}
           >
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -94,9 +94,9 @@ export default function ListQuestionEditor({
                 type="radio"
                 checked={values.correctIndex === idx}
                 onChange={() => setValues({ ...values, correctIndex: idx })}
-                className="w-4 h-4 accent-[#00FFCC] cursor-pointer"
+                className="w-4 h-4 accent-neo-mint cursor-pointer"
               />
-              <span className="font-black text-xs px-1.5 py-0.5 rounded bg-[#0A1128] text-slate-300">{letter}</span>
+              <span className="font-black text-xs px-1.5 py-0.5 rounded bg-deep-space text-slate-300">{letter}</span>
             </label>
             <input
               type="text"
@@ -118,7 +118,7 @@ export default function ListQuestionEditor({
             type="text"
             value={values.category}
             onChange={(e) => setValues({ ...values, category: e.target.value })}
-            className="w-full px-3 py-2 bg-[#1A1B35] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC]"
+            className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
           />
         </div>
         <div>
@@ -129,7 +129,7 @@ export default function ListQuestionEditor({
             value={values.explanation}
             onChange={(e) => setValues({ ...values, explanation: e.target.value })}
             placeholder="Why this answer is correct..."
-            className="w-full px-3 py-2 bg-[#1A1B35] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] placeholder:text-slate-500"
+            className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
           />
         </div>
       </div>
@@ -138,7 +138,7 @@ export default function ListQuestionEditor({
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
+          className="flex-1 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-50 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {submitLabel}
@@ -147,7 +147,7 @@ export default function ListQuestionEditor({
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 bg-[#25284D] hover:bg-[#2D305A] text-slate-300 rounded-xl font-bold text-sm cursor-pointer"
+            className="px-4 py-2 bg-cyber-violet-light hover:bg-cyber-border text-slate-300 rounded-xl font-bold text-sm cursor-pointer"
           >
             Cancel
           </button>

@@ -16,10 +16,10 @@ import { ListCardEditDetailsPanel } from './ListCardEditDetailsPanel';
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
-  submitted: 'bg-[#FFD166]/15 text-[#FFD166] border-[#FFD166]/40',
-  approved: 'bg-[#6C5CE7]/15 text-[#6C5CE7] border-[#6C5CE7]/40',
-  live: 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/40',
-  rejected: 'bg-[#FF4757]/15 text-[#FF4757] border-[#FF4757]/40',
+  submitted: 'bg-crypto-gold/15 text-crypto-gold border-crypto-gold/40',
+  approved: 'bg-electric-indigo/15 text-electric-indigo border-electric-indigo/40',
+  live: 'bg-neo-mint/15 text-neo-mint border-neo-mint/40',
+  rejected: 'bg-pop-coral/15 text-pop-coral border-pop-coral/40',
 };
 
 const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
@@ -108,7 +108,7 @@ export function ListCard({
   };
 
   return (
-    <div className="bg-[#1A1B35]/90 border border-[#2D305A] rounded-2xl overflow-hidden">
+    <div className="bg-cyber-violet/90 border border-cyber-border rounded-2xl overflow-hidden">
       <button
         type="button"
         onClick={onToggle}
@@ -131,9 +131,9 @@ export function ListCard({
       </button>
 
       {expanded && (
-        <div className="border-t border-[#2D305A] p-4 space-y-3">
+        <div className="border-t border-cyber-border p-4 space-y-3">
           {error && (
-            <div className="p-2.5 rounded-xl text-xs font-bold bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40">
+            <div className="p-2.5 rounded-xl text-xs font-bold bg-pop-coral/15 text-pop-coral border border-pop-coral/40">
               {error}
             </div>
           )}

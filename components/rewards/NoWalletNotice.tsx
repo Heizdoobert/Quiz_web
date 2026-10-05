@@ -17,7 +17,7 @@ export default function NoWalletNotice({
       {heldTokens !== undefined && (
         <p className="text-sm text-white">
           Held for you:{' '}
-          <span className="font-black text-[#FFD166]">{(BigInt(heldTokens || '0') / TOKEN_DECIMALS).toString()} $QUIZ</span>
+          <span className="font-black text-crypto-gold">{(BigInt(heldTokens || '0') / TOKEN_DECIMALS).toString()} $QUIZ</span>
         </p>
       )}
       {sweepsAt && (

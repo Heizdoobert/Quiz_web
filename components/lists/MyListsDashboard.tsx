@@ -73,17 +73,17 @@ export default function MyListsDashboard() {
         <div
           className={`p-3 rounded-xl text-xs font-bold ${
             message.type === 'error'
-              ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40'
-              : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/40'
+              ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/40'
+              : 'bg-neo-mint/15 text-neo-mint border border-neo-mint/40'
           }`}
         >
           {message.text}
         </div>
       )}
 
-      <form onSubmit={handleCreate} className="p-4 bg-[#1A1B35]/90 border border-[#2D305A] rounded-2xl space-y-3">
+      <form onSubmit={handleCreate} className="p-4 bg-cyber-violet/90 border border-cyber-border rounded-2xl space-y-3">
         <h2 className="font-bold text-white text-sm flex items-center gap-2">
-          <Plus className="w-4 h-4 text-[#00FFCC]" /> New List
+          <Plus className="w-4 h-4 text-neo-mint" /> New List
         </h2>
         <input
           type="text"
@@ -93,7 +93,7 @@ export default function MyListsDashboard() {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="List title, e.g. DeFi Fundamentals"
-          className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] placeholder:text-slate-500"
+          className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />
         <textarea
           rows={2}
@@ -101,11 +101,11 @@ export default function MyListsDashboard() {
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Optional description"
-          className="w-full px-3 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] placeholder:text-slate-500"
+          className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black text-sm cursor-pointer"
+          className="px-4 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
         >
           Create List
         </button>

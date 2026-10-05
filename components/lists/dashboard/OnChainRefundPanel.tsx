@@ -59,9 +59,9 @@ export function OnChainRefundPanel({
   };
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-[#1A1B35] border border-[#2D305A] rounded-xl">
+    <div className="flex flex-wrap items-center justify-between gap-2 p-3 bg-cyber-violet border border-cyber-border rounded-xl">
       <div>
-        <p className="text-xs text-slate-300">Remaining Pool: <span className="font-bold text-[#FFD166]">{(Number(onChainState.remainingPool) / 1e18).toString()} QUIZ</span></p>
+        <p className="text-xs text-slate-300">Remaining Pool: <span className="font-bold text-crypto-gold">{(Number(onChainState.remainingPool) / 1e18).toString()} QUIZ</span></p>
         <p className="text-[10px] text-slate-500">
           {onChainState.expiresAt * 1000 > now 
             ? `Expires ${new Date(onChainState.expiresAt * 1000).toLocaleString()}` 
@@ -73,7 +73,7 @@ export function OnChainRefundPanel({
           type="button"
           onClick={handleRefund}
           disabled={refunding}
-          className="px-3 py-1.5 bg-[#FF4757]/15 hover:bg-[#FF4757]/30 text-[#FF4757] rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
+          className="px-3 py-1.5 bg-pop-coral/15 hover:bg-pop-coral/30 text-pop-coral rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 disabled:opacity-40"
         >
           {refunding ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
           Refund Remaining

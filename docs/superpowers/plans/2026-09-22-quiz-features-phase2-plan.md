@@ -687,14 +687,14 @@ export default function AdZone({ variant, slot, className = '', children }: AdZo
     return (
       <aside
         data-slot={slot}
-        className={`hidden xl:flex flex-col w-[160px] shrink-0 sticky top-20 self-start p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 shadow-lg text-center backdrop-blur-sm transition-all hover:border-slate-600 ${className}`}
+        className={`hidden xl:flex flex-col w-40 shrink-0 sticky top-20 self-start p-3 rounded-xl bg-slate-800/80 border border-slate-700/60 shadow-lg text-center backdrop-blur-sm transition-all hover:border-slate-600 ${className}`}
         aria-label="Sponsored Promotions"
       >
         <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2 py-0.5 px-2 bg-slate-900/60 rounded-full inline-block mx-auto border border-slate-700/40">
           Sponsored
         </div>
         {children || (
-          <div className="flex flex-col items-center justify-center min-h-[500px] border border-dashed border-slate-700 rounded-lg p-2 text-slate-500 text-xs">
+          <div className="flex flex-col items-center justify-center min-h-125 border border-dashed border-slate-700 rounded-lg p-2 text-slate-500 text-xs">
             <span className="text-2xl mb-2">⚡</span>
             <span className="font-medium text-slate-300">Hot Dev Deals</span>
             <span className="text-[11px] text-slate-400 mt-1">Tools & Cloud Offers</span>
@@ -2035,7 +2035,7 @@ export default function QuizCard({
   // Empty state when no question is available
   if (!question) {
     return (
-      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl text-center">
+      <div className="w-full min-h-105 flex flex-col items-center justify-center p-8 bg-slate-800 border border-slate-700 rounded-3xl shadow-2xl text-center">
         <div className="text-5xl mb-4">🚀</div>
         <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-400 max-w-md mb-6">
@@ -2053,7 +2053,7 @@ export default function QuizCard({
   }
 
   return (
-    <div className="relative w-full min-h-[460px] perspective-1000">
+    <div className="relative w-full min-h-115 perspective-1000">
       <div
         className={`relative w-full h-full duration-500 transform-style-3d transition-transform ${
           isFlipped ? 'rotate-y-180' : ''
@@ -2202,7 +2202,7 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
               key={`${item.questionId}-${idx}`}
               className="flex items-center justify-between p-2 rounded-lg bg-slate-900/60 border border-slate-800 text-xs"
             >
-              <span className="truncate max-w-[150px] text-slate-300 font-medium">
+              <span className="truncate max-w-37.5 text-slate-300 font-medium">
                 {item.prompt}
               </span>
               <span className="text-xs">{item.isCorrect ? '✅' : '❌'}</span>
@@ -2670,7 +2670,7 @@ export default function QuizLayout() {
 
   return (
     <div className="w-full flex justify-center py-6 px-4">
-      <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">
+      <div className="w-full max-w-385 flex gap-6 justify-center items-start">
         {/* Left Skyscraper Ad (Desktop Only) */}
         <AdZone variant="skyscraper" slot="left-sky" />
 

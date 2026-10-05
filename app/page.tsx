@@ -36,7 +36,7 @@ export default async function Home({
     : null;
 
   return (
-    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
+    <main className="min-h-screen bg-deep-space text-slate-100 flex flex-col">
       {quizSchema && (
         <script
           type="application/ld+json"

@@ -22,7 +22,7 @@ export function NFTTrophyCase({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
-          <Award className="w-4 h-4 text-[#FFD166]" /> NFT Achievement Badges
+          <Award className="w-4 h-4 text-crypto-gold" /> NFT Achievement Badges
         </h4>
         <span className="text-[11px] text-slate-400 font-mono">
           {(claimableRewards?.alreadyClaimedBadges?.length || 0)} / 4 Minted
@@ -42,19 +42,19 @@ export function NFTTrophyCase({
               key={badgeId}
               className={`p-4 rounded-2xl border transition-all flex items-start gap-3 ${
                 isMinted
-                  ? 'bg-[#FFD166]/10 border-[#FFD166]/50'
+                  ? 'bg-crypto-gold/10 border-crypto-gold/50'
                   : isEligible
-                  ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50'
-                  : 'bg-[#0A1128]/60 border-[#2D305A]/70 opacity-75'
+                  ? 'bg-neo-mint/10 border-neo-mint/50'
+                  : 'bg-deep-space/60 border-cyber-border/70 opacity-75'
               }`}
             >
               <div
                 className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 ${
                   isMinted
-                    ? 'bg-[#FFD166]/20 border border-[#FFD166]/40'
+                    ? 'bg-crypto-gold/20 border border-crypto-gold/40'
                     : isEligible
-                    ? 'bg-[#00FFCC]/20 border border-[#00FFCC]/40'
-                    : 'bg-[#25284D]/40 border border-[#2D305A]'
+                    ? 'bg-neo-mint/20 border border-neo-mint/40'
+                    : 'bg-cyber-violet-light/40 border border-cyber-border'
                 }`}
               >
                 {icon}
@@ -66,7 +66,7 @@ export function NFTTrophyCase({
                     {name}
                   </span>
                   {isMinted ? (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-[#FFD166] shrink-0">
+                    <span className="flex items-center gap-1 text-[10px] font-bold text-crypto-gold shrink-0">
                       <ShieldCheck className="w-3 h-3" /> Minted
                     </span>
                   ) : isEligible ? (
@@ -76,7 +76,7 @@ export function NFTTrophyCase({
                         onClose();
                         onOpenRewards();
                       }}
-                      className="px-2 py-0.5 rounded-md bg-[#00FFCC] text-[#0A1128] font-heading font-black text-[10px] hover:bg-[#00FFCC]/90 active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+                      className="px-2 py-0.5 rounded-md bg-neo-mint text-deep-space font-heading font-black text-[10px] hover:bg-neo-mint/90 active:scale-95 transition-all cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
                     >
                       Mint Now
                     </button>

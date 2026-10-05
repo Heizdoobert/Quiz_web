@@ -43,18 +43,18 @@ export default function GroupModal({
       isOpen={isOpen}
       onClose={onClose}
       title="Groups & Guilds"
-      icon={<Shield className="w-5 h-5 text-[#6C5CE7]" />}
+      icon={<Shield className="w-5 h-5 text-electric-indigo" />}
       maxWidth="max-w-lg"
     >
       <div className="space-y-5">
         {/* Navigation Tabs */}
-        <div className="flex border-b border-[#2D305A] gap-2">
+        <div className="flex border-b border-cyber-border gap-2">
           <button
             type="button"
             onClick={() => selectTab('my')}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-indigo rounded-t ${
               tab === 'my'
-                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                ? 'border-electric-indigo text-electric-indigo'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -63,9 +63,9 @@ export default function GroupModal({
           <button
             type="button"
             onClick={() => selectTab('create')}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-indigo rounded-t ${
               tab === 'create'
-                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                ? 'border-electric-indigo text-electric-indigo'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -74,9 +74,9 @@ export default function GroupModal({
           <button
             type="button"
             onClick={() => selectTab('join')}
-            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] rounded-t ${
+            className={`pb-2.5 px-3 text-sm font-bold border-b-2 transition-all cursor-pointer inline-flex items-center gap-1.5 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-indigo rounded-t ${
               tab === 'join'
-                ? 'border-[#6C5CE7] text-[#6C5CE7]'
+                ? 'border-electric-indigo text-electric-indigo'
                 : 'border-transparent text-slate-400 hover:text-white'
             }`}
           >
@@ -89,8 +89,8 @@ export default function GroupModal({
           <div
             className={`p-4 rounded-xl text-xs font-semibold ${
               message.type === 'error'
-                ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/30'
-                : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30'
+                ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/30'
+                : 'bg-neo-mint/15 text-neo-mint border border-neo-mint/30'
             }`}
           >
             {message.text}
@@ -119,7 +119,7 @@ export default function GroupModal({
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
                 placeholder="e.g. Web3 Titans"
-                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
               />
             </div>
             <div>
@@ -130,7 +130,7 @@ export default function GroupModal({
                 value={groupDesc}
                 onChange={(e) => setGroupDesc(e.target.value)}
                 placeholder="What is this guild about?"
-                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
               />
             </div>
             <motion.button
@@ -139,9 +139,9 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+              className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}
               <span>{loading ? 'Creating Group...' : 'Create Group'}</span>
             </motion.button>
           </form>
@@ -158,7 +158,7 @@ export default function GroupModal({
                 value={joinId}
                 onChange={(e) => setJoinId(e.target.value)}
                 placeholder="Paste group UUID here..."
-                className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm font-mono focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+                className="w-full px-4 py-2.5 bg-deep-space border border-cyber-border rounded-xl text-white text-sm font-mono focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
               />
             </div>
             <motion.button
@@ -167,9 +167,9 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-[#6C5CE7] to-[#00FFCC] hover:opacity-95 disabled:opacity-50 text-[#0A1128] rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+              className="w-full py-2.5 bg-gradient-to-r from-electric-indigo to-neo-mint hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
             >
-              {loading && <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />}
+              {loading && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}
               <span>{loading ? 'Joining Guild...' : 'Join Group'}</span>
             </motion.button>
           </form>

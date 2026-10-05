@@ -21,7 +21,7 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
       isOpen={isOpen}
       onClose={onClose}
       title="Session Breakdown"
-      icon={<BarChart3 className="w-5 h-5 text-[#6C5CE7]" />}
+      icon={<BarChart3 className="w-5 h-5 text-electric-indigo" />}
       maxWidth="max-w-lg"
       footer={
         <motion.button
@@ -30,25 +30,25 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
           onClick={onClose}
-          className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Quiz
         </motion.button>
       }
     >
       <div className="space-y-5">
-        <div className="flex justify-between items-center p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A]">
+        <div className="flex justify-between items-center p-4 bg-deep-space/70 rounded-xl border border-cyber-border">
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Total Answered</span>
             <p className="text-lg font-bold text-white font-heading">{history.length}</p>
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Correct</span>
-            <p className="text-lg font-black text-[#00FFCC] font-heading">{correctCount}</p>
+            <p className="text-lg font-black text-neo-mint font-heading">{correctCount}</p>
           </div>
           <div>
             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Accuracy</span>
-            <p className="text-lg font-black text-[#6C5CE7] font-heading">{accuracy}%</p>
+            <p className="text-lg font-black text-electric-indigo font-heading">{accuracy}%</p>
           </div>
         </div>
 
@@ -61,18 +61,18 @@ export default function ReviewModal({ isOpen, onClose, history }: ReviewModalPro
                 key={`${item.questionId}-${idx}`}
                 className={`p-4 rounded-xl border flex items-start gap-3 transition-colors ${
                   item.isCorrect
-                    ? 'bg-[#00FFCC]/10 border-[#00FFCC]/30 text-slate-200'
-                    : 'bg-[#FF4757]/10 border-[#FF4757]/30 text-slate-200'
+                    ? 'bg-neo-mint/10 border-neo-mint/30 text-slate-200'
+                    : 'bg-pop-coral/10 border-pop-coral/30 text-slate-200'
                 }`}
               >
                 {item.isCorrect ? (
-                  <CheckCircle2 className="w-5 h-5 text-[#00FFCC] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-neo-mint shrink-0 mt-0.5" />
                 ) : (
-                  <XCircle className="w-5 h-5 text-[#FF4757] shrink-0 mt-0.5" />
+                  <XCircle className="w-5 h-5 text-pop-coral shrink-0 mt-0.5" />
                 )}
                 <div className="flex-1">
                   <span className={`text-[10px] font-bold uppercase tracking-wider font-heading ${
-                    item.isCorrect ? 'text-[#00FFCC]' : 'text-[#FF4757]'
+                    item.isCorrect ? 'text-neo-mint' : 'text-pop-coral'
                   }`}>
                     Q{idx + 1} • {item.isCorrect ? 'Correct' : 'Missed'}
                   </span>

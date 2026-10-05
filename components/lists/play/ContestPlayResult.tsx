@@ -200,12 +200,12 @@ export function ContestPlayResult({
 
   return (
     <div className="max-w-xl mx-auto p-6 text-center space-y-4">
-      <Trophy className="w-10 h-10 text-[#FFD166] mx-auto" />
+      <Trophy className="w-10 h-10 text-crypto-gold mx-auto" />
       <h2 className="text-xl font-black text-white">Contest Complete!</h2>
       <p className="text-slate-300 text-sm">
         {result.correctCount} / {totalQuestions} correct
       </p>
-      <p className="text-2xl font-black text-[#00FFCC]">{formatTokens(result.rewardAmount)} QUIZ</p>
+      <p className="text-2xl font-black text-neo-mint">{formatTokens(result.rewardAmount)} QUIZ</p>
 
       <ContestPlayClaimButton
         isWrongChain={isWrongChain}

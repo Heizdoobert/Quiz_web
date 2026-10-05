@@ -68,7 +68,7 @@ export default function RatingStars({
                   key={star}
                   className={`w-4 h-4 ${
                     star <= Math.round(average)
-                      ? 'text-[#FFD166] fill-[#FFD166]'
+                      ? 'text-crypto-gold fill-crypto-gold'
                       : 'text-slate-600'
                   }`}
                   aria-hidden="true"
@@ -85,13 +85,13 @@ export default function RatingStars({
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(null)}
                 onClick={() => handleRate(star)}
-                className="p-0.5 rounded hover:scale-110 transition-transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FFD166]"
+                className="p-0.5 rounded hover:scale-110 transition-transform cursor-pointer focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-crypto-gold"
               >
                 <Star
                   className={`w-4 h-4 transition-colors ${
                     isFilled
-                      ? 'text-[#FFD166] fill-[#FFD166]'
-                      : 'text-slate-500 hover:text-[#FFD166]'
+                      ? 'text-crypto-gold fill-crypto-gold'
+                      : 'text-slate-500 hover:text-crypto-gold'
                   }`}
                 />
               </button>
@@ -105,7 +105,7 @@ export default function RatingStars({
         <span className="text-xs text-slate-400">({count})</span>
       </div>
 
-      {error && <p className="text-xs text-[#FF4757] font-medium">{error}</p>}
+      {error && <p className="text-xs text-pop-coral font-medium">{error}</p>}
     </div>
   );
 }

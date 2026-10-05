@@ -51,12 +51,12 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
-          className="w-full px-4 py-2.5 rounded-xl bg-[#1A1B35] border border-[#2D305A] text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00FFCC]/60"
+          className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
         />
         <button
           type="submit"
           disabled={pending}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           {pending && <Loader2 className="w-4 h-4 animate-spin" />} Send code
         </button>
@@ -77,13 +77,13 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
         value={code}
         onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
         placeholder="123456"
-        className="w-full px-4 py-2.5 rounded-xl bg-[#1A1B35] border border-[#2D305A] text-sm text-white tracking-[0.3em] text-center placeholder:text-slate-500 focus:outline-none focus:border-[#00FFCC]/60"
+        className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white tracking-[0.3em] text-center placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
       />
-      {error && <p className="text-xs text-[#FF4757]">{error}</p>}
+      {error && <p className="text-xs text-pop-coral">{error}</p>}
       <button
         type="submit"
         disabled={pending || code.length !== 6}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         {pending && <Loader2 className="w-4 h-4 animate-spin" />} Verify
       </button>

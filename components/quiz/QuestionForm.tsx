@@ -37,10 +37,10 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-controls="question-form-body"
-        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-[#25284D] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] transition-all cursor-pointer select-none"
+        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-cyber-violet-light active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint transition-all cursor-pointer select-none"
       >
         <div className="flex items-center gap-3">
-          <span className="p-2 rounded-xl bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30">
+          <span className="p-2 rounded-xl bg-neo-mint/15 text-neo-mint border border-neo-mint/30">
             <Plus className="w-5 h-5" />
           </span>
           <div>
@@ -49,7 +49,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-bold font-heading px-3 py-1 bg-[#25284D] text-[#00FFCC] border border-[#3A3E70] rounded-full">
+          <span className="text-xs font-bold font-heading px-3 py-1 bg-cyber-violet-light text-neo-mint border border-[#3A3E70] rounded-full">
             {isOpen ? 'Close' : 'Expand'}
           </span>
           {isOpen ? (
@@ -68,7 +68,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-            className="overflow-hidden border-t border-[#2D305A]"
+            className="overflow-hidden border-t border-cyber-border"
           >
             <form
               id="question-form-body"
@@ -79,8 +79,8 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                 <div
                   className={`p-3 rounded-xl text-xs font-bold ${
                     feedback.type === 'error'
-                      ? 'bg-[#FF4757]/15 text-[#FF4757] border border-[#FF4757]/40'
-                      : 'bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/40'
+                      ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/40'
+                      : 'bg-neo-mint/15 text-neo-mint border border-neo-mint/40'
                   }`}
                 >
                   {feedback.message}
@@ -89,7 +89,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  Question Prompt <span className="text-[#FF4757]">*</span>
+                  Question Prompt <span className="text-pop-coral">*</span>
                 </label>
                 <input
                   type="text"
@@ -98,7 +98,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="e.g. What does CSS stand for?"
-                  className="w-full px-4 py-2.5 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC] placeholder:text-slate-500 transition-all"
+                  className="w-full px-4 py-2.5 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint focus:border-neo-mint placeholder:text-slate-500 transition-all"
                 />
               </div>
 
@@ -120,7 +120,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
                     placeholder="Web Dev, Crypto, General..."
-                    className="w-full px-3.5 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC] transition-all"
+                    className="w-full px-3.5 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-neo-mint focus:border-neo-mint transition-all"
                   />
                   <datalist id="topics-list">
                     <option value="Web Dev" />
@@ -141,7 +141,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                     value={explanation}
                     onChange={(e) => setExplanation(e.target.value)}
                     placeholder="e.g. Cascading Style Sheets format web pages."
-                    className="w-full px-3.5 py-2 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-[#00FFCC] focus:border-[#00FFCC] transition-all"
+                    className="w-full px-3.5 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-neo-mint focus:border-neo-mint transition-all"
                   />
                 </div>
               </div>
@@ -153,12 +153,12 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                   whileHover={{ scale: loading ? 1 : 1.03, filter: loading ? 'none' : 'brightness(1.1)' }}
                   whileTap={{ scale: loading ? 1 : 0.97 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-50 disabled:cursor-not-allowed text-[#0A1128] rounded-xl font-black font-heading text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-50 disabled:cursor-not-allowed text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
                 >
                   {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin text-[#0A1128]" />
+                    <Loader2 className="w-4 h-4 animate-spin text-deep-space" />
                   ) : (
-                    <Sparkles className="w-4 h-4 text-[#0A1128]" />
+                    <Sparkles className="w-4 h-4 text-deep-space" />
                   )}
                   {loading ? 'Submitting Question...' : 'Submit Question'}
                 </motion.button>

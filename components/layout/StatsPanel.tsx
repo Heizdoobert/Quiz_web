@@ -21,8 +21,8 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
     <div className="space-y-2.5">
       <div className="grid grid-cols-3 gap-2.5">
         {/* Total Score */}
-        <div className="bg-elevation-2 glass-border border border-transparent px-1.5 py-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#6C5CE7]/50 transition-colors">
-          <Trophy className="w-4 h-4 text-[#FFD166] mb-1" />
+        <div className="bg-elevation-2 glass-border border border-transparent px-1.5 py-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-electric-indigo/50 transition-colors">
+          <Trophy className="w-4 h-4 text-crypto-gold mb-1" />
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider whitespace-nowrap">Score</span>
           <span className="text-xl font-black font-heading text-white">{stats.score}</span>
           <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">pts</span>
@@ -32,21 +32,21 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
         <div
           className={`bg-elevation-2 glass-border px-1.5 py-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner transition-all ${
             stats.streak >= 3
-              ? 'border border-[#FF4757] animate-pulse'
-              : 'border border-transparent hover:border-[#FF4757]/50'
+              ? 'border border-pop-coral animate-pulse'
+              : 'border border-transparent hover:border-pop-coral/50'
           }`}
         >
-          <Flame className={`w-4 h-4 mb-1 ${stats.streak >= 3 ? 'text-[#FF4757] animate-bounce' : 'text-[#FF4757]'}`} />
+          <Flame className={`w-4 h-4 mb-1 ${stats.streak >= 3 ? 'text-pop-coral animate-bounce' : 'text-pop-coral'}`} />
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider whitespace-nowrap">Streak</span>
-          <span className="text-xl font-black font-heading text-[#FFD166]">{stats.streak}</span>
+          <span className="text-xl font-black font-heading text-crypto-gold">{stats.streak}</span>
           <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">Best: {stats.bestStreak}</span>
         </div>
 
         {/* Accuracy */}
-        <div className="bg-elevation-2 glass-border border border-transparent px-1.5 py-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-[#00FFCC]/50 transition-colors">
-          <Target className="w-4 h-4 text-[#00FFCC] mb-1" />
+        <div className="bg-elevation-2 glass-border border border-transparent px-1.5 py-3 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner hover:border-neo-mint/50 transition-colors">
+          <Target className="w-4 h-4 text-neo-mint mb-1" />
           <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider whitespace-nowrap">Accuracy</span>
-          <span className="text-xl font-black font-heading text-[#00FFCC]">{stats.accuracy}%</span>
+          <span className="text-xl font-black font-heading text-neo-mint">{stats.accuracy}%</span>
           <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{stats.totalAnswered} total</span>
         </div>
       </div>
@@ -59,19 +59,19 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="bg-elevation-2 glass-border border border-transparent w-full p-3 rounded-2xl flex items-center justify-between hover:border-[#00FFCC]/50 hover:bg-[#25284D] cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="bg-elevation-2 glass-border border border-transparent w-full p-3 rounded-2xl flex items-center justify-between hover:border-neo-mint/50 hover:bg-cyber-violet-light cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
         >
           <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-[#FFD166] group-hover:rotate-12 transition-transform" />
+            <Coins className="w-4 h-4 text-crypto-gold group-hover:rotate-12 transition-transform" />
             <span className="text-xs font-semibold text-slate-300">
               {hasClaimable ? (
-                <span className="text-[#00FFCC] font-bold font-heading">{formattedClaimable} $QUIZ claimable</span>
+                <span className="text-neo-mint font-bold font-heading">{formattedClaimable} $QUIZ claimable</span>
               ) : (
                 'No tokens to claim'
               )}
             </span>
           </div>
-          <span className="text-[10px] text-[#00FFCC] font-bold font-heading group-hover:underline">View Rewards →</span>
+          <span className="text-[10px] text-neo-mint font-bold font-heading group-hover:underline">View Rewards →</span>
         </motion.button>
       )}
     </div>
