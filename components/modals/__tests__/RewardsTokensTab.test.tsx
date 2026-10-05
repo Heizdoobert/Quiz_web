@@ -10,7 +10,6 @@ describe('RewardsTokensTab', () => {
     claimableTokens: '1000',
     eligibleBadges: [],
     alreadyClaimedBadges: [],
-    totalTokensMinted: '0',
   };
 
   const formatTokens = (val: string) => `${val} TKN`;

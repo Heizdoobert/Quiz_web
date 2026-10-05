@@ -9,9 +9,8 @@ describe('GroupList', () => {
       id: 'g1',
       name: 'Alpha Team',
       description: 'The alpha testers',
-      created_at: 'user1',
+      owner_wallet: 'user1',
       created_at: '2026-01-01',
-      members_count: 5,
     },
   ];
 

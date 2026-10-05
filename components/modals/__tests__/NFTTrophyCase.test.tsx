@@ -16,9 +16,11 @@ describe('NFTTrophyCase', () => {
 
   it('renders minted and eligible badges correctly', () => {
     const mockRewards: ClaimableRewards = {
+      claimableTokens: '0',
+      totalEarned: '0',
+      totalClaimed: '0',
       eligibleBadges: [1],
       alreadyClaimedBadges: [0],
-      totalTokensMinted: '0',
     };
 
     render(
@@ -33,9 +35,11 @@ describe('NFTTrophyCase', () => {
 
   it('handles Mint Now click', () => {
     const mockRewards: ClaimableRewards = {
+      claimableTokens: '0',
+      totalEarned: '0',
+      totalClaimed: '0',
       eligibleBadges: [2],
       alreadyClaimedBadges: [],
-      totalTokensMinted: '0',
     };
 
     const openMock = vi.fn();

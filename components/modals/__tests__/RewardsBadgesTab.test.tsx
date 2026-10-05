@@ -10,7 +10,6 @@ describe('RewardsBadgesTab', () => {
     claimableTokens: '0',
     eligibleBadges: [1],
     alreadyClaimedBadges: [0],
-    totalTokensMinted: '0',
   };
 
   it('renders badges in correct states', () => {
