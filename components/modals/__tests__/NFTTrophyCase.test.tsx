@@ -16,7 +16,6 @@ describe('NFTTrophyCase', () => {
 
   it('renders minted and eligible badges correctly', () => {
     const mockRewards: ClaimableRewards = {
-      amount: '0',
       eligibleBadges: [1],
       alreadyClaimedBadges: [0],
       totalTokensMinted: '0',
@@ -34,7 +33,6 @@ describe('NFTTrophyCase', () => {
 
   it('handles Mint Now click', () => {
     const mockRewards: ClaimableRewards = {
-      amount: '0',
       eligibleBadges: [2],
       alreadyClaimedBadges: [],
       totalTokensMinted: '0',

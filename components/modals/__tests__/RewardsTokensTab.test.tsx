@@ -5,7 +5,6 @@ import { ClaimableRewards } from '@/lib/types';
 
 describe('RewardsTokensTab', () => {
   const mockRewards: ClaimableRewards = {
-    amount: '1000',
     totalEarned: '2000',
     totalClaimed: '1000',
     claimableTokens: '1000',
