@@ -28,16 +28,16 @@ export default function Header({
   const { account } = useSession();
 
   return (
-    <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-[#2D305A] sticky top-0 z-30 shadow-lg">
+    <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-cyber-border sticky top-0 z-30 shadow-lg">
       <Link
         href="/"
-        className="flex items-center gap-2.5 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] rounded-xl group transition-transform active:scale-95"
+        className="flex items-center gap-2.5 min-w-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint rounded-xl group transition-transform active:scale-95"
         aria-label="Quick Quiz Home"
       >
-        <div className="shrink-0 p-1.5 rounded-xl bg-[#00FFCC]/15 border border-[#00FFCC]/40 text-[#00FFCC] group-hover:scale-105 transition-transform">
+        <div className="shrink-0 p-1.5 rounded-xl bg-neo-mint/15 border border-neo-mint/40 text-neo-mint group-hover:scale-105 transition-transform">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
-        <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] bg-clip-text text-transparent">
+        <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent">
           Quick Quiz
         </span>
       </Link>
@@ -48,10 +48,10 @@ export default function Header({
         <button
           type="button"
           onClick={handleToggleSound}
-          className={`p-2 rounded-xl border transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+          className={`p-2 rounded-xl border transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint ${
             isMuted
-              ? 'bg-[#25284D]/50 border-[#3A3E70]/60 text-slate-500 hover:text-slate-300'
-              : 'bg-[#25284D] border-[#3A3E70] text-[#00FFCC] hover:border-[#00FFCC]/60'
+              ? 'bg-cyber-violet-light/50 border-[#3A3E70]/60 text-slate-500 hover:text-slate-300'
+              : 'bg-cyber-violet-light border-[#3A3E70] text-neo-mint hover:border-neo-mint/60'
           }`}
           title={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
           aria-label={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
@@ -62,7 +62,7 @@ export default function Header({
         {/* Question Lists / Contests */}
         <Link
           href="/contest"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#00FFCC] font-bold font-heading text-xs transition-all shadow-sm hover:scale-105"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint border border-[#3A3E70] text-neo-mint font-bold font-heading text-xs transition-all shadow-sm hover:scale-105"
           aria-label="Question Lists & Contests"
         >
           <Trophy className="w-4 h-4" />
@@ -74,10 +74,10 @@ export default function Header({
           <button
             type="button"
             onClick={onOpenProfile}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-slate-200 hover:text-white font-bold font-heading text-xs transition-all shadow-sm hover:scale-105 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint border border-[#3A3E70] text-slate-200 hover:text-white font-bold font-heading text-xs transition-all shadow-sm hover:scale-105 cursor-pointer"
             aria-label="Player Profile"
           >
-            <User className="w-4 h-4 text-[#6C5CE7]" />
+            <User className="w-4 h-4 text-electric-indigo" />
             <span className="hidden sm:inline">Profile</span>
           </button>
         )}
@@ -87,13 +87,13 @@ export default function Header({
           <button
             type="button"
             onClick={onOpenRewards}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] border border-[#3A3E70] text-[#FFD166] font-bold font-heading text-xs transition-all hover:scale-105 cursor-pointer"
+            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint border border-[#3A3E70] text-crypto-gold font-bold font-heading text-xs transition-all hover:scale-105 cursor-pointer"
             aria-label="Rewards"
           >
-            <Gift className="w-4 h-4 text-[#FFD166]" />
+            <Gift className="w-4 h-4 text-crypto-gold" />
             <span className="hidden sm:inline">Rewards</span>
             {hasClaimable && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#00FFCC] rounded-full animate-ping" />
+              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-mint rounded-full animate-ping" />
             )}
           </button>
         )}
@@ -102,12 +102,12 @@ export default function Header({
         {account && !account.wallet && (
           <details className="relative">
             <summary
-              className="list-none p-2 rounded-xl border border-[#3A3E70] bg-[#25284D] text-[#FFD166] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+              className="list-none p-2 rounded-xl border border-[#3A3E70] bg-cyber-violet-light text-crypto-gold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
               aria-label="Why add a wallet?"
             >
               <Info className="w-4 h-4" />
             </summary>
-            <div className="absolute right-0 mt-2 w-72 p-4 rounded-xl border border-[#2D305A] bg-[#14163A] shadow-lg z-40">
+            <div className="absolute right-0 mt-2 w-72 p-4 rounded-xl border border-cyber-border bg-elevation-2 shadow-lg z-40">
               <NoWalletNotice heldTokens={heldTokens} sweepsAt={sweepsAt} />
             </div>
           </details>

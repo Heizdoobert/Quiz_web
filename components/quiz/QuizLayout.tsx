@@ -73,8 +73,8 @@ export default function QuizLayout({
         heldTokens={claimableRewards?.heldTokens}
         sweepsAt={claimableRewards?.sweepsAt}
       />
-      <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-[84px]' : 'pb-6'}`}>
-      <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">
+      <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-21' : 'pb-6'}`}>
+      <div className="w-full max-w-385 flex gap-6 justify-center items-start">
         {/* Center Main Content Area */}
         <div className="flex-1 max-w-6xl w-full flex flex-col items-center">
           {/* Top Banner Ad */}
@@ -136,7 +136,7 @@ export default function QuizLayout({
                     <button
                       type="button"
                       onClick={() => requireSignIn()}
-                      className="px-5 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black font-heading text-xs cursor-pointer"
+                      className="px-5 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer"
                     >
                       Sign In
                     </button>

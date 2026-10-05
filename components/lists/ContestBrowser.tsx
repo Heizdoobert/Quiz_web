@@ -78,7 +78,7 @@ export default function ContestBrowser() {
             return (
               <div
                 key={list.id}
-                className="p-4 bg-[#1A1B35]/90 border border-[#2D305A] rounded-2xl flex items-center justify-between gap-3"
+                className="p-4 bg-cyber-violet/90 border border-cyber-border rounded-2xl flex items-center justify-between gap-3"
               >
                 <div className="min-w-0">
                   <h3 className="font-bold text-white text-sm truncate">{list.title}</h3>
@@ -86,10 +86,10 @@ export default function ContestBrowser() {
                     <span className="flex items-center gap-1">
                       <ListChecks className="w-3.5 h-3.5" /> {list.questionCount} questions
                     </span>
-                    <span className="flex items-center gap-1 text-[#FFD166]">
+                    <span className="flex items-center gap-1 text-crypto-gold">
                       <Users className="w-3.5 h-3.5" /> {list.participantCount ?? 0}/{list.max_participants ?? 10} players
                     </span>
-                    <span className="flex items-center gap-1 text-[#00FFCC]">
+                    <span className="flex items-center gap-1 text-neo-mint">
                       <Coins className="w-3.5 h-3.5" />
                       {(Number(list.perQuestionReward || '0') / 1e18).toString()} QUIZ / correct answer
                     </span>
@@ -102,10 +102,10 @@ export default function ContestBrowser() {
                     disabled={isClaimed}
                     className={`shrink-0 px-4 py-2 rounded-xl font-black text-sm flex items-center gap-1.5 ${
                       isClaimed
-                        ? 'bg-[#1A1B35] text-slate-500 border border-[#2D305A]'
+                        ? 'bg-cyber-violet text-slate-500 border border-cyber-border'
                         : isCompleted
-                        ? 'bg-gradient-to-r from-[#FFD166] to-[#FF9F1C] text-[#0A1128] cursor-pointer'
-                        : 'bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] cursor-pointer'
+                        ? 'bg-gradient-to-r from-crypto-gold to-[#FF9F1C] text-deep-space cursor-pointer'
+                        : 'bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space cursor-pointer'
                     }`}
                   >
                     {isClaimed ? (

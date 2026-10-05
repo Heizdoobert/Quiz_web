@@ -26,7 +26,7 @@ export function useDisputeModal({ onClose, questionId, walletAddress }: UseDispu
   const [isQuarantined, setIsQuarantined] = useState(false);
   const { requireSignIn: ensureSession } = useSession();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!questionId) {
       setError('No active question to dispute.');

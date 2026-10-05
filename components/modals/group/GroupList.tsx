@@ -25,7 +25,7 @@ export function GroupList({
           {groups.map((g) => (
             <div
               key={g.id}
-              className="p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
+              className="p-4 bg-deep-space/70 rounded-xl border border-cyber-border flex items-center justify-between"
             >
               <div>
                 <h4 className="font-bold text-white text-sm">{g.name}</h4>
@@ -39,7 +39,7 @@ export function GroupList({
                   <button
                     type="button"
                     onClick={() => onSelectGroup(g.id)}
-                    className="px-2.5 py-1 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7]"
+                    className="px-2.5 py-1 bg-electric-indigo/20 hover:bg-electric-indigo text-electric-indigo hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-indigo"
                   >
                     View Board
                   </button>
@@ -47,7 +47,7 @@ export function GroupList({
                 <button
                   type="button"
                   onClick={() => onLeaveGroup(g.id)}
-                  className="px-2.5 py-1 bg-[#FF4757]/15 hover:bg-[#FF4757] text-[#FF4757] hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF4757]"
+                  className="px-2.5 py-1 bg-pop-coral/15 hover:bg-pop-coral text-pop-coral hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pop-coral"
                 >
                   Leave
                 </button>

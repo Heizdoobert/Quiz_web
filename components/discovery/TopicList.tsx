@@ -14,7 +14,7 @@ export default function TopicList({ topics }: { topics: Topic[] }) {
         <li key={topic.name}>
           <Link
             href={`/topics/${encodeURIComponent(topic.name)}`}
-            className="glass glass-border glass-edge rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-[#00FFCC]/60 transition-all"
+            className="glass glass-border glass-edge rounded-2xl p-4 flex items-center justify-between gap-4 hover:border-neo-mint/60 transition-all"
           >
             <div className="min-w-0">
               <p className="text-sm sm:text-base text-slate-100 font-semibold truncate">{topic.name}</p>

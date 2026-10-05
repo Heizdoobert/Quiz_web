@@ -11,7 +11,7 @@ export default async function TopicsPage() {
   const topics = await getTopics();
 
   return (
-    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
+    <main className="min-h-screen bg-deep-space text-slate-100 flex flex-col">
       <Header />
       <div className="w-full max-w-3xl mx-auto px-4 py-8 flex flex-col gap-4">
         <h1 className="text-xl font-black font-heading">Topics</h1>

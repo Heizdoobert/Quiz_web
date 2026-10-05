@@ -35,7 +35,7 @@ export default function GroupLeaderboard({
         <button
           type="button"
           onClick={onOpenGroupModal}
-          className="px-3.5 py-1.5 bg-[#6C5CE7]/20 hover:bg-[#6C5CE7] text-[#6C5CE7] hover:text-white border border-[#6C5CE7]/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
+          className="px-3.5 py-1.5 bg-electric-indigo/20 hover:bg-electric-indigo text-electric-indigo hover:text-white border border-electric-indigo/40 rounded-xl text-xs font-bold transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neo-mint"
         >
           Manage Groups
         </button>
@@ -46,7 +46,7 @@ export default function GroupLeaderboard({
   return (
     <div className="space-y-3">
       {/* Entries List with Min-Height to Prevent Layout Shift */}
-      <div className="space-y-2 min-h-[260px]">
+      <div className="space-y-2 min-h-65">
         {pagedEntries.map((entry, index) => {
           const isTop1 = entry.rank === 1;
           const isTop2 = entry.rank === 2;
@@ -63,14 +63,14 @@ export default function GroupLeaderboard({
                 isTopThree
                   ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
                   : index % 2 === 0
-                    ? 'bg-deep-space border-[#2D305A] hover:border-[#6C5CE7]/60'
-                    : 'bg-elevation-2 border-[#2D305A] hover:border-[#6C5CE7]/60'
+                    ? 'bg-deep-space border-cyber-border hover:border-electric-indigo/60'
+                    : 'bg-elevation-2 border-cyber-border hover:border-electric-indigo/60'
               }`}
             >
               <div className="flex items-center gap-2">
-                <span className="w-6 flex items-center justify-center font-heading font-bold text-[#6C5CE7]">
+                <span className="w-6 flex items-center justify-center font-heading font-bold text-electric-indigo">
                   {isTop1 ? (
-                    <Trophy className="w-4 h-4 text-[#FFD166]" />
+                    <Trophy className="w-4 h-4 text-crypto-gold" />
                   ) : isTop2 ? (
                     <Medal className="w-4 h-4 text-slate-300" />
                   ) : isTop3 ? (
@@ -79,13 +79,13 @@ export default function GroupLeaderboard({
                     <span className="text-[11px]">#{entry.rank}</span>
                   )}
                 </span>
-                <span className={`font-bold ${isTop1 ? 'text-[#FFD166]' : 'text-slate-200'}`}>
+                <span className={`font-bold ${isTop1 ? 'text-crypto-gold' : 'text-slate-200'}`}>
                   {entry.display_name || entry.wallet_address?.slice(0, 10) || 'Player'}
                 </span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
-                <span className="font-heading font-black text-[#00FFCC]">{entry.score} pts</span>
+                <span className="font-heading font-black text-neo-mint">{entry.score} pts</span>
               </div>
             </motion.div>
           );
@@ -94,12 +94,12 @@ export default function GroupLeaderboard({
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-2 border-t border-[#2D305A] text-xs">
+        <div className="flex items-center justify-between pt-2 border-t border-cyber-border text-xs">
           <button
             type="button"
             disabled={safePage <= 1}
             onClick={goToPrevPage}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#25284D] hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neo-mint"
             aria-label="Previous Page"
           >
             <ChevronLeft className="w-3.5 h-3.5" />
@@ -114,7 +114,7 @@ export default function GroupLeaderboard({
             type="button"
             disabled={safePage >= totalPages}
             onClick={goToNextPage}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#25284D] hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
+            className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neo-mint"
             aria-label="Next Page"
           >
             <span>Next</span>

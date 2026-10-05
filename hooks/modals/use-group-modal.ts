@@ -45,7 +45,7 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
     setMessage(null);
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!walletAddress) {
       setMessage({ type: 'error', text: 'Please connect your wallet first.' });
@@ -71,7 +71,7 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
     }
   };
 
-  const handleJoin = async (e: React.FormEvent) => {
+  const handleJoin = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!walletAddress) {
       setMessage({ type: 'error', text: 'Please connect your wallet first.' });

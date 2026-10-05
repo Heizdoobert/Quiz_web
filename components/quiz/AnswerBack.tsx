@@ -49,14 +49,14 @@ export default function AnswerBack({
       <div
         className={`flex items-center gap-3.5 p-4 rounded-2xl border ${
           result.isCorrect
-            ? 'bg-[#00FFCC]/10 border-[#00FFCC]/40 text-[#00FFCC]'
-            : 'bg-[#FF4757]/10 border-[#FF4757]/40 text-[#FF4757]'
+            ? 'bg-neo-mint/10 border-neo-mint/40 text-neo-mint'
+            : 'bg-pop-coral/10 border-pop-coral/40 text-pop-coral'
         }`}
       >
         {result.isCorrect ? (
-          <CheckCircle2 className="w-8 h-8 text-[#00FFCC] shrink-0" />
+          <CheckCircle2 className="w-8 h-8 text-neo-mint shrink-0" />
         ) : (
-          <XCircle className="w-8 h-8 text-[#FF4757] shrink-0" />
+          <XCircle className="w-8 h-8 text-pop-coral shrink-0" />
         )}
         <div>
           <h3 className="text-lg font-bold tracking-wide">
@@ -73,12 +73,12 @@ export default function AnswerBack({
       </div>
 
       {/* Answer & Explanation Box */}
-      <div className="my-6 p-5 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] space-y-3">
+      <div className="my-6 p-5 rounded-2xl bg-deep-space/80 border border-cyber-border space-y-3">
         <div>
           <span className="text-xs font-bold font-heading text-slate-400 uppercase tracking-wider">
             Correct Answer:
           </span>
-          <p className="text-base font-bold font-heading text-[#00FFCC] mt-0.5">
+          <p className="text-base font-bold font-heading text-neo-mint mt-0.5">
             {letters[result.correctIndex]}: {question.options[result.correctIndex]}
           </p>
         </div>
@@ -98,15 +98,15 @@ export default function AnswerBack({
       <CommunityDiscussion questionId={question.id} />
 
       {/* Next Button & Dispute Footer */}
-      <div className="pt-4 border-t border-[#2D305A] flex items-center justify-between">
+      <div className="pt-4 border-t border-cyber-border flex items-center justify-between">
         {onOpenDispute ? (
           <button
             type="button"
             onClick={onOpenDispute}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-[#FF4757] hover:bg-[#FF4757]/10 border border-transparent hover:border-[#FF4757]/30 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FF4757]"
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-pop-coral hover:bg-pop-coral/10 border border-transparent hover:border-pop-coral/30 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pop-coral"
             title="Challenge or report this question"
           >
-            <Flag className="w-3.5 h-3.5 text-[#FF4757]/70" />
+            <Flag className="w-3.5 h-3.5 text-pop-coral/70" />
             <span className="hidden sm:inline">Dispute Question</span>
           </button>
         ) : (
@@ -119,7 +119,7 @@ export default function AnswerBack({
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
         >
           <span>Next Question</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

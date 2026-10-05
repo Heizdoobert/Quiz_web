@@ -31,7 +31,7 @@ export default function TimerSettingsModal({
       isOpen={isOpen}
       onClose={handleCancel}
       title="Timer & Clock Settings"
-      icon={<Clock className="w-5 h-5 text-[#00FFCC]" />}
+      icon={<Clock className="w-5 h-5 text-neo-mint" />}
       footer={
         <>
           <motion.button
@@ -40,7 +40,7 @@ export default function TimerSettingsModal({
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             onClick={handleCancel}
-            className="px-4 py-2 text-sm font-semibold rounded-xl bg-[#25284D] hover:bg-[#2D305A] text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+            className="px-4 py-2 text-sm font-semibold rounded-xl bg-cyber-violet-light hover:bg-cyber-border text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
           >
             Cancel
           </motion.button>
@@ -50,7 +50,7 @@ export default function TimerSettingsModal({
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             onClick={handleSave}
-            className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+            className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           >
             Save Settings
           </motion.button>
@@ -63,7 +63,7 @@ export default function TimerSettingsModal({
           <select
             value={mode}
             onChange={(e) => setMode(e.target.value as 'per-question' | 'total' | 'stopwatch')}
-            className="w-full px-4 py-3 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+            className="w-full px-4 py-3 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
           >
             <option value="per-question">Per-Question Countdown</option>
             <option value="total">Total Quiz Countdown</option>
@@ -82,10 +82,10 @@ export default function TimerSettingsModal({
                   key={p}
                   type="button"
                   onClick={() => setDuration(p)}
-                  className={`flex-1 py-2 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#6C5CE7] ${
+                  className={`flex-1 py-2 rounded-lg text-xs font-bold font-heading border transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric-indigo ${
                     duration === p
-                      ? 'bg-[#6C5CE7] border-[#6C5CE7] text-white shadow-sm'
-                      : 'bg-[#0A1128] border-[#2D305A] text-slate-300 hover:bg-[#25284D] hover:border-[#6C5CE7]/50'
+                      ? 'bg-electric-indigo border-electric-indigo text-white shadow-sm'
+                      : 'bg-deep-space border-cyber-border text-slate-300 hover:bg-cyber-violet-light hover:border-electric-indigo/50'
                   }`}
                 >
                   {p < 60 ? `${p}s` : `${p / 60}m`}
@@ -98,7 +98,7 @@ export default function TimerSettingsModal({
               max="600"
               value={duration}
               onChange={(e) => setValidatedDuration(e.target.value)}
-              className="w-full px-4 py-3 bg-[#0A1128] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:border-[#00FFCC] focus:ring-1 focus:ring-[#00FFCC]"
+              className="w-full px-4 py-3 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
             />
           </div>
         )}

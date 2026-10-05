@@ -3,10 +3,10 @@ import { Compass, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#0A1128] text-white flex flex-col items-center justify-center p-6 text-center">
-      <div className="max-w-md w-full p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 space-y-4">
+    <div className="min-h-screen bg-deep-space text-white flex flex-col items-center justify-center p-6 text-center">
+      <div className="max-w-md w-full p-8 bg-cyber-violet border border-cyber-border rounded-3xl shadow-2xl shadow-black/60 space-y-4">
         <div className="flex justify-center">
-          <div className="p-3 bg-[#6C5CE7]/20 rounded-2xl border border-[#6C5CE7]/40 text-[#6C5CE7]">
+          <div className="p-3 bg-electric-indigo/20 rounded-2xl border border-electric-indigo/40 text-electric-indigo">
             <Compass className="w-12 h-12" />
           </div>
         </div>
@@ -17,7 +17,7 @@ export default function NotFound() {
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] text-xs font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 font-heading"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 font-heading"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Quick Quiz
           </Link>

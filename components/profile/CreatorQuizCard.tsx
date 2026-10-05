@@ -13,22 +13,22 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
   const getCategoryStyles = (category: string) => {
     const cat = category?.toLowerCase() || '';
     if (cat.includes('defi')) {
-      return 'bg-[#8A2BE2]/15 text-[#8A2BE2] border-[#8A2BE2]/30';
+      return 'bg-cat-defi/15 text-cat-defi border-cat-defi/30';
     }
     if (cat.includes('nft')) {
-      return 'bg-[#FF007F]/15 text-[#FF007F] border-[#FF007F]/30';
+      return 'bg-cat-nft/15 text-cat-nft border-cat-nft/30';
     }
     if (cat.includes('l1') || cat.includes('layer')) {
-      return 'bg-[#3071FF]/15 text-[#3071FF] border-[#3071FF]/30';
+      return 'bg-cat-l1/15 text-cat-l1 border-cat-l1/30';
     }
-    return 'bg-[#6C5CE7]/15 text-[#6C5CE7] border-[#6C5CE7]/30';
+    return 'bg-electric-indigo/15 text-electric-indigo border-electric-indigo/30';
   };
 
   const getStatusBadge = (status?: ClientQuestion['status']) => {
     switch (status) {
       case 'verified':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#00FFCC]/10 text-[#00FFCC] border border-[#00FFCC]/30">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-neo-mint/10 text-neo-mint border border-neo-mint/30">
             <CheckCircle2 className="w-3 h-3" aria-hidden="true" />
             Verified
           </span>
@@ -36,7 +36,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
       case 'quarantined':
       case 'rejected':
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FF4757]/10 text-[#FF4757] border border-[#FF4757]/30">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-pop-coral/10 text-pop-coral border border-pop-coral/30">
             <AlertTriangle className="w-3 h-3" aria-hidden="true" />
             {status === 'quarantined' ? 'Quarantined' : 'Rejected'}
           </span>
@@ -44,7 +44,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
       case 'pending':
       default:
         return (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FFD166]/10 text-[#FFD166] border border-[#FFD166]/30">
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-crypto-gold/10 text-crypto-gold border border-crypto-gold/30">
             <Clock className="w-3 h-3" aria-hidden="true" />
             Pending
           </span>
@@ -61,7 +61,7 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
     : null;
 
   return (
-    <li className="list-none flex flex-col justify-between p-5 rounded-2xl border border-[#2D305A] bg-[#1A1B35]/50 hover:bg-[#1A1B35]/80 transition-all hover:border-[#6C5CE7]/60 group focus-within:ring-2 focus-within:ring-[#00FFCC]">
+    <li className="list-none flex flex-col justify-between p-5 rounded-2xl border border-cyber-border bg-cyber-violet/50 hover:bg-cyber-violet/80 transition-all hover:border-electric-indigo/60 group focus-within:ring-2 focus-within:ring-neo-mint">
       <div>
         <div className="flex items-center justify-between gap-2 mb-3">
           <span
@@ -79,9 +79,9 @@ export default function CreatorQuizCard({ quiz }: CreatorQuizCardProps) {
         </h3>
       </div>
 
-      <div className="flex items-center justify-between pt-3.5 border-t border-[#2D305A]/70 text-xs text-slate-400">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#0A1128] border border-[#2D305A] font-mono text-[11px]">
-          <ListChecks className="w-3.5 h-3.5 text-[#00FFCC]" aria-hidden="true" />
+      <div className="flex items-center justify-between pt-3.5 border-t border-cyber-border/70 text-xs text-slate-400">
+        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-deep-space border border-cyber-border font-mono text-[11px]">
+          <ListChecks className="w-3.5 h-3.5 text-neo-mint" aria-hidden="true" />
           <span>{quiz.options?.length || 0} Options</span>
         </div>
 

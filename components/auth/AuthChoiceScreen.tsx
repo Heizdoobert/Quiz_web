@@ -26,7 +26,7 @@ export default function AuthChoiceScreen({ onSelectMode, onClose }: AuthChoiceSc
         <button
           type="button"
           onClick={() => onSelectMode('login')}
-          className="w-full flex flex-col items-center justify-center py-3.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black shadow-md hover:opacity-95 transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          className="w-full flex flex-col items-center justify-center py-3.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black shadow-md hover:opacity-95 transition-opacity cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           <span className="text-base">Sign In</span>
           <span className="text-xs opacity-80 font-medium">Log into your existing account</span>
@@ -35,7 +35,7 @@ export default function AuthChoiceScreen({ onSelectMode, onClose }: AuthChoiceSc
         <button
           type="button"
           onClick={() => onSelectMode('register')}
-          className="w-full flex flex-col items-center justify-center py-3.5 border border-[#00FFCC] text-[#00FFCC] bg-[#00FFCC]/10 rounded-xl font-black shadow-sm hover:bg-[#00FFCC]/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="w-full flex flex-col items-center justify-center py-3.5 border border-neo-mint text-neo-mint bg-neo-mint/10 rounded-xl font-black shadow-sm hover:bg-neo-mint/20 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
         >
           <span className="text-base">Create Account</span>
           <span className="text-xs opacity-80 font-medium">Join Quick Quiz today</span>

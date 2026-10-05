@@ -19,7 +19,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
       isOpen={isOpen}
       onClose={onClose}
       title="How to Create & Play"
-      icon={<Lightbulb className="w-5 h-5 text-[#FFD166]" />}
+      icon={<Lightbulb className="w-5 h-5 text-crypto-gold" />}
       footer={
         <div className="flex w-full items-center justify-between">
           {step > 1 ? (
@@ -29,7 +29,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
               onClick={handleBack}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-[#25284D] hover:bg-[#2D305A] text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-cyber-violet-light hover:bg-cyber-border text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </motion.button>
@@ -40,7 +40,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             onClick={handleNext}
-            className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+            className="inline-flex items-center gap-1.5 px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           >
             {step === 3 ? (
               <>
@@ -59,16 +59,16 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 1 && (
           <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-4 rounded-2xl bg-[#00FFCC]/15 border border-[#00FFCC]/30 text-[#00FFCC]">
+              <div className="p-4 rounded-2xl bg-neo-mint/15 border border-neo-mint/30 text-neo-mint">
                 <FileEdit className="w-8 h-8" />
               </div>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 bg-[#00FFCC]/15 text-[#00FFCC] border border-[#00FFCC]/30 rounded-full font-heading">
+            <span className="text-xs font-bold px-2.5 py-1 bg-neo-mint/15 text-neo-mint border border-neo-mint/30 rounded-full font-heading">
               Step 1 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Create Your Questions</h3>
             <p className="text-sm text-slate-300">
-              Click <strong className="text-[#00FFCC]">&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
+              Click <strong className="text-neo-mint">&quot;Add Custom Question&quot;</strong> to enter your question text, 4 options, and select the radio button next to the correct answer.
             </p>
           </div>
         )}
@@ -76,11 +76,11 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 2 && (
           <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-4 rounded-2xl bg-[#6C5CE7]/20 border border-[#6C5CE7]/40 text-[#6C5CE7]">
+              <div className="p-4 rounded-2xl bg-electric-indigo/20 border border-electric-indigo/40 text-electric-indigo">
                 <Boxes className="w-8 h-8" />
               </div>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 bg-[#6C5CE7]/20 text-[#6C5CE7] border border-[#6C5CE7]/40 rounded-full font-heading">
+            <span className="text-xs font-bold px-2.5 py-1 bg-electric-indigo/20 text-electric-indigo border border-electric-indigo/40 rounded-full font-heading">
               Step 2 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Build Your Trivia Pool</h3>
@@ -93,16 +93,16 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
         {step === 3 && (
           <div className="text-center py-3 space-y-4">
             <div className="flex justify-center mb-2">
-              <div className="p-4 rounded-2xl bg-[#FFD166]/20 border border-[#FFD166]/40 text-[#FFD166]">
+              <div className="p-4 rounded-2xl bg-crypto-gold/20 border border-crypto-gold/40 text-crypto-gold">
                 <Trophy className="w-8 h-8" />
               </div>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 bg-[#FFD166]/20 text-[#FFD166] border border-[#FFD166]/40 rounded-full font-heading">
+            <span className="text-xs font-bold px-2.5 py-1 bg-crypto-gold/20 text-crypto-gold border border-crypto-gold/40 rounded-full font-heading">
               Step 3 of 3
             </span>
             <h3 className="text-lg font-bold text-white">Play & Climb Ranks</h3>
             <p className="text-sm text-slate-300">
-              Use keys <strong className="text-[#00FFCC]">1–4</strong> or <strong className="text-[#00FFCC]">A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
+              Use keys <strong className="text-neo-mint">1–4</strong> or <strong className="text-neo-mint">A–D</strong> to answer. Enjoy live streak tracking, accuracy stats, and compete for top ranks on the Global and Group Leaderboards!
             </p>
           </div>
         )}
@@ -114,8 +114,8 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
               key={s}
               type="button"
               onClick={() => setStep(s)}
-              className={`h-2.5 rounded-full transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
-                step === s ? 'bg-[#00FFCC] w-6' : 'bg-[#2D305A] hover:bg-[#6C5CE7] w-2.5'
+              className={`h-2.5 rounded-full transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint ${
+                step === s ? 'bg-neo-mint w-6' : 'bg-cyber-border hover:bg-electric-indigo w-2.5'
               }`}
               aria-label={`Step ${s}`}
             />

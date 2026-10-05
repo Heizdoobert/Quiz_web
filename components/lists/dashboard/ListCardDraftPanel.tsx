@@ -24,14 +24,14 @@ export function ListCardDraftPanel({
       <button
         type="button"
         onClick={onAddQuestion}
-        className="px-3 py-1.5 bg-[#00FFCC]/15 text-[#00FFCC] rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-neo-mint/15 text-neo-mint rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Plus className="w-3.5 h-3.5" /> Add Question
       </button>
       <button
         type="button"
         onClick={onEditDetails}
-        className="px-3 py-1.5 bg-[#6C5CE7]/15 text-[#6C5CE7] rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-electric-indigo/15 text-electric-indigo rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Pencil className="w-3.5 h-3.5" /> Edit Details
       </button>
@@ -39,14 +39,14 @@ export function ListCardDraftPanel({
         type="button"
         onClick={onSubmitForReview}
         disabled={questionCount < MIN_LIST_QUESTIONS}
-        className="px-3 py-1.5 bg-[#6C5CE7]/15 text-[#6C5CE7] disabled:opacity-40 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-electric-indigo/15 text-electric-indigo disabled:opacity-40 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Send className="w-3.5 h-3.5" /> Submit for Review
       </button>
       <button
         type="button"
         onClick={onDeleteList}
-        className="px-3 py-1.5 bg-[#FF4757]/15 text-[#FF4757] rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-pop-coral/15 text-pop-coral rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Trash2 className="w-3.5 h-3.5" /> Delete List
       </button>

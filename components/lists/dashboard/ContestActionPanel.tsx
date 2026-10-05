@@ -139,11 +139,11 @@ export function ContestActionPanel({
   if (listStatus !== 'approved') return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-2 p-3 bg-[#6C5CE7]/10 border border-[#6C5CE7]/30 rounded-xl">
-      <Rocket className="w-4 h-4 text-[#6C5CE7]" />
+    <div className="flex flex-wrap items-center gap-2 p-3 bg-electric-indigo/10 border border-electric-indigo/30 rounded-xl">
+      <Rocket className="w-4 h-4 text-electric-indigo" />
       <div className="flex flex-col">
         <span className="text-xs text-slate-300">Approved! Set a reward pool (QUIZ tokens) and start the contest:</span>
-        <span className="text-[10px] text-slate-500">Balance: <span className="font-bold text-[#FFD166]">{quizBalance.toLocaleString()} QUIZ</span></span>
+        <span className="text-[10px] text-slate-500">Balance: <span className="font-bold text-crypto-gold">{quizBalance.toLocaleString()} QUIZ</span></span>
       </div>
       <input
         type="number"
@@ -151,7 +151,7 @@ export function ContestActionPanel({
         value={poolAmount}
         onChange={(e) => setPoolAmount(e.target.value)}
         placeholder="e.g. 500"
-        className="w-28 px-2 py-1 bg-[#0A1128] border border-[#2D305A] rounded-lg text-white text-xs"
+        className="w-28 px-2 py-1 bg-deep-space border border-cyber-border rounded-lg text-white text-xs"
       />
       <span className="text-xs text-slate-300">Max Players:</span>
       <input
@@ -160,13 +160,13 @@ export function ContestActionPanel({
         max={1000}
         value={maxParticipants}
         onChange={(e) => setMaxParticipants(e.target.value)}
-        className="w-20 px-2 py-1 bg-[#0A1128] border border-[#2D305A] rounded-lg text-white text-xs"
+        className="w-20 px-2 py-1 bg-deep-space border border-cyber-border rounded-lg text-white text-xs"
       />
       <button
         type="button"
         onClick={handleStartContest}
         disabled={funding !== null}
-        className="px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-lg text-xs font-black disabled:opacity-40 cursor-pointer"
+        className="px-3 py-1.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-lg text-xs font-black disabled:opacity-40 cursor-pointer"
       >
         {funding === 'approving' ? 'Approving QUIZ…' : funding === 'creating' ? 'Funding escrow…' : 'Start Contest'}
       </button>
