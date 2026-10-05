@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Wallet, Mail, User, KeyRound, Loader2 } from 'lucide-react';
-import Modal from '@/components/Modal';
+import { Wallet, Mail, User, KeyRound, Loader2, ArrowLeft } from 'lucide-react';
 import {
   requestEmailCode,
   verifyEmailCode,
@@ -14,19 +14,17 @@ import { NO_WALLET_DISCLOSURE } from '@/lib/rewards-copy';
 
 type Tab = 'username' | 'wallet' | 'email';
 type EmailStep = 'input' | 'code';
-type AuthMode = 'login' | 'register';
+export type AuthMode = 'login' | 'register';
 
-export default function SignInModal({
-  isOpen,
-  onClose,
-  refresh,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
+export interface AuthMethodTabsProps {
+  mode: AuthMode;
+  onBack: () => void;
+  onSuccess: () => void;
   refresh: () => Promise<unknown>;
-}) {
+}
+
+export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: AuthMethodTabsProps) {
   const [tab, setTab] = useState<Tab>('username');
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [email, setEmail] = useState('');
@@ -35,34 +33,22 @@ export default function SignInModal({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleClose = () => {
-    setTab('username');
-    setAuthMode('login');
-    setUsername('');
-    setPassword('');
-    setEmail('');
-    setCode('');
-    setEmailStep('input');
-    setError(null);
-    onClose();
-  };
-
   const handleUsernameAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);
 
-    const action = authMode === 'login' ? signInWithUsername : signUpWithUsername;
+    const action = mode === 'login' ? signInWithUsername : signUpWithUsername;
     const res = await action(username, password);
 
     setPending(false);
     if (!res.ok) {
-      setError(res.error || (authMode === 'login' ? 'Failed to sign in.' : 'Failed to create account.'));
+      setError(res.error || (mode === 'login' ? 'Failed to sign in.' : 'Failed to create account.'));
       return;
     }
 
     await refresh();
-    handleClose();
+    onSuccess();
   };
 
   const handleSendCode = async (e: React.FormEvent) => {
@@ -85,18 +71,33 @@ export default function SignInModal({
       return;
     }
     await refresh();
-    handleClose();
+    onSuccess();
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={handleClose}
-      title={authMode === 'register' && tab === 'username' ? 'Create Account' : 'Sign In'}
-      icon={<User className="w-5 h-5 text-[#00FFCC]" />}
+    <motion.div
+      key="methods"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0, transition: { duration: 0.2 } }}
+      exit={{ opacity: 0, x: 20, transition: { duration: 0.15 } }}
+      className="space-y-5"
     >
-      {/* Auth Method Navigation Tabs */}
-      <div className="flex border-b border-[#2D305A] mb-5">
+      <div className="flex items-center mb-2">
+        <button
+          type="button"
+          onClick={onBack}
+          className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#25284D] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          aria-label="Go back"
+        >
+          <ArrowLeft className="w-5 h-5" />
+        </button>
+        <h3 className="flex-1 text-center text-lg font-bold text-white mr-6">
+          {mode === 'login' ? 'Sign In' : 'Create Account'}
+        </h3>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-[#2D305A]">
         <button
           type="button"
           onClick={() => {
@@ -141,7 +142,6 @@ export default function SignInModal({
         </button>
       </div>
 
-      {/* Tab: Username & Password */}
       {tab === 'username' && (
         <form onSubmit={handleUsernameAuth} className="space-y-4">
           <div className="space-y-3">
@@ -187,30 +187,14 @@ export default function SignInModal({
           <button
             type="submit"
             disabled={pending || !username.trim() || password.length < 6}
-            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer shadow-md hover:opacity-95 transition-opacity"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer shadow-md hover:opacity-95 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
           >
             {pending && <Loader2 className="w-4 h-4 animate-spin" />}
-            {authMode === 'login' ? 'Sign in' : 'Create account'}
+            {mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
-
-          <div className="text-center pt-1">
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode(authMode === 'login' ? 'register' : 'login');
-                setError(null);
-              }}
-              className="text-xs text-[#00FFCC] hover:underline cursor-pointer"
-            >
-              {authMode === 'login'
-                ? "Don't have an account? Create one"
-                : 'Already have an account? Sign in'}
-            </button>
-          </div>
         </form>
       )}
 
-      {/* Tab: Web3 Wallet */}
       {tab === 'wallet' && (
         <div className="space-y-5">
           <p className="text-sm text-slate-300">
@@ -225,7 +209,6 @@ export default function SignInModal({
         </div>
       )}
 
-      {/* Tab: Email OTP */}
       {tab === 'email' && (
         <>
           {emailStep === 'input' && (
@@ -243,7 +226,7 @@ export default function SignInModal({
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 {pending && <Loader2 className="w-4 h-4 animate-spin" />} Send code
               </button>
@@ -269,7 +252,7 @@ export default function SignInModal({
               <button
                 type="submit"
                 disabled={pending || code.length !== 6}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
               >
                 {pending && <Loader2 className="w-4 h-4 animate-spin" />} Verify
               </button>
@@ -277,7 +260,7 @@ export default function SignInModal({
                 <button
                   type="button"
                   onClick={() => setEmailStep('input')}
-                  className="text-xs text-slate-400 hover:text-white cursor-pointer"
+                  className="text-xs text-slate-400 hover:text-white cursor-pointer focus-visible:outline-none focus-visible:underline"
                 >
                   ← Use different email
                 </button>
@@ -286,6 +269,6 @@ export default function SignInModal({
           )}
         </>
       )}
-    </Modal>
+    </motion.div>
   );
 }

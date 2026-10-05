@@ -50,7 +50,7 @@ vi.mock('../lib/audio', () => ({
   },
 }));
 
-vi.mock('../components/auth/SignInModal', () => ({
+vi.mock('../components/auth/AuthPopup', () => ({
   default: () => null,
 }));
 
