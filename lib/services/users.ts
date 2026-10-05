@@ -1,6 +1,6 @@
 import 'server-only';
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 
 // The account id for a wallet, creating the account if the wallet has none.
 // Never call this with an address that hasn't been proven by a session or a

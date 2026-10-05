@@ -18,6 +18,12 @@ const eslintConfig = defineConfig([
     ".agents/**",
     "coverage/**",
   ]),
+  {
+    files: ["components/**/*.tsx", "components/**/*.jsx"],
+    rules: {
+      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }]
+    }
+  }
 ]);
 
 export default eslintConfig;

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
 import AnswerBack from './AnswerBack';
+import useSound from 'use-sound';
 
 import { Rocket, PlusCircle } from 'lucide-react';
 
@@ -47,19 +48,32 @@ export default function QuizCard({
   isUnlocked = true,
   onUnlock,
 }: QuizCardProps) {
-  // Fire confetti if result is correct
+  const [playFlip] = useSound('/sounds/flip.mp3', { volume: 0.5 });
+  const [playCorrect] = useSound('/sounds/correct.mp3', { volume: 0.6 });
+  const [playWrong] = useSound('/sounds/wrong.mp3', { volume: 0.5 });
+
+  // Fire confetti and sound if result is correct
   React.useEffect(() => {
-    if (isFlipped && result?.isCorrect) {
-      import('canvas-confetti').then(({ default: confetti }) => {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#00FFCC', '#6C5CE7', '#FFD166', '#FF4757'],
-        });
-      });
+    if (isFlipped) {
+      playFlip();
+      
+      if (result) {
+        if (result.isCorrect) {
+          setTimeout(playCorrect, 300); // Slight delay for the flip animation
+          import('canvas-confetti').then(({ default: confetti }) => {
+            confetti({
+              particleCount: 80,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#00FFCC', '#6C5CE7', '#FFD166', '#FF4757'],
+            });
+          });
+        } else {
+          setTimeout(playWrong, 300);
+        }
+      }
     }
-  }, [isFlipped, result]);
+  }, [isFlipped, result, playFlip, playCorrect, playWrong]);
 
   // Empty state when no question is available
   if (!question) {

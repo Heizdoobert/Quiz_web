@@ -55,7 +55,7 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
       const res = await createQuestion({ prompt, options, correctIndex, category, explanation });
 
       if (!res.success) {
-        setFeedback({ type: 'error', message: res.error || 'Failed to add question.' });
+        setFeedback({ type: 'error', message: res.error?.message || 'Failed to add question.' });
       } else {
         setFeedback({ type: 'success', message: 'Question added successfully!' });
         setPrompt('');

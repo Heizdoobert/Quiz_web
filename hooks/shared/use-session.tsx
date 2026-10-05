@@ -12,7 +12,7 @@ import {
 import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
 
-const SignInModal = dynamic(() => import('@/components/auth/SignInModal'), {
+const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), {
   ssr: false,
 });
 
@@ -98,7 +98,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   return (
     <SessionContext.Provider value={{ account, refresh, requireSignIn, clearSession }}>
       {children}
-      <SignInModal isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />
+      <AuthPopup isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />
     </SessionContext.Provider>
   );
 }

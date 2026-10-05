@@ -161,6 +161,27 @@ export const BADGE_ICONS: Record<number, string> = {
   3: '⭐',
 };
 
+// --- Standard API Error Contract ---
+export type ActionErrorCode = 
+  | 'VALIDATION_ERROR'
+  | 'UNAUTHORIZED'
+  | 'NOT_FOUND'
+  | 'CONFLICT'
+  | 'RATE_LIMITED'
+  | 'SERVER_ERROR'
+  | 'UNKNOWN_ERROR';
+
+export type ActionResult<T = void> =
+  | { success: true; data: T }
+  | { 
+      success: false; 
+      error: { 
+        code: ActionErrorCode | string; 
+        message: string; 
+        details?: unknown;
+      } 
+    };
+
 // --- Profile & Data Export Interface Contracts ---
 
 export interface PaginationParams {

@@ -88,6 +88,7 @@ For technical architecture decisions and design trade-offs, consult:
   - [ADR-002: Dual-Key Supabase Architecture & RLS Lockdown](docs/decisions/002-dual-key-supabase-rls-lockdown.md)
   - [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](docs/decisions/003-question-lists-and-contest-voucher-safeguards.md)
   - [ADR-004: Next.js Server Action Bundling & Module Separation](docs/decisions/004-server-action-module-separation.md)
+  - [ADR-005: Adopt Component Manager Pattern for UI Code Splitting](docs/decisions/005-component-manager-pattern.md)
 - [Security Threat Model & STRIDE Analysis](SECURITY-TRADE-OFFS.md)
 
 ## Branches

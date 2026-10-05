@@ -14,7 +14,7 @@ import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/que
 import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { getClaimableRewards } from '@/lib/actions/reward-actions';
-import { soundEngine } from '@/lib/audio';
+import { soundEngine } from '@/lib/services/audio';
 import { useSession } from '@/hooks/shared/use-session';
 
 export type ActiveModal =

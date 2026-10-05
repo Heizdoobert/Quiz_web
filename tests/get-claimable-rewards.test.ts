@@ -1,19 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getClaimableRewards } from '../lib/actions/reward-actions';
-import { getSessionAccount } from '../lib/session';
-import { statsForAccount } from '../lib/stats';
+import { getSessionAccount } from '../lib/services/session';
+import { statsForAccount } from '../lib/utils/stats';
 import { getGlobalLeaderboard } from '../lib/actions/leaderboard-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
 
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 const ZERO_STATS = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
 
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/stats', () => ({ statsForAccount: vi.fn() }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/utils/stats', () => ({ statsForAccount: vi.fn() }));
 vi.mock('../lib/actions/leaderboard-actions', () => ({ getGlobalLeaderboard: vi.fn() }));
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),
@@ -21,8 +21,8 @@ vi.mock('../lib/chain', () => ({
   newNonce: vi.fn(),
   getContestId: vi.fn(),
 }));
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn() } }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 
 // No pending vouchers to settle, and no already-claimed rows: an empty result for every query.
 function emptyChain() {

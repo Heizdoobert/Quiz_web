@@ -25,7 +25,7 @@ export function newNonce(): bigint {
   return BigInt('0x' + crypto.randomUUID().replace(/-/g, ''));
 }
 
-export { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
+export { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/services/contest';
 
 export function publicClientFor(chainId: number) {
   const chain = CHAINS.find((c) => c.id === chainId);
