@@ -121,4 +121,98 @@ describe('AuthPopup', () => {
       expect(mockOnClose).toHaveBeenCalled();
     });
   });
+
+  it('handles username login error', async () => {
+    vi.mocked(signInWithUsername).mockResolvedValue({ ok: false, error: 'Invalid credentials' });
+    
+    render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
+    fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
+    
+    // Fill form
+    const usernameInput = await screen.findByPlaceholderText(/e\.g\. crypto_champ/i);
+    const passwordInput = screen.getByPlaceholderText(/••••••••/i);
+    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(passwordInput, { target: { value: 'password123' } });
+    
+    // Submit
+    fireEvent.click(screen.getByRole('button', { name: /Sign in/i }));
+    
+    await waitFor(() => {
+      expect(screen.getByText(/Invalid credentials/i)).toBeTruthy();
+    });
+  });
+
+  it('navigates to Wallet tab and displays ConnectButton', async () => {
+    render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
+    fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
+    
+    const walletTab = await screen.findByRole('button', { name: /Wallet/i });
+    fireEvent.click(walletTab);
+
+    await waitFor(() => {
+      expect(screen.getByTestId('connect-button')).toBeTruthy();
+      expect(screen.getByText(/Supports MetaMask/i)).toBeTruthy();
+    });
+  });
+
+  it('navigates to Email tab and sends code, then verifies code', async () => {
+    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
+    vi.mocked(requestEmailCode).mockResolvedValue({ ok: true });
+    vi.mocked(verifyEmailCode).mockResolvedValue({ ok: true });
+
+    render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
+    fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
+    
+    const emailTab = await screen.findByRole('button', { name: /Email/i });
+    fireEvent.click(emailTab);
+
+    // Enter email
+    const emailInput = await screen.findByPlaceholderText(/you@example.com/i);
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    
+    // Send code
+    const sendBtn = screen.getByRole('button', { name: /Send code/i });
+    fireEvent.click(sendBtn);
+
+    await waitFor(() => {
+      expect(requestEmailCode).toHaveBeenCalledWith('test@example.com');
+    });
+
+    // Enter code
+    const codeInput = await screen.findByPlaceholderText(/123456/i);
+    fireEvent.change(codeInput, { target: { value: '123456' } });
+
+    // Verify
+    const verifyBtn = screen.getByRole('button', { name: /Verify/i });
+    fireEvent.click(verifyBtn);
+
+    await waitFor(() => {
+      expect(verifyEmailCode).toHaveBeenCalledWith('test@example.com', '123456');
+      expect(mockRefresh).toHaveBeenCalled();
+      expect(mockOnClose).toHaveBeenCalled();
+    });
+  });
+
+  it('displays error on invalid email code', async () => {
+    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
+    vi.mocked(requestEmailCode).mockResolvedValue({ ok: true });
+    vi.mocked(verifyEmailCode).mockResolvedValue({ ok: false });
+
+    render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
+    fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
+    
+    fireEvent.click(await screen.findByRole('button', { name: /Email/i }));
+
+    const emailInput = await screen.findByPlaceholderText(/you@example.com/i);
+    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+    fireEvent.click(screen.getByRole('button', { name: /Send code/i }));
+
+    const codeInput = await screen.findByPlaceholderText(/123456/i);
+    fireEvent.change(codeInput, { target: { value: '111111' } });
+    fireEvent.click(screen.getByRole('button', { name: /Verify/i }));
+
+    await waitFor(() => {
+      expect(screen.getByText(/Wrong or expired code/i)).toBeTruthy();
+    });
+  });
 });
