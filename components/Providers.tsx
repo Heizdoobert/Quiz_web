@@ -83,6 +83,8 @@ function RainbowAuthWrapper({ children }: { children: React.ReactNode }) {
   );
 }
 
+import { ToastProvider } from '@/components/ui/Toast';
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -91,7 +93,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <SessionProvider>
-            <RainbowAuthWrapper>{children}</RainbowAuthWrapper>
+            <RainbowAuthWrapper>
+              <ToastProvider>
+                {children}
+              </ToastProvider>
+            </RainbowAuthWrapper>
           </SessionProvider>
         </QueryClientProvider>
       </WagmiProvider>

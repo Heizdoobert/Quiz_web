@@ -152,3 +152,32 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     };
   }
 }
+
+export interface QuestionAnalytics {
+  question_id: string;
+  prompt: string;
+  play_count: number;
+  accuracy_rate: number;
+}
+
+export async function getQuestionAnalytics(): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
+  try {
+    const account = await getSessionAccount();
+    if (!account) {
+      return { success: false, error: 'Sign in to view analytics.' };
+    }
+
+    const { data, error } = await supabase.rpc('get_question_analytics', { p_user_id: account.id });
+
+    if (error) {
+      console.error('[getQuestionAnalytics:rpc]', error);
+      return { success: false, error: 'Failed to fetch analytics.' };
+    }
+
+    return { success: true, data: data as QuestionAnalytics[] };
+  } catch (error) {
+    console.error('[getQuestionAnalytics]', error);
+    return { success: false, error: 'An unexpected error occurred.' };
+  }
+}
+

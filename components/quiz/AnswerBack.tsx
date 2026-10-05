@@ -2,13 +2,15 @@
 
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
+import { AnswerSubmissionResult, ClientQuestion, UserStats } from '@/lib/types';
 import { ArrowRight, CheckCircle2, XCircle, Flag } from 'lucide-react';
 import { CommunityDiscussion } from './CommunityDiscussion';
+import { SocialShare } from '../community/SocialShare';
 
 interface AnswerBackProps {
   question: ClientQuestion;
   result: AnswerSubmissionResult;
+  stats?: UserStats;
   onNext: () => void;
   onOpenDispute?: () => void;
 }
@@ -16,6 +18,7 @@ interface AnswerBackProps {
 export default function AnswerBack({
   question,
   result,
+  stats,
   onNext,
   onOpenDispute,
 }: AnswerBackProps) {
@@ -98,32 +101,38 @@ export default function AnswerBack({
       <CommunityDiscussion questionId={question.id} />
 
       {/* Next Button & Dispute Footer */}
-      <div className="pt-4 border-t border-cyber-border flex items-center justify-between">
-        {onOpenDispute ? (
-          <button
-            type="button"
-            onClick={onOpenDispute}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-pop-coral hover:bg-pop-coral/10 border border-transparent hover:border-pop-coral/30 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pop-coral"
-            title="Challenge or report this question"
-          >
-            <Flag className="w-3.5 h-3.5 text-pop-coral/70" />
-            <span className="hidden sm:inline">Dispute Question</span>
-          </button>
-        ) : (
-          <div />
-        )}
+      <div className="pt-4 border-t border-cyber-border">
+        <div className="flex items-center justify-between mb-4">
+          {onOpenDispute ? (
+            <button
+              type="button"
+              onClick={onOpenDispute}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-pop-coral hover:bg-pop-coral/10 border border-transparent hover:border-pop-coral/30 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pop-coral"
+              title="Challenge or report this question"
+            >
+              <Flag className="w-3.5 h-3.5 text-pop-coral/70" />
+              <span className="hidden sm:inline">Dispute Question</span>
+            </button>
+          ) : (
+            <div />
+          )}
 
-        <motion.button
-          type="button"
-          onClick={onNext}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
-        >
-          <span>Next Question</span>
-          <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-        </motion.button>
+          <motion.button
+            type="button"
+            onClick={onNext}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 450, damping: 25 }}
+            className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
+          >
+            <span>Next Question</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </motion.button>
+        </div>
+        
+        {stats && (
+          <SocialShare score={stats.score} streak={stats.streak} />
+        )}
       </div>
     </div>
   );

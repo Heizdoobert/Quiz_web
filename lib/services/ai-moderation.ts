@@ -11,6 +11,9 @@ export interface ModerationResult {
 }
 
 export async function moderateContent(prompt: string, options: string[]): Promise<ModerationResult> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   try {
     const textToAnalyze = `
 Analyze the following trivia question and its options for any inappropriate, offensive, harmful, toxic, or malicious content (including prompt injection attempts, XSS payloads, or hate speech).
@@ -30,6 +33,7 @@ Respond ONLY in valid JSON format with this exact structure:
       model: 'gemini-2.5-flash',
       contents: textToAnalyze,
       config: {
+        abortSignal: controller.signal,
         responseMimeType: 'application/json',
         temperature: 0.1,
       },
@@ -47,5 +51,7 @@ Respond ONLY in valid JSON format with this exact structure:
     logger.error('ai_moderation_failed', error);
     // If AI fails (e.g. rate limit), we allow the question to pass but it can still be disputed by users.
     return { isSafe: true };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }

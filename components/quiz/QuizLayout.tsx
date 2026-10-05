@@ -104,6 +104,7 @@ export default function QuizLayout({
                 isFlipped={isFlipped}
                 timeLeft={timeLeft}
                 result={result}
+                stats={stats}
                 onSelectAnswer={handleAnswerSubmit}
                 onNextQuestion={loadNextQuestion}
                 onOpenTimerSettings={() => openModal('timer')}
