@@ -509,7 +509,7 @@ describe('createQuestion guards', () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({ questions: { count: 5 } });
     const res = await createQuestion(params);
-    expect(res).toEqual({ success: false, error: 'You can add up to 5 questions per day.' });
+    expect(res).toEqual({ success: false, error: { code: 'RATE_LIMITED', message: 'You can add up to 5 questions per day.' } });
   });
 });
 
@@ -527,7 +527,7 @@ describe('disputeQuestion guards', () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({ quiz_results: {} });
     const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
-    expect(res).toEqual({ success: false, error: 'Answer this question before reporting it.' });
+    expect(res).toEqual({ success: false, error: { code: 'UNAUTHORIZED', message: 'Answer this question before reporting it.' } });
   });
 
   it('records a dispute keyed by account id and quarantines at the threshold', async () => {
@@ -537,7 +537,7 @@ describe('disputeQuestion guards', () => {
       question_disputes: { count: 3 },
     });
     const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
-    expect(res).toEqual({ success: true, quarantined: true });
+    expect(res).toEqual({ success: true, data: { quarantined: true } });
     expect(inserts.question_disputes![0]).toMatchObject({
       question_id: Q_ID,
       reporter_user: ACCOUNT_ID,
@@ -552,7 +552,7 @@ describe('disputeQuestion guards', () => {
       question_disputes: { insertError: { code: '23505' } },
     });
     const res = await disputeQuestion({ questionId: Q_ID, reason: 'incorrect_answer' });
-    expect(res).toEqual({ success: false, error: 'You have already reported this question.' });
+    expect(res).toEqual({ success: false, error: { code: 'CONFLICT', message: 'You have already reported this question.' } });
   });
 });
 

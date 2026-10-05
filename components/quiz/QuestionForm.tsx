@@ -1,10 +1,12 @@
 'use client';
+import { useToast } from "@/hooks/use-toast";
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionForm } from '@/hooks/quiz/use-question-form';
 import { ChevronDown, ChevronUp, Plus, Sparkles, Loader2 } from 'lucide-react';
 import { QuestionOptionsInput } from './QuestionOptionsInput';
+import { AiQuestionGenerator } from './AiQuestionGenerator';
 
 interface QuestionFormProps {
   walletAddress: string | null;
@@ -12,6 +14,7 @@ interface QuestionFormProps {
 }
 
 export default function QuestionForm({ walletAddress, onQuestionAdded }: QuestionFormProps) {
+  const toast = useToast();
   const {
     isOpen,
     setIsOpen,
@@ -25,10 +28,22 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
     explanation,
     setExplanation,
     loading,
-    feedback,
+    setOptions,
     handleOptionChange,
     handleSubmit,
   } = useQuestionForm({ walletAddress, onQuestionAdded });
+
+  const handleAiSuccess = (data: { prompt: string; options: string[]; correctIndex: number; explanation: string }) => {
+    setPrompt(data.prompt);
+    setOptions(data.options);
+    setCorrectIndex(data.correctIndex);
+    setExplanation(data.explanation || '');
+    toast.success('Question generated successfully! Please review before submitting.');
+  };
+
+  const handleAiError = (message: string) => {
+    toast.error(message);
+  };
 
   return (
     <section className="w-full glass glass-border glass-edge rounded-3xl shadow-xl overflow-hidden my-4">
@@ -75,17 +90,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
               onSubmit={handleSubmit}
               className="p-6 pt-4 space-y-4"
             >
-              {feedback && (
-                <div
-                  className={`p-3 rounded-xl text-xs font-bold ${
-                    feedback.type === 'error'
-                      ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/40'
-                      : 'bg-neo-mint/15 text-neo-mint border border-neo-mint/40'
-                  }`}
-                >
-                  {feedback.message}
-                </div>
-              )}
+              <AiQuestionGenerator onSuccess={handleAiSuccess} onError={handleAiError} />
 
               <div>
                 <label className="block text-xs font-bold text-slate-300 mb-1.5">

@@ -22,6 +22,7 @@ vi.mock('../lib/actions/question-list-actions', () => ({
   ]),
   getMyContestEntries: vi.fn().mockResolvedValue([]),
   getClaimableContests: vi.fn().mockResolvedValue([]),
+  getContestAnalytics: vi.fn().mockResolvedValue({ success: true, data: { participation_count: 0, completion_rate: 0, avg_score: 0 } }),
 }));
 
 const EMAIL_ACCOUNT = { id: 'acc-1', wallet: null };
