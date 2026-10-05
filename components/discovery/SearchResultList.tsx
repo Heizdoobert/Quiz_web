@@ -18,7 +18,7 @@ export default function SearchResultList({ results }: { results: SearchResult[] 
           </div>
           <Link
             href={`/q/${result.id}`}
-            className="shrink-0 px-4 py-2 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black font-heading text-xs whitespace-nowrap"
+            className="shrink-0 px-4 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs whitespace-nowrap"
           >
             Play
           </Link>

@@ -78,8 +78,8 @@ export default function QuizCard({
   // Empty state when no question is available
   if (!question) {
     return (
-      <div className="w-full min-h-[420px] flex flex-col items-center justify-center p-8 glass glass-border glass-edge rounded-3xl shadow-2xl shadow-black/60 text-center">
-        <Rocket className="w-12 h-12 text-[#00FFCC] mb-4 animate-bounce" />
+      <div className="w-full min-h-105 flex flex-col items-center justify-center p-8 glass glass-border glass-edge rounded-3xl shadow-2xl shadow-black/60 text-center">
+        <Rocket className="w-12 h-12 text-neo-mint mb-4 animate-bounce" />
         <h2 className="text-2xl font-bold text-white mb-2">No Quiz Questions Yet</h2>
         <p className="text-sm text-slate-300 max-w-md mb-6">
           Be the first to contribute! Add your own custom questions to kick off the trivia session.
@@ -87,7 +87,7 @@ export default function QuizCard({
         <button
           type="button"
           onClick={onAddQuestionClick}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 active:scale-95 text-[#0A1128] font-black font-heading rounded-xl shadow-lg shadow-[#00FFCC]/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] focus-visible:ring-offset-2 focus-visible:ring-offset-[#1A1B35]"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 text-deep-space font-black font-heading rounded-xl shadow-lg shadow-neo-mint/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
         >
           <PlusCircle className="w-4 h-4" /> Add First Question
         </button>
@@ -99,7 +99,7 @@ export default function QuizCard({
     <div className="relative w-full perspective-1000">
       {/* Both faces share one grid cell, so the card grows to the taller face */}
       <motion.div
-        className="grid w-full min-h-[460px] transform-style-3d"
+        className="grid w-full min-h-115 transform-style-3d"
         animate={{ rotateY: isFlipped ? 180 : 0 }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
       >

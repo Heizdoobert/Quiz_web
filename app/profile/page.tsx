@@ -104,7 +104,7 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col selection:bg-[#00FFCC] selection:text-[#0A1128]">
+    <div className="min-h-screen bg-deep-space text-slate-100 flex flex-col selection:bg-neo-mint selection:text-deep-space">
       <Header />
 
       <main
@@ -126,7 +126,7 @@ export default function ProfilePage() {
             {actionError && (
               <div
                 role="alert"
-                className="mb-6 p-4 rounded-xl bg-[#FF4757]/10 border border-[#FF4757]/30 text-[#FF4757] flex items-center justify-between gap-3 text-sm shadow-sm"
+                className="mb-6 p-4 rounded-xl bg-pop-coral/10 border border-pop-coral/30 text-pop-coral flex items-center justify-between gap-3 text-sm shadow-sm"
               >
                 <div className="flex items-center gap-2.5">
                   <AlertCircle className="w-5 h-5 shrink-0" aria-hidden="true" />
@@ -135,7 +135,7 @@ export default function ProfilePage() {
                 <button
                   type="button"
                   onClick={() => setActionError(null)}
-                  className="text-xs uppercase font-heading font-bold text-slate-300 hover:text-white px-2 py-1 rounded-md hover:bg-[#FF4757]/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#FF4757]"
+                  className="text-xs uppercase font-heading font-bold text-slate-300 hover:text-white px-2 py-1 rounded-md hover:bg-pop-coral/20 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-pop-coral"
                   aria-label="Dismiss error"
                 >
                   Dismiss

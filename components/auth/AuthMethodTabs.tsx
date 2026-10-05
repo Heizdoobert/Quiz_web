@@ -32,7 +32,7 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
         <button
           type="button"
           onClick={onBack}
-          className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#25284D] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-cyber-violet-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           aria-label="Go back"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -43,13 +43,13 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-[#2D305A]">
+      <div className="flex border-b border-cyber-border">
         <button
           type="button"
           onClick={() => setTab('username')}
           className={`flex-1 pb-2.5 text-xs font-heading font-bold text-center border-b-2 transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
             tab === 'username'
-              ? 'border-[#00FFCC] text-[#00FFCC]'
+              ? 'border-neo-mint text-neo-mint'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -60,7 +60,7 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
           onClick={() => setTab('wallet')}
           className={`flex-1 pb-2.5 text-xs font-heading font-bold text-center border-b-2 transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
             tab === 'wallet'
-              ? 'border-[#00FFCC] text-[#00FFCC]'
+              ? 'border-neo-mint text-neo-mint'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
@@ -71,7 +71,7 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
           onClick={() => setTab('email')}
           className={`flex-1 pb-2.5 text-xs font-heading font-bold text-center border-b-2 transition-colors cursor-pointer flex items-center justify-center gap-1.5 ${
             tab === 'email'
-              ? 'border-[#00FFCC] text-[#00FFCC]'
+              ? 'border-neo-mint text-neo-mint'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >

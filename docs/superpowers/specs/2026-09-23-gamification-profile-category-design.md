@@ -118,6 +118,6 @@ export interface SoundEngine {
   - Category DeFi: `#8A2BE2`
   - Category NFT: `#FF007F`
   - Category L1: `#3071FF`
-- All interactive buttons have `:hover`, `:active:scale-95`, and `:focus-visible:ring-2 focus-visible:ring-[#00FFCC]`.
+- All interactive buttons have `:hover`, `:active:scale-95`, and `:focus-visible:ring-2 focus-visible:ring-neo-mint`.
 - All modals use snappy cubic-bezier easing (`[0.16, 1, 0.3, 1]`) and clean `<AnimatePresence>` unmounting.
 - Zero errors on `npm run lint` and `npm run build`.

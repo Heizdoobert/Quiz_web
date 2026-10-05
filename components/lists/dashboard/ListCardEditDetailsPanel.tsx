@@ -35,34 +35,34 @@ export function ListCardEditDetailsPanel({
   };
 
   return (
-    <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl space-y-2">
+    <div className="p-3 bg-deep-space/70 border border-cyber-border rounded-xl space-y-2">
       <input
         type="text"
         minLength={5}
         maxLength={80}
         value={editTitle}
         onChange={(e) => setEditTitle(e.target.value)}
-        className="w-full px-3 py-2 bg-[#1A1B35] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC]"
+        className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
       />
       <textarea
         rows={2}
         maxLength={200}
         value={editDescription}
         onChange={(e) => setEditDescription(e.target.value)}
-        className="w-full px-3 py-2 bg-[#1A1B35] border border-[#2D305A] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-[#00FFCC]"
+        className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
       />
       <div className="flex gap-2">
         <button
           type="button"
           onClick={handleSaveListEdit}
-          className="px-3 py-1.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-lg text-xs font-black cursor-pointer"
+          className="px-3 py-1.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-lg text-xs font-black cursor-pointer"
         >
           Save
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 py-1.5 bg-[#25284D] text-slate-300 rounded-lg text-xs font-bold cursor-pointer"
+          className="px-3 py-1.5 bg-cyber-violet-light text-slate-300 rounded-lg text-xs font-bold cursor-pointer"
         >
           Cancel
         </button>

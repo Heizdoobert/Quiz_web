@@ -68,7 +68,7 @@ export function ListQuestionManager({
         ) : (
           <div
             key={q.id}
-            className="p-2.5 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl flex items-start justify-between gap-2"
+            className="p-2.5 bg-deep-space/70 border border-cyber-border rounded-xl flex items-start justify-between gap-2"
           >
             <div className="min-w-0">
               <p className="text-xs text-slate-500 font-mono">#{idx + 1}</p>
@@ -79,7 +79,7 @@ export function ListQuestionManager({
                 <button
                   type="button"
                   onClick={() => setEditingId(q.id)}
-                  className="p-1.5 bg-[#6C5CE7]/15 text-[#6C5CE7] rounded-lg cursor-pointer"
+                  className="p-1.5 bg-electric-indigo/15 text-electric-indigo rounded-lg cursor-pointer"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                 </button>
@@ -91,7 +91,7 @@ export function ListQuestionManager({
                     loadDetail();
                     onChanged();
                   }}
-                  className="p-1.5 bg-[#FF4757]/15 text-[#FF4757] rounded-lg cursor-pointer"
+                  className="p-1.5 bg-pop-coral/15 text-pop-coral rounded-lg cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>

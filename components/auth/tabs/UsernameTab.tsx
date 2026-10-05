@@ -15,7 +15,7 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleUsernameAuth = async (e: React.FormEvent) => {
+  const handleUsernameAuth = async (e: React.SubmitEvent) => {
     e.preventDefault();
     setPending(true);
     setError(null);
@@ -46,7 +46,7 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="e.g. crypto_champ"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#1A1B35] border border-[#2D305A] text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00FFCC]/60"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
             />
             <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
           </div>
@@ -62,23 +62,23 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-[#1A1B35] border border-[#2D305A] text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-[#00FFCC]/60"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
             />
             <KeyRound className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
           </div>
         </div>
       </div>
 
-      <p className="text-xs text-slate-400 leading-relaxed bg-[#1A1B35]/60 p-2.5 rounded-lg border border-[#2D305A]/40">
+      <p className="text-xs text-slate-400 leading-relaxed bg-cyber-violet/60 p-2.5 rounded-lg border border-cyber-border/40">
         Play and earn $QUIZ coins right away without a wallet. You can link your Web3 wallet anytime later to withdraw your rewards!
       </p>
 
-      {error && <p className="text-xs text-[#FF4757] font-medium">{error}</p>}
+      {error && <p className="text-xs text-pop-coral font-medium">{error}</p>}
 
       <button
         type="submit"
         disabled={pending || !username.trim() || password.length < 6}
-        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] disabled:opacity-40 text-[#0A1128] rounded-xl font-black text-sm cursor-pointer shadow-md hover:opacity-95 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm cursor-pointer shadow-md hover:opacity-95 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
       >
         {pending && <Loader2 className="w-4 h-4 animate-spin" />}
         {mode === 'login' ? 'Sign in' : 'Create account'}

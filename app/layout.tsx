@@ -167,10 +167,10 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${jetbrainsMono.variable} font-sans bg-[#0A1128] text-slate-100 min-h-screen antialiased selection:bg-[#00FFCC] selection:text-[#0A1128]`}
+        className={`${jetbrainsMono.variable} font-sans bg-deep-space text-slate-100 min-h-screen antialiased selection:bg-neo-mint selection:text-deep-space`}
       >
         <Providers>
-          <div className="flex justify-between max-w-[1920px] mx-auto w-full relative">
+          <div className="flex justify-between max-w-480 mx-auto w-full relative">
             <AdZone variant="skyscraper" slot="global-left" className="hidden 2xl:flex sticky top-20 ml-4 my-8" />
             <div className="flex-1 w-full flex flex-col min-h-screen max-w-full overflow-x-hidden">
               {children}

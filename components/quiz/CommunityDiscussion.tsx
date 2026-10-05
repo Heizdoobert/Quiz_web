@@ -71,7 +71,7 @@ export function CommunityDiscussion({ questionId }: { questionId: string }) {
   };
 
   return (
-    <div className="mb-6 p-4 rounded-2xl bg-[#0A1128]/80 border border-[#2D305A] space-y-4">
+    <div className="mb-6 p-4 rounded-2xl bg-deep-space/80 border border-cyber-border space-y-4">
       <div className="flex items-center justify-between gap-4 flex-wrap border-b border-[#1C1E3A] pb-3">
         <RatingStars
           questionId={questionId}

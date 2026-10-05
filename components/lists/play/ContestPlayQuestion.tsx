@@ -43,10 +43,10 @@ export function ContestPlayQuestion({
               disabled={selected !== null}
               className={`w-full text-left px-4 py-3 rounded-xl border text-sm transition-all cursor-pointer ${
                 isCorrectAnswer
-                  ? 'bg-[#00FFCC]/15 border-[#00FFCC] text-[#00FFCC]'
+                  ? 'bg-neo-mint/15 border-neo-mint text-neo-mint'
                   : showWrong
-                  ? 'bg-[#FF4757]/15 border-[#FF4757] text-[#FF4757]'
-                  : 'bg-[#1A1B35] border-[#2D305A] text-white hover:border-[#6C5CE7]/50'
+                  ? 'bg-pop-coral/15 border-pop-coral text-pop-coral'
+                  : 'bg-cyber-violet border-cyber-border text-white hover:border-electric-indigo/50'
               }`}
             >
               <span className="flex items-center justify-between">
@@ -61,7 +61,7 @@ export function ContestPlayQuestion({
       {feedback && (
         <button
           onClick={onNext}
-          className="w-full py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] text-[#0A1128] rounded-xl font-black text-sm cursor-pointer"
+          className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
         >
           {index + 1 < totalQuestions ? 'Next Question' : 'Finish Contest'}
         </button>

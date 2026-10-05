@@ -23,7 +23,7 @@ export default async function PlayQuestionPage({
   if (!question) notFound();
 
   return (
-    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
+    <main className="min-h-screen bg-deep-space text-slate-100 flex flex-col">
       <QuizLayout initialQuestion={question} initialLeaderboard={leaderboard} />
     </main>
   );

@@ -36,15 +36,15 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
   } = useRewardsModal({ isOpen, walletAddress });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rewards & Badges" icon={<Gift className="w-5 h-5 text-[#FFD166]" />} maxWidth="max-w-lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rewards & Badges" icon={<Gift className="w-5 h-5 text-crypto-gold" />} maxWidth="max-w-lg">
       {/* Chain warning */}
       {isWrongChain && (
-        <div className="mb-5 p-4 bg-[#FF4757]/15 border border-[#FF4757]/40 rounded-xl text-[#FF4757] text-sm flex items-center justify-between">
+        <div className="mb-5 p-4 bg-pop-coral/15 border border-pop-coral/40 rounded-xl text-pop-coral text-sm flex items-center justify-between">
           <span className="font-medium">Switch to {targetChainName} to claim rewards</span>
           <button
             type="button"
             onClick={handleSwitchChain}
-            className="px-3 py-1 bg-[#FF4757] hover:bg-[#FF4757]/90 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+            className="px-3 py-1 bg-pop-coral hover:bg-pop-coral/90 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
           >
             Switch
           </button>
@@ -53,26 +53,26 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
       {/* Gasless / Sponsored badge */}
       {isGasless && !isWrongChain && (
-        <div className="mb-4 p-2.5 bg-[#00FFCC]/10 border border-[#00FFCC]/30 rounded-xl flex items-center justify-between">
+        <div className="mb-4 p-2.5 bg-neo-mint/10 border border-neo-mint/30 rounded-xl flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#00FFCC]" />
-            <span className="text-xs font-bold text-[#00FFCC]">Gasless Transactions Active</span>
+            <Sparkles className="w-4 h-4 text-neo-mint" />
+            <span className="text-xs font-bold text-neo-mint">Gasless Transactions Active</span>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-[#0A1128] bg-[#00FFCC] px-2 py-0.5 rounded-full">
+          <span className="text-[10px] font-black uppercase tracking-wider text-deep-space bg-neo-mint px-2 py-0.5 rounded-full">
             Free Gas
           </span>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1.5 mb-4 bg-[#0A1128]/80 border border-[#2D305A] rounded-xl p-1.5">
+      <div className="flex gap-1.5 mb-4 bg-deep-space/80 border border-cyber-border rounded-xl p-1.5">
         <button
           type="button"
           onClick={() => setTab('tokens')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint ${
             tab === 'tokens'
-              ? 'bg-[#6C5CE7] text-white shadow-md'
-              : 'text-slate-400 hover:text-[#00FFCC]'
+              ? 'bg-electric-indigo text-white shadow-md'
+              : 'text-slate-400 hover:text-neo-mint'
           }`}
         >
           <Coins className="w-4 h-4" /> $QUIZ Tokens
@@ -80,10 +80,10 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
         <button
           type="button"
           onClick={() => setTab('badges')}
-          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] ${
+          className={`flex-1 py-2 px-3 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint ${
             tab === 'badges'
-              ? 'bg-[#6C5CE7] text-white shadow-md'
-              : 'text-slate-400 hover:text-[#00FFCC]'
+              ? 'bg-electric-indigo text-white shadow-md'
+              : 'text-slate-400 hover:text-neo-mint'
           }`}
         >
           <Award className="w-4 h-4" /> Badges
@@ -92,7 +92,7 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
 
       {loading ? (
         <div className="flex justify-center py-8">
-          <Loader2 className="w-6 h-6 text-[#00FFCC] animate-spin" />
+          <Loader2 className="w-6 h-6 text-neo-mint animate-spin" />
         </div>
       ) : hasNoWallet ? (
         <div className="space-y-5 py-2">
