@@ -1,11 +1,13 @@
 # app/q/[id]/page.tsx
-lines:28 exports:metadata,default
+lines:30 exports:dynamic,metadata,default
 ---
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import QuizLayout from '@/components/quiz/QuizLayout';
 import { getPublicQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'Play a question',

@@ -3,24 +3,24 @@ lines:237 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionAccount } from '../lib/session';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSessionAccount } from '../lib/services/session';
 
 // Mock the supabase module
-vi.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase/supabase', () => ({
   supabase: {
     from: vi.fn(),
   },
 }));
 
 // Export reads with the secret key, for the signed-in wallet only.
-vi.mock('../lib/supabase-admin', () => ({
+vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
   },
 }));
-vi.mock('../lib/session', () => ({
+vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 

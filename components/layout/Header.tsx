@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
-import { Gift, Zap, Volume2, VolumeX, User, Trophy, Info } from 'lucide-react';
-import { useSoundToggle } from '@/hooks/shared/use-sound-toggle';
-import { useSession } from '@/hooks/shared/use-session';
-import SearchBox from '@/components/discovery/SearchBox';
-import NoWalletNotice from '@/components/rewards/NoWalletNotice';
+import React from "react";
+import Link from "next/link";
+import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { Gift, Zap, Volume2, VolumeX, User, Trophy, Info } from "lucide-react";
+import { useSoundToggle } from "@/hooks/shared/use-sound-toggle";
+import { useSession } from "@/hooks/shared/use-session";
+import SearchBox from "@/components/discovery/SearchBox";
+import NoWalletNotice from "@/components/rewards/NoWalletNotice";
 
 interface HeaderProps {
   onOpenRewards?: () => void;
@@ -37,7 +37,7 @@ export default function Header({
         <div className="shrink-0 p-1.5 rounded-xl bg-neo-mint/15 border border-neo-mint/40 text-neo-mint group-hover:scale-105 transition-transform">
           <Zap className="w-5 h-5 animate-pulse" />
         </div>
-        <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-gradient-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent">
+        <span className="text-lg sm:text-2xl truncate font-black font-heading tracking-wider bg-linear-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent">
           Quick Quiz
         </span>
       </Link>
@@ -50,13 +50,17 @@ export default function Header({
           onClick={handleToggleSound}
           className={`p-2 rounded-xl border transition-all cursor-pointer active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint ${
             isMuted
-              ? 'bg-cyber-violet-light/50 border-[#3A3E70]/60 text-slate-500 hover:text-slate-300'
-              : 'bg-cyber-violet-light border-[#3A3E70] text-neo-mint hover:border-neo-mint/60'
+              ? "bg-cyber-violet-light/50 border-[#3A3E70]/60 text-slate-500 hover:text-slate-300"
+              : "bg-cyber-violet-light border-[#3A3E70] text-neo-mint hover:border-neo-mint/60"
           }`}
-          title={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
-          aria-label={isMuted ? 'Unmute Sound Effects' : 'Mute Sound Effects'}
+          title={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
+          aria-label={isMuted ? "Unmute Sound Effects" : "Mute Sound Effects"}
         >
-          {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {isMuted ? (
+            <VolumeX className="w-4 h-4" />
+          ) : (
+            <Volume2 className="w-4 h-4" />
+          )}
         </button>
 
         {/* Question Lists / Contests */}
@@ -112,7 +116,10 @@ export default function Header({
             </div>
           </details>
         )}
-        <ConnectButton label={account && !account.wallet ? 'Add wallet' : 'Connect'} showBalance={false} />
+        <ConnectButton
+          label={account && !account.wallet ? "Add wallet" : "Connect"}
+          showBalance={false}
+        />
       </div>
     </header>
   );

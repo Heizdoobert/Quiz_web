@@ -87,7 +87,7 @@ export default function QuizCard({
         <button
           type="button"
           onClick={onAddQuestionClick}
-          className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 text-deep-space font-black font-heading rounded-xl shadow-lg shadow-neo-mint/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
+          className="inline-flex items-center gap-2 px-6 py-3 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 text-deep-space font-black font-heading rounded-xl shadow-lg shadow-neo-mint/20 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
         >
           <PlusCircle className="w-4 h-4" /> Add First Question
         </button>

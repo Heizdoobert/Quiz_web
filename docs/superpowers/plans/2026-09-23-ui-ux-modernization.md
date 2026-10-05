@@ -322,7 +322,7 @@ In `GlobalLeaderboard.tsx` and `GroupLeaderboard.tsx`, find the row-rendering ma
 
 - [ ] **Step 3: Rank #1-3 accent**
 
-Replace any rank-1/2/3 glow badge class with a gradient-mesh background: `bg-gradient-to-br from-[--color-crypto-gold]/20 to-[--color-pop-coral]/20` combined with `glass-border`, applied only when `rank <= 3`.
+Replace any rank-1/2/3 glow badge class with a gradient-mesh background: `bg-linear-to-br from-[--color-crypto-gold]/20 to-[--color-pop-coral]/20` combined with `glass-border`, applied only when `rank <= 3`.
 
 - [ ] **Step 4: Stagger entrance**
 

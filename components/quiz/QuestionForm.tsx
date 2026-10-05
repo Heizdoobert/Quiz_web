@@ -153,7 +153,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                   whileHover={{ scale: loading ? 1 : 1.03, filter: loading ? 'none' : 'brightness(1.1)' }}
                   whileTap={{ scale: loading ? 1 : 0.97 }}
                   transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-50 disabled:cursor-not-allowed text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+                  className="flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo disabled:opacity-50 disabled:cursor-not-allowed text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
                 >
                   {loading ? (
                     <Loader2 className="w-4 h-4 animate-spin text-deep-space" />

@@ -1,21 +1,13 @@
 # components/quiz/AnswerBack.tsx
-lines:220 exports:default
+lines:130 exports:default
 ---
 'use client';
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import { ArrowRight, CheckCircle2, XCircle, Flag } from 'lucide-react';
-import { useSession } from '@/hooks/shared/use-session';
-import {
-  getQuestionDiscussion,
-  RatingSummary,
-  CommentView,
-} from '@/lib/actions/community-actions';
-import RatingStars from '@/components/community/RatingStars';
-import CommentList from '@/components/community/CommentList';
-import SuggestionForm from '@/components/community/SuggestionForm';
+import { CommunityDiscussion } from './CommunityDiscussion';
 
 interface AnswerBackProps {
   question: ClientQuestion;
@@ -32,12 +24,20 @@ export default function AnswerBack({
 }: AnswerBackProps) {
   const letters = ['A', 'B', 'C', 'D'];
 
-  const { account, requireSignIn } = useSession();
-  const [discussion, setDiscussion] = useState<{
-    rating: RatingSummary;
-    myRating: number | null;
-    comments: CommentView[];
-    hasMore: boolean;
-  }>({
-    rating: { average: 0, count: 0 },
-    myRating: null,
+  const notSavedMessage: Record<NonNullable<AnswerSubmissionResult['notSavedReason']>, string> = {
+    'signed-out': 'Sign in with your wallet so this counts.',
+    'already-answered': 'Already answered — this one only counts once.',
+    'own-question': "You wrote this question, so it doesn't count for you.",
+    error: 'Not saved — something went wrong, try again.',
+  };
+
+  // Advance to next question on Enter or Space
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable || target?.tagName === 'BUTTON') return;
+
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onNext();
+      }

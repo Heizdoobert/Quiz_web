@@ -1,9 +1,9 @@
 # tests/auth-adapter.test.ts
-lines:186 exports:
+lines:715 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
-import { createQuizAuthAdapter } from '../lib/auth-adapter';
+import { createQuizAuthAdapter } from '../lib/services/auth-adapter';
 import { useQuizAuth } from '../hooks/shared/use-quiz-auth';
 import {
   getAuthNonce,

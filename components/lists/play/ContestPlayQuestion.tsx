@@ -61,7 +61,7 @@ export function ContestPlayQuestion({
       {feedback && (
         <button
           onClick={onNext}
-          className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
+          className="w-full py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
         >
           {index + 1 < totalQuestions ? 'Next Question' : 'Finish Contest'}
         </button>

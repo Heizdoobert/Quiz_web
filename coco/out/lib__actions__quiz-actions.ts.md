@@ -3,9 +3,9 @@ lines:122 exports:getAnswerHistory,submitAnswer,getUserStats
 ---
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount } from '@/lib/session';
-import { statsForAccount } from '@/lib/stats';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount } from '@/lib/services/session';
+import { statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
 
 const HISTORY_LIMIT = 20;

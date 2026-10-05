@@ -5,7 +5,7 @@ import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import SeoFaqSection from '../components/seo/SeoFaqSection';
-import { FAQ_DATA } from '../lib/seo-data';
+import { FAQ_DATA } from '../lib/constants/seo-data';
 
 describe('SeoFaqSection accordion', () => {
   const tabFor = (question: string) => screen.getByText(question).closest('button')!;

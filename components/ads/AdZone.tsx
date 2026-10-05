@@ -61,7 +61,7 @@ export default function AdZone({
               href={sponsor ? sponsor.url : "https://go.isclix.com"}
               target="_blank"
               rel="noopener noreferrer sponsored"
-              className="mt-4 px-3 py-1.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint text-deep-space font-black font-heading rounded-lg text-[11px] shadow transition-all cursor-pointer"
+              className="mt-4 px-3 py-1.5 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint text-deep-space font-black font-heading rounded-lg text-[11px] shadow transition-all cursor-pointer"
             >
               Claim Offer →
             </a>

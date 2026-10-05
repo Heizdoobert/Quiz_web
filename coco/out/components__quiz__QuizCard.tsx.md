@@ -1,5 +1,5 @@
 # components/quiz/QuizCard.tsx
-lines:129 exports:default
+lines:143 exports:default
 ---
 'use client';
 
@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
 import QuestionFront from './QuestionFront';
 import AnswerBack from './AnswerBack';
+import useSound from 'use-sound';
 
 import { Rocket, PlusCircle } from 'lucide-react';
 
@@ -40,4 +41,3 @@ export default function QuizCard({
   onNextQuestion,
   onOpenTimerSettings,
   onUse5050,
-  onUseSkip,

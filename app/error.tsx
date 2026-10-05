@@ -31,7 +31,7 @@ export default function Error({ error, reset }: ErrorProps) {
           <button
             type="button"
             onClick={() => reset()}
-            className="px-5 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 cursor-pointer font-heading"
+            className="px-5 py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 cursor-pointer font-heading"
           >
             Try Again
           </button>

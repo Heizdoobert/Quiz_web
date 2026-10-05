@@ -3,13 +3,13 @@ lines:134 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '../lib/actions/group-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionAccount } from '../lib/session';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSessionAccount } from '../lib/services/session';
 
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn() } }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';

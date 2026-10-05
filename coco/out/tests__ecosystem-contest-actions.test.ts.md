@@ -1,5 +1,5 @@
 # tests/ecosystem-contest-actions.test.ts
-lines:323 exports:
+lines:375 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import {
@@ -10,9 +10,9 @@ import {
   getLiveLists,
   startListAttempt,
 } from '../lib/actions/question-list-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionAccount } from '../lib/session';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSessionAccount } from '../lib/services/session';
 
 let mockOnChainContest: {
   creator: string;
@@ -23,10 +23,10 @@ let mockOnChainContest: {
   active: boolean;
 } | null = null;
 
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
   getContestId: (listId: string, creator?: string) =>

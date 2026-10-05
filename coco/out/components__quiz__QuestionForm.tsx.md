@@ -1,5 +1,5 @@
 # components/quiz/QuestionForm.tsx
-lines:213 exports:default
+lines:172 exports:default
 ---
 'use client';
 
@@ -7,6 +7,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionForm } from '@/hooks/quiz/use-question-form';
 import { ChevronDown, ChevronUp, Plus, Sparkles, Loader2 } from 'lucide-react';
+import { QuestionOptionsInput } from './QuestionOptionsInput';
 
 interface QuestionFormProps {
   walletAddress: string | null;
@@ -34,7 +35,6 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
   return (
     <section className="w-full glass glass-border glass-edge rounded-3xl shadow-xl overflow-hidden my-4">
-      {/* Header bar */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

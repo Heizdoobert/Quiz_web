@@ -78,7 +78,7 @@ export default function SeoFaqSection() {
               key={idx}
               className={`rounded-2xl overflow-hidden border transition-all duration-300 ${
                 isOpen
-                  ? 'bg-gradient-to-b from-neo-mint/[0.07] to-cyber-violet border-neo-mint/40 shadow-lg shadow-neo-mint/10'
+                  ? 'bg-linear-to-b from-neo-mint/[0.07] to-cyber-violet border-neo-mint/40 shadow-lg shadow-neo-mint/10'
                   : 'glass glass-border border-transparent hover:border-electric-indigo/60 hover:bg-elevation-2'
               }`}
             >

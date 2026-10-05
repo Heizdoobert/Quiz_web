@@ -1,19 +1,21 @@
-'use client';
+"use client";
 
-import React, { useEffect, useState } from 'react';
-import { Lightbulb, Check } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { Lightbulb, Check } from "lucide-react";
 import {
   SuggestionView,
   getSuggestionsForAuthor,
   resolveSuggestion,
-} from '@/lib/actions/community-actions';
-import { formatRelativeTime } from '@/lib/utils';
+} from "@/lib/actions/community-actions";
+import { formatRelativeTime } from "@/lib/utils";
 
 interface AuthorSuggestionsProps {
   accountId: string;
 }
 
-export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps) {
+export default function AuthorSuggestions({
+  accountId,
+}: AuthorSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<SuggestionView[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
@@ -29,7 +31,7 @@ export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps)
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error('Failed to load author suggestions:', err);
+          console.error("Failed to load author suggestions:", err);
           setLoading(false);
         }
       });
@@ -49,7 +51,7 @@ export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps)
         setSuggestions((prev) => prev.filter((s) => s.id !== commentId));
       }
     } catch (err) {
-      console.error('Failed to mark suggestion done:', err);
+      console.error("Failed to mark suggestion done:", err);
     } finally {
       setResolvingId(null);
     }
@@ -63,7 +65,10 @@ export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps)
     <section aria-labelledby="suggestions-heading" className="mt-10">
       <div className="flex items-center gap-2 mb-4">
         <Lightbulb className="w-5 h-5 text-neo-mint" />
-        <h2 id="suggestions-heading" className="text-xl font-bold font-heading text-slate-100">
+        <h2
+          id="suggestions-heading"
+          className="text-xl font-bold font-heading text-slate-100"
+        >
           Suggestions for your questions
         </h2>
         {suggestions.length > 0 && (
@@ -86,12 +91,19 @@ export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps)
             >
               <div className="space-y-1.5 min-w-0">
                 <p className="text-xs font-bold font-heading text-slate-400 uppercase tracking-wider">
-                  Question:{' '}
-                  <span className="text-slate-200 normal-case font-medium">{item.prompt}</span>
+                  Question:{" "}
+                  <span className="text-slate-200 normal-case font-medium">
+                    {item.prompt}
+                  </span>
                 </p>
-                <p className="text-sm text-slate-100 font-semibold break-words">{item.body}</p>
+                <p className="text-sm text-slate-100 font-semibold wrap-break-word">
+                  {item.body}
+                </p>
                 <p className="text-xs text-slate-400">
-                  Suggested by <span className="text-slate-300 font-medium">{item.senderName}</span>{' '}
+                  Suggested by{" "}
+                  <span className="text-slate-300 font-medium">
+                    {item.senderName}
+                  </span>{" "}
                   · {formatRelativeTime(item.createdAt)}
                 </p>
               </div>
@@ -103,7 +115,9 @@ export default function AuthorSuggestions({ accountId }: AuthorSuggestionsProps)
                 className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-neo-mint/10 hover:bg-neo-mint/20 border border-neo-mint/40 text-neo-mint font-bold font-heading rounded-xl text-xs cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neo-mint disabled:opacity-50"
               >
                 <Check className="w-3.5 h-3.5" />
-                <span>{resolvingId === item.id ? 'Saving...' : 'Mark done'}</span>
+                <span>
+                  {resolvingId === item.id ? "Saving..." : "Mark done"}
+                </span>
               </button>
             </li>
           ))}

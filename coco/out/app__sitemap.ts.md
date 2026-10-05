@@ -2,7 +2,7 @@
 lines:16 exports:default
 ---
 import type { MetadataRoute } from 'next';
-import { getSiteUrl } from '@/lib/site-url';
+import { getSiteUrl } from '@/lib/utils/site-url';
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = getSiteUrl();

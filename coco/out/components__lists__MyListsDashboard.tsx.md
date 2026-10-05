@@ -1,43 +1,43 @@
 # components/lists/MyListsDashboard.tsx
-lines:674 exports:default
+lines:133 exports:default
 ---
 'use client';
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract, useReadContract } from 'wagmi';
-import {
-  createList,
-  updateList,
-  deleteList,
-  getMyLists,
-  getListDetail,
-  addListQuestion,
-  updateListQuestion,
-  deleteListQuestion,
-  submitListForReview,
-  startContest,
-  recordContestRefund,
-} from '@/lib/actions/question-list-actions';
-import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
-import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
-import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
-import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
+import { Plus } from 'lucide-react';
+import { createList, getMyLists } from '@/lib/actions/question-list-actions';
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
+import { QuestionListWithMeta } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
+import { ListCard } from './dashboard/ListCard';
 
 const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
-import { Question, QuestionListWithMeta } from '@/lib/types';
-import ListQuestionEditor, { QuestionFormValues } from '@/components/lists/ListQuestionEditor';
-import {
-  Plus,
-  Trash2,
-  Pencil,
-  Send,
-  Rocket,
-  ChevronDown,
-  ChevronUp,
-  ListChecks,
-  Loader2,
-  RefreshCw,
-} from 'lucide-react';
 
+export default function MyListsDashboard() {
+  const { account, requireSignIn: ensureSession } = useSession();
+
+  const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!account) return;
+    setLoading(true);
+    setLists(await getMyLists());
+    setLoading(false);
+  }, [account]);
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh();
+  }, [refresh]);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!account) return;
+    setMessage(null);
+    if (!(await ensureSession())) {
+      setMessage({ type: 'error', text: SIGN_IN_ERROR });

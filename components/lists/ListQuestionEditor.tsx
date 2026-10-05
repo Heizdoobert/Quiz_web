@@ -138,7 +138,7 @@ export default function ListQuestionEditor({
         <button
           type="submit"
           disabled={loading}
-          className="flex-1 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-50 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
+          className="flex-1 py-2 bg-linear-to-r from-neo-mint to-electric-indigo disabled:opacity-50 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
         >
           {loading && <Loader2 className="w-4 h-4 animate-spin" />}
           {submitLabel}

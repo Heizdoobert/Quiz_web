@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Lightbulb, Send, X, Check } from 'lucide-react';
-import { addComment } from '@/lib/actions/community-actions';
+import React, { useState } from "react";
+import { Lightbulb, Send, X, Check } from "lucide-react";
+import { addComment } from "@/lib/actions/community-actions";
 
 interface SuggestionFormProps {
   questionId: string;
@@ -10,7 +10,7 @@ interface SuggestionFormProps {
 
 export default function SuggestionForm({ questionId }: SuggestionFormProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [body, setBody] = useState('');
+  const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -24,28 +24,32 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
     setError(null);
 
     try {
-      const res = await addComment(questionId, trimmed, 'suggestion');
+      const res = await addComment(questionId, trimmed, "suggestion");
       if (res.ok) {
         setSuccess(true);
-        setBody('');
+        setBody("");
         setTimeout(() => {
           setSuccess(false);
           setIsOpen(false);
         }, 2000);
       } else {
-        if (res.code === 'NOT_ALLOWED') {
-          setError('Authors cannot send suggestions on their own questions.');
-        } else if (res.code === 'RATE_LIMITED') {
-          setError('Daily limit reached (max 20 comments or suggestions per day).');
-        } else if (res.code === 'NOT_ANSWERED') {
-          setError('You must answer this question before sending a suggestion.');
+        if (res.code === "NOT_ALLOWED") {
+          setError("Authors cannot send suggestions on their own questions.");
+        } else if (res.code === "RATE_LIMITED") {
+          setError(
+            "Daily limit reached (max 20 comments or suggestions per day).",
+          );
+        } else if (res.code === "NOT_ANSWERED") {
+          setError(
+            "You must answer this question before sending a suggestion.",
+          );
         } else {
-          setError('Failed to send suggestion. Please try again.');
+          setError("Failed to send suggestion. Please try again.");
         }
       }
     } catch (err) {
-      console.error('Suggestion submission error:', err);
-      setError('Failed to send suggestion. Please try again.');
+      console.error("Suggestion submission error:", err);
+      setError("Failed to send suggestion. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -106,7 +110,7 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
           />
 
           <div className="flex items-center justify-between text-[11px] text-slate-500">
-            <span className={body.length > 480 ? 'text-crypto-gold' : ''}>
+            <span className={body.length > 480 ? "text-crypto-gold" : ""}>
               {body.length}/500
             </span>
             <div className="flex items-center gap-2">
@@ -120,15 +124,17 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
               <button
                 type="submit"
                 disabled={!body.trim() || body.length > 500 || submitting}
-                className="flex items-center gap-1 px-3 py-1 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-bold font-heading rounded-lg text-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="flex items-center gap-1 px-3 py-1 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-bold font-heading rounded-lg text-xs cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 <Send className="w-3 h-3" />
-                <span>{submitting ? 'Sending...' : 'Send Suggestion'}</span>
+                <span>{submitting ? "Sending..." : "Send Suggestion"}</span>
               </button>
             </div>
           </div>
 
-          {error && <p className="text-xs text-pop-coral font-medium">{error}</p>}
+          {error && (
+            <p className="text-xs text-pop-coral font-medium">{error}</p>
+          )}
         </form>
       )}
     </div>
