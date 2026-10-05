@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { accountIdForWallet } from '../lib/users';
-import { supabase } from '../lib/supabase';
+import { accountIdForWallet } from '../lib/services/users';
+import { supabase } from '../lib/supabase/supabase';
 
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
 
 function mockUsers(result: { data: unknown; error: unknown }) {
   const maybeSingle = vi.fn().mockResolvedValue(result);

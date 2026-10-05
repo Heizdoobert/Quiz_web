@@ -11,14 +11,28 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Lint, Types & Architecture
+  secrets:
+    name: Check Secrets (Gitleaks)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      - name: Install Gitleaks
+        run: |
+          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | sudo tar -xz -C /usr/local/bin gitleaks
+
+      - name: Check Secrets
+        run: gitleaks detect --redact --verbose
+
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -29,18 +43,43 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Install Gitleaks
-        run: |
-          curl -sSL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | sudo tar -xz -C /usr/local/bin gitleaks
-
-      - name: Check Secrets (Gitleaks)
-        run: gitleaks detect --redact --verbose
-
-      - name: TypeScript Type Check
+      - name: Type Check
         run: npm run type-check
 
-      - name: ESLint
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint
         run: npm run lint
+
+  architecture:
+    name: Architecture Boundary Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
 
       - name: Architecture Boundary Check
         run: npm run check:architecture
@@ -89,7 +128,7 @@ jobs:
 
   build:
     name: Next.js Production Build
-    needs: [quality, test]
+    needs: [secrets, typecheck, lint, architecture, test]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -124,7 +163,7 @@ jobs:
 
   security:
     name: Security & Dependencies Audit
-    needs: [quality]
+    needs: [secrets, typecheck, lint, architecture]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

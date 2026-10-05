@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { confirmList, getListDetail, getListsPendingReview } from '@/lib/actions/question-list-actions';
-import { REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
 import { useSession } from '@/hooks/shared/use-session';
 import { Question, QuestionListWithMeta } from '@/lib/types';
 import { CheckCircle2, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react';

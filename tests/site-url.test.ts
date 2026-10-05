@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { getSiteUrl } from '../lib/site-url';
+import { getSiteUrl } from '../lib/utils/site-url';
 
 describe('lib/site-url getSiteUrl', () => {
   const originalEnv = process.env;

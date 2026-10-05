@@ -2,8 +2,9 @@ import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
-import { FAQ_DATA } from '@/lib/seo-data';
-import { getSiteUrl } from '@/lib/site-url';
+import AdZone from '@/components/ads/AdZone';
+import { FAQ_DATA } from '@/lib/constants/seo-data';
+import { getSiteUrl } from '@/lib/utils/site-url';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -168,7 +169,15 @@ export default function RootLayout({
       <body
         className={`${jetbrainsMono.variable} font-sans bg-[#0A1128] text-slate-100 min-h-screen antialiased selection:bg-[#00FFCC] selection:text-[#0A1128]`}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="flex justify-between max-w-[1920px] mx-auto w-full relative">
+            <AdZone variant="skyscraper" slot="global-left" className="hidden 2xl:flex sticky top-20 ml-4 my-8" />
+            <div className="flex-1 w-full flex flex-col min-h-screen max-w-full overflow-x-hidden">
+              {children}
+            </div>
+            <AdZone variant="skyscraper" slot="global-right" className="hidden 2xl:flex sticky top-20 mr-4 my-8" />
+          </div>
+        </Providers>
       </body>
     </html>
   );

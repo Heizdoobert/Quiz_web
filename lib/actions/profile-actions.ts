@@ -1,8 +1,8 @@
 'use server';
 
-import { supabase } from '../supabase';
-import { supabaseAdmin } from '../supabase-admin';
-import { getSessionAccount } from '../session';
+import { supabase } from '../supabase/supabase';
+import { supabaseAdmin } from '../supabase/supabase-admin';
+import { getSessionAccount } from '../services/session';
 import {
   Question,
   ClientQuestion,

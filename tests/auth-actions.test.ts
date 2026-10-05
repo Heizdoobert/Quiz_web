@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/session';
+import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/services/session';
 import {
   getAuthNonce,
   requestSignIn,
@@ -9,9 +9,9 @@ import {
   signUpWithUsername,
   signInWithUsername,
 } from '../lib/actions/auth-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { publicClientFor } from '../lib/chain';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { publicClientFor } from '../lib/utils/chain';
 
 // In-memory cookie store
 const cookieStore = new Map<string, { value: string; [key: string]: unknown }>();
@@ -29,7 +29,7 @@ vi.mock('next/headers', () => ({
   headers: vi.fn(async () => new Headers({ host: 'localhost:3000', 'x-forwarded-proto': 'http' })),
 }));
 
-vi.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
@@ -45,7 +45,7 @@ vi.mock('../lib/supabase', () => ({
   },
 }));
 
-vi.mock('../lib/supabase-admin', () => ({
+vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(() => ({
       upsert: vi.fn().mockResolvedValue({ error: null }),
@@ -62,7 +62,7 @@ vi.mock('../lib/supabase-admin', () => ({
   },
 }));
 
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/utils/chain', () => ({
   publicClientFor: vi.fn(),
 }));
 

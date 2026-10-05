@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { HelpCircle, ChevronDown, Award, Coins, ShieldCheck, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FAQ_DATA } from '@/lib/seo-data';
+import { FAQ_DATA } from '@/lib/constants/seo-data';
 
 export default function SeoFaqSection() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);

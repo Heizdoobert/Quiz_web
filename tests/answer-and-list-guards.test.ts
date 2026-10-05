@@ -13,18 +13,18 @@ import {
   getListsPendingReview,
   getListDetail,
 } from '../lib/actions/question-list-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSessionAccount } from '../lib/session';
-import { validateQuestionInput } from '../lib/validation';
-import { REQUIRED_CONFIRMATIONS } from '../lib/list-constants';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSessionAccount } from '../lib/services/session';
+import { validateQuestionInput } from '../lib/utils/validation';
+import { REQUIRED_CONFIRMATIONS } from '../lib/constants/list-constants';
 
 let mockIsContestFunded = true;
 
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
   getContestId: (listId: string, creator?: string) =>

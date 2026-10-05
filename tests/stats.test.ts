@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { statsForAccount } from '../lib/stats';
+import { statsForAccount } from '../lib/utils/stats';
 import { getUserStats } from '../lib/actions/quiz-actions';
-import { supabase } from '../lib/supabase';
-import { getSessionAccount } from '../lib/session';
+import { supabase } from '../lib/supabase/supabase';
+import { getSessionAccount } from '../lib/services/session';
 
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 const ZERO = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
 
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: vi.fn() } }));
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { rpc: vi.fn() } }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 
 function mockRpc(result: { data: unknown; error: unknown }) {
   (supabase.rpc as ReturnType<typeof vi.fn>).mockReturnValue({ single: () => Promise.resolve(result) });

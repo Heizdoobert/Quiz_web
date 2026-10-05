@@ -1,11 +1,11 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount } from '@/lib/session';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount } from '@/lib/services/session';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { statsForAccount } from '@/lib/stats';
+import { statsForAccount } from '@/lib/utils/stats';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
@@ -14,7 +14,7 @@ import {
   getSignerAccount,
   newNonce,
   getContestId,
-} from '@/lib/chain';
+} from '@/lib/utils/chain';
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
 const VOUCHER_TTL_SECONDS = 3600;
