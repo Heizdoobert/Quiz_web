@@ -1,5 +1,5 @@
 # CHANGELOG.md
-lines:91 exports:
+lines:105 exports:
 ---
 # Changelog
 
@@ -7,6 +7,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.4.0] - 2026-10-05
+
+### Added
+- **AI Content Moderation**: Integrated `@google/genai` (Gemini) into the question creation flow to automatically reject toxic, harmful, or malicious submissions.
+- **Server-Side Leaderboard Pagination**: Refactored leaderboard queries (`get_global_leaderboard`) to support `LIMIT` and `OFFSET` in SQL, and upgraded the frontend components with an infinite scroll / "Load More" implementation for better performance on large datasets.
+- **Playwright E2E Tests**: Initialized Playwright testing framework and added automated UI rendering tests (`e2e/home.spec.ts`).
+
+### Changed
+- **Clean Architecture Refactoring**: Reorganized the `/lib` directory into `/lib/supabase`, `/lib/services`, `/lib/utils`, and `/lib/constants`, with all import paths safely refactored across the project.
+- **Database Migrations Structure**: Moved raw SQL files from `lib/sql` to a standardized `supabase/migrations` directory.
+
+### Security
+- **Service Role Key Hardening**: Removed insecure usage of Supabase Service Role key (`SUPABASE_SECRET_KEY`) from public server actions (`ads-actions.ts`) to prevent privilege escalation.
 
 ## [0.3.1] - 2026-10-01
 
@@ -27,17 +41,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Affiliate Integration**: Updated sidebar and banner ad units to affiliate monetization links.
 - **Variable Font Optimization**: Switched JetBrains Mono font configuration in `app/layout.tsx` to variable font definition without static weight arrays, streamlining Turbopack build optimization.
 
-### Security
-- **Treasury Function Hardening**: Explicitly pinned PostgreSQL `search_path` on treasury and reward database functions to mitigate search-path hijack risks.
-- **Dependabot Ecosystem Compatibility**: Configured semver-major ignores in `.github/dependabot.yml` for breaking ecosystems (`wagmi` v3, `typescript` v7, `hardhat` v3, `eslint` v10) to preserve project constraints and prevent broken builds.
-- **Gitleaks Pre-commit & CI Gates**: Enforced zero secret leaks in commits and CI with curated `.gitleaksignore` patterns for mock contract addresses and referral tracking parameters.
-
-### Fixed
-- **Contracts Lockfile Graph**: Regenerated `contracts/package-lock.json` to properly retain peer dependency resolution during package upgrades.
-- **Duplicate History Refreshes**: Removed redundant `refreshHistory` triggers preventing duplicate network requests during question answering.
-- **Framer Motion Transition Conflicts**: Cleaned up leftover CSS transitions and neon glows that conflicted with Framer Motion layout animations.
-- **Canonical Domain Fallback**: Corrected canonical URL resolution in `lib/site-url.ts` and `app/layout.tsx` to dynamically reference configured site URLs rather than unowned domains.
-
-## [0.3.0] - 2026-09-28
-
-### Added

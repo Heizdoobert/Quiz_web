@@ -1,5 +1,5 @@
 # components/leaderboard/GlobalLeaderboard.tsx
-lines:117 exports:default
+lines:145 exports:default
 ---
 'use client';
 
@@ -16,28 +16,28 @@ interface GlobalLeaderboardProps {
 
 const PAGE_SIZE = 5;
 
-export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboardProps) {
+export default function GlobalLeaderboard({ entries: initialEntries, loading: initialLoading }: GlobalLeaderboardProps) {
+  const [entries, setEntries] = React.useState<LeaderboardEntry[]>(initialEntries);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(initialEntries.length >= 50);
+
+  const [prevInitial, setPrevInitial] = React.useState(initialEntries);
+
+  if (initialEntries !== prevInitial) {
+    setPrevInitial(initialEntries);
+    setEntries(initialEntries);
+    setHasMore(initialEntries.length >= 50);
+  }
+
   const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } = usePagination(
     entries,
     PAGE_SIZE
   );
 
-  if (loading) {
-    return <p className="text-xs text-slate-400 text-center py-6">Loading leaderboard...</p>;
-  }
-
-  if (entries.length === 0) {
-    return (
-      <div className="text-center py-6 text-slate-500 text-xs italic">
-        No records yet. Complete a quiz to rank!
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-3">
-      {/* Entries List with Min-Height to Prevent Layout Shift */}
-      <div className="space-y-2 min-h-[260px]">
-        {pagedEntries.map((entry, index) => {
-          const isTop1 = entry.rank === 1;
-          const isTop2 = entry.rank === 2;
+  const handleNextPage = async () => {
+    if (safePage >= totalPages && hasMore && !loadingMore) {
+      setLoadingMore(true);
+      const { getGlobalLeaderboard } = await import('@/lib/actions/leaderboard-actions');
+      const moreEntries = await getGlobalLeaderboard(50, entries.length);
+      if (moreEntries.length < 50) setHasMore(false);
+      setEntries((prev) => [...prev, ...moreEntries]);

@@ -170,7 +170,7 @@ function ReviewCard({
             type="button"
             onClick={handleConfirm}
             disabled={confirming || list.hasConfirmed}
-            className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             {list.hasConfirmed ? (
               <>

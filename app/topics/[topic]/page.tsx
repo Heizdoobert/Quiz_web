@@ -32,7 +32,7 @@ export default async function TopicPage({
           {results.length > 0 && (
             <Link
               href={`/q/${results[0].id}`}
-              className="shrink-0 px-4 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs whitespace-nowrap"
+              className="shrink-0 px-4 py-2 bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs whitespace-nowrap"
             >
               Play this topic
             </Link>

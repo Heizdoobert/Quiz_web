@@ -149,7 +149,7 @@ export default function QuestionFront({
             whileTap={{ scale: 0.96 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
             onClick={onUnlock}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-black font-heading rounded-2xl bg-gradient-to-r from-neo-mint via-cat-l1 to-electric-indigo hover:opacity-95 text-deep-space cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-black font-heading rounded-2xl bg-linear-to-r from-neo-mint via-cat-l1 to-electric-indigo hover:opacity-95 text-deep-space cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           >
             <Rocket className="w-5 h-5 text-deep-space" />
             <span>START ANSWERING</span>

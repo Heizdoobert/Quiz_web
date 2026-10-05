@@ -8,14 +8,14 @@ export default function Loading() {
         <div className="relative flex items-center justify-center w-16 h-16 rounded-2xl bg-neo-mint/15 border border-neo-mint/40 text-neo-mint animate-pulse shadow-lg shadow-neo-mint/20">
           <Zap className="w-8 h-8 fill-neo-mint" />
         </div>
-        <h2 className="text-2xl font-black bg-gradient-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent tracking-wide font-heading">
+        <h2 className="text-2xl font-black bg-linear-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent tracking-wide font-heading">
           Quick Quiz
         </h2>
         <p className="text-xs text-slate-400">Loading crypto trivia & web3 leaderboards...</p>
 
         {/* Skeleton Progress Bar */}
         <div className="w-full h-1.5 bg-cyber-violet rounded-full overflow-hidden mt-2 border border-cyber-border">
-          <div className="h-full bg-gradient-to-r from-neo-mint to-electric-indigo w-1/2 animate-[shimmer_1.5s_infinite]" />
+          <div className="h-full bg-linear-to-r from-neo-mint to-electric-indigo w-1/2 animate-[shimmer_1.5s_infinite]" />
         </div>
       </div>
     </div>

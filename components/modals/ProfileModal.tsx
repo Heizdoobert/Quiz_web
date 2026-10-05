@@ -55,7 +55,7 @@ export default function ProfileModal({
         {/* User Identity Card */}
         <div className="p-5 rounded-2xl bg-deep-space/90 border border-cyber-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-electric-indigo to-neo-mint flex items-center justify-center font-heading font-black text-xl text-deep-space shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-linear-to-tr from-electric-indigo to-neo-mint flex items-center justify-center font-heading font-black text-xl text-deep-space shadow-lg">
               {address ? address.slice(2, 4).toUpperCase() : '??'}
             </div>
             <div>
@@ -168,7 +168,7 @@ export default function ProfileModal({
 
         {/* Claim Rewards CTA Banner */}
         {BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-neo-mint/15 to-electric-indigo/15 border border-neo-mint/30 flex items-center justify-between gap-3">
+          <div className="p-4 rounded-2xl bg-linear-to-r from-neo-mint/15 to-electric-indigo/15 border border-neo-mint/30 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2">
               <Coins className="w-4 h-4 text-neo-mint animate-bounce" />
               <span className="text-xs text-slate-200 font-medium">

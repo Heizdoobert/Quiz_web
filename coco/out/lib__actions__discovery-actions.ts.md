@@ -3,9 +3,9 @@ lines:95 exports:searchQuestions,getTopicQuestions
 ---
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/supabase';
 import { SearchResult } from '@/lib/types';
-import { escapeLikePattern } from '@/lib/validation';
+import { escapeLikePattern } from '@/lib/utils/validation';
 
 const PAGE_SIZE = 20;
 

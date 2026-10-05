@@ -1,5 +1,5 @@
 # lib/types.ts
-lines:232 exports:Question,ClientQuestion,QuestionDispute,QuizResult,Group,QuestionListStatus,QuestionList,QuestionListWithMeta,ListEntry,UserStats,LeaderboardEntry,AnswerSubmissionResult,SearchResult,HistoryItem,ClaimableRewards,RewardVoucher,BADGE_NAMES,BADGE_ICONS,PaginationParams,GetUserQuizzesFilter
+lines:253 exports:Question,ClientQuestion,QuestionDispute,QuizResult,Group,QuestionListStatus,QuestionList,QuestionListWithMeta,ListEntry,UserStats,LeaderboardEntry,AnswerSubmissionResult,SearchResult,HistoryItem,ClaimableRewards,RewardVoucher,BADGE_NAMES,BADGE_ICONS,ActionErrorCode,ActionResult
 ---
 export interface Question {
   id: string;

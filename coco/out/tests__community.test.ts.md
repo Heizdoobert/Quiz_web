@@ -10,22 +10,22 @@ import {
   getSuggestionsForAuthor,
   resolveSuggestion,
 } from '../lib/actions/community-actions';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { supabase } from '../lib/supabase';
-import { getSessionAccount } from '../lib/session';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/supabase/supabase';
+import { getSessionAccount } from '../lib/services/session';
 
-vi.mock('../lib/session', () => ({
+vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 
-vi.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase/supabase', () => ({
   supabase: {
     rpc: vi.fn(),
     from: vi.fn(),
   },
 }));
 
-vi.mock('../lib/supabase-admin', () => ({
+vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
   },

@@ -11,7 +11,7 @@ vi.mock('../lib/actions/auth-actions', () => ({
   getSessionInfo: vi.fn(),
 }));
 
-vi.mock('../components/auth/SignInModal', () => ({
+vi.mock('../components/auth/AuthPopup', () => ({
   default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) =>
     isOpen ? (
       <div data-testid="sign-in-modal">

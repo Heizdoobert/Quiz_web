@@ -1,5 +1,5 @@
 # CONSTRAINTS.md
-lines:63 exports:
+lines:65 exports:
 ---
 # Constraints
 
@@ -22,6 +22,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | Lint | Zero errors from our config | `npm run lint` (`eslint`) | every edit, `check:fast` |
 | Secrets | Zero secret leaks in diff | `gitleaks git --pre-commit --redact --no-banner` | every edit, `check:fast` |
 | Architecture | Zero boundary or circular dependency violations | `npm run check:architecture` (`npx depcruise`) | task end, `check:task` |
+| UI Components | Max 200 lines per component file | `npm run lint` (ESLint `max-lines`) | every edit, `check:fast` |
 | Coverage (changed lines) | Changed lines ≥ 80% covered | `npm run test:coverage` + git diff | task end, CI |
 | Coverage (project ratchet) | Lines ≥ 62.5% (measured 62.56% on 2026-10-01) — must not fall | `npm run test:coverage` | CI, `check:task` |
 | Security: code | Zero high findings | `npm run check:security` (`uvx semgrep scan`) | CI, on-demand |
@@ -40,4 +41,3 @@ Last reviewed: 2026-09-28 by @alexheiz
 - **Security dependencies**: `npm audit --omit=dev` targets production runtime risk; transitive exceptions require specific deprecation plans.
 - **Accessibility & Lighthouse**: Core Web Vitals (LCP ≤ 2.5s, CLS ≤ 0.1) and WCAG 2.1 AA zero critical/serious issues prevent UX and accessibility degradation on deployed preview routes.
 - **Bundle size budget (150 kB gzip)**: Wagmi/RainbowKit/Viem already contribute ~127 kB; 150 kB caps new dependency bloat while leaving 23 kB headroom.
-

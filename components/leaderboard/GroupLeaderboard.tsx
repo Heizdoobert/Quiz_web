@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { LeaderboardEntry } from '@/lib/types';
-import { usePagination } from '@/hooks/shared/use-pagination';
-import { ChevronLeft, ChevronRight, Trophy, Medal } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { LeaderboardEntry } from "@/lib/types";
+import { usePagination } from "@/hooks/shared/use-pagination";
+import { ChevronLeft, ChevronRight, Trophy, Medal } from "lucide-react";
 
 interface GroupLeaderboardProps {
   entries: LeaderboardEntry[];
@@ -19,19 +19,23 @@ export default function GroupLeaderboard({
   loading,
   onOpenGroupModal,
 }: GroupLeaderboardProps) {
-  const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } = usePagination(
-    entries,
-    PAGE_SIZE
-  );
+  const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } =
+    usePagination(entries, PAGE_SIZE);
 
   if (loading) {
-    return <p className="text-xs text-slate-400 text-center py-6">Loading group ranking...</p>;
+    return (
+      <p className="text-xs text-slate-400 text-center py-6">
+        Loading group ranking...
+      </p>
+    );
   }
 
   if (entries.length === 0) {
     return (
       <div className="text-center py-6 space-y-3">
-        <p className="text-xs text-slate-400">No member activity recorded yet for this group.</p>
+        <p className="text-xs text-slate-400">
+          No member activity recorded yet for this group.
+        </p>
         <button
           type="button"
           onClick={onOpenGroupModal}
@@ -61,10 +65,10 @@ export default function GroupLeaderboard({
               transition={{ delay: index * 0.04 }}
               className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
                 isTopThree
-                  ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
+                  ? "glass-border border-transparent bg-linear-to-br from-crypto-gold/20 to-pop-coral/20"
                   : index % 2 === 0
-                    ? 'bg-deep-space border-cyber-border hover:border-electric-indigo/60'
-                    : 'bg-elevation-2 border-cyber-border hover:border-electric-indigo/60'
+                    ? "bg-deep-space border-cyber-border hover:border-electric-indigo/60"
+                    : "bg-elevation-2 border-cyber-border hover:border-electric-indigo/60"
               }`}
             >
               <div className="flex items-center gap-2">
@@ -79,13 +83,21 @@ export default function GroupLeaderboard({
                     <span className="text-[11px]">#{entry.rank}</span>
                   )}
                 </span>
-                <span className={`font-bold ${isTop1 ? 'text-crypto-gold' : 'text-slate-200'}`}>
-                  {entry.display_name || entry.wallet_address?.slice(0, 10) || 'Player'}
+                <span
+                  className={`font-bold ${isTop1 ? "text-crypto-gold" : "text-slate-200"}`}
+                >
+                  {entry.display_name ||
+                    entry.wallet_address?.slice(0, 10) ||
+                    "Player"}
                 </span>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-slate-400 font-medium">{entry.accuracy}%</span>
-                <span className="font-heading font-black text-neo-mint">{entry.score} pts</span>
+                <span className="text-slate-400 font-medium">
+                  {entry.accuracy}%
+                </span>
+                <span className="font-heading font-black text-neo-mint">
+                  {entry.score} pts
+                </span>
               </div>
             </motion.div>
           );
@@ -107,7 +119,8 @@ export default function GroupLeaderboard({
           </button>
 
           <span className="font-mono text-[11px] text-slate-400 font-medium">
-            Page <strong className="text-slate-200">{safePage}</strong> of {totalPages}
+            Page <strong className="text-slate-200">{safePage}</strong> of{" "}
+            {totalPages}
           </span>
 
           <button

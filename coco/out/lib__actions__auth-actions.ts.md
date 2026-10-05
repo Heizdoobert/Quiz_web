@@ -1,17 +1,24 @@
 # lib/actions/auth-actions.ts
-lines:156 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
+lines:277 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,signUpWithUsername,signInWithUsername,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
 ---
 'use server';
 
 import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
-import { publicClientFor } from '@/lib/chain';
-import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
-import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/users';
-import { supabase } from '@/lib/supabase';
+import { publicClientFor } from '@/lib/utils/chain';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/services/session';
+import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+function usernameToEmail(username: string): string {
+  const trimmed = username.trim().toLowerCase();
+  return trimmed.includes('@') ? trimmed : `${trimmed}@player.quiz`;
+}
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -34,10 +41,3 @@ export async function getAuthNonce(): Promise<string> {
     path: '/',
     maxAge: CHALLENGE_TTL_SECONDS,
   });
-  return nonce;
-}
-
-export async function requestSignIn(address: string, chainId: number): Promise<string> {
-  const { host, uri } = await requestOrigin();
-  const nonce = await getAuthNonce();
-  const now = new Date();

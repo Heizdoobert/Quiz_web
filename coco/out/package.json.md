@@ -1,9 +1,9 @@
 # package.json
-lines:62 exports:
+lines:65 exports:
 ---
 {
   "name": "quick-quiz",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -25,6 +25,8 @@ lines:62 exports:
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
   "dependencies": {
+    "@google/genai": "^2.27.0",
+    "@playwright/test": "^1.63.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@supabase/server": "^1.8.0",
     "@supabase/supabase-js": "^2.117.2",
@@ -38,6 +40,4 @@ lines:62 exports:
     "next": "16.3.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "viem": "^2.56.9",
-    "wagmi": "^2.19.5"
-  },
+    "use-sound": "^5.0.0",

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { updateList } from '@/lib/actions/question-list-actions';
-import { useSession } from '@/hooks/shared/use-session';
+import React, { useState } from "react";
+import { updateList } from "@/lib/actions/question-list-actions";
+import { useSession } from "@/hooks/shared/use-session";
 
 export function ListCardEditDetailsPanel({
   listId,
@@ -21,14 +21,23 @@ export function ListCardEditDetailsPanel({
   const [editTitle, setEditTitle] = useState(initialTitle);
   const [editDescription, setEditDescription] = useState(initialDescription);
 
-  const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
-    (await ensureSession()) ? action() : { success: false, error: 'Sign the message in your wallet to manage your lists.' };
+  const asSignedIn = async <T,>(
+    action: () => Promise<T>,
+  ): Promise<T | { success: false; error: string }> =>
+    (await ensureSession())
+      ? action()
+      : {
+          success: false,
+          error: "Sign the message in your wallet to manage your lists.",
+        };
 
   const handleSaveListEdit = async () => {
     setError(null);
-    const res = await asSignedIn(() => updateList(listId, { title: editTitle, description: editDescription }));
+    const res = await asSignedIn(() =>
+      updateList(listId, { title: editTitle, description: editDescription }),
+    );
     if (!res.success) {
-      setError(res.error || 'Failed to update list.');
+      setError(res.error || "Failed to update list.");
       return;
     }
     onSave();
@@ -55,7 +64,7 @@ export function ListCardEditDetailsPanel({
         <button
           type="button"
           onClick={handleSaveListEdit}
-          className="px-3 py-1.5 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-lg text-xs font-black cursor-pointer"
+          className="px-3 py-1.5 bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space rounded-lg text-xs font-black cursor-pointer"
         >
           Save
         </button>

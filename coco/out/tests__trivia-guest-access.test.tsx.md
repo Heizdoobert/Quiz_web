@@ -3,10 +3,10 @@ lines:151 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fetchRandomQuestion, getPublicQuestion, getTopics } from '../lib/actions/question-actions';
-import { validateQuestionInput } from '../lib/validation';
-import { supabase } from '../lib/supabase';
+import { validateQuestionInput } from '../lib/utils/validation';
+import { supabase } from '../lib/supabase/supabase';
 
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 
 function mockChain(result: { data: unknown[] | null; error: unknown }) {
   const eq = vi.fn().mockReturnThis();

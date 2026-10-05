@@ -1,5 +1,5 @@
 # next.config.js
-lines:22 exports:
+lines:25 exports:
 ---
 const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
@@ -17,6 +17,9 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  experimental: {
+    optimizePackageImports: ['lucide-react'],
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

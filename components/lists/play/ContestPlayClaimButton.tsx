@@ -1,7 +1,8 @@
-import React from 'react';
-import { Loader2, Coins, CheckCircle2 } from 'lucide-react';
+import React from "react";
+import { Loader2, Coins, CheckCircle2 } from "lucide-react";
 
-export type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
+export type ClaimStep =
+  "idle" | "signing" | "submitting" | "confirming" | "done" | "error";
 
 export function ContestPlayClaimButton({
   isWrongChain,
@@ -31,7 +32,7 @@ export function ContestPlayClaimButton({
         >
           Switch to {targetChainName}
         </button>
-      ) : claimStep === 'done' ? (
+      ) : claimStep === "done" ? (
         <p className="text-neo-mint font-bold text-sm flex items-center justify-center gap-1.5">
           <CheckCircle2 className="w-4 h-4" /> Reward claimed!
         </p>
@@ -39,17 +40,20 @@ export function ContestPlayClaimButton({
         <button
           onClick={onClaim}
           disabled={
-            claimStep === 'signing' ||
-            claimStep === 'submitting' ||
-            claimStep === 'confirming' ||
+            claimStep === "signing" ||
+            claimStep === "submitting" ||
+            claimStep === "confirming" ||
             BigInt(rewardAmount) <= BigInt(0)
           }
-          className="px-5 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 mx-auto cursor-pointer"
+          className="px-5 py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo disabled:opacity-40 text-deep-space rounded-xl font-black text-sm flex items-center justify-center gap-2 mx-auto cursor-pointer"
         >
-          {(claimStep === 'signing' || claimStep === 'submitting' || claimStep === 'confirming') && (
+          {(claimStep === "signing" ||
+            claimStep === "submitting" ||
+            claimStep === "confirming") && (
             <Loader2 className="w-4 h-4 animate-spin" />
           )}
-          <Coins className="w-4 h-4" /> Claim Reward{isGasless ? ' (Gasless)' : ''}
+          <Coins className="w-4 h-4" /> Claim Reward
+          {isGasless ? " (Gasless)" : ""}
         </button>
       )}
       {claimError && <p className="text-xs text-pop-coral">{claimError}</p>}

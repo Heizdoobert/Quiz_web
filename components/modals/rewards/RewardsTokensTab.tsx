@@ -86,7 +86,7 @@ export function RewardsTokensTab({
         whileHover={{ scale: 1.015, filter: 'brightness(1.1)' }}
         whileTap={{ scale: 0.985 }}
         transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-        className="w-full py-3 bg-gradient-to-r from-neo-mint to-electric-indigo disabled:bg-cyber-violet-light disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-deep-space font-black rounded-xl transition-[color,background-color,border-color,opacity,box-shadow] shadow-lg shadow-neo-mint/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+        className="w-full py-3 bg-linear-to-r from-neo-mint to-electric-indigo disabled:bg-cyber-violet-light disabled:from-transparent disabled:to-transparent disabled:text-slate-500 text-deep-space font-black rounded-xl transition-[color,background-color,border-color,opacity,box-shadow] shadow-lg shadow-neo-mint/20 flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
       >
         {claimStep === 'signing' && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}
         {claimStep === 'submitting' && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}

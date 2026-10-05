@@ -1,5 +1,5 @@
 # components/quiz/QuizLayout.tsx
-lines:224 exports:default
+lines:190 exports:default
 ---
 'use client';
 
@@ -15,16 +15,8 @@ import LeaderboardPanel from '../leaderboard/LeaderboardPanel';
 import QuestionForm from './QuestionForm';
 import AdZone from '../ads/AdZone';
 import StickyBannerAd from '../ads/StickyBannerAd';
-import dynamic from 'next/dynamic';
 import SeoFaqSection from '../seo/SeoFaqSection';
-
-const IntroModal = dynamic(() => import('../modals/IntroModal'), { ssr: false });
-const TimerSettingsModal = dynamic(() => import('../modals/TimerSettingsModal'), { ssr: false });
-const GroupModal = dynamic(() => import('../modals/GroupModal'), { ssr: false });
-const ReviewModal = dynamic(() => import('../modals/ReviewModal'), { ssr: false });
-const RewardsModal = dynamic(() => import('../modals/RewardsModal'), { ssr: false });
-const ProfileModal = dynamic(() => import('../modals/ProfileModal'), { ssr: false });
-const DisputeModal = dynamic(() => import('../modals/DisputeModal'), { ssr: false });
+import { QuizModals } from './QuizModals';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -41,3 +33,11 @@ export default function QuizLayout({
     address,
     selectedCategory,
     currentQuestion,
+    isFlipped,
+    isSubmitting,
+    result,
+    showStickyAd,
+    setShowStickyAd,
+    stats,
+    history,
+    timerMode,

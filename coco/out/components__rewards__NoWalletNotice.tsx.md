@@ -2,7 +2,7 @@
 lines:31 exports:default
 ---
 import React from 'react';
-import { NO_WALLET_DISCLOSURE } from '@/lib/rewards-copy';
+import { NO_WALLET_DISCLOSURE } from '@/lib/constants/rewards-copy';
 
 const TOKEN_DECIMALS = BigInt(10) ** BigInt(18);
 

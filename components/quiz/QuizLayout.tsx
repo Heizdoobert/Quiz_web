@@ -136,7 +136,7 @@ export default function QuizLayout({
                     <button
                       type="button"
                       onClick={() => requireSignIn()}
-                      className="px-5 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer"
+                      className="px-5 py-2 bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black font-heading text-xs cursor-pointer"
                     >
                       Sign In
                     </button>

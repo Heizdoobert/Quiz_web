@@ -1,23 +1,23 @@
 # tests/reward-actions.test.ts
-lines:247 exports:
+lines:288 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateTokenVoucher, generateBadgeVoucher, confirmRewardClaim } from '../lib/actions/reward-actions';
-import { getSessionAccount } from '../lib/session';
-import { statsForAccount } from '../lib/stats';
+import { getSessionAccount } from '../lib/services/session';
+import { statsForAccount } from '../lib/utils/stats';
 import { getGlobalLeaderboard } from '../lib/actions/leaderboard-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSignerAccount, isVoucherUsed, isContestVoucherUsed } from '../lib/chain';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSignerAccount, isVoucherUsed, isContestVoucherUsed } from '../lib/utils/chain';
 
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
 const ZERO_STATS = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
 
-vi.mock('../lib/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/stats', () => ({ statsForAccount: vi.fn() }));
+vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/utils/stats', () => ({ statsForAccount: vi.fn() }));
 vi.mock('../lib/actions/leaderboard-actions', () => ({ getGlobalLeaderboard: vi.fn() }));
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),
@@ -25,8 +25,8 @@ vi.mock('../lib/chain', () => ({
   newNonce: vi.fn(() => BigInt(1)),
   getContestId: vi.fn(() => '0xcontest'),
 }));
-vi.mock('../lib/supabase', () => ({ supabase: { from: vi.fn() } }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 
 // A chain that answers a plain select (via `.then`, once awaited) with `selectResult`,
 // a `.maybeSingle()` with `maybeSingleResult`, an `.insert()` with `insertResult`, and
