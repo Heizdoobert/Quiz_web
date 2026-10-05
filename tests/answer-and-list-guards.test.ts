@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { submitAnswer, getAnswerHistory } from '../lib/actions/quiz-actions';
-import { createQuestion, disputeQuestion } from '../lib/actions/question-actions';
+import { createQuestion, disputeQuestion, get5050EliminatedIndices } from '../lib/actions/question-actions';
 import {
   createList,
   updateList,
@@ -63,7 +63,9 @@ type TableStubs = Record<
 // A chainable query stub: every builder method returns the chain, and the terminal
 // calls (single, maybeSingle, insert, await) resolve to what the test gives per table.
 function stubFrom(fromMock: ReturnType<typeof vi.fn>, tables: TableStubs) {
-  const inserts: Record<string, unknown[]> = {};
+  const inserts: Record<string, unknown[]> & { _updates?: Record<string, unknown[]> } = {};
+  const updates: Record<string, unknown[]> = {};
+  inserts._updates = updates;
   fromMock.mockImplementation((table: string) => {
     const t = tables[table] ?? {};
     const chain: Record<string, unknown> = {};
@@ -78,7 +80,10 @@ function stubFrom(fromMock: ReturnType<typeof vi.fn>, tables: TableStubs) {
       (inserts[table] ??= []).push(row);
       return { error: null };
     };
-    chain.update = () => chain;
+    chain.update = (val: unknown) => {
+      (updates[table] ??= []).push(val);
+      return chain;
+    };
     chain.then = (resolve: (val: unknown) => unknown) =>
       resolve({
         data: t.queryError ? null : t.rows ?? (t.row ? [t.row] : []),
@@ -343,6 +348,20 @@ describe('question list guards', () => {
     expect(inserts.reward_claims![0]).toMatchObject({ user_id: ACCOUNT_ID, wallet_address: WALLET });
   });
 
+  it('uses list.onchain_contest_id when owner_wallet is null during claimListReward', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({
+      question_lists: { row: { owner_wallet: null, onchain_contest_id: '0xsavedcontestid', status: 'live' } },
+      list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
+    });
+    const res = await claimListReward(LIST_ID);
+    expect(res).toMatchObject({
+      recipient: WALLET,
+      contestId: '0xsavedcontestid',
+      amount: '10000000000000000000',
+    });
+  });
+
   it('refuses startContest if contest is not funded on-chain', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = false;
@@ -353,14 +372,18 @@ describe('question list guards', () => {
     expect(res).toEqual({ success: false, error: 'Contest pool has not been funded on-chain.' });
   });
 
-  it('allows startContest when contest is verified funded on-chain', async () => {
+  it('allows startContest when contest is verified funded on-chain and updates owner_wallet', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = true;
-    mockTables({
+    const inserts = mockTables({
       question_lists: { row: { owner_user: ACCOUNT_ID, status: 'approved' } },
     });
     const res = await startContest(LIST_ID, 100);
     expect(res.success).toBe(true);
+    expect(inserts._updates?.question_lists?.[0]).toMatchObject({
+      status: 'live',
+      owner_wallet: WALLET,
+    });
   });
 
   it('refuses startContest for an account with no wallet', async () => {
@@ -547,3 +570,29 @@ describe('validateQuestionInput', () => {
     expect(validateQuestionInput({ ...base, correctIndex: 0, options: ['y'.repeat(121), 'b', 'c', 'd'] }).valid).toBe(false);
   });
 });
+
+describe('get5050EliminatedIndices', () => {
+  it('returns two distinct wrong indices without eliminating the correct index', async () => {
+    mockTables({ questions: { row: { correct_index: 2 } } });
+    const eliminated = await get5050EliminatedIndices('q-test-123');
+    expect(eliminated).toHaveLength(2);
+    expect(eliminated).not.toContain(2);
+    expect(eliminated[0]).toBeLessThan(eliminated[1]);
+  });
+
+  it('is deterministic for the same question ID', async () => {
+    mockTables({ questions: { row: { correct_index: 0 } } });
+    const run1 = await get5050EliminatedIndices('q-deterministic');
+    const run2 = await get5050EliminatedIndices('q-deterministic');
+    expect(run1).toEqual(run2);
+  });
+
+  it('returns empty array when question is not found or correct_index is invalid', async () => {
+    mockTables({ questions: { row: null } });
+    expect(await get5050EliminatedIndices('q-not-found')).toEqual([]);
+
+    mockTables({ questions: { row: { correct_index: 99 } } });
+    expect(await get5050EliminatedIndices('q-invalid-index')).toEqual([]);
+  });
+});
+

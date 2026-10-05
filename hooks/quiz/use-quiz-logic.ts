@@ -40,6 +40,7 @@ export function useQuizLogic({
 }: UseQuizLogicOptions = {}) {
   const { address, isConnected } = useAccount();
   const { account, requireSignIn: ensureSession } = useSession();
+  const accountRef = useRef(account);
 
   // Quiz state
   const [selectedCategory, setSelectedCategory] = useState<string>(initialCategory || 'All');
@@ -102,25 +103,46 @@ export function useQuizLogic({
   const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
 
   const refreshStats = useCallback(async () => {
-    if (!account) return;
+    const targetId = account?.id;
+    if (!targetId) {
+      setStats({
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        accuracy: 0,
+        totalAnswered: 0,
+      });
+      return;
+    }
     const userStats = await getUserStats();
+    if (accountRef.current?.id !== targetId) return;
     setStats(userStats);
   }, [account]);
 
   const refreshRewards = useCallback(async () => {
-    if (!account) return;
+    const targetId = account?.id;
+    if (!targetId) {
+      setClaimableRewards(null);
+      return;
+    }
     const data = await getClaimableRewards();
+    if (accountRef.current?.id !== targetId) return;
     setClaimableRewards(data);
   }, [account]);
 
   // Loads the signed-in account's saved answers so history and the "already answered"
   // set survive a reload; an account with no session yet gets [] back.
   const refreshHistory = useCallback(async () => {
-    if (!account) return;
+    const targetId = account?.id;
+    if (!targetId) {
+      setHistory([]);
+      setAnsweredIds([]);
+      return;
+    }
     const saved = await getAnswerHistory();
-    if (saved.length === 0) return;
+    if (accountRef.current?.id !== targetId) return;
     setHistory(saved);
-    setAnsweredIds((prev) => [...new Set([...prev, ...saved.map((h) => h.questionId)])]);
+    setAnsweredIds(saved.map((h) => h.questionId));
   }, [account]);
 
   const loadLeaderboards = useCallback(
@@ -228,12 +250,11 @@ export function useQuizLogic({
 
   // Initial stats and history fetch (the account itself is created at sign-in)
   useEffect(() => {
-    if (account) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      refreshStats();
-      refreshRewards();
-      refreshHistory();
-    }
+    accountRef.current = account;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void refreshStats();
+    void refreshRewards();
+    void refreshHistory();
   }, [account, refreshStats, refreshRewards, refreshHistory]);
 
   // Only fetch initial question and leaderboards if not supplied via SSR

@@ -9,8 +9,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
-import SignInModal from '@/components/auth/SignInModal';
+
+const SignInModal = dynamic(() => import('@/components/auth/SignInModal'), {
+  ssr: false,
+});
 
 export interface SessionAccount {
   id: string;
@@ -24,6 +28,7 @@ interface SessionContextValue {
   // otherwise opens SignInModal and resolves when it closes (true on success,
   // false if the player cancels).
   requireSignIn: () => Promise<boolean>;
+  clearSession: () => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -31,20 +36,42 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<SessionAccount | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const resolveRef = useRef<((ok: boolean) => void) | null>(null);
+  const resolversRef = useRef<Array<(ok: boolean) => void>>([]);
+  const reqIdRef = useRef(0);
+
+  const clearSession = useCallback(() => {
+    reqIdRef.current += 1;
+    setAccount(null);
+    setModalOpen(false);
+    if (resolversRef.current.length > 0) {
+      const pending = resolversRef.current;
+      resolversRef.current = [];
+      pending.forEach((res) => res(false));
+    }
+  }, []);
 
   // Sign-in happens elsewhere (today: RainbowKit's auto SIWE flow calling refresh()
   // after Providers.tsx sees the auth status change); when that refresh finds an
   // account while a requireSignIn() call is waiting on the modal, settle it here.
   const refresh = useCallback(async () => {
-    const info = await getSessionInfo();
-    setAccount(info);
-    if (info && resolveRef.current) {
-      setModalOpen(false);
-      resolveRef.current(true);
-      resolveRef.current = null;
+    const currentReqId = ++reqIdRef.current;
+    try {
+      const info = await getSessionInfo();
+      if (currentReqId !== reqIdRef.current) {
+        return null;
+      }
+      setAccount(info);
+      if (info && resolversRef.current.length > 0) {
+        setModalOpen(false);
+        const pending = resolversRef.current;
+        resolversRef.current = [];
+        pending.forEach((res) => res(true));
+      }
+      return info;
+    } catch (err) {
+      console.error('Session refresh error:', err);
+      return null;
     }
-    return info;
   }, []);
 
   useEffect(() => {
@@ -56,19 +83,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     const info = await refresh();
     if (info) return true;
     return new Promise<boolean>((resolve) => {
-      resolveRef.current = resolve;
+      resolversRef.current.push(resolve);
       setModalOpen(true);
     });
   }, [refresh]);
 
   const cancelSignIn = useCallback(() => {
     setModalOpen(false);
-    resolveRef.current?.(false);
-    resolveRef.current = null;
+    const pending = resolversRef.current;
+    resolversRef.current = [];
+    pending.forEach((res) => res(false));
   }, []);
 
   return (
-    <SessionContext.Provider value={{ account, refresh, requireSignIn }}>
+    <SessionContext.Provider value={{ account, refresh, requireSignIn, clearSession }}>
       {children}
       <SignInModal isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />
     </SessionContext.Provider>

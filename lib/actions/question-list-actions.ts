@@ -88,8 +88,11 @@ async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | 
       ]);
 
       const confirmationCount = confirmations?.length ?? 0;
+      const maxParticipants = BigInt(list.max_participants || 10);
       const perQuestionReward =
-        questionCount > 0 ? (BigInt(list.reward_pool_tokens || '0') / BigInt(questionCount)).toString() : '0';
+        questionCount > 0 && maxParticipants > BigInt(0)
+          ? (BigInt(list.reward_pool_tokens || '0') / maxParticipants / BigInt(questionCount)).toString()
+          : '0';
 
       return {
         ...list,
@@ -524,6 +527,7 @@ export async function startContest(
       .from('question_lists')
       .update({
         status: 'live',
+        owner_wallet: auth.wallet,
         reward_pool_tokens: minPoolWei.toString(),
         max_participants: safeParticipants,
         started_at: new Date().toISOString(),
@@ -755,13 +759,16 @@ export async function startListAttempt(
       .eq('list_id', listId);
     if (qErr || !questions) return { success: false, error: 'Failed to load contest questions.' };
 
-    const { data: answeredResults } = await auth.db
-      .from('quiz_results')
-      .select('question_id')
-      .eq('user_id', auth.account.id)
-      .in('question_id', questions.map((q) => q.id));
+    let answeredQuestionIds: string[] = [];
+    if (questions.length > 0) {
+      const { data: answeredResults } = await auth.db
+        .from('quiz_results')
+        .select('question_id')
+        .eq('user_id', auth.account.id)
+        .in('question_id', questions.map((q) => q.id));
 
-    const answeredQuestionIds = (answeredResults || []).map((r) => r.question_id);
+      answeredQuestionIds = (answeredResults || []).map((r) => r.question_id);
+    }
 
     return {
       success: true,
@@ -841,7 +848,6 @@ export async function completeListAttempt(
 }
 
 const VOUCHER_TTL_SECONDS = 3600;
-const EXPIRY_MARGIN_SECONDS = 300;
 
 function toContestVoucher(
   wallet: string,
@@ -884,12 +890,12 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('owner_wallet, status')
+      .select('owner_wallet, status, onchain_contest_id')
       .eq('id', listId)
       .maybeSingle();
 
     if (listErr || !list) return { error: 'Contest not found.' };
-    const contestId = getContestId(listId, list.owner_wallet);
+    const contestId = (list.onchain_contest_id as `0x${string}`) || getContestId(listId, list.owner_wallet);
 
     // Verify on-chain contest status if deployed
     const onChain = await getContestOnChain(contestId);
@@ -919,7 +925,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
         let status: 'claimed' | 'expired' | null = null;
         if (await isContestVoucherUsed(contestId, auth.wallet, claim.nonce)) {
           status = 'claimed';
-        } else if (!claim.deadline || Number(claim.deadline) + EXPIRY_MARGIN_SECONDS < now) {
+        } else if (!claim.deadline || Number(claim.deadline) <= now) {
           status = 'expired';
         }
 

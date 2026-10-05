@@ -4,6 +4,8 @@ import QuizLayout from '@/components/quiz/QuizLayout';
 import { getPublicQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Play a question',
 };

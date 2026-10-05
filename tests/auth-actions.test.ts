@@ -6,7 +6,10 @@ import {
   signInWithWallet,
   signOutWallet,
   getSessionInfo,
+  signUpWithUsername,
+  signInWithUsername,
 } from '../lib/actions/auth-actions';
+import { supabase } from '../lib/supabase';
 import { supabaseAdmin } from '../lib/supabase-admin';
 import { publicClientFor } from '../lib/chain';
 
@@ -33,6 +36,12 @@ vi.mock('../lib/supabase', () => ({
       eq: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }),
     })),
+    auth: {
+      signInWithPassword: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } }, error: null }),
+      signUp: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } }, error: null }),
+      signInWithOtp: vi.fn().mockResolvedValue({ data: {}, error: null }),
+      verifyOtp: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } }, error: null }),
+    },
   },
 }));
 
@@ -43,7 +52,13 @@ vi.mock('../lib/supabase-admin', () => ({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
+      maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: null }, error: null }),
     })),
+    auth: {
+      admin: {
+        createUser: vi.fn().mockResolvedValue({ data: { user: { id: 'test-user-id' } }, error: null }),
+      },
+    },
   },
 }));
 
@@ -59,6 +74,28 @@ describe('Auth & Session Foundations', () => {
     vi.resetAllMocks();
     cookieStore.clear();
     process.env.SUPABASE_SECRET_KEY = TEST_SECRET;
+
+    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue({
+      upsert: vi.fn().mockResolvedValue({ error: null }),
+      select: vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: null }, error: null }),
+        }),
+      }),
+    });
+    (supabaseAdmin!.auth.admin.createUser as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+    (supabase.auth.signInWithPassword as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
+    (supabase.auth.signUp as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: { user: { id: 'test-user-id' } },
+      error: null,
+    });
   });
 
   describe('session', () => {
@@ -141,6 +178,89 @@ describe('Auth & Session Foundations', () => {
       expect(cookieStore.has('quiz_session')).toBe(true);
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('users');
       expect(upsertMock).toHaveBeenCalled();
+    });
+
+    describe('signUpWithUsername', () => {
+      it('rejects invalid username', async () => {
+        const resShort = await signUpWithUsername('ab', 'secret123');
+        expect(resShort.ok).toBe(false);
+        expect(resShort.error).toContain('Username must be 3-20 characters');
+
+        const resInvalid = await signUpWithUsername('user@invalid!', 'secret123');
+        expect(resInvalid.ok).toBe(false);
+        expect(resInvalid.error).toContain('Username must be 3-20 characters');
+      });
+
+      it('rejects short password', async () => {
+        const res = await signUpWithUsername('valid_user', '12345');
+        expect(res.ok).toBe(false);
+        expect(res.error).toContain('Password must be at least 6 characters');
+      });
+
+      it('successfully registers new user and creates session', async () => {
+        const res = await signUpWithUsername('test_player', 'secretpass123');
+        expect(res.ok).toBe(true);
+        expect(res.error).toBeUndefined();
+        expect(cookieStore.has('quiz_session')).toBe(true);
+        const account = await getSessionAccount();
+        expect(account).toEqual({ id: 'test-account-id', wallet: null });
+      });
+
+      it('handles duplicate username error', async () => {
+        (supabaseAdmin!.auth.admin.createUser as ReturnType<typeof vi.fn>).mockResolvedValue({
+          data: { user: null },
+          error: { message: 'User already registered' },
+        });
+
+        const res = await signUpWithUsername('existing_player', 'secretpass123');
+        expect(res.ok).toBe(false);
+        expect(res.error).toContain('Username is already taken');
+      });
+    });
+
+    describe('signInWithUsername', () => {
+      it('rejects empty credentials', async () => {
+        const res = await signInWithUsername('', '');
+        expect(res.ok).toBe(false);
+        expect(res.error).toContain('Username and password are required');
+      });
+
+      it('handles invalid credentials', async () => {
+        (supabase.auth.signInWithPassword as ReturnType<typeof vi.fn>).mockResolvedValue({
+          data: { user: null },
+          error: { message: 'Invalid login credentials' },
+        });
+
+        const res = await signInWithUsername('test_player', 'wrong_password');
+        expect(res.ok).toBe(false);
+        expect(res.error).toBe('Invalid username or password.');
+      });
+
+      it('successfully signs in user without wallet and establishes session', async () => {
+        const res = await signInWithUsername('test_player', 'correct_password');
+        expect(res.ok).toBe(true);
+        expect(cookieStore.has('quiz_session')).toBe(true);
+        const account = await getSessionAccount();
+        expect(account).toEqual({ id: 'test-account-id', wallet: null });
+      });
+
+      it('successfully signs in user with linked wallet and establishes session with wallet', async () => {
+        (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue({
+          upsert: vi.fn().mockResolvedValue({ error: null }),
+          select: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
+              maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: TEST_WALLET }, error: null }),
+            }),
+          }),
+        });
+
+        const res = await signInWithUsername('test_player', 'correct_password');
+        expect(res.ok).toBe(true);
+        expect(cookieStore.has('quiz_session')).toBe(true);
+        const account = await getSessionAccount();
+        expect(account).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
+      });
     });
   });
 });
