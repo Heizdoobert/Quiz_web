@@ -157,7 +157,7 @@ describe('AuthPopup', () => {
 
   it('navigates to Email tab and sends code, then verifies code', async () => {
     const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
-    vi.mocked(requestEmailCode).mockResolvedValue({ ok: true });
+    vi.mocked(requestEmailCode).mockResolvedValue({ sent: true });
     vi.mocked(verifyEmailCode).mockResolvedValue({ ok: true });
 
     render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
@@ -195,7 +195,7 @@ describe('AuthPopup', () => {
 
   it('displays error on invalid email code', async () => {
     const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
-    vi.mocked(requestEmailCode).mockResolvedValue({ ok: true });
+    vi.mocked(requestEmailCode).mockResolvedValue({ sent: true });
     vi.mocked(verifyEmailCode).mockResolvedValue({ ok: false });
 
     render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
