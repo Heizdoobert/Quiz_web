@@ -8,14 +8,12 @@ import Header from '../layout/Header';
 import CategoryBar from './CategoryBar';
 import QuizCard from './QuizCard';
 import Sidebar from '../layout/Sidebar';
+import LeaderboardPanel from '../leaderboard/LeaderboardPanel';
+import QuestionForm from './QuestionForm';
 import AdZone from '../ads/AdZone';
 import StickyBannerAd from '../ads/StickyBannerAd';
 import SeoFaqSection from '../seo/SeoFaqSection';
 import { QuizModals } from './QuizModals';
-import dynamic from 'next/dynamic';
-
-const QuestionForm = dynamic(() => import('./QuestionForm'), { ssr: false });
-const LeaderboardPanel = dynamic(() => import('../leaderboard/LeaderboardPanel'), { ssr: true });
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
