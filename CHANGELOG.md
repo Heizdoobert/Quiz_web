@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-10-05
+
+### Added
+- **AI Content Moderation**: Integrated `@google/genai` (Gemini) into the question creation flow to automatically reject toxic, harmful, or malicious submissions.
+- **Server-Side Leaderboard Pagination**: Refactored leaderboard queries (`get_global_leaderboard`) to support `LIMIT` and `OFFSET` in SQL, and upgraded the frontend components with an infinite scroll / "Load More" implementation for better performance on large datasets.
+- **Playwright E2E Tests**: Initialized Playwright testing framework and added automated UI rendering tests (`e2e/home.spec.ts`).
+
+### Changed
+- **Clean Architecture Refactoring**: Reorganized the `/lib` directory into `/lib/supabase`, `/lib/services`, `/lib/utils`, and `/lib/constants`, with all import paths safely refactored across the project.
+- **Database Migrations Structure**: Moved raw SQL files from `lib/sql` to a standardized `supabase/migrations` directory.
+
+### Security
+- **Service Role Key Hardening**: Removed insecure usage of Supabase Service Role key (`SUPABASE_SECRET_KEY`) from public server actions (`ads-actions.ts`) to prevent privilege escalation.
+
 ## [0.3.1] - 2026-10-01
 
 ### Added
