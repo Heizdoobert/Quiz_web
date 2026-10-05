@@ -19,6 +19,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | Lint | Zero errors from our config | `npm run lint` (`eslint`) | every edit, `check:fast` |
 | Secrets | Zero secret leaks in diff | `gitleaks git --pre-commit --redact --no-banner` | every edit, `check:fast` |
 | Architecture | Zero boundary or circular dependency violations | `npm run check:architecture` (`npx depcruise`) | task end, `check:task` |
+| UI Components | Max 200 lines per component file | `npm run lint` (ESLint `max-lines`) | every edit, `check:fast` |
 | Coverage (changed lines) | Changed lines ≥ 80% covered | `npm run test:coverage` + git diff | task end, CI |
 | Coverage (project ratchet) | Lines ≥ 62.5% (measured 62.56% on 2026-10-01) — must not fall | `npm run test:coverage` | CI, `check:task` |
 | Security: code | Zero high findings | `npm run check:security` (`uvx semgrep scan`) | CI, on-demand |
@@ -50,6 +51,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
 | W1 | Deps high | `ws <=8.20.1` via `@walletconnect/utils` / `@reown/appkit` (transitive) | Fix requires `wagmi@3` breaking change; tracked separately | @alexheiz | 2026-12-27 |
+| A1 | UI Component Size | `components/lists/*`, `components/modals/*`, `components/quiz/*` (8 files) | Legacy monoliths exceeding 200 lines. To be split using Component Manager Pattern | @alexheiz | 2027-01-05 |
 
 ## Lifecycle mapping
 
