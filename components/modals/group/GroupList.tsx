@@ -1,4 +1,5 @@
 import React from 'react';
+import { Group } from '@/lib/types';
 
 export function GroupList({
   groups,
@@ -6,7 +7,7 @@ export function GroupList({
   onSelectGroup,
   onLeaveGroup,
 }: {
-  groups: any[];
+  groups: Group[];
   loading: boolean;
   onSelectGroup?: (groupId: string) => void;
   onLeaveGroup: (groupId: string) => void;
