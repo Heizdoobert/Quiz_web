@@ -51,7 +51,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
 | W1 | Deps high | `ws <=8.20.1` via `@walletconnect/utils` / `@reown/appkit` (transitive) | Fix requires `wagmi@3` breaking change; tracked separately | @alexheiz | 2026-12-27 |
-| A1 | UI Component Size | `components/lists/*`, `components/modals/*`, `components/quiz/*` (7 files) | Legacy monoliths exceeding 200 lines. To be split using Component Manager Pattern | @alexheiz | 2027-01-05 |
+
 
 ## Lifecycle mapping
 

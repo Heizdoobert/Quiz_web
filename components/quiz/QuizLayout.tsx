@@ -8,12 +8,14 @@ import Header from '../layout/Header';
 import CategoryBar from './CategoryBar';
 import QuizCard from './QuizCard';
 import Sidebar from '../layout/Sidebar';
-import LeaderboardPanel from '../leaderboard/LeaderboardPanel';
-import QuestionForm from './QuestionForm';
 import AdZone from '../ads/AdZone';
 import StickyBannerAd from '../ads/StickyBannerAd';
 import SeoFaqSection from '../seo/SeoFaqSection';
 import { QuizModals } from './QuizModals';
+import dynamic from 'next/dynamic';
+
+const QuestionForm = dynamic(() => import('./QuestionForm'), { ssr: false });
+const LeaderboardPanel = dynamic(() => import('../leaderboard/LeaderboardPanel'), { ssr: true });
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -75,9 +77,6 @@ export default function QuizLayout({
       />
       <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-[84px]' : 'pb-6'}`}>
       <div className="w-full max-w-[1540px] flex gap-6 justify-center items-start">
-        {/* Left Skyscraper Ad (Desktop Only) */}
-        <AdZone variant="skyscraper" slot="left-sky" />
-
         {/* Center Main Content Area */}
         <div className="flex-1 max-w-6xl w-full flex flex-col items-center">
           {/* Top Banner Ad */}
@@ -165,9 +164,6 @@ export default function QuizLayout({
           {/* Semantic SEO & Knowledge FAQ Section */}
           <SeoFaqSection />
         </div>
-
-        {/* Right Skyscraper Ad (Desktop Only) */}
-        <AdZone variant="skyscraper" slot="right-sky" />
       </div>
 
       <QuizModals
