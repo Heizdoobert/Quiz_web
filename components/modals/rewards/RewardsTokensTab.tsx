@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ExternalLink, Loader2, Sparkles } from 'lucide-react';
 import { ClaimableRewards } from '@/lib/types';
+import useSound from 'use-sound';
 
 export function RewardsTokensTab({
   rewards,
@@ -24,6 +25,14 @@ export function RewardsTokensTab({
   formatTokens: (val: string) => string;
   handleClaimTokens: () => void;
 }) {
+  const [playCorrect] = useSound('/sounds/correct.mp3', { volume: 0.6 });
+
+  React.useEffect(() => {
+    if (claimStep === 'done') {
+      playCorrect();
+    }
+  }, [claimStep, playCorrect]);
+
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-3">
