@@ -10,20 +10,28 @@ const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
 const QUARANTINE_AT = 3;
 
+import { ActionResult } from '@/lib/types';
+
 export async function createQuestion(params: {
   prompt: string;
   options: string[];
   correctIndex: number;
   category?: string;
   explanation?: string;
-}): Promise<{ success: boolean; error?: string }> {
+}): Promise<ActionResult> {
   try {
     const account = await getSessionAccount();
-    if (!account) return { success: false, error: 'Sign in to add questions.' };
-    if (!supabaseAdmin) return { success: false, error: 'Adding questions is unavailable right now.' };
+    if (!account) {
+      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to add questions.' } };
+    }
+    if (!supabaseAdmin) {
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Adding questions is unavailable right now.' } };
+    }
 
     const validated = validateQuestionInput(params);
-    if (!validated.valid) return { success: false, error: validated.error };
+    if (!validated.valid) {
+      return { success: false, error: { code: 'VALIDATION_ERROR', message: validated.error } };
+    }
 
     // New questions go live at once and are moderated by disputes, so cap how fast one account adds them.
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
@@ -32,16 +40,21 @@ export async function createQuestion(params: {
       .select('id', { count: 'exact', head: true })
       .eq('created_by_user', account.id)
       .gte('created_at', since);
+      
     if (countErr) {
       console.error('createQuestion count error:', countErr);
-      return { success: false, error: 'Failed to add question.' };
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to add question.' } };
     }
     if ((count ?? 0) >= QUESTIONS_PER_DAY) {
-      return { success: false, error: `You can add up to ${QUESTIONS_PER_DAY} questions per day.` };
+      return { 
+        success: false, 
+        error: { 
+          code: 'RATE_LIMITED', 
+          message: `You can add up to ${QUESTIONS_PER_DAY} questions per day.` 
+        } 
+      };
     }
 
-    // wallet_address (created_by) is written directly too, same as quiz-actions.ts's quiz_results
-    // insert, so readers of the old column stay correct until it's dropped in Task 25.
     const { error } = await supabaseAdmin.from('questions').insert({
       prompt: validated.prompt,
       options: validated.options,
@@ -53,15 +66,16 @@ export async function createQuestion(params: {
       status: 'verified',
       dispute_count: 0,
     });
+    
     if (error) {
       console.error('createQuestion insert error:', error);
-      return { success: false, error: 'Failed to add question.' };
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to add question.' } };
     }
 
-    return { success: true };
+    return { success: true, data: undefined };
   } catch (err) {
     console.error('createQuestion error:', err);
-    return { success: false, error: 'Failed to add question.' };
+    return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Failed to add question.' } };
   }
 }
 
@@ -182,33 +196,33 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
 export async function disputeQuestion(params: {
   questionId: string;
   reason: string;
-}): Promise<{ success: boolean; quarantined?: boolean; error?: string }> {
+}): Promise<ActionResult<{ quarantined: boolean }>> {
   try {
     const reason = params.reason?.trim() || '';
     if (!isUuid(params.questionId) || !reason) {
-      return { success: false, error: 'Question and dispute reason are required.' };
+      return { success: false, error: { code: 'VALIDATION_ERROR', message: 'Question and dispute reason are required.' } };
     }
     if (reason.length > MAX_DISPUTE_REASON) {
-      return { success: false, error: `Dispute reason must be at most ${MAX_DISPUTE_REASON} characters.` };
+      return { success: false, error: { code: 'VALIDATION_ERROR', message: `Dispute reason must be at most ${MAX_DISPUTE_REASON} characters.` } };
     }
     const account = await getSessionAccount();
-    if (!account) return { success: false, error: 'Sign in to report questions.' };
-    if (!supabaseAdmin) return { success: false, error: 'Reporting is unavailable right now.' };
+    if (!account) return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to report questions.' } };
+    if (!supabaseAdmin) return { success: false, error: { code: 'SERVER_ERROR', message: 'Reporting is unavailable right now.' } };
 
-    // Only players whose answer to this question was recorded may report it,
-    // so a quarantine takes signed-in accounts that actually played it.
+    // Only players whose answer to this question was recorded may report it
     const { data: answered, error: answeredErr } = await supabaseAdmin
       .from('quiz_results')
       .select('id')
       .eq('user_id', account.id)
       .eq('question_id', params.questionId)
       .limit(1);
+      
     if (answeredErr) {
       console.error('disputeQuestion answered check error:', answeredErr);
-      return { success: false, error: 'Failed to submit dispute.' };
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to submit dispute.' } };
     }
     if (!answered?.length) {
-      return { success: false, error: 'Answer this question before reporting it.' };
+      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Answer this question before reporting it.' } };
     }
 
     const { error: disputeErr } = await supabaseAdmin.from('question_disputes').insert({
@@ -217,35 +231,38 @@ export async function disputeQuestion(params: {
       reporter_wallet: account.wallet,
       reason,
     });
+    
     if (disputeErr) {
       if (disputeErr.code === '23505') {
-        return { success: false, error: 'You have already reported this question.' };
+        return { success: false, error: { code: 'CONFLICT', message: 'You have already reported this question.' } };
       }
       console.error('disputeQuestion insert error:', disputeErr);
-      return { success: false, error: 'Failed to submit dispute.' };
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to submit dispute.' } };
     }
 
-    // Count dispute rows instead of incrementing, so concurrent reports can't lose an update.
     const { count, error: countErr } = await supabaseAdmin
       .from('question_disputes')
       .select('id', { count: 'exact', head: true })
       .eq('question_id', params.questionId);
+      
     if (countErr) {
       console.error('disputeQuestion count error:', countErr);
-      return { success: true, quarantined: false };
+      return { success: true, data: { quarantined: false } };
     }
+    
     const disputeCount = count ?? 0;
     const quarantined = disputeCount >= QUARANTINE_AT;
     const { error: updateErr } = await supabaseAdmin
       .from('questions')
       .update({ dispute_count: disputeCount, ...(quarantined ? { status: 'quarantined' } : {}) })
       .eq('id', params.questionId);
+      
     if (updateErr) console.error('disputeQuestion update error:', updateErr);
 
-    return { success: true, quarantined: quarantined && !updateErr };
+    return { success: true, data: { quarantined: quarantined && !updateErr } };
   } catch (err) {
     console.error('disputeQuestion error:', err);
-    return { success: false, error: 'Failed to submit dispute.' };
+    return { success: false, error: { code: 'UNKNOWN_ERROR', message: 'Failed to submit dispute.' } };
   }
 }
 

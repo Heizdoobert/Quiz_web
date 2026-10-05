@@ -51,9 +51,9 @@ export function useDisputeModal({ onClose, questionId, walletAddress }: UseDispu
     setLoading(false);
     if (res.success) {
       setSuccess(true);
-      setIsQuarantined(Boolean(res.quarantined));
+      setIsQuarantined(Boolean(res.data?.quarantined));
     } else {
-      setError(res.error || 'Failed to submit dispute.');
+      setError(res.error?.message || 'Failed to submit dispute.');
     }
   };
 
