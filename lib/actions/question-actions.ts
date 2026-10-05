@@ -1,10 +1,10 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount } from '@/lib/session';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount } from '@/lib/services/session';
 import { ClientQuestion } from '@/lib/types';
-import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/validation';
+import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/utils/validation';
 
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
@@ -55,6 +55,20 @@ export async function createQuestion(params: {
           code: 'RATE_LIMITED', 
           message: `You can add up to ${QUESTIONS_PER_DAY} questions per day.` 
         } 
+      };
+    }
+
+    // AI Moderation
+    const { moderateContent } = await import('@/lib/services/ai-moderation');
+    const modResult = await moderateContent(validated.prompt, validated.options);
+    if (!modResult.isSafe) {
+      logger.warn('question_creation_ai_rejected', { userId: account.id, reason: modResult.reason });
+      return {
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: `Content rejected: ${modResult.reason || 'Inappropriate content detected'}`
+        }
       };
     }
 

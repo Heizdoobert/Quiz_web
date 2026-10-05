@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import type { AuthenticationStatus } from '@rainbow-me/rainbowkit';
 import { getSignedInWallet, signOutWallet } from '@/lib/actions/auth-actions';
-import { createQuizAuthAdapter } from '@/lib/auth-adapter';
+import { createQuizAuthAdapter } from '@/lib/services/auth-adapter';
 import type { SessionAccount } from '@/hooks/shared/use-session';
 
 export interface QuizAuthOptions {

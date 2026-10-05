@@ -13,13 +13,37 @@ interface GlobalLeaderboardProps {
 
 const PAGE_SIZE = 5;
 
-export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboardProps) {
+export default function GlobalLeaderboard({ entries: initialEntries, loading: initialLoading }: GlobalLeaderboardProps) {
+  const [entries, setEntries] = React.useState<LeaderboardEntry[]>(initialEntries);
+  const [loadingMore, setLoadingMore] = React.useState(false);
+  const [hasMore, setHasMore] = React.useState(initialEntries.length >= 50);
+
+  const [prevInitial, setPrevInitial] = React.useState(initialEntries);
+
+  if (initialEntries !== prevInitial) {
+    setPrevInitial(initialEntries);
+    setEntries(initialEntries);
+    setHasMore(initialEntries.length >= 50);
+  }
+
   const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } = usePagination(
     entries,
     PAGE_SIZE
   );
 
-  if (loading) {
+  const handleNextPage = async () => {
+    if (safePage >= totalPages && hasMore && !loadingMore) {
+      setLoadingMore(true);
+      const { getGlobalLeaderboard } = await import('@/lib/actions/leaderboard-actions');
+      const moreEntries = await getGlobalLeaderboard(50, entries.length);
+      if (moreEntries.length < 50) setHasMore(false);
+      setEntries((prev) => [...prev, ...moreEntries]);
+      setLoadingMore(false);
+    }
+    goToNextPage();
+  };
+
+  if (initialLoading) {
     return <p className="text-xs text-slate-400 text-center py-6">Loading leaderboard...</p>;
   }
 
@@ -43,7 +67,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
 
           return (
             <motion.div
-              key={entry.user_id}
+              key={entry.user_id + entry.rank}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.04 }}
@@ -83,7 +107,7 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
       </div>
 
       {/* Pagination Controls */}
-      {totalPages > 1 && (
+      {(totalPages > 1 || hasMore) && (
         <div className="flex items-center justify-between pt-2 border-t border-[#2D305A] text-xs">
           <button
             type="button"
@@ -97,13 +121,17 @@ export default function GlobalLeaderboard({ entries, loading }: GlobalLeaderboar
           </button>
 
           <span className="font-mono text-[11px] text-slate-400 font-medium">
-            Page <strong className="text-slate-200">{safePage}</strong> of {totalPages}
+            {loadingMore ? (
+               <span className="animate-pulse">Loading...</span>
+            ) : (
+               <>Page <strong className="text-slate-200">{safePage}</strong> of {totalPages}</>
+            )}
           </span>
 
           <button
             type="button"
-            disabled={safePage >= totalPages}
-            onClick={goToNextPage}
+            disabled={(!hasMore && safePage >= totalPages) || loadingMore}
+            onClick={handleNextPage}
             className="flex items-center gap-1 px-2.5 py-1 rounded-xl bg-[#25284D] hover:bg-[#2E3260] disabled:opacity-40 disabled:pointer-events-none text-slate-300 hover:text-white transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
             aria-label="Next Page"
           >

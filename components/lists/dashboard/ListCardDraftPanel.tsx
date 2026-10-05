@@ -1,6 +1,6 @@
 import React from 'react';
 import { Plus, Pencil, Send, Trash2 } from 'lucide-react';
-import { MIN_LIST_QUESTIONS } from '@/lib/list-constants';
+import { MIN_LIST_QUESTIONS } from '@/lib/constants/list-constants';
 
 export function ListCardDraftPanel({
   isDraft,

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Loader2 } from 'lucide-react';
 import { requestEmailCode, verifyEmailCode } from '@/lib/actions/auth-actions';
-import { NO_WALLET_DISCLOSURE } from '@/lib/rewards-copy';
+import { NO_WALLET_DISCLOSURE } from '@/lib/constants/rewards-copy';
 
 type EmailStep = 'input' | 'code';
 

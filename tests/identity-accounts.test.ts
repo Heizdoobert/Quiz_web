@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
-import { getSessionAccount, setSessionAccount } from '../lib/session';
-import { ensureAccountForWallet } from '../lib/users';
+import { getSessionAccount, setSessionAccount } from '../lib/services/session';
+import { ensureAccountForWallet } from '../lib/services/users';
 import {
   signInWithWallet,
   getSignedInWallet,
@@ -8,8 +8,8 @@ import {
   verifyEmailCode,
   linkWallet,
 } from '../lib/actions/auth-actions';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { supabase } from '../lib/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/supabase/supabase';
 
 const ACCOUNT_ID = '11111111-2222-4333-8444-555555555555';
 const OTHER_ID = '99999999-2222-4333-8444-555555555555';
@@ -26,11 +26,11 @@ vi.mock('next/headers', () => ({
   }),
   headers: async () => ({ get: (k: string) => (k === 'host' ? 'quiz.example.com' : null) }),
 }));
-vi.mock('../lib/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
-vi.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({
   supabase: { auth: { signInWithOtp: vi.fn(), verifyOtp: vi.fn() } },
 }));
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/utils/chain', () => ({
   publicClientFor: () => ({ verifySiweMessage: async () => state.siweValid }),
 }));
 vi.mock('viem/siwe', () => ({

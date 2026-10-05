@@ -1,9 +1,9 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { supabase } from '@/lib/supabase';
-import { getSessionAccount } from '@/lib/session';
-import { isUuid } from '@/lib/validation';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { supabase } from '@/lib/supabase/supabase';
+import { getSessionAccount } from '@/lib/services/session';
+import { isUuid } from '@/lib/utils/validation';
 
 export type CommunityResult =
   | { ok: true }

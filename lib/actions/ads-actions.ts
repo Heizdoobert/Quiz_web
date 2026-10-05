@@ -1,14 +1,7 @@
 'use server';
 
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-// Initialize Supabase client
-const supabase = createClient(supabaseUrl, supabaseKey, {
-  auth: { persistSession: false },
-});
+import { supabase } from '@/lib/supabase/supabase';
+import { logger } from '@/lib/logger';
 
 export interface Sponsor {
   id: string;
@@ -27,7 +20,7 @@ export async function fetchRandomSponsor(): Promise<Sponsor | null> {
       .eq('active', true);
 
     if (error) {
-      console.error('Error fetching sponsors:', error);
+      logger.error('fetch_sponsors_failed', error);
       return null;
     }
 
@@ -39,7 +32,7 @@ export async function fetchRandomSponsor(): Promise<Sponsor | null> {
     const randomIndex = Math.floor(Math.random() * data.length);
     return data[randomIndex] as Sponsor;
   } catch (error) {
-    console.error('Failed to fetch sponsors:', error);
+    logger.error('fetch_sponsors_unexpected_error', error);
     return null;
   }
 }

@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { usePublicClient } from 'wagmi';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { QuestionListWithMeta, Question } from '@/lib/types';
-import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
 import { deleteList, submitListForReview, getListDetail, addListQuestion } from '@/lib/actions/question-list-actions';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID } from '@/lib/contracts/addresses';

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract, useReadContract } from 'wagmi';
 import { Rocket } from 'lucide-react';
 import { startContest } from '@/lib/actions/question-list-actions';
-import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/contest';
+import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/services/contest';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';

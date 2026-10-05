@@ -3,8 +3,8 @@ import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
 import AdZone from '@/components/ads/AdZone';
-import { FAQ_DATA } from '@/lib/seo-data';
-import { getSiteUrl } from '@/lib/site-url';
+import { FAQ_DATA } from '@/lib/constants/seo-data';
+import { getSiteUrl } from '@/lib/utils/site-url';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],

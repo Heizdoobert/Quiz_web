@@ -4,18 +4,18 @@ import {
   generateTokenVoucher,
   generateBadgeVoucher,
 } from '../lib/actions/reward-actions';
-import { getSessionAccount } from '../lib/session';
-import { statsForAccount } from '../lib/stats';
+import { getSessionAccount } from '../lib/services/session';
+import { statsForAccount } from '../lib/utils/stats';
 import { getGlobalLeaderboard } from '../lib/actions/leaderboard-actions';
-import { supabase } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabase-admin';
-import { getSignerAccount, isVoucherUsed } from '../lib/chain';
+import { supabase } from '../lib/supabase/supabase';
+import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { getSignerAccount, isVoucherUsed } from '../lib/utils/chain';
 
-vi.mock('../lib/session', () => ({
+vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 
-vi.mock('../lib/stats', () => ({
+vi.mock('../lib/utils/stats', () => ({
   statsForAccount: vi.fn(),
 }));
 
@@ -23,7 +23,7 @@ vi.mock('../lib/actions/leaderboard-actions', () => ({
   getGlobalLeaderboard: vi.fn(),
 }));
 
-vi.mock('../lib/chain', () => ({
+vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),
@@ -32,13 +32,13 @@ vi.mock('../lib/chain', () => ({
   getContestId: vi.fn(),
 }));
 
-vi.mock('../lib/supabase', () => ({
+vi.mock('../lib/supabase/supabase', () => ({
   supabase: {
     from: vi.fn(),
   },
 }));
 
-vi.mock('../lib/supabase-admin', () => ({
+vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
     rpc: vi.fn(),

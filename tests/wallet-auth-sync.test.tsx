@@ -40,7 +40,7 @@ vi.mock('../lib/actions/leaderboard-actions', () => ({
   getGroupLeaderboard: vi.fn().mockResolvedValue([]),
 }));
 
-vi.mock('../lib/audio', () => ({
+vi.mock('../lib/services/audio', () => ({
   soundEngine: {
     playFlip: vi.fn(),
     playCorrect: vi.fn(),

@@ -1,5 +1,5 @@
 import 'server-only';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/supabase';
 import { UserStats } from '@/lib/types';
 
 const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };

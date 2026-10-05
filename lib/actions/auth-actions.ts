@@ -3,11 +3,11 @@
 import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
-import { publicClientFor } from '@/lib/chain';
-import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/session';
-import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/users';
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
+import { publicClientFor } from '@/lib/utils/chain';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/services/session';
+import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;

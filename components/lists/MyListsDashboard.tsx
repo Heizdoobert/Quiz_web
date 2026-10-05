@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { createList, getMyLists } from '@/lib/actions/question-list-actions';
-import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
 import { QuestionListWithMeta } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import { ListCard } from './dashboard/ListCard';
