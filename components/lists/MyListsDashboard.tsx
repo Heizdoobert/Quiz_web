@@ -105,7 +105,7 @@ export default function MyListsDashboard() {
         />
         <button
           type="submit"
-          className="px-4 py-2 bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
+          className="px-4 py-2 bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space rounded-xl font-black text-sm cursor-pointer"
         >
           Create List
         </button>

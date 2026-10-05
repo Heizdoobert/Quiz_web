@@ -1,5 +1,5 @@
 # eslint.config.mjs
-lines:23 exports:default
+lines:29 exports:default
 ---
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -21,6 +21,12 @@ const eslintConfig = defineConfig([
     ".agents/**",
     "coverage/**",
   ]),
+  {
+    files: ["components/**/*.tsx", "components/**/*.jsx"],
+    rules: {
+      "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }]
+    }
+  }
 ]);
 
 export default eslintConfig;

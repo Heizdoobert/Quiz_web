@@ -13,7 +13,7 @@ vi.mock('../hooks/shared/use-session', () => ({
     requireSignIn: vi.fn().mockResolvedValue(true),
   }),
 }));
-vi.mock('../lib/audio', () => ({
+vi.mock('../lib/services/audio', () => ({
   soundEngine: { playFlip: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(), playTick: vi.fn(), playPowerup: vi.fn() },
 }));
 vi.mock('../lib/actions/question-actions', () => ({

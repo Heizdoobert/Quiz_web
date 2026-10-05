@@ -1,12 +1,13 @@
 # app/layout.tsx
-lines:175 exports:viewport,metadata,default
+lines:184 exports:viewport,metadata,default
 ---
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
-import { FAQ_DATA } from '@/lib/seo-data';
-import { getSiteUrl } from '@/lib/site-url';
+import AdZone from '@/components/ads/AdZone';
+import { FAQ_DATA } from '@/lib/constants/seo-data';
+import { getSiteUrl } from '@/lib/utils/site-url';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -40,4 +41,3 @@ export const metadata: Metadata = {
     'base blockchain quiz',
     'base sepolia rewards',
     'blockchain trivia game',
-    'defi quiz',

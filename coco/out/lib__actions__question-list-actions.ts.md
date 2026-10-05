@@ -1,14 +1,14 @@
 # lib/actions/question-list-actions.ts
-lines:1038 exports:createList,updateList,deleteList,getMyLists,getListDetail,addListQuestion,updateListQuestion,deleteListQuestion,submitListForReview,getListsPendingReview,confirmList,startContest,syncContestStatus,getLiveLists,getMyContestEntries,getClaimableContests,recordContestRefund,startListAttempt,completeListAttempt,claimListReward
+lines:1044 exports:createList,updateList,deleteList,getMyLists,getListDetail,addListQuestion,updateListQuestion,deleteListQuestion,submitListForReview,getListsPendingReview,confirmList,startContest,syncContestStatus,getLiveLists,getMyContestEntries,getClaimableContests,recordContestRefund,startListAttempt,completeListAttempt,claimListReward
 ---
 'use server';
 
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount, SessionAccount } from '@/lib/session';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { ClientQuestion, Question, QuestionList, QuestionListWithMeta, RewardVoucher, QuestionListStatus, ListEntry } from '@/lib/types';
-import { isUuid, normalizePrompt, validateQuestionInput } from '@/lib/validation';
-import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/list-constants';
+import { isUuid, normalizePrompt, validateQuestionInput } from '@/lib/utils/validation';
+import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
 import { CONTEST_ESCROW_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
@@ -17,7 +17,7 @@ import {
   getSignerAccount,
   newNonce,
   getContestId,
-} from '@/lib/chain';
+} from '@/lib/utils/chain';
 
 // Every write acts for the signed-in wallet (never a wallet argument) and goes through
 // the secret key: the public key can only read lists, confirmations and entries

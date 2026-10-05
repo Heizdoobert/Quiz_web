@@ -1,26 +1,15 @@
 # components/lists/ContestPlay.tsx
-lines:369 exports:default
+lines:120 exports:default
 ---
 'use client';
 
-import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
-import { useWriteContracts, useCapabilities, useCallsStatus } from 'wagmi/experimental';
-import { startListAttempt, completeListAttempt, claimListReward } from '@/lib/actions/question-list-actions';
-import { useSession } from '@/hooks/shared/use-session';
-import { confirmRewardClaim } from '@/lib/actions/reward-actions';
+import React, { useEffect, useState } from 'react';
+import { startListAttempt, completeListAttempt } from '@/lib/actions/question-list-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
-import { ClientQuestion, QuestionListWithMeta, RewardVoucher } from '@/lib/types';
-import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
-import { ArrowLeft, Loader2, Trophy, Coins, CheckCircle2, XCircle } from 'lucide-react';
-
-type ClaimStep = 'idle' | 'signing' | 'submitting' | 'confirming' | 'done' | 'error';
-
-function formatTokens(weiStr: string): string {
-  const wei = BigInt(weiStr || '0');
-  return (wei / (BigInt(10) ** BigInt(18))).toString();
-}
+import { useSession } from '@/hooks/shared/use-session';
+import { ClientQuestion, QuestionListWithMeta } from '@/lib/types';
+import { ContestPlayResult } from './play/ContestPlayResult';
+import { ContestPlayQuestion } from './play/ContestPlayQuestion';
 
 export default function ContestPlay({
   list,
@@ -33,11 +22,22 @@ export default function ContestPlay({
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; correctIndex: number } | null>(null);
-  const [result, setResult] = useState<{ correctCount: number; rewardAmount: string } | null>(null);
+  const [result, setResult] = useState<{ correctCount: number; rewardAmount: string; claimed?: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const [claimStep, setClaimStep] = useState<ClaimStep>('idle');
-  const [claimError, setClaimError] = useState<string | null>(null);
-  const [currentNonce, setCurrentNonce] = useState<string | null>(null);
-  
-  const [callId, setCallId] = useState<string | null>(null);
+  const { account, requireSignIn: ensureSession } = useSession();
+
+  useEffect(() => {
+    // Contest answers only count for the signed-in wallet that started the attempt.
+    ensureSession().then(async (signedIn) => {
+      if (!signedIn) {
+        setError('Sign the message in your wallet to play.');
+        return;
+      }
+      const res = await startListAttempt(list.id);
+      if (!res.success) {
+        setError(res.error || 'Failed to start contest.');
+        return;
+      }
+      if (res.result) {
+        setResult({ correctCount: res.result.correctCount, rewardAmount: res.result.rewardAmount, claimed: res.result.claimed });

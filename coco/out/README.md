@@ -1,5 +1,5 @@
 # README.md
-lines:100 exports:
+lines:101 exports:
 ---
 # Quick Quiz — Web3 Trivia & On-Chain Rewards
 

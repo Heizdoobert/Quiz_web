@@ -50,7 +50,7 @@ export default function TimerSettingsModal({
             whileTap={{ scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 25 }}
             onClick={handleSave}
-            className="px-5 py-2 text-sm font-black rounded-xl bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+            className="px-5 py-2 text-sm font-black rounded-xl bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           >
             Save Settings
           </motion.button>

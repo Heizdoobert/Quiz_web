@@ -7,7 +7,7 @@ import React from 'react';
 import Header from '../components/layout/Header';
 import ContestBrowser from '../components/lists/ContestBrowser';
 import RewardsModal from '../components/modals/RewardsModal';
-import { NO_WALLET_DISCLOSURE } from '../lib/rewards-copy';
+import { NO_WALLET_DISCLOSURE } from '../lib/constants/rewards-copy';
 
 vi.mock('@rainbow-me/rainbowkit', () => ({
   ConnectButton: ({ label }: { label?: string }) => <button type="button">{label}</button>,

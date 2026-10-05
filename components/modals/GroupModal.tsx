@@ -139,7 +139,7 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+              className="w-full py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}
               <span>{loading ? 'Creating Group...' : 'Create Group'}</span>
@@ -167,7 +167,7 @@ export default function GroupModal({
               whileHover={{ scale: loading ? 1 : 1.015 }}
               whileTap={{ scale: loading ? 1 : 0.985 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-              className="w-full py-2.5 bg-gradient-to-r from-electric-indigo to-neo-mint hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+              className="w-full py-2.5 bg-linear-to-r from-electric-indigo to-neo-mint hover:opacity-95 disabled:opacity-50 text-deep-space rounded-xl font-black text-sm transition-[color,background-color,border-color,opacity,box-shadow] shadow-md cursor-pointer font-heading flex items-center justify-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin text-deep-space" />}
               <span>{loading ? 'Joining Guild...' : 'Join Group'}</span>

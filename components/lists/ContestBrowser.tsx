@@ -104,8 +104,8 @@ export default function ContestBrowser() {
                       isClaimed
                         ? 'bg-cyber-violet text-slate-500 border border-cyber-border'
                         : isCompleted
-                        ? 'bg-gradient-to-r from-crypto-gold to-[#FF9F1C] text-deep-space cursor-pointer'
-                        : 'bg-gradient-to-r from-neo-mint to-electric-indigo text-deep-space cursor-pointer'
+                        ? 'bg-linear-to-r from-crypto-gold to-[#FF9F1C] text-deep-space cursor-pointer'
+                        : 'bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space cursor-pointer'
                     }`}
                   >
                     {isClaimed ? (

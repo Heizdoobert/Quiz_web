@@ -119,7 +119,7 @@ export default function AnswerBack({
           whileHover={{ scale: 1.03 }}
           whileTap={{ scale: 0.97 }}
           transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
+          className="flex items-center gap-2 px-6 py-3 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space font-black font-heading rounded-xl text-sm cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
         >
           <span>Next Question</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

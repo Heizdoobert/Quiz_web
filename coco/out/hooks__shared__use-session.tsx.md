@@ -1,5 +1,5 @@
 # hooks/shared/use-session.tsx
-lines:82 exports:SessionAccount,SessionProvider,useSession
+lines:110 exports:SessionAccount,SessionProvider,useSession
 ---
 'use client';
 
@@ -12,8 +12,12 @@ import {
   useState,
   type ReactNode,
 } from 'react';
+import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
-import SignInModal from '@/components/auth/SignInModal';
+
+const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), {
+  ssr: false,
+});
 
 export interface SessionAccount {
   id: string;
@@ -27,6 +31,7 @@ interface SessionContextValue {
   // otherwise opens SignInModal and resolves when it closes (true on success,
   // false if the player cancels).
   requireSignIn: () => Promise<boolean>;
+  clearSession: () => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -34,10 +39,5 @@ const SessionContext = createContext<SessionContextValue | null>(null);
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<SessionAccount | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const resolveRef = useRef<((ok: boolean) => void) | null>(null);
-
-  // Sign-in happens elsewhere (today: RainbowKit's auto SIWE flow calling refresh()
-  // after Providers.tsx sees the auth status change); when that refresh finds an
-  // account while a requireSignIn() call is waiting on the modal, settle it here.
-  const refresh = useCallback(async () => {
-    const info = await getSessionInfo();
+  const resolversRef = useRef<Array<(ok: boolean) => void>>([]);
+  const reqIdRef = useRef(0);

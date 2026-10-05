@@ -72,7 +72,7 @@ export function RewardsBadgesTab({
                 whileHover={{ scale: isMinting ? 1 : 1.02 }}
                 whileTap={{ scale: isMinting ? 1 : 0.98 }}
                 transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-                className="w-full py-2 bg-gradient-to-r from-crypto-gold to-pop-coral hover:opacity-95 disabled:bg-cyber-violet-light disabled:from-transparent disabled:to-transparent text-deep-space text-xs font-black rounded-lg transition-[color,background-color,border-color,opacity,box-shadow] flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crypto-gold"
+                className="w-full py-2 bg-linear-to-r from-crypto-gold to-pop-coral hover:opacity-95 disabled:bg-cyber-violet-light disabled:from-transparent disabled:to-transparent text-deep-space text-xs font-black rounded-lg transition-[color,background-color,border-color,opacity,box-shadow] flex items-center justify-center gap-1 cursor-pointer shadow font-heading focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-crypto-gold"
               >
                 {isMinting ? <Loader2 className="w-3 h-3 animate-spin text-deep-space" /> : null}
                 {isMinting ? 'Minting...' : isGasless ? 'Mint (Gasless)' : 'Mint Badge'}

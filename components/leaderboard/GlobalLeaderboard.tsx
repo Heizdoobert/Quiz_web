@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { LeaderboardEntry } from '@/lib/types';
-import { usePagination } from '@/hooks/shared/use-pagination';
-import { Trophy, Medal, ChevronLeft, ChevronRight } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { LeaderboardEntry } from "@/lib/types";
+import { usePagination } from "@/hooks/shared/use-pagination";
+import { Trophy, Medal, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface GlobalLeaderboardProps {
   entries: LeaderboardEntry[];
@@ -13,8 +13,12 @@ interface GlobalLeaderboardProps {
 
 const PAGE_SIZE = 5;
 
-export default function GlobalLeaderboard({ entries: initialEntries, loading: initialLoading }: GlobalLeaderboardProps) {
-  const [entries, setEntries] = React.useState<LeaderboardEntry[]>(initialEntries);
+export default function GlobalLeaderboard({
+  entries: initialEntries,
+  loading: initialLoading,
+}: GlobalLeaderboardProps) {
+  const [entries, setEntries] =
+    React.useState<LeaderboardEntry[]>(initialEntries);
   const [loadingMore, setLoadingMore] = React.useState(false);
   const [hasMore, setHasMore] = React.useState(initialEntries.length >= 50);
 
@@ -26,15 +30,14 @@ export default function GlobalLeaderboard({ entries: initialEntries, loading: in
     setHasMore(initialEntries.length >= 50);
   }
 
-  const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } = usePagination(
-    entries,
-    PAGE_SIZE
-  );
+  const { totalPages, safePage, pagedEntries, goToPrevPage, goToNextPage } =
+    usePagination(entries, PAGE_SIZE);
 
   const handleNextPage = async () => {
     if (safePage >= totalPages && hasMore && !loadingMore) {
       setLoadingMore(true);
-      const { getGlobalLeaderboard } = await import('@/lib/actions/leaderboard-actions');
+      const { getGlobalLeaderboard } =
+        await import("@/lib/actions/leaderboard-actions");
       const moreEntries = await getGlobalLeaderboard(50, entries.length);
       if (moreEntries.length < 50) setHasMore(false);
       setEntries((prev) => [...prev, ...moreEntries]);
@@ -44,7 +47,11 @@ export default function GlobalLeaderboard({ entries: initialEntries, loading: in
   };
 
   if (initialLoading) {
-    return <p className="text-xs text-slate-400 text-center py-6">Loading leaderboard...</p>;
+    return (
+      <p className="text-xs text-slate-400 text-center py-6">
+        Loading leaderboard...
+      </p>
+    );
   }
 
   if (entries.length === 0) {
@@ -73,10 +80,10 @@ export default function GlobalLeaderboard({ entries: initialEntries, loading: in
               transition={{ delay: index * 0.04 }}
               className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
                 isTopThree
-                  ? 'glass-border border-transparent bg-gradient-to-br from-crypto-gold/20 to-pop-coral/20'
+                  ? "glass-border border-transparent bg-linear-to-br from-crypto-gold/20 to-pop-coral/20"
                   : index % 2 === 0
-                    ? 'bg-deep-space border-cyber-border hover:border-electric-indigo/60'
-                    : 'bg-elevation-2 border-cyber-border hover:border-electric-indigo/60'
+                    ? "bg-deep-space border-cyber-border hover:border-electric-indigo/60"
+                    : "bg-elevation-2 border-cyber-border hover:border-electric-indigo/60"
               }`}
             >
               <div className="flex items-center gap-2.5">
@@ -88,18 +95,28 @@ export default function GlobalLeaderboard({ entries: initialEntries, loading: in
                   ) : isTop3 ? (
                     <Medal className="w-4 h-4 text-[#FF8A65]" />
                   ) : (
-                    <span className="text-[11px] text-slate-400">#{entry.rank}</span>
+                    <span className="text-[11px] text-slate-400">
+                      #{entry.rank}
+                    </span>
                   )}
                 </span>
                 <div>
-                  <span className={`font-bold ${isTop1 ? 'text-crypto-gold' : 'text-slate-200'}`}>
-                    {entry.display_name || entry.wallet_address?.slice(0, 10) || 'Player'}
+                  <span
+                    className={`font-bold ${isTop1 ? "text-crypto-gold" : "text-slate-200"}`}
+                  >
+                    {entry.display_name ||
+                      entry.wallet_address?.slice(0, 10) ||
+                      "Player"}
                   </span>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-slate-400 font-medium">{entry.accuracy}% acc</span>
-                <span className="font-heading font-black text-neo-mint">{entry.score} pts</span>
+                <span className="text-slate-400 font-medium">
+                  {entry.accuracy}% acc
+                </span>
+                <span className="font-heading font-black text-neo-mint">
+                  {entry.score} pts
+                </span>
               </div>
             </motion.div>
           );
@@ -122,9 +139,12 @@ export default function GlobalLeaderboard({ entries: initialEntries, loading: in
 
           <span className="font-mono text-[11px] text-slate-400 font-medium">
             {loadingMore ? (
-               <span className="animate-pulse">Loading...</span>
+              <span className="animate-pulse">Loading...</span>
             ) : (
-               <>Page <strong className="text-slate-200">{safePage}</strong> of {totalPages}</>
+              <>
+                Page <strong className="text-slate-200">{safePage}</strong> of{" "}
+                {totalPages}
+              </>
             )}
           </span>
 

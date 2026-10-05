@@ -1,5 +1,5 @@
 # app/profile/page.tsx
-lines:175 exports:default
+lines:179 exports:default
 ---
 'use client';
 
@@ -36,8 +36,8 @@ export default function ProfilePage() {
     if (!account?.wallet) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
+      setQuizzes([]);
+      setFetchError(null);
       return;
     }
     const wallet = account.wallet;
-
-    async function load() {

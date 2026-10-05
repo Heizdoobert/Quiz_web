@@ -1,14 +1,14 @@
 # lib/actions/reward-actions.ts
-lines:432 exports:getClaimableRewards,generateTokenVoucher,generateBadgeVoucher,confirmRewardClaim
+lines:429 exports:getClaimableRewards,generateTokenVoucher,generateBadgeVoucher,confirmRewardClaim
 ---
 'use server';
 
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount } from '@/lib/session';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount } from '@/lib/services/session';
 import { ClaimableRewards, RewardVoucher } from '@/lib/types';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { statsForAccount } from '@/lib/stats';
+import { statsForAccount } from '@/lib/utils/stats';
 import { QUIZ_TOKEN_ADDRESS, QUIZ_BADGE_ADDRESS } from '@/lib/contracts/addresses';
 import {
   REWARD_CHAIN_ID,
@@ -17,13 +17,10 @@ import {
   getSignerAccount,
   newNonce,
   getContestId,
-} from '@/lib/chain';
+} from '@/lib/utils/chain';
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
 const VOUCHER_TTL_SECONDS = 3600;
-// An unused voucher past its deadline can never be minted. The margin covers
-// the gap between block time and this server's clock.
-const EXPIRY_MARGIN_SECONDS = 300;
 
 type PendingTokenClaim = { nonce: string; amount: string; deadline: string; signature: `0x${string}` };
 
@@ -41,3 +38,6 @@ async function settlePendingTokenClaims(accountId: string, wallet: string): Prom
     .eq('status', 'pending');
   if (error) throw error;
 
+  const now = Math.floor(Date.now() / 1000);
+  let open: PendingTokenClaim | null = null;
+  for (const claim of data) {

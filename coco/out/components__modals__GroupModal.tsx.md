@@ -1,5 +1,5 @@
 # components/modals/GroupModal.tsx
-lines:217 exports:default
+lines:180 exports:default
 ---
 'use client';
 
@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import Modal from '@/components/Modal';
 import { useGroupModal } from '@/hooks/modals/use-group-modal';
 import { Shield, Users, UserPlus, Plus, Loader2 } from 'lucide-react';
+import { GroupList } from './group/GroupList';
 
 interface GroupModalProps {
   isOpen: boolean;
@@ -37,7 +38,6 @@ export default function GroupModal({
     handleCreate,
     handleJoin,
     handleLeave,
-    handleSelectGroup,
+    handleSelectGroup: selectGroupHandler,
   } = useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup });
 
-  return (

@@ -3,14 +3,14 @@ lines:64 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '../lib/actions/leaderboard-actions';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/supabase';
 
 const ACCOUNT_A = '00000000-0000-4000-8000-0000000000a1';
 const ACCOUNT_B = '00000000-0000-4000-8000-0000000000b1';
 const WALLET_A = '0x' + 'a'.repeat(40);
 const GROUP_ID = '00000000-0000-4000-8000-0000000000c1';
 
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { rpc: vi.fn() } }));
 
 describe('getGlobalLeaderboard', () => {
   beforeEach(() => vi.resetAllMocks());

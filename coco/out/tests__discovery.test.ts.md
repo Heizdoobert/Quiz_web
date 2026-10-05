@@ -3,9 +3,9 @@ lines:209 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { searchQuestions, getTopicQuestions } from '../lib/actions/discovery-actions';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase/supabase';
 
-vi.mock('../lib/supabase', () => ({ supabase: { rpc: vi.fn(), from: vi.fn() } }));
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { rpc: vi.fn(), from: vi.fn() } }));
 
 // Chainable query stub matching tests/answer-and-list-guards.test.ts: every builder
 // method returns the chain, and the chain itself resolves via `then` when awaited.

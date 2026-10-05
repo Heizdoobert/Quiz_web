@@ -17,7 +17,7 @@ export default function NotFound() {
         <div className="pt-2">
           <Link
             href="/"
-            className="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 font-heading"
+            className="inline-flex items-center gap-2 px-6 py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 font-heading"
           >
             <ArrowLeft className="w-4 h-4" /> Back to Quick Quiz
           </Link>

@@ -3,11 +3,11 @@ lines:125 exports:createGroup,joinGroup,leaveGroup,getUserGroups
 ---
 'use server';
 
-import { supabase } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabase-admin';
-import { getSessionAccount, SessionAccount } from '@/lib/session';
+import { supabase } from '@/lib/supabase/supabase';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { Group } from '@/lib/types';
-import { isUuid } from '@/lib/validation';
+import { isUuid } from '@/lib/utils/validation';
 const MAX_NAME = 50;
 const MAX_DESCRIPTION = 200;
 

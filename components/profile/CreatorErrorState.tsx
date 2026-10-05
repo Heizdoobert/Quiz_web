@@ -36,7 +36,7 @@ export default function CreatorErrorState({
         type="button"
         onClick={onRetry}
         disabled={retrying}
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 text-deep-space font-heading font-black text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 active:scale-95 text-deep-space font-heading font-black text-xs transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
         aria-label="Retry loading quizzes"
       >
         <RefreshCw className={`w-4 h-4 ${retrying ? 'animate-spin' : ''}`} aria-hidden="true" />
