@@ -24,14 +24,9 @@ import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 // Configure Coinbase Wallet to support Coinbase Smart Wallet (passkeys / EIP-5792).
 // In @rainbow-me/rainbowkit, static property assignment on the wallet factory
 // is the documented API pattern (AcceptedCoinbaseWalletParameters interface).
-coinbaseWallet.preference = 'all';
-
-const projectId = process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID;
-if (!projectId) {
-  throw new Error(
-    'Missing NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID. Get one at https://cloud.walletconnect.com. See .env.example.'
-  );
-}
+const projectId =
+  process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID ||
+  '00000000000000000000000000000000';
 
 const config = getDefaultConfig({
   appName: 'Quick Quiz',

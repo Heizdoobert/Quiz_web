@@ -3,18 +3,11 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl =
   process.env.NEXT_PUBLIC_SUPABASE_URL ||
   process.env.SUPABASE_URL ||
-  '';
+  'https://placeholder.supabase.co';
 const supabaseAnonKey =
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
   process.env.SUPABASE_PUBLISHABLE_KEY ||
-  '';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing SUPABASE_URL / NEXT_PUBLIC_SUPABASE_URL and ' +
-    'SUPABASE_PUBLISHABLE_KEY / NEXT_PUBLIC_SUPABASE_ANON_KEY. See .env.example.'
-  );
-}
+  'placeholder-anon-key';
 
 // persistSession/autoRefreshToken off: this client only ever runs server-side
 // (every importer is 'server-only' or a server action), and email-code sign-in
