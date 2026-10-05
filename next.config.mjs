@@ -47,6 +47,7 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false,
   output: 'standalone',
+  turbopack: {},
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
