@@ -1,4 +1,3 @@
-/* eslint-disable max-lines */
 'use client';
 
 import React from 'react';
@@ -13,16 +12,8 @@ import LeaderboardPanel from '../leaderboard/LeaderboardPanel';
 import QuestionForm from './QuestionForm';
 import AdZone from '../ads/AdZone';
 import StickyBannerAd from '../ads/StickyBannerAd';
-import dynamic from 'next/dynamic';
 import SeoFaqSection from '../seo/SeoFaqSection';
-
-const IntroModal = dynamic(() => import('../modals/IntroModal'), { ssr: false });
-const TimerSettingsModal = dynamic(() => import('../modals/TimerSettingsModal'), { ssr: false });
-const GroupModal = dynamic(() => import('../modals/GroupModal'), { ssr: false });
-const ReviewModal = dynamic(() => import('../modals/ReviewModal'), { ssr: false });
-const RewardsModal = dynamic(() => import('../modals/RewardsModal'), { ssr: false });
-const ProfileModal = dynamic(() => import('../modals/ProfileModal'), { ssr: false });
-const DisputeModal = dynamic(() => import('../modals/DisputeModal'), { ssr: false });
+import { QuizModals } from './QuizModals';
 
 interface QuizLayoutProps {
   initialQuestion?: ClientQuestion | null;
@@ -179,40 +170,20 @@ export default function QuizLayout({
         <AdZone variant="skyscraper" slot="right-sky" />
       </div>
 
-      {/* Modals rendered via Portals */}
-      <IntroModal isOpen={activeModal === 'intro'} onClose={closeModal} />
-      <TimerSettingsModal
-        isOpen={activeModal === 'timer'}
-        onClose={closeModal}
-        currentMode={timerMode}
-        currentDuration={timerDuration}
-        onSave={handleSaveTimerSettings}
-      />
-      <GroupModal
-        isOpen={activeModal === 'group'}
-        onClose={closeModal}
-        walletAddress={address || null}
-        onSelectGroup={handleSelectGroup}
-      />
-      <ReviewModal isOpen={activeModal === 'review'} onClose={closeModal} history={history} />
-      <RewardsModal
-        isOpen={activeModal === 'rewards'}
-        onClose={handleCloseRewards}
-        walletAddress={address || null}
-      />
-      <ProfileModal
-        isOpen={activeModal === 'profile'}
-        onClose={closeModal}
+      <QuizModals
+        activeModal={activeModal}
+        closeModal={closeModal}
+        openModal={openModal}
+        timerMode={timerMode}
+        timerDuration={timerDuration}
+        handleSaveTimerSettings={handleSaveTimerSettings}
         address={address}
+        handleSelectGroup={handleSelectGroup}
+        history={history}
+        handleCloseRewards={handleCloseRewards}
         stats={stats}
         claimableRewards={claimableRewards}
-        onOpenRewards={() => openModal('rewards')}
-      />
-      <DisputeModal
-        isOpen={activeModal === 'dispute'}
-        onClose={closeModal}
-        questionId={currentQuestion?.id}
-        walletAddress={address || null}
+        currentQuestionId={currentQuestion?.id}
       />
     </div>
 
