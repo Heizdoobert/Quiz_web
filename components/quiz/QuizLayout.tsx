@@ -51,6 +51,7 @@ export default function QuizLayout({
     closeModal,
     claimableRewards,
     hasClaimableRewards,
+    loadLeaderboards,
     loadNextQuestion,
     handleSelectCategory,
     handleAnswerSubmit,
@@ -153,6 +154,7 @@ export default function QuizLayout({
                 groupEntries={groupLeaderboard}
                 loading={leaderboardLoading}
                 onOpenGroupModal={() => openModal('group')}
+                refreshLeaderboard={loadLeaderboards}
               />
             </div>
           </div>

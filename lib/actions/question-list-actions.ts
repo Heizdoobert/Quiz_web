@@ -1054,14 +1054,14 @@ export async function getContestAnalytics(listId: string): Promise<{ success: bo
     const account = await getSessionAccount();
     if (!account) return { success: false, error: 'Unauthorized.' };
 
-    const { data, error } = await supabase.rpc('get_contest_analytics', { p_list_id: listId });
+    const { data, error } = await supabase.rpc('get_contest_analytics', { p_list_id: listId }).single();
 
-    if (error || !data || data.length === 0) {
+    if (error || !data) {
       console.error('[getContestAnalytics]', error);
       return { success: false, error: 'Failed to fetch contest analytics.' };
     }
 
-    return { success: true, data: data[0] as ContestAnalytics };
+    return { success: true, data: data as ContestAnalytics };
   } catch (err) {
     console.error('[getContestAnalytics]', err);
     return { success: false, error: 'An unexpected error occurred.' };

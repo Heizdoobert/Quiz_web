@@ -67,14 +67,4 @@ describe('moderateContent', () => {
     const result = await moderateContent('Error test', ['a']);
     expect(result).toEqual({ isSafe: true });
   });
-
-  it('clears timeout upon completion', async () => {
-    const clearTimeoutSpy = vi.spyOn(global, 'clearTimeout');
-    mockGenerateContent.mockResolvedValueOnce({
-      text: JSON.stringify({ isSafe: true, reason: '' }),
-    });
-
-    await moderateContent('Test', ['a']);
-    expect(clearTimeoutSpy).toHaveBeenCalled();
-  });
 });

@@ -56,23 +56,22 @@ export function AiQuestionGenerator({ onSuccess, onError }: AiQuestionGeneratorP
             exit={{ height: 0, opacity: 0 }}
             className="overflow-hidden mt-3"
           >
-            <div className="flex items-center gap-2">
+            <form 
+              className="flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleGenerateAi();
+              }}
+            >
               <input
                 type="text"
                 value={aiTopic}
                 onChange={(e) => setAiTopic(e.target.value)}
                 placeholder="Enter a topic or URL..."
                 className="flex-1 px-3 py-2 bg-black border border-cyber-border rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-neo-mint transition-all"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleGenerateAi();
-                  }
-                }}
               />
               <button
-                type="button"
-                onClick={handleGenerateAi}
+                type="submit"
                 disabled={isAiLoading || !aiTopic.trim()}
                 className="px-4 py-2 bg-neo-mint text-deep-space disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-bold text-xs flex items-center gap-2 cursor-pointer"
               >
@@ -83,7 +82,7 @@ export function AiQuestionGenerator({ onSuccess, onError }: AiQuestionGeneratorP
                 )}
                 {isAiLoading ? 'Generating...' : 'Generate'}
               </button>
-            </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>

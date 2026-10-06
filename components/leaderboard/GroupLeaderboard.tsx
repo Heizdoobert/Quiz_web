@@ -58,20 +58,28 @@ export default function GroupLeaderboard({
           const isTopThree = entry.rank <= 3;
 
           return (
-            <motion.div
-              key={entry.user_id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.04 }}
-              className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
-                isTopThree
-                  ? "glass-border border-transparent bg-linear-to-br from-crypto-gold/20 to-pop-coral/20"
-                  : index % 2 === 0
-                    ? "bg-deep-space border-cyber-border hover:border-electric-indigo/60"
-                    : "bg-elevation-2 border-cyber-border hover:border-electric-indigo/60"
-              }`}
-            >
-              <div className="flex items-center gap-2">
+            <div key={entry.user_id + "-" + entry.rank} className="relative">
+              {/* Highlight Flash on Score Update */}
+              <motion.div
+                key={`flash-${entry.score}`}
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 1.5, ease: "easeOut" }}
+                className="absolute inset-0 bg-neo-mint/40 rounded-2xl pointer-events-none z-10"
+              />
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.04 }}
+                className={`flex items-center justify-between p-3 rounded-2xl border transition-all text-xs ${
+                  isTopThree
+                    ? "glass-border border-transparent bg-linear-to-br from-crypto-gold/20 to-pop-coral/20"
+                    : index % 2 === 0
+                      ? "bg-deep-space border-cyber-border hover:border-electric-indigo/60"
+                      : "bg-elevation-2 border-cyber-border hover:border-electric-indigo/60"
+                }`}
+              >
+                <div className="flex items-center gap-2">
                 <span className="w-6 flex items-center justify-center font-heading font-bold text-electric-indigo">
                   {isTop1 ? (
                     <Trophy className="w-4 h-4 text-crypto-gold" />
@@ -100,6 +108,7 @@ export default function GroupLeaderboard({
                 </span>
               </div>
             </motion.div>
+          </div>
           );
         })}
       </div>
