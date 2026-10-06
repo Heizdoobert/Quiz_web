@@ -1,0 +1,19 @@
+name: pages-build-deployment
+
+on:
+  push:
+    branches:
+      - main
+      - preview
+  workflow_dispatch:
+
+jobs:
+  skip-pages-deploy:
+    name: build (dynamic)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip Pages Deployment
+        run: |
+          echo "GitHub Pages deployment is intentionally skipped."
+          echo "This Next.js app uses Server Actions/SSR and deploys via Docker to GHCR."
+          echo "Marking workflow as successful."
