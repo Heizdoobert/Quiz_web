@@ -1,17 +1,29 @@
 # components/lists/dashboard/ContestActionPanel.tsx
-lines:175 exports:ContestActionPanel
+lines:200 exports:ContestActionPanel
 ---
-import React, { useState } from 'react';
-import { useAccount, useChainId, usePublicClient, useSwitchChain, useWriteContract, useReadContract } from 'wagmi';
-import { Rocket } from 'lucide-react';
-import { startContest } from '@/lib/actions/question-list-actions';
-import { getContestId, CONTEST_DURATION_SECONDS } from '@/lib/services/contest';
-import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
-import { CONTEST_ESCROW_ADDRESS, QUIZ_TOKEN_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
-import { useSession } from '@/hooks/shared/use-session';
+import React, { useState } from "react";
+import {
+  useAccount,
+  useChainId,
+  usePublicClient,
+  useSwitchChain,
+  useWriteContract,
+  useReadContract,
+} from "wagmi";
+import { Rocket } from "lucide-react";
+import { startContest } from "@/lib/actions/question-list-actions";
+import { getContestId, CONTEST_DURATION_SECONDS } from "@/lib/services/contest";
+import { ContestEscrowABI } from "@/lib/contracts/ContestEscrowABI";
+import { QuizTokenABI } from "@/lib/contracts/QuizTokenABI";
+import {
+  CONTEST_ESCROW_ADDRESS,
+  QUIZ_TOKEN_ADDRESS,
+  TARGET_CHAIN_ID,
+  TARGET_CHAIN_NAME,
+} from "@/lib/contracts/addresses";
+import { useSession } from "@/hooks/shared/use-session";
 
-const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
+const SIGN_IN_ERROR = "Sign the message in your wallet to manage your lists.";
 
 export function ContestActionPanel({
   listId,
@@ -25,19 +37,7 @@ export function ContestActionPanel({
   setError: (err: string | null) => void;
 }) {
   const { account, requireSignIn: ensureSession } = useSession();
-  const [poolAmount, setPoolAmount] = useState('');
-  const [maxParticipants, setMaxParticipants] = useState('10');
-  const [funding, setFunding] = useState<null | 'approving' | 'creating'>(null);
-  
-  const chainId = useChainId();
-  const { switchChain } = useSwitchChain();
-  const { writeContractAsync } = useWriteContract();
-  const publicClient = usePublicClient({ chainId: TARGET_CHAIN_ID });
-  const { address } = useAccount();
+  const [poolAmount, setPoolAmount] = useState("");
+  const [maxParticipants, setMaxParticipants] = useState("10");
+  const [funding, setFunding] = useState<null | "approving" | "creating">(null);
 
-  const { data: quizBalanceData } = useReadContract({
-    address: QUIZ_TOKEN_ADDRESS,
-    abi: QuizTokenABI,
-    functionName: 'balanceOf',
-    args: address ? [address as `0x${string}`] : undefined,
-    query: {

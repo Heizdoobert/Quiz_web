@@ -26,7 +26,7 @@ describe('getGlobalLeaderboard', () => {
 
     const entries = await getGlobalLeaderboard(50);
 
-    expect(supabase.rpc).toHaveBeenCalledWith('get_global_leaderboard', { p_limit: 50 });
+    expect(supabase.rpc).toHaveBeenCalledWith('get_global_leaderboard', { p_limit: 50, p_offset: 0 });
     expect(entries).toEqual([
       { user_id: ACCOUNT_A, wallet_address: WALLET_A, display_name: 'Alice', score: 5, accuracy: 90, rank: 1 },
       { user_id: ACCOUNT_B, wallet_address: null, display_name: 'Player-x', score: 3, accuracy: 60, rank: 2 },

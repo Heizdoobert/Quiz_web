@@ -1,5 +1,5 @@
 # tests/profile-page.test.tsx
-lines:258 exports:
+lines:259 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
@@ -23,6 +23,7 @@ vi.mock('../components/layout/Header', () => ({
 vi.mock('../lib/actions/profile-actions', () => ({
   getUserQuizzes: vi.fn(),
   exportUserData: vi.fn(),
+  getQuestionAnalytics: vi.fn().mockResolvedValue({ success: true, data: [] }),
 }));
 
 vi.mock('../lib/actions/community-actions', () => ({
@@ -40,4 +41,3 @@ function mockSignedInAs(wallet: string | null) {
   });
 }
 
-describe('ProfilePage', () => {

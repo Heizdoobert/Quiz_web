@@ -1,9 +1,9 @@
 # components/lists/dashboard/ListCardEditDetailsPanel.tsx
-lines:72 exports:ListCardEditDetailsPanel
+lines:81 exports:ListCardEditDetailsPanel
 ---
-import React, { useState } from 'react';
-import { updateList } from '@/lib/actions/question-list-actions';
-import { useSession } from '@/hooks/shared/use-session';
+import React, { useState } from "react";
+import { updateList } from "@/lib/actions/question-list-actions";
+import { useSession } from "@/hooks/shared/use-session";
 
 export function ListCardEditDetailsPanel({
   listId,
@@ -24,20 +24,20 @@ export function ListCardEditDetailsPanel({
   const [editTitle, setEditTitle] = useState(initialTitle);
   const [editDescription, setEditDescription] = useState(initialDescription);
 
-  const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
-    (await ensureSession()) ? action() : { success: false, error: 'Sign the message in your wallet to manage your lists.' };
+  const asSignedIn = async <T,>(
+    action: () => Promise<T>,
+  ): Promise<T | { success: false; error: string }> =>
+    (await ensureSession())
+      ? action()
+      : {
+          success: false,
+          error: "Sign the message in your wallet to manage your lists.",
+        };
 
   const handleSaveListEdit = async () => {
     setError(null);
-    const res = await asSignedIn(() => updateList(listId, { title: editTitle, description: editDescription }));
+    const res = await asSignedIn(() =>
+      updateList(listId, { title: editTitle, description: editDescription }),
+    );
     if (!res.success) {
-      setError(res.error || 'Failed to update list.');
-      return;
-    }
-    onSave();
-  };
-
-  return (
-    <div className="p-3 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl space-y-2">
-      <input
-        type="text"
+      setError(res.error || "Failed to update list.");

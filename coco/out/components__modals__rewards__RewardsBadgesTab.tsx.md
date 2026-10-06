@@ -7,10 +7,10 @@ import { ExternalLink, Loader2, Sparkles, Check, Lock, Target, Trophy, Flame, Aw
 import { BADGE_NAMES, ClaimableRewards } from '@/lib/types';
 
 const BADGE_COMPONENTS: Record<number, React.ReactNode> = {
-  0: <Trophy className="w-8 h-8 text-[#FFD166] mx-auto" />,
-  1: <Flame className="w-8 h-8 text-[#FF4757] mx-auto" />,
-  2: <Award className="w-8 h-8 text-[#00FFCC] mx-auto" />,
-  3: <Sparkles className="w-8 h-8 text-[#6C5CE7] mx-auto" />,
+  0: <Trophy className="w-8 h-8 text-crypto-gold mx-auto" />,
+  1: <Flame className="w-8 h-8 text-pop-coral mx-auto" />,
+  2: <Award className="w-8 h-8 text-neo-mint mx-auto" />,
+  3: <Sparkles className="w-8 h-8 text-electric-indigo mx-auto" />,
 };
 
 export function RewardsBadgesTab({

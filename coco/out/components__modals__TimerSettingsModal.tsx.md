@@ -34,7 +34,7 @@ export default function TimerSettingsModal({
       isOpen={isOpen}
       onClose={handleCancel}
       title="Timer & Clock Settings"
-      icon={<Clock className="w-5 h-5 text-[#00FFCC]" />}
+      icon={<Clock className="w-5 h-5 text-neo-mint" />}
       footer={
         <>
           <motion.button

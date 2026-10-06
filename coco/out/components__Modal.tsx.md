@@ -1,12 +1,12 @@
 # components/Modal.tsx
-lines:115 exports:default
+lines:129 exports:default
 ---
-'use client';
+"use client";
 
-import React, { useEffect, useSyncExternalStore } from 'react';
-import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import React, { useEffect, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
 
 interface ModalProps {
   isOpen: boolean;
@@ -27,17 +27,17 @@ export default function Modal({
   icon,
   children,
   footer,
-  maxWidth = 'max-w-md',
+  maxWidth = "max-w-md",
 }: ModalProps) {
   const mounted = useSyncExternalStore(
     emptySubscribe,
     () => true,
-    () => false
+    () => false,
   );
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";

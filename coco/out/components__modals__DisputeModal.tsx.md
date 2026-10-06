@@ -40,4 +40,4 @@ export default function DisputeModal({
       isOpen={isOpen}
       onClose={handleResetAndClose}
       title="Dispute Question"
-      icon={<AlertTriangle className="w-5 h-5 text-[#FF4757]" />}
+      icon={<AlertTriangle className="w-5 h-5 text-pop-coral" />}

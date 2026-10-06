@@ -28,7 +28,7 @@ export function GroupList({
           {groups.map((g) => (
             <div
               key={g.id}
-              className="p-4 bg-[#0A1128]/70 rounded-xl border border-[#2D305A] flex items-center justify-between"
+              className="p-4 bg-deep-space/70 rounded-xl border border-cyber-border flex items-center justify-between"
             >
               <div>
                 <h4 className="font-bold text-white text-sm">{g.name}</h4>

@@ -35,7 +35,7 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
         <button
           type="button"
           onClick={onBack}
-          className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-[#25284D] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+          className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-cyber-violet-light transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
           aria-label="Go back"
         >
           <ArrowLeft className="w-5 h-5" />

@@ -18,7 +18,7 @@ export function QuestionOptionsInput({
     <div>
       <div className="flex items-center justify-between mb-1.5">
         <label className="text-xs font-bold text-slate-300">
-          Answer Options <span className="text-[#FF4757]">*</span>
+          Answer Options <span className="text-pop-coral">*</span>
         </label>
         <span className="text-[11px] text-slate-400">Radio button selects correct answer</span>
       </div>
@@ -28,8 +28,8 @@ export function QuestionOptionsInput({
             key={letter}
             className={`flex items-center gap-2 p-2.5 rounded-xl border transition-all ${
               correctIndex === idx
-                ? 'bg-[#00FFCC]/10 border-[#00FFCC]/50'
-                : 'bg-[#0A1128] border-[#2D305A] hover:border-[#6C5CE7]/50'
+                ? 'bg-neo-mint/10 border-neo-mint/50'
+                : 'bg-deep-space border-cyber-border hover:border-electric-indigo/50'
             }`}
           >
             <label className="flex items-center gap-1.5 cursor-pointer">
@@ -38,6 +38,6 @@ export function QuestionOptionsInput({
                 name="correct-option"
                 checked={correctIndex === idx}
                 onChange={() => onCorrectIndexChange(idx)}
-                className="w-4 h-4 text-[#00FFCC] accent-[#00FFCC] bg-[#1A1B35] border-[#2D305A] cursor-pointer"
+                className="w-4 h-4 text-neo-mint accent-neo-mint bg-cyber-violet border-cyber-border cursor-pointer"
               />
-              <span className="font-black text-xs px-2 py-0.5 rounded-lg bg-[#1A1B35] text-slate-300 font-heading">
+              <span className="font-black text-xs px-2 py-0.5 rounded-lg bg-cyber-violet text-slate-300 font-heading">

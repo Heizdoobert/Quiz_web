@@ -1,5 +1,5 @@
 # lib/actions/profile-actions.ts
-lines:154 exports:getUserQuizzes,exportUserData
+lines:183 exports:getUserQuizzes,exportUserData,QuestionAnalytics,getQuestionAnalytics
 ---
 'use server';
 

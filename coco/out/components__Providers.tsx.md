@@ -1,5 +1,5 @@
 # components/Providers.tsx
-lines:99 exports:Providers
+lines:106 exports:Providers
 ---
 'use client';
 
@@ -11,7 +11,7 @@ import {
   darkTheme,
 } from '@rainbow-me/rainbowkit';
 import {
-  coinbaseWallet,
+  base as baseWallet,
   rainbowWallet,
   metaMaskWallet,
   walletConnectWallet,
@@ -27,7 +27,8 @@ import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 // Configure Coinbase Wallet to support Coinbase Smart Wallet (passkeys / EIP-5792).
 // In @rainbow-me/rainbowkit, static property assignment on the wallet factory
 // is the documented API pattern (AcceptedCoinbaseWalletParameters interface).
-coinbaseWallet.preference = 'all';
+// @ts-expect-error Type string vs Preference mismatch in new wallet-sdk
+baseWallet.preference = 'all';
 
 const isBuildPhase =
   process.env.NEXT_PHASE === 'phase-production-build' ||
@@ -40,4 +41,3 @@ const projectId =
 if (!projectId) {
   throw new Error(
     'Missing NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID. Get one at https://cloud.walletconnect.com. See .env.example.'
-  );

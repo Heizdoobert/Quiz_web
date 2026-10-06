@@ -22,7 +22,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
       isOpen={isOpen}
       onClose={onClose}
       title="How to Create & Play"
-      icon={<Lightbulb className="w-5 h-5 text-[#FFD166]" />}
+      icon={<Lightbulb className="w-5 h-5 text-crypto-gold" />}
       footer={
         <div className="flex w-full items-center justify-between">
           {step > 1 ? (
@@ -32,7 +32,7 @@ export default function IntroModal({ isOpen, onClose }: IntroModalProps) {
               whileTap={{ scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
               onClick={handleBack}
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-[#25284D] hover:bg-[#2D305A] text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl bg-cyber-violet-light hover:bg-cyber-border text-slate-200 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               <ArrowLeft className="w-4 h-4" /> Back
             </motion.button>

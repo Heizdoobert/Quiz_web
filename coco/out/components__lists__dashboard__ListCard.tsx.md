@@ -19,10 +19,10 @@ import { ListCardEditDetailsPanel } from './ListCardEditDetailsPanel';
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
-  submitted: 'bg-[#FFD166]/15 text-[#FFD166] border-[#FFD166]/40',
-  approved: 'bg-[#6C5CE7]/15 text-[#6C5CE7] border-[#6C5CE7]/40',
-  live: 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/40',
-  rejected: 'bg-[#FF4757]/15 text-[#FF4757] border-[#FF4757]/40',
+  submitted: 'bg-crypto-gold/15 text-crypto-gold border-crypto-gold/40',
+  approved: 'bg-electric-indigo/15 text-electric-indigo border-electric-indigo/40',
+  live: 'bg-neo-mint/15 text-neo-mint border-neo-mint/40',
+  rejected: 'bg-pop-coral/15 text-pop-coral border-pop-coral/40',
 };
 
 const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';

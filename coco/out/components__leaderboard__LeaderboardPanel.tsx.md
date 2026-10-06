@@ -1,20 +1,24 @@
 # components/leaderboard/LeaderboardPanel.tsx
-lines:82 exports:default
+lines:116 exports:default
 ---
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import GlobalLeaderboard from './GlobalLeaderboard';
 import GroupLeaderboard from './GroupLeaderboard';
 import { Shield, Trophy, Users } from 'lucide-react';
+import { useIntersectionObserver } from '@/hooks/shared/use-intersection';
+import { supabase } from '@/lib/supabase/supabase';
+import debounce from 'lodash.debounce';
 
 interface LeaderboardPanelProps {
   globalEntries: LeaderboardEntry[];
   groupEntries: LeaderboardEntry[];
   loading: boolean;
   onOpenGroupModal: () => void;
+  refreshLeaderboard?: () => void;
   className?: string;
 }
 
@@ -23,21 +27,17 @@ export default function LeaderboardPanel({
   groupEntries,
   loading,
   onOpenGroupModal,
+  refreshLeaderboard,
   className = '',
 }: LeaderboardPanelProps) {
   const [activeTab, setActiveTab] = useState<'global' | 'group'>('global');
   const { account } = useSession();
+  
+  const panelRef = useRef<HTMLElement>(null);
+  const isVisible = useIntersectionObserver(panelRef, { threshold: 0.1 });
 
-  return (
-    <section
-      className={`glass glass-border glass-edge p-5 rounded-3xl shadow-2xl space-y-4 ${className}`}
-      aria-label="Leaderboards"
-    >
-      <div className="flex items-center justify-between border-b border-[#2D305A] pb-3">
-        <div className="flex gap-4">
-          <button
-            type="button"
-            onClick={() => setActiveTab('global')}
-            className={`flex items-center gap-1.5 text-xs font-black font-heading pb-1.5 border-b-2 transition-all cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFD166] rounded-t ${
-              activeTab === 'global'
-                ? 'border-[#FFD166] text-[#FFD166] shadow-[0_4px_12px_rgba(255,209,102,0.2)]'
+  const debouncedRefresh = useMemo(() => {
+    if (!refreshLeaderboard) return null;
+    return debounce(refreshLeaderboard, 5000, { leading: true, trailing: true });
+  }, [refreshLeaderboard]);
+

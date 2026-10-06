@@ -39,5 +39,5 @@ export default function RewardsModal({ isOpen, onClose, walletAddress }: Rewards
   } = useRewardsModal({ isOpen, walletAddress });
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Rewards & Badges" icon={<Gift className="w-5 h-5 text-[#FFD166]" />} maxWidth="max-w-lg">
+    <Modal isOpen={isOpen} onClose={onClose} title="Rewards & Badges" icon={<Gift className="w-5 h-5 text-crypto-gold" />} maxWidth="max-w-lg">
       {/* Chain warning */}
