@@ -48,6 +48,7 @@ contracts/node_modules/
 
 # Python & CocoIndex (state + venv local; out/ and pipeline checked in)
 coco/cocoindex.db*
+coco/coco/
 coco/.venv/
 __pycache__/
 *.py[cod]
