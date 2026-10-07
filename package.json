@@ -68,5 +68,10 @@
     "typescript": "^5",
     "vite": "^8.3.1",
     "vitest": "^5.0.2"
+  },
+  "overrides": {
+    "braces": "3.0.3",
+    "serialize-javascript": "7.1.2",
+    "micromatch": "4.0.8"
   }
 }
