@@ -24,7 +24,6 @@
   "dependencies": {
     "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
-    "@prisma/client": "^5.22.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
@@ -63,7 +62,6 @@
     "eslint-config-next": "16.3.6",
     "jsdom": "^30.1.1",
     "lighthouse": "^13.5.0",
-    "prisma": "^5.22.0",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite": "^8.3.1",
