@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase/supabase';
 import { SearchResult } from '@/lib/types';
 import { escapeLikePattern } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 
 const PAGE_SIZE = 20;
 
@@ -39,7 +40,7 @@ export async function searchQuestions(
     p_offset: (Math.max(1, page) - 1) * PAGE_SIZE,
   });
   if (error || !data) {
-    console.error('searchQuestions error:', error);
+    logger.error('searchQuestions error:', error);
     return { results: [], hasMore: false };
   }
 
@@ -76,7 +77,7 @@ export async function getTopicQuestions(
     .order('created_at', { ascending: false })
     .range(offset, offset + PAGE_SIZE);
   if (error || !data) {
-    console.error('getTopicQuestions error:', error);
+    logger.error('getTopicQuestions error:', error);
     return { results: [], hasMore: false };
   }
 

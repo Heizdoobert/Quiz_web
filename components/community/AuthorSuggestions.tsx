@@ -8,6 +8,7 @@ import {
   resolveSuggestion,
 } from "@/lib/actions/community-actions";
 import { formatRelativeTime } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 interface AuthorSuggestionsProps {
   accountId: string;
@@ -31,7 +32,7 @@ export default function AuthorSuggestions({
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error("Failed to load author suggestions:", err);
+          logger.error("Failed to load author suggestions:", err);
           setLoading(false);
         }
       });
@@ -51,7 +52,7 @@ export default function AuthorSuggestions({
         setSuggestions((prev) => prev.filter((s) => s.id !== commentId));
       }
     } catch (err) {
-      console.error("Failed to mark suggestion done:", err);
+      logger.error("Failed to mark suggestion done:", err);
     } finally {
       setResolvingId(null);
     }

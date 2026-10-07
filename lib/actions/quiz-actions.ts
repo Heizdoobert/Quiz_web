@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount } from '@/lib/services/session';
 import { statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
+import { logger } from '@/lib/logger';
 
 const HISTORY_LIMIT = 20;
 
@@ -24,7 +25,7 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
       .limit(HISTORY_LIMIT);
 
     if (error || !data) {
-      console.error('getAnswerHistory error:', error);
+      logger.error('getAnswerHistory error:', error);
       return [];
     }
 
@@ -36,7 +37,7 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
       })
     );
   } catch (err) {
-    console.error('getAnswerHistory exception:', err);
+    logger.error('getAnswerHistory exception:', err);
     return [];
   }
 }
@@ -55,7 +56,7 @@ export async function submitAnswer(params: {
   try {
     // correct_index and explanation are not readable with the public key.
     if (!supabaseAdmin) {
-      console.error('submitAnswer: SUPABASE_SECRET_KEY is not set');
+      logger.error('submitAnswer: SUPABASE_SECRET_KEY is not set', new Error('submitAnswer: SUPABASE_SECRET_KEY is not set'));
       return failed('error');
     }
     // '*' so this keeps working before lib/sql/question-lists.sql adds list_id.
@@ -66,7 +67,7 @@ export async function submitAnswer(params: {
       .single();
 
     if (qError || !qData) {
-      console.error('Question not found for answer submission:', qError);
+      logger.error('Question not found for answer submission:', qError);
       return failed('error');
     }
     const account = await getSessionAccount();
@@ -107,10 +108,10 @@ export async function submitAnswer(params: {
     });
     if (!insertError) return { ...revealed, recorded: true };
     if (insertError.code === '23505') return { ...revealed, recorded: false, notSavedReason: 'already-answered' };
-    console.error('submitAnswer insert error:', insertError);
+    logger.error('submitAnswer insert error:', insertError);
     return { ...revealed, recorded: false, notSavedReason: 'error' };
   } catch (err) {
-    console.error('submitAnswer error:', err);
+    logger.error('submitAnswer error:', err);
     return failed('error');
   }
 }

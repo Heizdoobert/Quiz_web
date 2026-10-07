@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -11,7 +12,7 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to server or monitoring
-    console.error('Next.js Page Error caught by boundary:', error);
+    logger.error('Next.js Page Error caught by boundary:', error);
   }, [error]);
 
   return (

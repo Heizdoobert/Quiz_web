@@ -8,6 +8,7 @@ import { RewardVoucher } from '@/lib/types';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
 import { ContestPlayClaimButton, ClaimStep } from './ContestPlayClaimButton';
+import { logger } from '@/lib/logger';
 
 function formatTokens(weiStr: string): string {
   const wei = BigInt(weiStr || '0');
@@ -192,7 +193,7 @@ export function ContestPlayResult({
       }
       setClaimStep('confirming');
     } catch (err) {
-      console.error('Claim tx failed:', err);
+      logger.error('Claim tx failed:', err);
       setClaimError('Transaction failed or was rejected');
       setClaimStep('error');
     }

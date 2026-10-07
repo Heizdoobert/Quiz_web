@@ -4,6 +4,7 @@ import { Loader2, RefreshCw } from 'lucide-react';
 import { recordContestRefund } from '@/lib/actions/question-list-actions';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
+import { logger } from '@/lib/logger';
 
 export function OnChainRefundPanel({
   listId,
@@ -52,7 +53,7 @@ export function OnChainRefundPanel({
       await recordContestRefund(listId, hash);
       onChanged();
     } catch (err) {
-      console.error(err);
+      logger.error('error', err);
       setError('Refund transaction failed or was rejected.');
     }
     setRefunding(false);

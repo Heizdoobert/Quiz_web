@@ -178,7 +178,7 @@ export async function getTopics(): Promise<Array<{ name: string; questionCount: 
       latestAt: row.latest_at,
     }));
   } catch (err) {
-    console.error('getTopics error:', err);
+    logger.error('getTopics error:', err);
     return [];
   }
 }
@@ -203,7 +203,7 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
       status: data.status || 'verified',
     };
   } catch (err) {
-    console.error('getPublicQuestion error:', err);
+    logger.error('getPublicQuestion error:', err);
     return null;
   }
 }

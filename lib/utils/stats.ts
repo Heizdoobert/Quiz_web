@@ -1,6 +1,7 @@
 import 'server-only';
 import { supabase } from '@/lib/supabase/supabase';
 import { UserStats } from '@/lib/types';
+import { logger } from '@/lib/logger';
 
 const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
 
@@ -14,7 +15,7 @@ export async function statsForAccount(accountId: string): Promise<UserStats> {
       .rpc('get_user_stats', { p_user: accountId })
       .single<{ total_answered: number; correct_count: number; streak: number; best_streak: number }>();
 
-    if (error) console.error('statsForAccount rpc error:', error);
+    if (error) logger.error('statsForAccount rpc error:', error);
     if (error || !data || data.total_answered === 0) return ZERO_STATS;
 
     return {
@@ -25,7 +26,7 @@ export async function statsForAccount(accountId: string): Promise<UserStats> {
       totalAnswered: data.total_answered,
     };
   } catch (err) {
-    console.error('statsForAccount error:', err);
+    logger.error('statsForAccount error:', err);
     return ZERO_STATS;
   }
 }

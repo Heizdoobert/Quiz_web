@@ -19,6 +19,7 @@ import {
   TARGET_CHAIN_NAME,
 } from "@/lib/contracts/addresses";
 import { useSession } from "@/hooks/shared/use-session";
+import { logger } from '@/lib/logger';
 
 const SIGN_IN_ERROR = "Sign the message in your wallet to manage your lists.";
 
@@ -134,7 +135,7 @@ export function ContestActionPanel({
         await publicClient.waitForTransactionReceipt({ hash: createHash });
       }
     } catch (err) {
-      console.error("Contest funding tx failed:", err);
+      logger.error("Contest funding tx failed:", err);
       setError("On-chain funding failed or was rejected.");
       setFunding(null);
       return;

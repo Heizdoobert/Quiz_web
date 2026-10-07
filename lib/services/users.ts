@@ -1,31 +1,31 @@
 import 'server-only';
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { logger } from '@/lib/logger';
 
 // The account id for a wallet, creating the account if the wallet has none.
 // Never call this with an address that hasn't been proven by a session or a
 // SIWE signature just verified.
 export async function ensureAccountForWallet(walletAddress: string): Promise<string | null> {
   if (!supabaseAdmin) {
-    console.error('ensureAccountForWallet: SUPABASE_SECRET_KEY is not set');
+    logger.error('ensureAccountForWallet: SUPABASE_SECRET_KEY is not set', new Error('ensureAccountForWallet: SUPABASE_SECRET_KEY is not set'));
     return null;
   }
   const wallet = walletAddress.toLowerCase();
   const { error: upsertError } = await supabaseAdmin.from('users').upsert(
     {
-      wallet_address: wallet,
-      display_name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
+      wallet_address: wallet, display_name: `${wallet.slice(0, 6)}...${wallet.slice(-4)}`,
       wallet_linked_at: new Date().toISOString(),
     },
     { onConflict: 'wallet_address', ignoreDuplicates: true }
   );
   if (upsertError) {
-    console.error('ensureAccountForWallet upsert error:', upsertError);
+    logger.error('ensureAccountForWallet upsert error:', upsertError);
     return null;
   }
   const { data, error } = await supabaseAdmin.from('users').select('id').eq('wallet_address', wallet).single();
   if (error || !data) {
-    console.error('ensureAccountForWallet lookup error:', error);
+    logger.error('ensureAccountForWallet lookup error:', error);
     return null;
   }
   return data.id;
@@ -38,23 +38,22 @@ export async function ensureAccountForAuthUser(
   displayName?: string
 ): Promise<string | null> {
   if (!supabaseAdmin) {
-    console.error('ensureAccountForAuthUser: SUPABASE_SECRET_KEY is not set');
+    logger.error('ensureAccountForAuthUser: SUPABASE_SECRET_KEY is not set', new Error('ensureAccountForAuthUser: SUPABASE_SECRET_KEY is not set'));
     return null;
   }
   const { error: upsertError } = await supabaseAdmin.from('users').upsert(
     {
-      auth_user_id: authUserId,
-      display_name: displayName || `Player-${authUserId.slice(0, 4)}`,
+      auth_user_id: authUserId, display_name: displayName || `Player-${authUserId.slice(0, 4)}`,
     },
     { onConflict: 'auth_user_id', ignoreDuplicates: true }
   );
   if (upsertError) {
-    console.error('ensureAccountForAuthUser upsert error:', upsertError);
+    logger.error('ensureAccountForAuthUser upsert error:', upsertError);
     return null;
   }
   const { data, error } = await supabaseAdmin.from('users').select('id').eq('auth_user_id', authUserId).single();
   if (error || !data) {
-    console.error('ensureAccountForAuthUser lookup error:', error);
+    logger.error('ensureAccountForAuthUser lookup error:', error);
     return null;
   }
   return data.id;
@@ -68,7 +67,7 @@ export async function linkWalletToAccount(
   walletAddress: string
 ): Promise<'ok' | 'in_use' | 'error'> {
   if (!supabaseAdmin) {
-    console.error('linkWalletToAccount: SUPABASE_SECRET_KEY is not set');
+    logger.error('linkWalletToAccount: SUPABASE_SECRET_KEY is not set', new Error('linkWalletToAccount: SUPABASE_SECRET_KEY is not set'));
     return 'error';
   }
   const wallet = walletAddress.toLowerCase();
@@ -78,7 +77,7 @@ export async function linkWalletToAccount(
     .eq('wallet_address', wallet)
     .maybeSingle();
   if (lookupError) {
-    console.error('linkWalletToAccount lookup error:', lookupError);
+    logger.error('linkWalletToAccount lookup error:', lookupError);
     return 'error';
   }
   if (existing) return existing.id === accountId ? 'ok' : 'in_use';
@@ -88,7 +87,7 @@ export async function linkWalletToAccount(
     .update({ wallet_address: wallet, wallet_linked_at: new Date().toISOString() })
     .eq('id', accountId);
   if (updateError) {
-    console.error('linkWalletToAccount update error:', updateError);
+    logger.error('linkWalletToAccount update error:', updateError);
     return (updateError as { code?: string }).code === '23505' ? 'in_use' : 'error';
   }
   return 'ok';
@@ -103,7 +102,7 @@ export async function accountIdForWallet(walletAddress: string): Promise<string 
     .eq('wallet_address', walletAddress.toLowerCase())
     .maybeSingle();
   if (error) {
-    console.error('accountIdForWallet error:', error);
+    logger.error('accountIdForWallet error:', error);
     return null;
   }
   return data?.id ?? null;

@@ -4,6 +4,7 @@ import { createAuthenticationAdapter } from '@rainbow-me/rainbowkit';
 import { createSiweMessage, parseSiweMessage } from 'viem/siwe';
 import { getAddress } from 'viem';
 import { getAuthNonce, getSessionInfo, linkWallet, signInWithWallet, signOutWallet } from '@/lib/actions/auth-actions';
+import { logger } from '@/lib/logger';
 
 export interface QuizAuthAdapterOptions {
   onSignIn?: () => void;
@@ -71,7 +72,7 @@ export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
         }
         return ok;
       } catch (err) {
-        console.error('QuizAuthAdapter verify error:', err);
+        logger.error('QuizAuthAdapter verify error:', err);
         return false;
       }
     },
@@ -79,7 +80,7 @@ export function createQuizAuthAdapter(options?: QuizAuthAdapterOptions) {
       try {
         await signOutWallet();
       } catch (err) {
-        console.error('QuizAuthAdapter signOut error:', err);
+        logger.error('QuizAuthAdapter signOut error:', err);
       } finally {
         options?.onSignOut?.();
       }

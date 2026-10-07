@@ -1,4 +1,5 @@
 "use client";
+import { logger } from "@/lib/logger";
 
 import React, { useEffect, useState } from "react";
 import { Zap, Rocket, Shield } from "lucide-react";
@@ -26,7 +27,7 @@ export default function AdZone({
       .then((data) => {
         if (data) setSponsor(data);
       })
-      .catch(console.error);
+      .catch((err) => logger.error('error', err));
   }, [variant]);
 
   if (variant === "sticky-bottom") {

@@ -1,4 +1,5 @@
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
@@ -143,12 +144,12 @@ export async function createList(params: {
       .single();
 
     if (error) {
-      console.error('createList error:', error);
+      logger.error('createList error:', error);
       return { success: false, error: 'Failed to create list.' };
     }
     return { success: true, list: data as QuestionList };
   } catch (err) {
-    console.error('createList error:', err);
+    logger.error('createList error:', err);
     return { success: false, error: 'Failed to create list.' };
   }
 }
@@ -181,12 +182,12 @@ export async function updateList(listId: string, params: { title?: string; descr
 
     const { error } = await owned.db.from('question_lists').update(update).eq('id', listId);
     if (error) {
-      console.error('updateList error:', error);
+      logger.error('updateList error:', error);
       return { success: false, error: 'Failed to update list.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('updateList error:', err);
+    logger.error('updateList error:', err);
     return { success: false, error: 'Failed to update list.' };
   }
 }
@@ -198,12 +199,12 @@ export async function deleteList(listId: string): Promise<Result> {
 
     const { error } = await owned.db.from('question_lists').delete().eq('id', listId);
     if (error) {
-      console.error('deleteList error:', error);
+      logger.error('deleteList error:', error);
       return { success: false, error: 'Failed to delete list.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('deleteList error:', err);
+    logger.error('deleteList error:', err);
     return { success: false, error: 'Failed to delete list.' };
   }
 }
@@ -221,7 +222,7 @@ export async function getMyLists(): Promise<QuestionListWithMeta[]> {
 
     return await attachListMeta(lists as QuestionList[]);
   } catch (err) {
-    console.error('getMyLists error:', err);
+    logger.error('getMyLists error:', err);
     return [];
   }
 }
@@ -252,7 +253,7 @@ export async function getListDetail(
     const [withMeta] = await attachListMeta([list as QuestionList], viewer?.id);
     return { list: withMeta, questions: (questions as unknown as Question[]) || [] };
   } catch (err) {
-    console.error('getListDetail error:', err);
+    logger.error('getListDetail error:', err);
     return null;
   }
 }
@@ -311,12 +312,12 @@ export async function addListQuestion(
       .single();
 
     if (error) {
-      console.error('addListQuestion error:', error);
+      logger.error('addListQuestion error:', error);
       return { success: false, error: 'Failed to add question.' };
     }
     return { success: true, question: data as Question };
   } catch (err) {
-    console.error('addListQuestion error:', err);
+    logger.error('addListQuestion error:', err);
     return { success: false, error: 'Failed to add question.' };
   }
 }
@@ -357,12 +358,12 @@ export async function updateListQuestion(questionId: string, params: QuestionPar
       .eq('id', questionId);
 
     if (error) {
-      console.error('updateListQuestion error:', error);
+      logger.error('updateListQuestion error:', error);
       return { success: false, error: 'Failed to update question.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('updateListQuestion error:', err);
+    logger.error('updateListQuestion error:', err);
     return { success: false, error: 'Failed to update question.' };
   }
 }
@@ -374,12 +375,12 @@ export async function deleteListQuestion(questionId: string): Promise<Result> {
 
     const { error } = await owned.db.from('questions').delete().eq('id', questionId);
     if (error) {
-      console.error('deleteListQuestion error:', error);
+      logger.error('deleteListQuestion error:', error);
       return { success: false, error: 'Failed to delete question.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('deleteListQuestion error:', err);
+    logger.error('deleteListQuestion error:', err);
     return { success: false, error: 'Failed to delete question.' };
   }
 }
@@ -408,12 +409,12 @@ export async function submitListForReview(listId: string): Promise<Result> {
       .eq('status', 'draft');
 
     if (error) {
-      console.error('submitListForReview error:', error);
+      logger.error('submitListForReview error:', error);
       return { success: false, error: 'Failed to submit list.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('submitListForReview error:', err);
+    logger.error('submitListForReview error:', err);
     return { success: false, error: 'Failed to submit list.' };
   }
 }
@@ -432,7 +433,7 @@ export async function getListsPendingReview(): Promise<QuestionListWithMeta[]> {
 
     return await attachListMeta(lists as QuestionList[], account.id);
   } catch (err) {
-    console.error('getListsPendingReview error:', err);
+    logger.error('getListsPendingReview error:', err);
     return [];
   }
 }
@@ -460,7 +461,7 @@ export async function confirmList(listId: string): Promise<{ success: boolean; a
       .insert({ list_id: listId, confirmer_user: auth.account.id, confirmer_wallet: auth.account.wallet });
     if (insertErr) {
       if (insertErr.code === '23505') return { success: false, error: 'You have already confirmed this list.' };
-      console.error('confirmList insert error:', insertErr);
+      logger.error('confirmList insert error:', insertErr);
       return { success: false, error: 'Failed to confirm list.' };
     }
 
@@ -476,12 +477,12 @@ export async function confirmList(listId: string): Promise<{ success: boolean; a
         .update({ status: 'approved' })
         .eq('id', listId)
         .eq('status', 'submitted');
-      if (error) console.error('confirmList approve error:', error);
+      if (error) logger.error('confirmList approve error:', error);
     }
 
     return { success: true, approved };
   } catch (err) {
-    console.error('confirmList error:', err);
+    logger.error('confirmList error:', err);
     return { success: false, error: 'Failed to confirm list.' };
   }
 }
@@ -538,12 +539,12 @@ export async function startContest(
       .eq('status', 'approved');
 
     if (error) {
-      console.error('startContest error:', error);
+      logger.error('startContest error:', error);
       return { success: false, error: 'Failed to start contest.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('startContest error:', err);
+    logger.error('startContest error:', err);
     return { success: false, error: 'Failed to start contest.' };
   }
 }
@@ -598,7 +599,7 @@ export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
     const activeLists = [];
     for (const list of (lists as QuestionList[])) {
       if (list.expires_at && new Date(list.expires_at) < now) {
-        syncContestStatus(list.id).catch(console.error);
+        syncContestStatus(list.id).catch((err) => logger.error('error', err));
       } else {
         activeLists.push(list);
       }
@@ -606,7 +607,7 @@ export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
 
     return await attachListMeta(activeLists);
   } catch (err) {
-    console.error('getLiveLists error:', err);
+    logger.error('getLiveLists error:', err);
     return [];
   }
 }
@@ -623,7 +624,7 @@ export async function getMyContestEntries(): Promise<ListEntry[]> {
     if (error || !entries) return [];
     return entries as ListEntry[];
   } catch (err) {
-    console.error('getMyContestEntries error:', err);
+    logger.error('getMyContestEntries error:', err);
     return [];
   }
 }
@@ -650,7 +651,7 @@ export async function getClaimableContests(): Promise<QuestionListWithMeta[]> {
     if (!lists) return [];
     return await attachListMeta(lists as QuestionList[]);
   } catch (err) {
-    console.error('getClaimableContests error:', err);
+    logger.error('getClaimableContests error:', err);
     return [];
   }
 }
@@ -680,7 +681,7 @@ export async function recordContestRefund(listId: string, txHash: string): Promi
       
     return { success: true };
   } catch (err) {
-    console.error('recordContestRefund error:', err);
+    logger.error('recordContestRefund error:', err);
     return { success: false, error: 'Failed to record refund' };
   }
 }
@@ -748,7 +749,7 @@ export async function startListAttempt(
         .from('list_entries')
         .insert({ list_id: listId, user_id: auth.account.id, wallet_address: auth.wallet });
       if (insertErr && insertErr.code !== '23505') {
-        console.error('startListAttempt entry error:', insertErr);
+        logger.error('startListAttempt entry error:', insertErr);
         return { success: false, error: 'Failed to start contest.' };
       }
     }
@@ -783,7 +784,7 @@ export async function startListAttempt(
       answeredQuestionIds,
     };
   } catch (err) {
-    console.error('startListAttempt error:', err);
+    logger.error('startListAttempt error:', err);
     return { success: false, error: 'Failed to start contest.' };
   }
 }
@@ -833,16 +834,16 @@ export async function completeListAttempt(
       .select('list_id');
 
     if (error) {
-      console.error('completeListAttempt error:', error);
+      logger.error('completeListAttempt error:', error);
       return { success: false, error: 'Failed to finish contest.' };
     }
     if (!updated?.length) return { success: false, error: 'No contest in progress for this wallet.' };
     
-    syncContestStatus(listId).catch(console.error);
+    syncContestStatus(listId).catch((err) => logger.error('error', err));
 
     return { success: true, correctCount, rewardAmount: rewardAmount.toString() };
   } catch (err) {
-    console.error('completeListAttempt error:', err);
+    logger.error('completeListAttempt error:', err);
     return { success: false, error: 'Failed to finish contest.' };
   }
 }
@@ -901,11 +902,11 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     const onChain = await getContestOnChain(contestId);
     if (onChain) {
       if (!onChain.active || onChain.remainingPool < amount) {
-        syncContestStatus(listId).catch(console.error);
+        syncContestStatus(listId).catch((err) => logger.error('error', err));
         return { error: 'Contest reward pool has been exhausted or closed.' };
       }
       if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
-        syncContestStatus(listId).catch(console.error);
+        syncContestStatus(listId).catch((err) => logger.error('error', err));
         return { error: 'Contest has expired.' };
       }
     }
@@ -1023,7 +1024,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
           );
         }
       }
-      console.error('claimListReward insert error:', insertErr);
+      logger.error('claimListReward insert error:', insertErr);
       return { error: 'Failed to record reward voucher.' };
     }
 
@@ -1038,7 +1039,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
       contestId,
     );
   } catch (err) {
-    console.error('claimListReward error:', err);
+    logger.error('claimListReward error:', err);
     return { error: 'Failed to claim contest reward.' };
   }
 }
@@ -1057,13 +1058,13 @@ export async function getContestAnalytics(listId: string): Promise<{ success: bo
     const { data, error } = await supabase.rpc('get_contest_analytics', { p_list_id: listId }).single();
 
     if (error || !data) {
-      console.error('[getContestAnalytics]', error);
+      logger.error('[getContestAnalytics]', error);
       return { success: false, error: 'Failed to fetch contest analytics.' };
     }
 
     return { success: true, data: data as ContestAnalytics };
   } catch (err) {
-    console.error('[getContestAnalytics]', err);
+    logger.error('[getContestAnalytics]', err);
     return { success: false, error: 'An unexpected error occurred.' };
   }
 }

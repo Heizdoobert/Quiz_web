@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { rateQuestion } from '@/lib/actions/community-actions';
+import { logger } from '@/lib/logger';
 
 interface RatingStarsProps {
   questionId: string;
@@ -48,7 +49,7 @@ export default function RatingStars({
         }
       }
     } catch (e) {
-      console.error('Rating error:', e);
+      logger.error('Rating error:', e);
       setError('Failed to save rating');
     } finally {
       setSubmitting(false);

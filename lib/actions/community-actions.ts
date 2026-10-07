@@ -4,6 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { supabase } from '@/lib/supabase/supabase';
 import { getSessionAccount } from '@/lib/services/session';
 import { isUuid } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 
 export type CommunityResult =
   | { ok: true }
@@ -95,7 +96,7 @@ export async function rateQuestion(questionId: string, rating: number): Promise<
   });
 
   if (error) {
-    console.error('rateQuestion error:', error);
+    logger.error('rateQuestion error:', error);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -132,7 +133,7 @@ export async function addComment(
     .gte('created_at', since);
 
   if (countErr) {
-    console.error('addComment rate limit check error:', countErr);
+    logger.error('addComment rate limit check error:', countErr);
     return { ok: false, code: 'FAILED' };
   }
   if (count !== null && count >= 20) {
@@ -147,7 +148,7 @@ export async function addComment(
   });
 
   if (error) {
-    console.error('addComment error:', error);
+    logger.error('addComment error:', error);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -171,7 +172,7 @@ export async function deleteComment(commentId: string): Promise<CommunityResult>
   const { error } = await supabaseAdmin.from('question_comments').delete().eq('id', commentId);
 
   if (error) {
-    console.error('deleteComment error:', error);
+    logger.error('deleteComment error:', error);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -203,7 +204,7 @@ export async function resolveSuggestion(commentId: string): Promise<CommunityRes
     .eq('id', commentId);
 
   if (error) {
-    console.error('resolveSuggestion error:', error);
+    logger.error('resolveSuggestion error:', error);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -267,7 +268,7 @@ export async function getQuestionDiscussion(
     .range(offset, offset + PAGE_SIZE);
 
   if (cErr || !commentRows) {
-    console.error('getQuestionDiscussion comments error:', cErr);
+    logger.error('getQuestionDiscussion comments error:', cErr);
     return { rating, myRating, comments: [], hasMore: false };
   }
 
@@ -319,7 +320,7 @@ export async function getSuggestionsForAuthor(accountId: string): Promise<Sugges
     .order('created_at', { ascending: false });
 
   if (error || !data) {
-    console.error('getSuggestionsForAuthor error:', error);
+    logger.error('getSuggestionsForAuthor error:', error);
     return [];
   }
 

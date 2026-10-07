@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { Lightbulb, Send, X, Check } from "lucide-react";
 import { addComment } from "@/lib/actions/community-actions";
+import { logger } from '@/lib/logger';
 
 interface SuggestionFormProps {
   questionId: string;
@@ -48,7 +49,7 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
         }
       }
     } catch (err) {
-      console.error("Suggestion submission error:", err);
+      logger.error("Suggestion submission error:", err);
       setError("Failed to send suggestion. Please try again.");
     } finally {
       setSubmitting(false);
