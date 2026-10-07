@@ -1,0 +1,22 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Leaderboard {
+  id        Int      @id @default(autoincrement())
+  user      String   @unique
+  score     Int
+  createdAt DateTime @default(now())
+
+  @@index([score])
+}
+
+model ProcessedTransaction {
+  hash      String   @id
+  createdAt DateTime @default(now())
+}
