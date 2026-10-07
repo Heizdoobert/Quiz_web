@@ -22,6 +22,7 @@
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
     "@prisma/client": "^5.22.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
@@ -36,16 +37,15 @@
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^1.47.0",
     "next": "16.3.6",
-    "next-pwa": "^5.6.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "use-sound": "^5.0.0",
     "viem": "^2.56.9",
     "wagmi": "^2.19.5",
+    "webpack": "^5.111.1",
     "zod": "^4.6.5"
   },
   "devDependencies": {
-    "@axe-core/cli": "^4.13.0",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/dom": "^10.4.2",
@@ -72,6 +72,14 @@
   "overrides": {
     "braces": "3.0.3",
     "serialize-javascript": "7.1.2",
-    "micromatch": "4.0.8"
+    "micromatch": "4.0.8",
+    "@walletconnect/sign-client": "^2.22.4",
+    "@walletconnect/ethereum-provider": "^2.22.4",
+    "@walletconnect/universal-provider": "^2.22.4",
+    "@walletconnect/utils": "^2.22.4",
+    "@walletconnect/core": "^2.22.4",
+    "viem": "^2.56.9",
+    "uuid": "^11.1.1",
+    "ws": "^8.20.1"
   }
 }
