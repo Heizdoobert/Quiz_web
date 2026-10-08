@@ -1,98 +1,52 @@
-# Tasks: Phase B Feature Enhancements
+# Tasks: Polling-Based Realtime Leaderboard
 
 > Plan: [plan.md](./plan.md)
 
 ---
 
-## Task 1: Clean up remaining Phase A dependencies
-**Description:** Remove unused `@x402/*` packages from `package.json` to complete Phase A pruning.
-> [!WARNING] Update: This step is invalid because `@coinbase/cdp-sdk` dynamically imports these packages and Next.js Turbopack fails to compile when they are missing. They must be kept.
+## Task 1: Integrate React Query for Leaderboards
+**Description:** Refactor leaderboard data fetching from manual React state (`useState`) to `@tanstack/react-query` (`useQuery`). 
 **Acceptance criteria:**
-- [ ] `@x402/core`, `@x402/evm`, `@x402/svm` are removed from `package.json`. (Skipped due to upstream dependency)
+- [ ] `useQuizLogic` hook uses `useQuery` for both global and group leaderboards instead of manual async functions and state.
+- [ ] Submitting an answer calls `queryClient.invalidateQueries({ queryKey: ['leaderboard'] })` rather than manually invoking `loadLeaderboards()`.
+- [ ] The `leaderboardLoading` state is derived from React Query's `isPending` / `isFetching` properties, ensuring background refetches do not trigger hard loading spinners (preventing UI flicker).
 **Verification:**
+- [ ] Tests pass: `npm run test`
 - [ ] Build succeeds: `npm run build`
+- [ ] Manual check: Submit an answer and verify the leaderboard updates immediately without a loading spinner flash.
 **Dependencies:** None
-**Files likely touched:** `package.json`
-**Estimated scope:** XS
+**Files likely touched:** `hooks/quiz/use-quiz-logic.ts`, `components/leaderboard/LeaderboardPanel.tsx`
+**Estimated scope:** M
 
-## Task 2: Implement Toast Notifications
-**Description:** Install `sonner` and add the `Toaster` provider to the global layout.
+## Task 2: Implement Visibility-Aware Polling
+**Description:** Add a conditional polling interval to the leaderboard queries that activates exclusively when the leaderboard panel is visible on screen.
 **Acceptance criteria:**
-- [x] `sonner` is added to dependencies (or custom toast is created).
-- [x] `<Toaster />` is rendered in `app/layout.tsx` (or a `Providers` component).
+- [ ] Remove all Supabase Realtime WebSocket logic (`supabase.channel().on(...)`) from `LeaderboardPanel.tsx`.
+- [ ] Pass the `isVisible` boolean (from `useIntersectionObserver`) into `useQuizLogic` or directly to the `useQuery` hook.
+- [ ] Set `refetchInterval: isVisible ? 15000 : false` on the leaderboard queries.
 **Verification:**
-- [x] Manual check: Add a temporary toast to a component and verify it displays.
-**Dependencies:** None
-**Files likely touched:** `package.json`, `app/layout.tsx`, `components/Providers.tsx`
-**Estimated scope:** S
-
-## Task 3: Implement Offline PWA caching
-**Description:** Configure `@ducanh2912/next-pwa` in Next.js config to enable offline support.
-**Acceptance criteria:**
-- [x] `next.config.js` uses `withPWA` wrapper.
-- [x] PWA is configured to generate a service worker in the `public` directory.
-**Verification:**
-- [x] Build succeeds: `npm run build`
-- [x] Manual check: Run `npm start` and verify service worker is registered in browser devtools.
-**Dependencies:** None
-**Files likely touched:** `next.config.js`, `next.config.mjs`
+- [ ] Tests pass: `npm run test`
+- [ ] Manual check: Open network tab, scroll the leaderboard into view, wait 15 seconds, and confirm an RPC network request is fired. Scroll out of view and confirm requests stop.
+**Dependencies:** Task 1
+**Files likely touched:** `components/leaderboard/LeaderboardPanel.tsx`, `hooks/quiz/use-quiz-logic.ts`
 **Estimated scope:** S
 
 ## Checkpoint: Foundation
-- [x] Clean build and tests pass
-- [x] Application loads without errors
+- [ ] Manual test: Leaderboard fetches successfully on initial load.
+- [ ] Manual test: Leaderboard polls exactly every 15 seconds when visible, and pauses when scrolled out of view or tab is backgrounded.
+- [ ] Network tab confirms no WebSocket connection is established for `quiz_results`.
 
-## Task 4: Social Sharing component
-**Description:** Create a component allowing users to share their quiz results on X (Twitter) and Farcaster.
+## Task 3: Visual Highlights for Leaderboard Changes
+**Description:** Add subtle animation cues to leaderboard rows when they update, so users notice changes that occur passively in the background.
 **Acceptance criteria:**
-- [x] Component renders X and Farcaster share buttons.
-- [x] Buttons open intent URLs with pre-filled text (e.g., "I scored X points on Quick Quiz!").
-- [x] Copy link button exists and uses Toast on success.
+- [ ] Leaderboard rows (e.g., in `GlobalLeaderboard.tsx` and `GroupLeaderboard.tsx`) use `framer-motion` to flash a subtle background color or pulse when their `score` or `rank` changes.
 **Verification:**
-- [x] Manual check: Click share buttons and ensure they open appropriate popups/tabs with correct text.
-**Dependencies:** Task 2
-**Files likely touched:** `components/quiz/SocialShare.tsx`, `app/results/page.tsx`
-**Estimated scope:** M
-
-## Task 5: AI Question Generator API
-**Description:** Create a Next.js Server Action to generate a crypto trivia question using `@google/genai`.
-**Acceptance criteria:**
-- [x] Server action `generateAIQuestion(topic)` exists.
-- [x] Uses Gemini to generate 1 question with 4 options and the correct answer.
-- [x] Includes a call to `moderateContent` (existing in Phase A) to ensure safety.
-**Verification:**
-- [x] Tests pass: `npm run test` (if applicable) or manual API check.
-**Dependencies:** None
-**Files likely touched:** `lib/actions/ai-actions.ts`
-**Estimated scope:** M
-
-## Task 6: AI Question Generator UI
-**Description:** Create a UI component where users can enter a topic and generate a question.
-**Acceptance criteria:**
-- [x] Input field for topic/difficulty.
-- [x] Loading state while waiting for the Server Action.
-- [x] Displays the generated question or shows a toast error on failure.
-**Verification:**
-- [x] Manual check: Enter a topic, click generate, verify a valid question is returned and displayed.
-**Dependencies:** Task 2, Task 5
-**Files likely touched:** `components/quiz/AIGenerator.tsx`, `app/submit/page.tsx`
-**Estimated scope:** M
-
-## Checkpoint: Core Features
-- [x] End-to-end AI question generation works
-- [x] Sharing intent URLs work correctly
-
-## Task 7: Analytics integration
-**Description:** Integrate `@vercel/analytics` to track page views and basic usage.
-**Acceptance criteria:**
-- [x] `@vercel/analytics` is installed. (Actually Question Analytics implemented)
-- [x] `<Analytics />` component is added to `app/layout.tsx`. (Question Analytics Panel)
-**Verification:**
-- [x] Build succeeds: `npm run build`
-**Dependencies:** None
-**Files likely touched:** `package.json`, `app/layout.tsx`
+- [ ] Tests pass: `npm run test`
+- [ ] Manual check: Trigger a mock cache update and observe the affected row animating smoothly.
+**Dependencies:** Task 1, Task 2
+**Files likely touched:** `components/leaderboard/GlobalLeaderboard.tsx`, `components/leaderboard/GroupLeaderboard.tsx`
 **Estimated scope:** S
 
 ## Checkpoint: Complete
-- [x] All acceptance criteria met
-- [x] Ready for review
+- [ ] Leaderboard rows animate gracefully when data updates.
+- [ ] All tests pass locally and the build succeeds.
