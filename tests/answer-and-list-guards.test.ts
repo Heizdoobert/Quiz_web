@@ -20,6 +20,7 @@ import { validateQuestionInput } from '../lib/utils/validation';
 import { REQUIRED_CONFIRMATIONS } from '../lib/constants/list-constants';
 
 let mockIsContestFunded = true;
+let mockVoucherCheckFails = false;
 
 vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
@@ -31,7 +32,10 @@ vi.mock('../lib/utils/chain', () => ({
     ('0x' + (listId + (creator || '')).replace(/[^a-f0-9]/gi, '').padEnd(64, '0').slice(0, 64)),
   newNonce: () => BigInt(7),
   getSignerAccount: () => ({ signTypedData: async () => ('0x' + 's'.repeat(130)) }),
-  isContestVoucherUsed: async () => false,
+  isContestVoucherUsed: async () => {
+    if (mockVoucherCheckFails) throw new Error('rpc down');
+    return false;
+  },
   isContestFundedOnChain: async () => mockIsContestFunded,
   getContestOnChain: async () =>
     mockIsContestFunded
@@ -375,6 +379,26 @@ describe('question list guards', () => {
       expect(inserts.reward_claims).toBeUndefined();
     } finally {
       mockIsContestFunded = true;
+    }
+  });
+
+  it('signs no new voucher for an expired pending one when the on-chain nonce check fails', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      question_lists: { row: { owner_wallet: WALLET, status: 'live' } },
+      list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
+      reward_claims: {
+        rows: [{ id: 'c1', nonce: '5', amount: '10000000000000000000', deadline: 1, signature: '0x' + 'a'.repeat(130) }],
+      },
+    });
+    mockVoucherCheckFails = true; // the old voucher may already have been redeemed
+    try {
+      const res = await claimListReward(LIST_ID);
+      expect(res).toEqual({ error: 'Failed to claim contest reward.' });
+      expect(inserts.reward_claims).toBeUndefined();
+      expect(inserts._updates!.reward_claims).toBeUndefined();
+    } finally {
+      mockVoucherCheckFails = false;
     }
   });
 

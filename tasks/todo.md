@@ -143,11 +143,12 @@
 ### Task A1: Fail closed in `isContestVoucherUsed`
 **Description:** S3-01, S4-03. A bare `catch` returns `false`, so an RPC blip lets `claimListReward` expire an already-redeemed voucher and sign a second one.
 **Acceptance criteria:**
-- [ ] `isContestVoucherUsed` throws on RPC error (keep the zero-address escape hatch)
-- [ ] `claimListReward` returns a retryable error instead of expiring or re-signing when the check throws
+- [x] `isContestVoucherUsed` throws on RPC error (keep the zero-address escape hatch)
+- [x] `claimListReward` returns a retryable error instead of expiring or re-signing when the check throws (it already sits in a `try/catch`, so it answers "Failed to claim contest reward."; `confirmRewardClaim` also catches and returns `{ success: false }`)
 **Verification:**
-- [ ] New test in `tests/answer-and-list-guards.test.ts`: voucher check throws, deadline passed, no new insert and no new signature
-- [ ] `npm run check:task`
+- [x] `tests/chain-utils.test.ts`: the old test asserted that a failed read counts as "unused"; it now asserts the call rejects (failed before the fix: `promise resolved "false" instead of rejecting`)
+- [x] `tests/answer-and-list-guards.test.ts`: voucher check throws, deadline passed, no new insert and no update. This one passes with or without the fix because `claimListReward` never caught that call; it pins the contract for callers.
+- [x] type-check, lint, architecture pass; `test:coverage`: 347 tests, lines 66.34% (ratchet 65.5%)
 **Dependencies:** None
 **Files:** `lib/utils/chain.ts`, `lib/actions/question-list-actions.ts`, `tests/answer-and-list-guards.test.ts`
 **Scope:** S
