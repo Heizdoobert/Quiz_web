@@ -6,9 +6,10 @@ import { Wallet, Mail, User, ArrowLeft } from 'lucide-react';
 import { UsernameTab } from './tabs/UsernameTab';
 import { WalletTab } from './tabs/WalletTab';
 import { EmailTab } from './tabs/EmailTab';
+import type { AuthMode } from './auth-mode';
 
+export type { AuthMode };
 type Tab = 'username' | 'wallet' | 'email';
-export type AuthMode = 'login' | 'register';
 
 export interface AuthMethodTabsProps {
   mode: AuthMode;

@@ -4,7 +4,7 @@ import {
   signInWithUsername,
   signUpWithUsername,
 } from "@/lib/actions/auth-actions";
-import type { AuthMode } from "../AuthMethodTabs";
+import type { AuthMode } from "../auth-mode";
 
 export interface UsernameTabProps {
   mode: AuthMode;
