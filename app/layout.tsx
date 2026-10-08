@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
+import { PostHogProvider } from '@/components/providers/PostHogProvider';
 import AdZone from '@/components/ads/AdZone';
 import { FAQ_DATA } from '@/lib/constants/seo-data';
 import { getSiteUrl } from '@/lib/utils/site-url';
@@ -170,15 +171,17 @@ export default function RootLayout({
       <body
         className={`${jetbrainsMono.variable} font-sans bg-deep-space text-slate-100 min-h-screen antialiased selection:bg-neo-mint selection:text-deep-space`}
       >
-        <Providers>
-          <div className="flex justify-between max-w-480 mx-auto w-full relative">
-            <AdZone variant="skyscraper" slot="global-left" className="hidden 2xl:flex sticky top-20 ml-4 my-8" />
-            <div className="flex-1 w-full flex flex-col min-h-screen max-w-full overflow-x-hidden">
-              {children}
+        <PostHogProvider>
+          <Providers>
+            <div className="flex justify-between max-w-480 mx-auto w-full relative">
+              <AdZone variant="skyscraper" slot="global-left" className="hidden 2xl:flex sticky top-20 ml-4 my-8" />
+              <div className="flex-1 w-full flex flex-col min-h-screen max-w-full overflow-x-hidden">
+                {children}
+              </div>
+              <AdZone variant="skyscraper" slot="global-right" className="hidden 2xl:flex sticky top-20 mr-4 my-8" />
             </div>
-            <AdZone variant="skyscraper" slot="global-right" className="hidden 2xl:flex sticky top-20 mr-4 my-8" />
-          </div>
-        </Providers>
+          </Providers>
+        </PostHogProvider>
       </body>
     </html>
   );

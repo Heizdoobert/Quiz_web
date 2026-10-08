@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import * as Sentry from '@sentry/nextjs';
 import { logger } from '@/lib/logger';
 
 interface ErrorProps {
@@ -13,6 +14,7 @@ export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to server or monitoring
     logger.error('Next.js Page Error caught by boundary:', error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
