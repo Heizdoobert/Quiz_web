@@ -58,9 +58,11 @@ As of September 2026, `npm audit` reports 23 moderate and 1 high vulnerability i
 - **Enforcement**: All public write access (`INSERT`, `UPDATE`, `DELETE`) is completely disabled at the database level for the anonymous client. All writes are mediated through `supabaseAdmin` with the server-side secret key (`SUPABASE_SECRET_KEY`).
 - **Impact**: Prevents direct database manipulation and unauthenticated result injection.
 
-### C. Contest Payout Escrow & Anti-Drain — ACTIVE MITIGATION
+### C. Contest Payout Escrow & Anti-Drain — RESOLVED (residual risks noted)
 - **Constraint**: List creators define contest reward pools and possess advance knowledge of all correct answers.
-- **Enforcement**: Public arbitrary voucher signing (`buildTokenClaimVoucher`) has been eliminated. Contest reward claims (`claimListReward`) return `{ error: 'Contest payouts are paused.' }` until an on-chain staking/escrow contract is deployed to custody creator funds before contests go live.
+- **Enforcement**: Public arbitrary voucher signing (`buildTokenClaimVoucher`) has been eliminated. `startContest` only sets a list `live` after confirming the creator's pool is locked in `ContestEscrow` on-chain. `claimListReward` signs EIP-712 vouchers against that pool, and `ContestEscrow.claimReward` pays only from deposited funds, bounded by the contest's `remainingPool`, with single-use nonces. One open voucher per entry is enforced by a unique index.
+- **Impact**: A creator farming their own contest only recycles their own deposit; no tokens are minted. Details and evidence: [ADR-006](docs/decisions/006-contest-escrow-payouts.md).
+- **Residual risks**: the voucher signer key is a single trust root (rotatable via `setAuthorizedSigner`); Sybil accounts can dilute honest winners within `max_participants`; `claimListReward` signs even when the on-chain read returns nothing (the contract still rejects it); `ContestEscrow.sol` is not externally audited.
 
 ---
 
@@ -70,3 +72,4 @@ For detailed design decisions and trade-offs, consult:
 - [ADR-002: Dual-Key Supabase Architecture & RLS Lockdown](docs/decisions/002-dual-key-supabase-rls-lockdown.md)
 - [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](docs/decisions/003-question-lists-and-contest-voucher-safeguards.md)
 - [ADR-004: Next.js Server Action Bundling & Module Separation](docs/decisions/004-server-action-module-separation.md)
+- [ADR-006: Contest Payouts Through ContestEscrow Vouchers](docs/decisions/006-contest-escrow-payouts.md)

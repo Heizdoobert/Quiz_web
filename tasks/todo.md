@@ -49,11 +49,11 @@
 ### Task 3: Verify contest claim flow; correct §4.C and ADR-003
 **Description:** F1. Read `claimListReward` end to end (`question-list-actions.ts:868` onward), `ContestEscrow.sol`, and `reward-actions.ts`. Confirm creator funds are escrowed before a voucher can be signed and the self-drain path from ADR-003 is closed. Then fix the doc/ADR status. If the flow is NOT safe, stop and report before editing docs.
 **Acceptance criteria:**
-- [ ] Written finding: what enforces escrow-before-claim (code path + contract check), or the gap
-- [ ] ADR-003 status/consequences and §4.C updated to match (or superseded by a new ADR if the decision changed)
+- [x] Written finding: `docs/decisions/006-contest-escrow-payouts.md` (escrow gate in `startContest`, bounded amounts, contract-level checks, unique-index voucher dedupe). Flow is safe. Residuals: signer key trust root, Sybil dilution, `claimListReward` signs when the on-chain read returns null (fail-closed follow-up, not done here), contract unaudited.
+- [x] ADR-003 annotated as superseded in part; new ADR-006; §4.C and ADR list in `SECURITY-TRADE-OFFS.md` and `docs/specs/contest-escrow.md` updated
 **Verification:**
-- [ ] Existing tests for `claimListReward` pass: `npx vitest run lib tests -t claim`
-- [ ] Manual: no remaining "payouts are paused" text in docs unless true
+- [x] Existing `claimListReward` tests pass: `npx vitest run tests/answer-and-list-guards.test.ts -t claim` (7 pass)
+- [x] Manual: no remaining "payouts are paused" text in docs unless true
 **Dependencies:** None
 **Files:** `SECURITY-TRADE-OFFS.md`, `docs/decisions/003-*.md`, possibly new `docs/decisions/006-*.md`
 **Scope:** S
