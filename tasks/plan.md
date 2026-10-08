@@ -25,7 +25,7 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 ### Phase 1: Make the record true (low risk, docs + deps)
 - [x] Task 1: Bump `next` and `eslint-config-next` to 16.4.0
 - [x] Task 1b: Repair 7 stale tests so `test:coverage` is green
-- [ ] Task 2: Verify `ws` fix path and re-triage W1
+- [x] Task 2: Verify `ws` fix path and re-triage W1
 - [ ] Task 3: Verify contest claim flow; correct §4.C and ADR-003
 
 ### Checkpoint: Phase 1

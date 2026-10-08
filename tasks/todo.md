@@ -35,12 +35,13 @@
 ### Task 2: Verify `ws` fix path and re-triage W1
 **Description:** F2/F6. Check whether patched `ws` (>8.20.1) exists and whether an `overrides` entry is compatible with `@reown/appkit*` / `@walletconnect/utils`. If yes, add override and delete W1; if no, refresh W1 reason text and expiry rationale. Never loosen `CONSTRAINTS.md` to pass.
 **Acceptance criteria:**
-- [ ] Decision recorded: override applied (W1 removed) or W1 kept with updated reason
-- [ ] `npm run check:deps` passes
-- [ ] If W1 removed or still covering: CI audit step no longer swallows failures (`|| echo ::warning::` removed from workflow)
+- [x] Decision: override applied (`overrides.viem.ws = 8.21.0`); W1 removed. Root cause was `viem@2.23.2` (under `@walletconnect/utils`) pinning `ws` to exactly 8.18.0. Also cleared two unrelated highs the audit now shows: `sharp` 0.35.5, `source-map-js` 1.2.2 (lockfile bump, in range).
+- [x] `npm run check:deps` passes (0 high, 21 moderate)
+- [x] CI audit step no longer swallows failures (`|| echo ::warning::` removed from `ci.yml`)
 **Verification:**
-- [ ] `npm audit --omit=dev` output matches the decision
-- [ ] `npm run build` and wallet connect smoke on preview if override applied
+- [x] `npm audit --omit=dev` output matches the decision
+- [x] `npm run build` and `npm run test:coverage` (302 pass) on the new tree
+- [ ] Wallet connect smoke on preview (needs deploy; do before merging toward `main`)
 **Dependencies:** Task 1
 **Files:** `package.json`, `package-lock.json`, `CONSTRAINTS.md`, `.github/workflows/ci.yml`
 **Scope:** S

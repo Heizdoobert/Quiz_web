@@ -1,6 +1,6 @@
 # Constraints
 
-Last reviewed: 2026-09-28 by @alexheiz
+Last reviewed: 2026-10-08 by @alexheiz
 
 ## Floor (always enforced, no setup required)
 
@@ -50,7 +50,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
-| W1 | Deps high | `ws <=8.20.1` via `@walletconnect/utils` / `@reown/appkit` (transitive) | Fix requires `wagmi@3` breaking change; tracked separately | @alexheiz | 2026-12-27 |
+| none | | | | | |
 
 
 ## Lifecycle mapping
