@@ -1,4 +1,4 @@
-name: CI
+name: Security Audit
 
 on:
   push:
@@ -6,9 +6,11 @@ on:
       - main
       - preview
   pull_request:
+  schedule:
+    - cron: '0 0 * * *'
 
 jobs:
-  build-and-test:
+  audit:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,16 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run lint
-        run: npm run lint
-
-      - name: Build Next.js
-        run: npm run build
-
-      - name: Run tests
-        run: npm run test
+      - name: Run dependency audit
+        run: npm audit --audit-level=high
