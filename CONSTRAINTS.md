@@ -1,6 +1,6 @@
 # Constraints
 
-Last reviewed: 2026-09-28 by @alexheiz
+Last reviewed: 2026-10-08 by @alexheiz
 
 ## Floor (always enforced, no setup required)
 
@@ -21,7 +21,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 | Architecture | Zero boundary or circular dependency violations | `npm run check:architecture` (`npx depcruise`) | task end, `check:task` |
 | UI Components | Max 200 lines per component file | `npm run lint` (ESLint `max-lines`) | every edit, `check:fast` |
 | Coverage (changed lines) | Changed lines ≥ 80% covered | `npm run test:coverage` + git diff | task end, CI |
-| Coverage (project ratchet) | Lines ≥ 62.5% (measured 62.56% on 2026-10-01) — must not fall | `npm run test:coverage` | CI, `check:task` |
+| Coverage (project ratchet) | Lines ≥ 65.5% (measured 65.50% on 2026-10-08) — must not fall | `npm run test:coverage` | CI, `check:task` |
 | Security: code | Zero high findings | `npm run check:security` (`uvx semgrep scan`) | CI, on-demand |
 | Security: deps | No high+ findings outside Exceptions table | `npm run check:deps` (`npm audit --omit=dev`) | CI, `check:full` |
 | Accessibility | Zero critical or serious axe violations | `npm run check:a11y` (`axe $PREVIEW_URL --tags wcag2a,wcag2aa,wcag21aa`) | preview deploy (warns locally) |
@@ -31,7 +31,7 @@ Last reviewed: 2026-09-28 by @alexheiz
 ### Why these numbers
 
 - **Coverage 80% on changed lines**: High enough to require comprehensive tests for new logic, low enough to accommodate boilerplate and pure types.
-- **Coverage project ratchet (62.5%)**: Measured value today (62.56%). Never relaxed downward; updated upward whenever coverage improves.
+- **Coverage project ratchet (65.5%)**: Measured value today (1614 of 2464 lines, 65.50%). Never relaxed downward; updated upward whenever coverage improves. Raised from 62.5% on 2026-10-08 after the auth rate-limit, CSP report and claim-flow tests landed.
 - **Secrets scanning**: Gitleaks pre-commit diff scan guarantees no credentials or private keys leak into commits, running in under 200ms.
 - **Architecture boundaries**: Enforced by dependency-cruiser; prevents `lib/` (business logic) from coupling to `app/` or `components/`, and prevents circular module dependencies.
 - **Security scanning**: Semgrep scans source code for OWASP Top Ten and framework vulnerabilities without slowing down the edit loop.
@@ -43,14 +43,14 @@ Last reviewed: 2026-09-28 by @alexheiz
 
 | Metric | Today | Direction |
 |--------|-------|-----------|
-| Statements / Branches / Functions | 56.9% / 49.8% / 72.1% | must not fall |
+| Statements / Branches / Functions | 63.25% / 58.21% / 66.49% (2026-10-08; the 2026-10-01 figures were 56.9% / 49.8% / 72.1%, and functions is lower now for a cause not yet investigated) | must not fall |
 | First-load JS (gzip, per route) | 127 kB (`/`, `/contest`, `/my-lists`, `/profile`, `/review`) | must not grow past 150 kB |
 
 ## Exceptions
 
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
-| W1 | Deps high | `ws <=8.20.1` via `@walletconnect/utils` / `@reown/appkit` (transitive) | Fix requires `wagmi@3` breaking change; tracked separately | @alexheiz | 2026-12-27 |
+| none | | | | | |
 
 
 ## Lifecycle mapping

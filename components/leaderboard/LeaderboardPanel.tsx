@@ -1,21 +1,19 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import GlobalLeaderboard from './GlobalLeaderboard';
 import GroupLeaderboard from './GroupLeaderboard';
 import { Shield, Trophy, Users } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/shared/use-intersection';
-import { supabase } from '@/lib/supabase/supabase';
-import debounce from 'lodash.debounce';
 
 interface LeaderboardPanelProps {
   globalEntries: LeaderboardEntry[];
   groupEntries: LeaderboardEntry[];
   loading: boolean;
   onOpenGroupModal: () => void;
-  refreshLeaderboard?: () => void;
+  onVisibilityChange?: (visible: boolean) => void;
   className?: string;
 }
 
@@ -24,7 +22,7 @@ export default function LeaderboardPanel({
   groupEntries,
   loading,
   onOpenGroupModal,
-  refreshLeaderboard,
+  onVisibilityChange,
   className = '',
 }: LeaderboardPanelProps) {
   const [activeTab, setActiveTab] = useState<'global' | 'group'>('global');
@@ -33,30 +31,11 @@ export default function LeaderboardPanel({
   const panelRef = useRef<HTMLElement>(null);
   const isVisible = useIntersectionObserver(panelRef, { threshold: 0.1 });
 
-  const debouncedRefresh = useMemo(() => {
-    if (!refreshLeaderboard) return null;
-    return debounce(refreshLeaderboard, 5000, { leading: true, trailing: true });
-  }, [refreshLeaderboard]);
-
   useEffect(() => {
-    if (!isVisible || !debouncedRefresh) return;
-
-    const channel = supabase
-      .channel('public:quiz_results')
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'quiz_results' },
-        () => {
-          debouncedRefresh();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-      debouncedRefresh.cancel();
-    };
-  }, [isVisible, debouncedRefresh]);
+    if (onVisibilityChange) {
+      onVisibilityChange(isVisible);
+    }
+  }, [isVisible, onVisibilityChange]);
 
   return (
     <section

@@ -178,4 +178,4 @@ jobs:
       - name: Audit Production Dependencies
         run: |
           echo "Scanning dependencies against production runtime risk..."
-          npm run check:deps || echo "::warning::Transitive dependency advisory detected (documented in CONSTRAINTS.md Exception W1)."
+          npm run check:deps
