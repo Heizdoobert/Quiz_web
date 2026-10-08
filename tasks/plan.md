@@ -1,43 +1,48 @@
-# Implementation Plan: Realtime Leaderboard
+# Implementation Plan: Phase B Feature Enhancements
 
 ## Overview
-Update the leaderboard to update in real-time by subscribing to `quiz_results` inserts via Supabase Realtime. The subscription will be active only when the leaderboard panel is visible, will debounce API refetches, and will highlight rows that change position or score.
+This plan covers the implementation of Phase B from `project-improvements.md`, which includes Offline PWA caching, Toast Notifications, Social Sharing (X & Farcaster), an AI Question Generator, and Analytics integration. We also include a quick cleanup step for leftover Phase A dependencies.
 
 ## Architecture Decisions
-- **Debouncing:** We will use `lodash.debounce` to debounce the refetch API calls, preventing database spam during high activity.
-- **Visibility:** Use `IntersectionObserver` within `LeaderboardPanel` to only subscribe when the panel is actually visible.
-- **Data Flow:** Pass `loadLeaderboards` down from `useQuizLogic` -> `QuizLayout` -> `LeaderboardPanel` so it can trigger the refetch.
-- **Animations:** Use Framer Motion in the row components (`GlobalLeaderboard` / `GroupLeaderboard`) to apply a highlight effect when a row's score changes.
+- **Toast Library**: Use `sonner` for lightweight, modern toast notifications.
+- **PWA**: Use `@ducanh2912/next-pwa` since it is already in `dependencies`.
+- **AI Generator**: Use `@google/genai` (already in `dependencies`) within a Next.js Server Action to keep keys secure.
+- **Analytics**: Use `@vercel/analytics` for zero-configuration Next.js analytics.
+- **Social Sharing**: Simple intent URLs for X (`twitter.com/intent/tweet`) and Farcaster (`warpcast.com/~/compose`).
 
 ## Task List
 
-### Phase 1: Foundation
-- [ ] Task 1: Install dependencies (`lodash.debounce` and `@types/lodash.debounce`).
-- [ ] Task 2: Create `useIntersectionObserver` hook for visibility tracking.
-- [ ] Task 3: Expose and pass `loadLeaderboards` down to `LeaderboardPanel`.
+### Phase 1: Foundation & Cleanup
+- [~] Task 1: Clean up remaining Phase A dependencies (Skipped: @x402 is required by @coinbase/cdp-sdk)
+- [x] Task 2: Implement Toast Notifications
+- [x] Task 3: Implement Offline PWA caching
 
 ### Checkpoint: Foundation
-- [ ] Dependencies installed.
-- [ ] Props passed down correctly without breaking the current UI.
+- [x] Clean build and tests pass
+- [x] Toasts can be triggered
 
-### Phase 2: Core Realtime Logic
-- [ ] Task 4: Implement `useRealtimeLeaderboard` hook (or logic inside `LeaderboardPanel`) that subscribes to `quiz_results` `INSERT` events when visible and debounces the `loadLeaderboards` callback.
+### Phase 2: Core Features
+- [x] Task 4: Social Sharing component (X & Farcaster)
+- [x] Task 5: AI Question Generator API (Server Action)
+- [x] Task 6: AI Question Generator UI
 
 ### Checkpoint: Core Features
-- [ ] Leaderboard automatically refetches when a new quiz result is inserted (testable via manual DB insert or another browser).
+- [x] End-to-end AI question generation works
+- [x] Sharing intent URLs work correctly
 
 ### Phase 3: Polish
-- [ ] Task 5: Add Framer Motion highlight animations to leaderboard rows when their score updates.
+- [x] Task 7: Analytics integration
 
 ### Checkpoint: Complete
-- [ ] All acceptance criteria met.
-- [ ] Ready for review.
+- [x] All acceptance criteria met
+- [x] Ready for review
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| Subscription memory leak | High | Ensure the realtime channel is removed in the `useEffect` cleanup. |
-| Excessive API calls | High | Implement strict debouncing (max 1 per 5 seconds). |
+| AI Generator rate limits | Med | Implement simple rate limiting or fail gracefully with a toast |
+| PWA Service Worker caching old assets | Low | Ensure `next-pwa` is configured with `reloadOnOnline` and proper caching strategies |
+| Vercel Analytics breaking local dev | Low | Analytics only tracks in production by default |
 
 ## Open Questions
-- None.
+- Is there a specific Analytics provider preferred over Vercel Analytics?
