@@ -57,8 +57,8 @@ describe('generateQuestion', () => {
 
   it('returns SERVER_ERROR if database rpc fails', async () => {
     // Arrange
-    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as any);
-    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: null, error: new Error('DB Error') } as any);
+    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as never);
+    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: null, error: new Error('DB Error') } as never);
 
     // Act
     const result = await generateQuestion('Bitcoin');
@@ -72,8 +72,8 @@ describe('generateQuestion', () => {
 
   it('enforces a rate limit of 3 generations per day', async () => {
     // Arrange
-    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as any);
-    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 4, error: null } as any);
+    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as never);
+    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 4, error: null } as never);
 
     // Act
     const result = await generateQuestion('Bitcoin');
@@ -87,8 +87,8 @@ describe('generateQuestion', () => {
 
   it('generates a question successfully when under rate limit', async () => {
     // Arrange
-    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as any);
-    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 1, error: null } as any);
+    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as never);
+    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 1, error: null } as never);
     
     const fakeAiResponse = {
       prompt: 'Who created Bitcoin?',
@@ -117,8 +117,8 @@ describe('generateQuestion', () => {
 
   it('returns SERVER_ERROR if the AI throws an error', async () => {
     // Arrange
-    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as any);
-    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 2, error: null } as any);
+    vi.mocked(getSessionAccount).mockResolvedValue({ id: 'user-1' } as never);
+    vi.mocked(supabaseAdmin.rpc).mockResolvedValue({ data: 2, error: null } as never);
     mockGenerateContent.mockRejectedValue(new Error('AI is down'));
 
     // Act
