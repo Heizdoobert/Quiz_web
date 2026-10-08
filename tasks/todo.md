@@ -69,13 +69,14 @@
 ### Task 4: Rate-limit auth actions
 **Description:** F3. Add per-identifier attempt limits to `requestEmailCode`, `verifyEmailCode`, `signInWithUsername`, `signUpWithUsername`, and `getAuthNonce`/`signInWithWallet` using the existing windowed-count pattern (see `community-actions.ts:126`). Return a `RATE_LIMITED` result, no raw DB errors.
 **Acceptance criteria:**
-- [ ] Email code request: max N per email per hour (default 5); verify: max 10 attempts per code window
-- [ ] Username sign-in: max 10 failures per username per 15 min
-- [ ] Limits stored via existing admin client; no new dependency
-- [ ] Failures logged server-side, generic message to client
+- [x] Email code request: 5 per email per hour plus 20 per IP per hour; verify: 10 per email per hour
+- [x] Username sign-in: 10 attempts (not only failures, one counter) per username per 15 min; sign-up: 5 per username and 10 per IP per hour; wallet sign-in and link: 30 per IP per 10 min (nonce issuing is cookie-only and costs nothing, so it is not limited)
+- [x] Stored via the admin client in `auth_attempts` with an atomic `rate_limit_hit` SQL function (`supabase/migrations/17-auth-rate-limit.sql`); no new dependency
+- [x] Limit hits logged server-side (`auth_rate_limited`); generic message to client
 **Verification:**
-- [ ] New unit tests: under limit passes, over limit returns `RATE_LIMITED`, window expiry resets
-- [ ] `npm run check:task` (changed lines ≥ 80% covered)
+- [x] `tests/auth-rate-limit.test.ts` (13 tests). Window expiry and purge are SQL-side: verified against postgres:16 in Docker (allow, block at limit, blocked attempt not recorded, reset after window, day-old purge, `anon` denied, re-run idempotent)
+- [x] type-check, lint, `test:coverage` pass (318 tests, 63.01%); `rate-limit.ts` 94%, `auth-actions.ts` 82%
+- [ ] **Deploy step:** run `17-auth-rate-limit.sql` in the Supabase SQL editor before or with the deploy. Until then the limiter fails open (logs `rate_limit_check_failed`).
 **Dependencies:** None
 **Files:** `lib/actions/auth-actions.ts`, a shared helper in `lib/` (reuse existing if one exists), `supabase/` migration only if a table/index is required, `tests/`
 **Scope:** M

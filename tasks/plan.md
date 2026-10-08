@@ -32,7 +32,7 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 - [ ] `npm run check:task` and `npm run check:deps` pass; first-load JS ≤ 150 kB
 
 ### Phase 2: Close real gaps
-- [ ] Task 4: Rate-limit auth actions
+- [x] Task 4: Rate-limit auth actions
 - [ ] Task 5: CSP report-only
 - [ ] Task 6: Enforce CSP
 
