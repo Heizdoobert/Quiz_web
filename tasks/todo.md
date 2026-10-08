@@ -1,70 +1,97 @@
-# Tasks: Realtime Leaderboard
+# Tasks: Phase B Feature Enhancements
 
 > Plan: [plan.md](./plan.md)
 
 ---
 
-## Task 1: Install Dependencies
-**Description:** Install `lodash.debounce` for debouncing refetches.
+## Task 1: Clean up remaining Phase A dependencies
+**Description:** Remove unused `@x402/*` packages from `package.json` to complete Phase A pruning.
 **Acceptance criteria:**
-- [x] `lodash.debounce` is in dependencies.
-- [x] `@types/lodash.debounce` is in devDependencies.
+- [x] `@x402/core`, `@x402/evm`, `@x402/svm` are removed from `package.json`.
 **Verification:**
-- [x] Build succeeds: `npm run build`
+- [ ] Build succeeds: `npm run build`
 **Dependencies:** None
 **Files likely touched:** `package.json`
 **Estimated scope:** XS
 
-## Task 2: Visibility Tracking
-**Description:** Create a hook to track if an element is visible on screen.
+## Task 2: Implement Toast Notifications
+**Description:** Install `sonner` and add the `Toaster` provider to the global layout.
 **Acceptance criteria:**
-- [x] `useIntersectionObserver` hook created.
+- [ ] `sonner` is added to dependencies.
+- [ ] `<Toaster />` is rendered in `app/layout.tsx` (or a `Providers` component).
 **Verification:**
-- [x] Build succeeds: `npm run build`
+- [ ] Manual check: Add a temporary toast to a component and verify it displays.
 **Dependencies:** None
-**Files likely touched:** `hooks/shared/use-intersection.ts`
+**Files likely touched:** `package.json`, `app/layout.tsx`, `components/Providers.tsx`
 **Estimated scope:** S
 
-## Task 3: Pass down refetch function
-**Description:** Pass `loadLeaderboards` from `useQuizLogic` to `LeaderboardPanel`.
+## Task 3: Implement Offline PWA caching
+**Description:** Configure `@ducanh2912/next-pwa` in Next.js config to enable offline support.
 **Acceptance criteria:**
-- [x] `LeaderboardPanel` receives `refreshLeaderboard` prop.
+- [ ] `next.config.js` uses `withPWA` wrapper.
+- [ ] PWA is configured to generate a service worker in the `public` directory.
 **Verification:**
-- [x] Tests pass: `npm run test`
+- [ ] Build succeeds: `npm run build`
+- [ ] Manual check: Run `npm start` and verify service worker is registered in browser devtools.
 **Dependencies:** None
-**Files likely touched:** `components/quiz/QuizLayout.tsx`, `components/leaderboard/LeaderboardPanel.tsx`
+**Files likely touched:** `next.config.js`, `next.config.mjs`
 **Estimated scope:** S
 
-## Checkpoint: After Tasks 1-3
-- [x] All tests pass
-- [x] Application builds without errors
+## Checkpoint: Foundation
+- [ ] Clean build and tests pass
+- [ ] Application loads without errors
 
-## Task 4: Realtime Subscription
-**Description:** Implement Supabase Realtime subscription in `LeaderboardPanel` when visible.
+## Task 4: Social Sharing component
+**Description:** Create a component allowing users to share their quiz results on X (Twitter) and Farcaster.
 **Acceptance criteria:**
-- [x] Subscribes to `public:quiz_results` INSERT events.
-- [x] Unsubscribes when hidden or unmounted.
-- [x] Calls `refreshLeaderboard` debounced by 5 seconds.
+- [ ] Component renders X and Farcaster share buttons.
+- [ ] Buttons open intent URLs with pre-filled text (e.g., "I scored X points on Quick Quiz!").
+- [ ] Copy link button exists and uses Toast on success.
 **Verification:**
-- [x] Manual check: Insert row in `quiz_results`, verify UI updates after 5s.
-**Dependencies:** Task 1, Task 2, Task 3
-**Files likely touched:** `components/leaderboard/LeaderboardPanel.tsx`
+- [ ] Manual check: Click share buttons and ensure they open appropriate popups/tabs with correct text.
+**Dependencies:** Task 2
+**Files likely touched:** `components/quiz/SocialShare.tsx`, `app/results/page.tsx`
 **Estimated scope:** M
 
-## Checkpoint: After Task 4
-- [x] Realtime functionality works end-to-end.
-
-## Task 5: Row Highlight Animations
-**Description:** Highlight rows in the leaderboard when their data changes.
+## Task 5: AI Question Generator API
+**Description:** Create a Next.js Server Action to generate a crypto trivia question using `@google/genai`.
 **Acceptance criteria:**
-- [x] Rows briefly highlight (e.g., flash color) when score increases.
-- [x] Framer Motion is used for smooth transitions.
+- [ ] Server action `generateAIQuestion(topic)` exists.
+- [ ] Uses Gemini to generate 1 question with 4 options and the correct answer.
+- [ ] Includes a call to `moderateContent` (existing in Phase A) to ensure safety.
 **Verification:**
-- [x] Manual check: Watch leaderboard update, row should flash.
-**Dependencies:** Task 4
-**Files likely touched:** `components/leaderboard/GlobalLeaderboard.tsx`, `components/leaderboard/GroupLeaderboard.tsx`
+- [ ] Tests pass: `npm run test` (if applicable) or manual API check.
+**Dependencies:** None
+**Files likely touched:** `lib/actions/ai-actions.ts`
 **Estimated scope:** M
+
+## Task 6: AI Question Generator UI
+**Description:** Create a UI component where users can enter a topic and generate a question.
+**Acceptance criteria:**
+- [ ] Input field for topic/difficulty.
+- [ ] Loading state while waiting for the Server Action.
+- [ ] Displays the generated question or shows a toast error on failure.
+**Verification:**
+- [ ] Manual check: Enter a topic, click generate, verify a valid question is returned and displayed.
+**Dependencies:** Task 2, Task 5
+**Files likely touched:** `components/quiz/AIGenerator.tsx`, `app/submit/page.tsx`
+**Estimated scope:** M
+
+## Checkpoint: Core Features
+- [ ] End-to-end AI question generation works
+- [ ] Sharing intent URLs work correctly
+
+## Task 7: Analytics integration
+**Description:** Integrate `@vercel/analytics` to track page views and basic usage.
+**Acceptance criteria:**
+- [ ] `@vercel/analytics` is installed.
+- [ ] `<Analytics />` component is added to `app/layout.tsx`.
+**Verification:**
+- [ ] Build succeeds: `npm run build`
+**Dependencies:** None
+**Files likely touched:** `package.json`, `app/layout.tsx`
+**Estimated scope:** S
 
 ## Checkpoint: Complete
-- [x] All acceptance criteria met
-- [x] Review with human before proceeding
+- [ ] All acceptance criteria met
+- [ ] Ready for review
