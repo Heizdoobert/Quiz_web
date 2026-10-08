@@ -76,9 +76,9 @@ As of 2026-10-08 the command reports **21 moderate, 0 high, 0 critical**. `CONST
 
 ### C. Contest Payout Escrow & Anti-Drain — RESOLVED (residual risks noted)
 - **Constraint**: list creators define contest reward pools and know all correct answers.
-- **Enforcement**: public arbitrary voucher signing (`buildTokenClaimVoucher`) no longer exists in `lib/` or `app/`. `startContest` sets a list `live` only after confirming the creator's pool is locked in `ContestEscrow` on-chain. `claimListReward` signs EIP-712 vouchers against that pool, and `ContestEscrow.claimReward` pays only from deposited funds, bounded by the contest's `remainingPool`, with single-use nonces. One open voucher per entry is enforced by the `reward_claims_one_open_contest_per_account` unique index.
+- **Enforcement**: public arbitrary voucher signing (`buildTokenClaimVoucher`) no longer exists in `lib/` or `app/`. `startContest` sets a list `live` only after confirming the creator's pool is locked in `ContestEscrow` on-chain. `claimListReward` re-reads the pool on-chain (and refuses if it cannot) before signing EIP-712 vouchers against it, and `ContestEscrow.claimReward` pays only from deposited funds, bounded by the contest's `remainingPool`, with single-use nonces. One open voucher per entry is enforced by the `reward_claims_one_open_contest_per_account` unique index.
 - **Impact**: a creator farming their own contest only recycles their own deposit; nothing is minted. Evidence: [ADR-006](docs/decisions/006-contest-escrow-payouts.md).
-- **Residual risks**: the voucher signer key is a single trust root (rotatable with `setAuthorizedSigner`); Sybil accounts can dilute honest winners within `max_participants`; `claimListReward` still signs when the on-chain read returns nothing (the contract rejects it); `ContestEscrow.sol` is not externally audited.
+- **Residual risks**: the voucher signer key is a single trust root (rotatable with `setAuthorizedSigner`); Sybil accounts can dilute honest winners within `max_participants`; `ContestEscrow.sol` is not externally audited.
 
 ---
 
