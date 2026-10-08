@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAccount } from 'wagmi';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AnswerSubmissionResult,
   ClientQuestion,
@@ -89,10 +90,25 @@ export function useQuizLogic({
   }, []);
 
   // Leaderboard data
-  const [globalLeaderboard, setGlobalLeaderboard] = useState<LeaderboardEntry[]>(initialLeaderboard);
-  const [groupLeaderboard, setGroupLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [leaderboardLoading, setLeaderboardLoading] = useState(false);
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
+  const [isLeaderboardVisible, setLeaderboardVisible] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: globalLeaderboard = initialLeaderboard, isPending: isGlobalPending } = useQuery({
+    queryKey: ['leaderboard', 'global'],
+    queryFn: () => getGlobalLeaderboard(50),
+    refetchInterval: isLeaderboardVisible ? 15000 : false,
+    initialData: initialLeaderboard,
+  });
+
+  const { data: groupLeaderboard = [], isPending: isGroupPending } = useQuery({
+    queryKey: ['leaderboard', 'group', selectedGroupId],
+    queryFn: () => getGroupLeaderboard(selectedGroupId!, 50),
+    refetchInterval: isLeaderboardVisible && selectedGroupId ? 15000 : false,
+    enabled: !!selectedGroupId,
+  });
+
+  const leaderboardLoading = isGlobalPending || (!!selectedGroupId && isGroupPending);
 
   // Modals
   const [activeModal, setActiveModal] = useState<ActiveModal>(null);
@@ -146,18 +162,10 @@ export function useQuizLogic({
   }, [account]);
 
   const loadLeaderboards = useCallback(
-    async (overrideGroupId?: string) => {
-      const gid = overrideGroupId ?? selectedGroupId;
-      setLeaderboardLoading(true);
-      const global = await getGlobalLeaderboard(50);
-      setGlobalLeaderboard(global);
-      if (gid) {
-        const group = await getGroupLeaderboard(gid, 50);
-        setGroupLeaderboard(group);
-      }
-      setLeaderboardLoading(false);
+    (overrideGroupId?: string) => {
+      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
     },
-    [selectedGroupId]
+    [queryClient]
   );
 
   const loadNextQuestion = useCallback(
@@ -257,7 +265,7 @@ export function useQuizLogic({
     void refreshHistory();
   }, [account, refreshStats, refreshRewards, refreshHistory]);
 
-  // Only fetch initial question and leaderboards if not supplied via SSR
+  // Only fetch initial question if not supplied via SSR
   useEffect(() => {
     let ignore = false;
     async function initData() {
@@ -265,16 +273,12 @@ export function useQuizLogic({
         const q = await fetchRandomQuestion();
         if (!ignore) setCurrentQuestion(q);
       }
-      if (initialLeaderboard.length === 0) {
-        const global = await getGlobalLeaderboard(50);
-        if (!ignore) setGlobalLeaderboard(global);
-      }
     }
     initData();
     return () => {
       ignore = true;
     };
-  }, [initialQuestion, initialLeaderboard.length]);
+  }, [initialQuestion]);
 
   // Timer Countdown effect
   useEffect(() => {
@@ -364,6 +368,7 @@ export function useQuizLogic({
     claimableRewards,
     hasClaimableRewards,
     refreshRewards,
+    setLeaderboardVisible,
     loadLeaderboards,
     loadNextQuestion,
     handleSelectCategory,
