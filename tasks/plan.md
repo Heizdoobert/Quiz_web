@@ -14,28 +14,28 @@ This plan covers the implementation of Phase B from `project-improvements.md`, w
 
 ### Phase 1: Foundation & Cleanup
 - [~] Task 1: Clean up remaining Phase A dependencies (Skipped: @x402 is required by @coinbase/cdp-sdk)
-- [ ] Task 2: Implement Toast Notifications
-- [ ] Task 3: Implement Offline PWA caching
+- [x] Task 2: Implement Toast Notifications
+- [x] Task 3: Implement Offline PWA caching
 
 ### Checkpoint: Foundation
-- [ ] Clean build and tests pass
-- [ ] Toasts can be triggered
+- [x] Clean build and tests pass
+- [x] Toasts can be triggered
 
 ### Phase 2: Core Features
-- [ ] Task 4: Social Sharing component (X & Farcaster)
-- [ ] Task 5: AI Question Generator API (Server Action)
-- [ ] Task 6: AI Question Generator UI
+- [x] Task 4: Social Sharing component (X & Farcaster)
+- [x] Task 5: AI Question Generator API (Server Action)
+- [x] Task 6: AI Question Generator UI
 
 ### Checkpoint: Core Features
-- [ ] End-to-end AI question generation works
-- [ ] Sharing intent URLs work correctly
+- [x] End-to-end AI question generation works
+- [x] Sharing intent URLs work correctly
 
 ### Phase 3: Polish
-- [ ] Task 7: Analytics integration
+- [x] Task 7: Analytics integration
 
 ### Checkpoint: Complete
-- [ ] All acceptance criteria met
-- [ ] Ready for review
+- [x] All acceptance criteria met
+- [x] Ready for review
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
