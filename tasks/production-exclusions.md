@@ -43,6 +43,3 @@ Removing the files with a one-time commit on `main` is not enough: the next `pre
 
 If this becomes routine, turn step 2 into a small script under `scripts/` (already outside the image). It is not written yet because the list may change after you decide the "Decide" rows.
 
-## Related stale text found while checking
-
-`.github/dependabot.yml` still says wagmi v3 is tracked under "CONSTRAINTS.md Exception W1". W1 was removed on 2026-10-08, so the comment points at nothing.
