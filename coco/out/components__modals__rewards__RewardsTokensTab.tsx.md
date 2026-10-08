@@ -39,5 +39,5 @@ export function RewardsTokensTab({
   return (
     <div className="space-y-5">
       <div className="grid grid-cols-3 gap-3">
-        <div className="p-4 bg-[#0A1128]/70 border border-[#2D305A] rounded-xl text-center">
+        <div className="p-4 bg-deep-space/70 border border-cyber-border rounded-xl text-center">
           <p className="text-[10px] uppercase text-slate-400 font-bold tracking-wider">Earned</p>

@@ -30,6 +30,7 @@ Respond ONLY in valid JSON format with this exact structure:
       model: 'gemini-2.5-flash',
       contents: textToAnalyze,
       config: {
+        abortSignal: AbortSignal.timeout(5000),
         responseMimeType: 'application/json',
         temperature: 0.1,
       },

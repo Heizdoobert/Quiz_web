@@ -1,12 +1,17 @@
 # components/community/CommentList.tsx
-lines:168 exports:default
+lines:179 exports:default
 ---
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Trash2, MessageSquare, Send } from 'lucide-react';
-import { CommentView, addComment, deleteComment } from '@/lib/actions/community-actions';
-import { formatRelativeTime } from '@/lib/utils';
+import React, { useState } from "react";
+import { Trash2, MessageSquare, Send } from "lucide-react";
+import {
+  CommentView,
+  addComment,
+  deleteComment,
+} from "@/lib/actions/community-actions";
+import { formatRelativeTime } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 interface CommentListProps {
   questionId: string;
@@ -25,19 +30,14 @@ export default function CommentList({
   onCommentDeleted,
   requireSignIn,
 }: CommentListProps) {
-  const [body, setBody] = useState('');
+  const [body, setBody] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
     const trimmed = body.trim();
     if (!trimmed || trimmed.length > 500 || submitting) return;
 
     setSubmitting(true);
-    setError(null);
-
-    try {
-      const res = await addComment(questionId, trimmed, 'comment');
-      if (res.ok) {

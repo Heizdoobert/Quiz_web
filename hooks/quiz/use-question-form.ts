@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createQuestion } from '@/lib/actions/question-actions';
 import { useSession } from '@/hooks/shared/use-session';
+import { useToast } from '@/hooks/use-toast';
 
 interface UseQuestionFormOptions {
   walletAddress: string | null;
@@ -10,6 +11,7 @@ interface UseQuestionFormOptions {
 }
 
 export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionFormOptions) {
+  const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [options, setOptions] = useState(['', '', '', '']);
@@ -17,9 +19,6 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
   const [category, setCategory] = useState('Web Dev');
   const [explanation, setExplanation] = useState('');
   const [loading, setLoading] = useState(false);
-  const [feedback, setFeedback] = useState<{ type: 'error' | 'success'; message: string } | null>(
-    null
-  );
   const { requireSignIn: ensureSession } = useSession();
 
   const handleOptionChange = (idx: number, val: string) => {
@@ -30,34 +29,33 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    setFeedback(null);
 
     if (!prompt.trim()) {
-      setFeedback({ type: 'error', message: 'Question prompt is required.' });
+      toast.error('Question prompt is required.');
       return;
     }
     if (options.some((opt) => !opt.trim())) {
-      setFeedback({ type: 'error', message: 'All 4 options must be filled.' });
+      toast.error('All 4 options must be filled.');
       return;
     }
 
     if (!walletAddress) {
-      setFeedback({ type: 'error', message: 'Connect your wallet to add questions.' });
+      toast.error('Connect your wallet to add questions.');
       return;
     }
 
     setLoading(true);
     try {
       if (!(await ensureSession())) {
-        setFeedback({ type: 'error', message: 'Sign the message in your wallet to add questions.' });
+        toast.error('Sign the message in your wallet to add questions.');
         return;
       }
       const res = await createQuestion({ prompt, options, correctIndex, category, explanation });
 
       if (!res.success) {
-        setFeedback({ type: 'error', message: res.error?.message || 'Failed to add question.' });
+        toast.error(res.error?.message || 'Failed to add question.');
       } else {
-        setFeedback({ type: 'success', message: 'Question added successfully!' });
+        toast.success('Question added successfully!');
         setPrompt('');
         setOptions(['', '', '', '']);
         setExplanation('');
@@ -67,7 +65,7 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'An unexpected error occurred while adding the question.';
-      setFeedback({ type: 'error', message });
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -86,7 +84,7 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
     explanation,
     setExplanation,
     loading,
-    feedback,
+    setOptions,
     handleOptionChange,
     handleSubmit,
   };

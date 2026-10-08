@@ -23,7 +23,7 @@ export default function SeoFaqSection() {
       {/* Platform Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
         <div className="glass glass-border rounded-2xl p-5 flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-[#00FFCC]/10 text-[#00FFCC] shrink-0">
+          <div className="p-2.5 rounded-lg bg-neo-mint/10 text-neo-mint shrink-0">
             <Coins className="w-5 h-5" />
           </div>
           <div>
@@ -33,7 +33,7 @@ export default function SeoFaqSection() {
         </div>
 
         <div className="glass glass-border rounded-2xl p-5 flex items-start gap-3">
-          <div className="p-2.5 rounded-lg bg-[#6C5CE7]/10 text-[#6C5CE7] shrink-0">
+          <div className="p-2.5 rounded-lg bg-electric-indigo/10 text-electric-indigo shrink-0">
             <Award className="w-5 h-5" />
           </div>
           <div>

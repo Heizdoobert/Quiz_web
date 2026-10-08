@@ -25,7 +25,7 @@ export function NFTTrophyCase({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <h4 className="text-xs font-black tracking-wider uppercase text-slate-300 flex items-center gap-1.5">
-          <Award className="w-4 h-4 text-[#FFD166]" /> NFT Achievement Badges
+          <Award className="w-4 h-4 text-crypto-gold" /> NFT Achievement Badges
         </h4>
         <span className="text-[11px] text-slate-400 font-mono">
           {(claimableRewards?.alreadyClaimedBadges?.length || 0)} / 4 Minted

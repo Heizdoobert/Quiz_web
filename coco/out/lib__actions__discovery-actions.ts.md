@@ -1,11 +1,12 @@
 # lib/actions/discovery-actions.ts
-lines:95 exports:searchQuestions,getTopicQuestions
+lines:96 exports:searchQuestions,getTopicQuestions
 ---
 'use server';
 
 import { supabase } from '@/lib/supabase/supabase';
 import { SearchResult } from '@/lib/types';
 import { escapeLikePattern } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 
 const PAGE_SIZE = 20;
 
@@ -40,4 +41,3 @@ export async function searchQuestions(
     p_query: q,
     p_limit: PAGE_SIZE + 1,
     p_offset: (Math.max(1, page) - 1) * PAGE_SIZE,
-  });

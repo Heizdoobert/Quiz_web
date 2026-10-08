@@ -1,4 +1,5 @@
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '../supabase/supabase';
 import { supabaseAdmin } from '../supabase/supabase-admin';
@@ -77,7 +78,7 @@ export async function getUserQuizzes(
       count: quizzes.length,
     };
   } catch (error: unknown) {
-    console.error('[getUserQuizzes]', error);
+    logger.error('[getUserQuizzes]', error);
     return {
       success: false,
       error: 'An unexpected error occurred.',
@@ -99,7 +100,7 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
       };
     }
     if (!supabaseAdmin) {
-      console.error('[exportUserData] SUPABASE_SECRET_KEY is not set');
+      logger.error('[exportUserData] SUPABASE_SECRET_KEY is not set', new Error('[exportUserData] SUPABASE_SECRET_KEY is not set'));
       return { success: false, error: 'Failed to generate secure backup.', code: 'EXPORT_FAILED' };
     }
 
@@ -109,7 +110,7 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     ]);
 
     if (quizzesResponse.error) {
-      console.error('[exportUserData:quizzes]', quizzesResponse.error);
+      logger.error('[exportUserData:quizzes]', quizzesResponse.error);
       return {
         success: false,
         error: 'Failed to fetch quizzes for export.',
@@ -118,7 +119,7 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     }
 
     if (statsResponse.error) {
-      console.error('[exportUserData:stats]', statsResponse.error);
+      logger.error('[exportUserData:stats]', statsResponse.error);
       return {
         success: false,
         error: 'Failed to fetch stats for export.',
@@ -144,7 +145,7 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
       data: exportData,
     };
   } catch (error: unknown) {
-    console.error('[exportUserData]', error);
+    logger.error('[exportUserData]', error);
     return {
       success: false,
       error: 'Failed to generate secure backup.',
@@ -152,3 +153,32 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     };
   }
 }
+
+export interface QuestionAnalytics {
+  question_id: string;
+  prompt: string;
+  play_count: number;
+  accuracy_rate: number;
+}
+
+export async function getQuestionAnalytics(): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
+  try {
+    const account = await getSessionAccount();
+    if (!account) {
+      return { success: false, error: 'Sign in to view analytics.' };
+    }
+
+    const { data, error } = await supabase.rpc('get_question_analytics', { p_user_id: account.id });
+
+    if (error) {
+      logger.error('[getQuestionAnalytics:rpc]', error);
+      return { success: false, error: 'Failed to fetch analytics.' };
+    }
+
+    return { success: true, data: data as QuestionAnalytics[] };
+  } catch (error) {
+    logger.error('[getQuestionAnalytics]', error);
+    return { success: false, error: 'An unexpected error occurred.' };
+  }
+}
+

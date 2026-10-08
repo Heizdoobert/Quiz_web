@@ -1,7 +1,8 @@
 # lib/actions/question-list-actions.ts
-lines:1044 exports:createList,updateList,deleteList,getMyLists,getListDetail,addListQuestion,updateListQuestion,deleteListQuestion,submitListForReview,getListsPendingReview,confirmList,startContest,syncContestStatus,getLiveLists,getMyContestEntries,getClaimableContests,recordContestRefund,startListAttempt,completeListAttempt,claimListReward
+lines:1070 exports:createList,updateList,deleteList,getMyLists,getListDetail,addListQuestion,updateListQuestion,deleteListQuestion,submitListForReview,getListsPendingReview,confirmList,startContest,syncContestStatus,getLiveLists,getMyContestEntries,getClaimableContests,recordContestRefund,startListAttempt,completeListAttempt,claimListReward
 ---
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
@@ -40,4 +41,3 @@ function toWei(wholeTokens: number): bigint {
 async function signedIn(): Promise<{ error: string } | { account: SessionAccount; db: NonNullable<typeof supabaseAdmin> }> {
   const account = await getSessionAccount();
   if (!account) return { error: 'Sign in to manage your lists.' };
-  if (!supabaseAdmin) return { error: 'Question lists are unavailable right now.' };

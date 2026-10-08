@@ -1,5 +1,5 @@
 # app/layout.tsx
-lines:184 exports:viewport,metadata,default
+lines:185 exports:viewport,metadata,default
 ---
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono } from 'next/font/google';

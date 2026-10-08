@@ -1,4 +1,5 @@
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
@@ -88,7 +89,7 @@ export async function getClaimableRewards(): Promise<ClaimableRewards> {
     // Only a wallet account could have vouchers signed on-chain to settle.
     if (account.wallet) {
       await settlePendingTokenClaims(account.id, account.wallet).catch((err) =>
-        console.error('getClaimableRewards settle error:', err)
+        logger.error('getClaimableRewards settle error:', err)
       );
     }
 
@@ -212,7 +213,7 @@ export async function getClaimableRewards(): Promise<ClaimableRewards> {
       sweepsAt,
     };
   } catch (err) {
-    console.error('getClaimableRewards error:', err);
+    logger.error('getClaimableRewards error:', err);
     return empty;
   }
 }
@@ -284,13 +285,13 @@ export async function generateTokenVoucher(): Promise<RewardVoucher | { error: s
         const winner = await settlePendingTokenClaims(account.id, wallet);
         if (winner) return tokenVoucher(wallet, winner);
       }
-      console.error('generateTokenVoucher record error:', insertErr);
+      logger.error('generateTokenVoucher record error:', insertErr);
       return { error: 'Failed to generate voucher' };
     }
 
     return tokenVoucher(wallet, claim);
   } catch (err) {
-    console.error('generateTokenVoucher error:', err);
+    logger.error('generateTokenVoucher error:', err);
     return { error: 'Failed to generate voucher' };
   }
 }
@@ -352,7 +353,7 @@ export async function generateBadgeVoucher(
       status: 'pending',
     });
     if (insertErr) {
-      console.error('generateBadgeVoucher record error:', insertErr);
+      logger.error('generateBadgeVoucher record error:', insertErr);
       return { error: 'Failed to generate badge voucher' };
     }
 
@@ -366,7 +367,7 @@ export async function generateBadgeVoucher(
       contractAddress: QUIZ_BADGE_ADDRESS,
     };
   } catch (err) {
-    console.error('generateBadgeVoucher error:', err);
+    logger.error('generateBadgeVoucher error:', err);
     return { error: 'Failed to generate badge voucher' };
   }
 }
@@ -423,7 +424,7 @@ export async function confirmRewardClaim(
 
     return { success: true };
   } catch (err) {
-    console.error('confirmRewardClaim error:', err);
+    logger.error('confirmRewardClaim error:', err);
     return { success: false };
   }
 }

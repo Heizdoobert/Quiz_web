@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { Group } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 const MAX_NAME = 50;
 const MAX_DESCRIPTION = 200;
 
@@ -46,7 +47,7 @@ export async function createGroup(params: {
       .single();
     if (error) {
       if (error.code === '23505') return { success: false, error: 'That group name is taken.' };
-      console.error('createGroup insert error:', error);
+      logger.error('createGroup insert error:', error);
       return { success: false, error: 'Failed to create group.' };
     }
 
@@ -54,11 +55,11 @@ export async function createGroup(params: {
     const { error: memberErr } = await auth.db
       .from('group_members')
       .insert({ group_id: group.id, user_id: auth.account.id, wallet_address: auth.account.wallet });
-    if (memberErr) console.error('createGroup owner membership error:', memberErr);
+    if (memberErr) logger.error('createGroup owner membership error:', memberErr);
 
     return { success: true, group: group as Group };
   } catch (err) {
-    console.error('createGroup error:', err);
+    logger.error('createGroup error:', err);
     return { success: false, error: 'Failed to create group.' };
   }
 }
@@ -75,12 +76,12 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
     if (error) {
       if (error.code === '23505') return { success: false, error: 'You are already in this group.' };
       if (error.code === '23503') return { success: false, error: 'Group not found.' };
-      console.error('joinGroup insert error:', error);
+      logger.error('joinGroup insert error:', error);
       return { success: false, error: 'Failed to join group.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('joinGroup error:', err);
+    logger.error('joinGroup error:', err);
     return { success: false, error: 'Failed to join group.' };
   }
 }
@@ -97,12 +98,12 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
       .eq('group_id', groupId)
       .eq('user_id', auth.account.id);
     if (error) {
-      console.error('leaveGroup delete error:', error);
+      logger.error('leaveGroup delete error:', error);
       return { success: false, error: 'Failed to leave group.' };
     }
     return { success: true };
   } catch (err) {
-    console.error('leaveGroup error:', err);
+    logger.error('leaveGroup error:', err);
     return { success: false, error: 'Failed to leave group.' };
   }
 }
@@ -119,7 +120,7 @@ export async function getUserGroups(): Promise<Group[]> {
     if (error || !data) return [];
     return data.map((d) => d.groups as unknown as Group).filter(Boolean);
   } catch (err) {
-    console.error('getUserGroups error:', err);
+    logger.error('getUserGroups error:', err);
     return [];
   }
 }

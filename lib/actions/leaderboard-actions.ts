@@ -3,6 +3,7 @@
 import { supabase } from '@/lib/supabase/supabase';
 import { LeaderboardEntry } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 
 // Rows come pre-aggregated and pre-sorted from Postgres (lib/sql/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
@@ -32,11 +33,11 @@ function toEntries(rows: LeaderboardRow[], offset: number = 0): LeaderboardEntry
 export async function getGlobalLeaderboard(limit: number = 50, offset: number = 0): Promise<LeaderboardEntry[]> {
   try {
     const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: clampLimit(limit), p_offset: Math.max(0, offset) });
-    if (error) console.error('getGlobalLeaderboard rpc error:', error);
+    if (error) logger.error('getGlobalLeaderboard rpc error:', error);
     if (error || !data) return [];
     return toEntries(data as LeaderboardRow[], offset);
   } catch (err) {
-    console.error('getGlobalLeaderboard error:', err);
+    logger.error('getGlobalLeaderboard error:', err);
     return [];
   }
 }
@@ -53,11 +54,11 @@ export async function getGroupLeaderboard(
       p_limit: clampLimit(limit),
       p_offset: Math.max(0, offset)
     });
-    if (error) console.error('getGroupLeaderboard rpc error:', error);
+    if (error) logger.error('getGroupLeaderboard rpc error:', error);
     if (error || !data) return [];
     return toEntries(data as LeaderboardRow[], offset);
   } catch (err) {
-    console.error('getGroupLeaderboard error:', err);
+    logger.error('getGroupLeaderboard error:', err);
     return [];
   }
 }

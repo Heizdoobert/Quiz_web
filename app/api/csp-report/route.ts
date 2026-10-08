@@ -2,7 +2,7 @@ import { logger } from '@/lib/logger';
 
 const MAX_REPORT_BYTES = 8 * 1024;
 
-// Receives Content-Security-Policy-Report-Only violation reports (see next.config.js) and
+// Receives Content-Security-Policy-Report-Only violation reports (see next.config.mjs) and
 // writes them to the server log. It stores nothing and answers 204 whatever it is sent.
 export async function POST(request: Request) {
   try {

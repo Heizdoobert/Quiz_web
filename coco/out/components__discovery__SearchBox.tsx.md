@@ -9,7 +9,7 @@ export default function SearchBox() {
       action="/search"
       method="GET"
       role="search"
-      className="hidden sm:flex items-center gap-1.5 bg-[#25284D] border border-[#3A3E70] rounded-xl px-3 py-1.5 focus-within:border-[#00FFCC]/60 transition-all"
+      className="hidden sm:flex items-center gap-1.5 bg-cyber-violet-light border border-[#3A3E70] rounded-xl px-3 py-1.5 focus-within:border-neo-mint/60 transition-all"
     >
       <Search className="w-4 h-4 text-slate-400 shrink-0" aria-hidden="true" />
       <input

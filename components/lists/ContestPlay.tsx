@@ -7,6 +7,7 @@ import { useSession } from '@/hooks/shared/use-session';
 import { ClientQuestion, QuestionListWithMeta } from '@/lib/types';
 import { ContestPlayResult } from './play/ContestPlayResult';
 import { ContestPlayQuestion } from './play/ContestPlayQuestion';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ContestPlay({
   list,
@@ -15,6 +16,7 @@ export default function ContestPlay({
   list: QuestionListWithMeta;
   onExit: () => void;
 }) {
+  const toast = useToast();
   const [questions, setQuestions] = useState<ClientQuestion[] | null>(null);
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -28,11 +30,13 @@ export default function ContestPlay({
     // Contest answers only count for the signed-in wallet that started the attempt.
     ensureSession().then(async (signedIn) => {
       if (!signedIn) {
+        toast.error('Sign the message in your wallet to play.');
         setError('Sign the message in your wallet to play.');
         return;
       }
       const res = await startListAttempt(list.id);
       if (!res.success) {
+        toast.error(res.error || 'Failed to start contest.');
         setError(res.error || 'Failed to start contest.');
         return;
       }
@@ -46,6 +50,7 @@ export default function ContestPlay({
           if (completeRes.success) {
             setResult({ correctCount: completeRes.correctCount || 0, rewardAmount: completeRes.rewardAmount || '0' });
           } else {
+            toast.error(completeRes.error || 'Failed to finalize contest.');
             setError(completeRes.error || 'Failed to finalize contest.');
           }
         } else {
@@ -53,13 +58,17 @@ export default function ContestPlay({
         }
       }
     });
-  }, [list.id, ensureSession]);
+  }, [list.id, ensureSession, toast]);
 
   const handleSelect = async (optionIdx: number) => {
     if (selected !== null || !questions) return;
     setSelected(optionIdx);
-    const res = await submitAnswer({ questionId: questions[index].id, answerIndex: optionIdx });
-    setFeedback({ isCorrect: res.isCorrect, correctIndex: res.correctIndex });
+    try {
+      const res = await submitAnswer({ questionId: questions[index].id, answerIndex: optionIdx });
+      setFeedback({ isCorrect: res.isCorrect, correctIndex: res.correctIndex });
+    } catch (err: unknown) {
+      toast.error((err instanceof Error ? err.message : 'Error submitting answer'));
+    }
   };
 
   const handleNext = async () => {
@@ -72,9 +81,11 @@ export default function ContestPlay({
     }
     const res = await completeListAttempt(list.id);
     if (!res.success) {
+      toast.error(res.error || 'Failed to finalize contest.');
       setError(res.error || 'Failed to finalize contest.');
       return;
     }
+    toast.success('Contest completed successfully!');
     setResult({ correctCount: res.correctCount || 0, rewardAmount: res.rewardAmount || '0' });
   };
 

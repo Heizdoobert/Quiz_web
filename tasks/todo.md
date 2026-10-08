@@ -49,8 +49,8 @@
 ### Task 3: Verify contest claim flow; correct §4.C and ADR-003
 **Description:** F1. Read `claimListReward` end to end (`question-list-actions.ts:868` onward), `ContestEscrow.sol`, and `reward-actions.ts`. Confirm creator funds are escrowed before a voucher can be signed and the self-drain path from ADR-003 is closed. Then fix the doc/ADR status. If the flow is NOT safe, stop and report before editing docs.
 **Acceptance criteria:**
-- [x] Written finding: `docs/decisions/006-contest-escrow-payouts.md` (escrow gate in `startContest`, bounded amounts, contract-level checks, unique-index voucher dedupe). Flow is safe. Residuals: signer key trust root, Sybil dilution, `claimListReward` signs when the on-chain read returns null (fail-closed follow-up, not done here), contract unaudited.
-- [x] ADR-003 annotated as superseded in part; new ADR-006; §4.C and ADR list in `SECURITY-TRADE-OFFS.md` and `docs/specs/contest-escrow.md` updated
+- [x] Written finding: `docs/decisions/007-contest-escrow-payouts.md` (escrow gate in `startContest`, bounded amounts, contract-level checks, unique-index voucher dedupe). Flow is safe. Residuals: signer key trust root, Sybil dilution, `claimListReward` signs when the on-chain read returns null (fail-closed follow-up, not done here), contract unaudited.
+- [x] ADR-003 annotated as superseded in part; new ADR-007; §4.C and ADR list in `SECURITY-TRADE-OFFS.md` and `docs/specs/contest-escrow.md` updated
 **Verification:**
 - [x] Existing `claimListReward` tests pass: `npx vitest run tests/answer-and-list-guards.test.ts -t claim` (7 pass)
 - [x] Manual: no remaining "payouts are paused" text in docs unless true
@@ -82,16 +82,16 @@
 **Scope:** M
 
 ### Task 5: CSP report-only
-**Description:** F4. Add `Content-Security-Policy-Report-Only` in `next.config.js` covering `default-src 'self'`, script/style (Next inline needs), `connect-src` for Supabase, RPC, WalletConnect/Reown relays, `img-src`, `frame-src` for wallet modals, `frame-ancestors 'none'` kept. Collect violations on preview.
+**Description:** F4. Add `Content-Security-Policy-Report-Only` in `next.config.mjs` covering `default-src 'self'`, script/style (Next inline needs), `connect-src` for Supabase, RPC, WalletConnect/Reown relays, `img-src`, `frame-src` for wallet modals, `frame-ancestors 'none'` kept. Collect violations on preview.
 **Acceptance criteria:**
-- [x] `Content-Security-Policy-Report-Only` on `/:path*`; existing headers (including enforcing `frame-ancestors 'none'`) unchanged. Policy: `next.config.js`. `script-src` keeps `'unsafe-inline'` for Next's hydration scripts (nonces are a later upgrade); `connect-src` lists Supabase (from `NEXT_PUBLIC_SUPABASE_URL` at build), WalletConnect/Reown/Coinbase/MetaMask hosts and viem's default RPCs.
+- [x] `Content-Security-Policy-Report-Only` on `/:path*`; existing headers (including enforcing `frame-ancestors 'none'`) unchanged. Policy: `next.config.mjs`. `script-src` keeps `'unsafe-inline'` for Next's hydration scripts (nonces are a later upgrade); `connect-src` lists Supabase (from `NEXT_PUBLIC_SUPABASE_URL` at build), WalletConnect/Reown/Coinbase/MetaMask hosts and viem's default RPCs.
 - [x] Violations POST to `app/api/csp-report/route.ts` (204, 8 kB cap) and appear in the server log as `csp_violation`; also visible in the browser console
 **Verification:**
 - [x] `npm run build` passes; `curl -I` against a local `next start` shows both headers; report endpoint answers 204. `tests/security-headers.test.ts` (5 tests)
 - [ ] `curl -I` on the preview deploy
 - [ ] Wallet, email and username sign-in exercised on preview; list of `csp_violation` log lines triaged and the policy adjusted (needs a deploy; not possible from this session)
 **Dependencies:** Task 1
-**Files:** `next.config.js`, possibly `app/` report route
+**Files:** `next.config.mjs`, possibly `app/` report route
 **Scope:** S
 
 ### Task 6: Enforce CSP
@@ -101,7 +101,7 @@
 **Verification:**
 - [ ] `npm run check:a11y` and `check:perf` on preview; e2e sign-in flow passes
 **Dependencies:** Task 5 + a clean preview observation period
-**Files:** `next.config.js`
+**Files:** `next.config.mjs`
 **Scope:** XS
 **Status:** BLOCKED, not started. Needs the preview deploy plus an observation period with real wallet, email and username sign-ins, then a read of the `csp_violation` log lines. Enforcing a guessed policy risks breaking wallet connect in production.
 

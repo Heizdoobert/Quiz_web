@@ -11,6 +11,7 @@ import {
 } from 'react';
 import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
+import { logger } from '@/lib/logger';
 
 const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), {
   ssr: false,
@@ -69,7 +70,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       }
       return info;
     } catch (err) {
-      console.error('Session refresh error:', err);
+      logger.error('session_refresh_failed', err);
       return null;
     }
   }, []);

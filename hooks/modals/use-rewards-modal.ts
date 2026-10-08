@@ -11,6 +11,7 @@ import {
   generateBadgeVoucher,
   confirmRewardClaim,
 } from '@/lib/actions/reward-actions';
+import { logger } from '@/lib/logger';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
 import {
@@ -160,7 +161,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
           setMintingBadge(null);
         }
       } catch (err) {
-        console.error('Claim confirmation failed:', err);
+        logger.error('rewards_claim_confirm_failed', err);
         setClaimStep('error');
         setClaimError('Failed to confirm reward claim');
         setMintingBadge(null);
@@ -258,7 +259,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
       }
       setClaimStep('confirming');
     } catch (err) {
-      console.error('Claim tx failed:', err);
+      logger.error('rewards_claim_tx_failed', err);
       setClaimError('Transaction failed or was rejected');
       setClaimStep('error');
       setCurrentNonce(null);
@@ -324,7 +325,7 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
       }
       setClaimStep('confirming');
     } catch (err) {
-      console.error('Badge mint tx failed:', err);
+      logger.error('rewards_badge_mint_tx_failed', err);
       setClaimError('Transaction failed or was rejected');
       setClaimStep('error');
       setMintingBadge(null);

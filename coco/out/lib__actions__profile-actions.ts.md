@@ -1,7 +1,8 @@
 # lib/actions/profile-actions.ts
-lines:154 exports:getUserQuizzes,exportUserData
+lines:184 exports:getUserQuizzes,exportUserData,QuestionAnalytics,getQuestionAnalytics
 ---
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '../supabase/supabase';
 import { supabaseAdmin } from '../supabase/supabase-admin';
@@ -40,4 +41,3 @@ export async function getUserQuizzes(
         error: 'A valid wallet address is required.',
         code: 'INVALID_ADDRESS',
       };
-    }

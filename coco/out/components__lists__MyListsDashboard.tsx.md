@@ -35,7 +35,7 @@ export default function MyListsDashboard() {
     refresh();
   }, [refresh]);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
     if (!account) return;
     setMessage(null);

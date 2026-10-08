@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount } from '@/lib/services/session';
 import { ClientQuestion } from '@/lib/types';
 import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/utils/validation';
+import { GoogleGenAI } from '@google/genai';
 
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
@@ -177,7 +178,7 @@ export async function getTopics(): Promise<Array<{ name: string; questionCount: 
       latestAt: row.latest_at,
     }));
   } catch (err) {
-    console.error('getTopics error:', err);
+    logger.error('getTopics error:', err);
     return [];
   }
 }
@@ -202,7 +203,7 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
       status: data.status || 'verified',
     };
   } catch (err) {
-    console.error('getPublicQuestion error:', err);
+    logger.error('getPublicQuestion error:', err);
     return null;
   }
 }
@@ -323,5 +324,60 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
     return [first, second].sort((a, b) => a - b);
   } catch {
     return [];
+  }
+}
+
+export async function generateQuestion(topic: string): Promise<ActionResult<{
+  prompt: string;
+  options: string[];
+  correctIndex: number;
+  explanation: string;
+}>> {
+  try {
+    const account = await getSessionAccount();
+    if (!account) {
+      return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to generate questions.' } };
+    }
+    if (!supabaseAdmin) {
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Database not available.' } };
+    }
+
+    const { data: countData, error: countErr } = await supabaseAdmin.rpc('increment_ai_generation', {
+      p_user_id: account.id
+    });
+
+    if (countErr) {
+      logger.error('generate_question_increment_failed', countErr, { userId: account.id });
+      return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to generate question.' } };
+    }
+
+    if (countData > 3) {
+      return { success: false, error: { code: 'RATE_LIMITED', message: 'You have reached the limit of 3 AI generations per day.' } };
+    }
+
+    const ai = new GoogleGenAI({});
+    const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Generate a trivia question about "${topic}". Respond in strict JSON format matching this schema exactly without markdown formatting:
+{
+  "prompt": "The question text",
+  "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
+  "correctIndex": 0,
+  "explanation": "Brief explanation of the correct answer"
+}`,
+        config: {
+          responseMimeType: "application/json",
+          temperature: 0.7,
+        }
+    });
+
+    const text = response.text;
+    if (!text) throw new Error('Empty response from AI');
+
+    const result = JSON.parse(text);
+    return { success: true, data: result };
+  } catch (err) {
+    logger.error('generate_question_failed', err);
+    return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to generate question.' } };
   }
 }

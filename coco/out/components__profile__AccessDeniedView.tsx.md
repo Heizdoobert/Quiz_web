@@ -11,9 +11,9 @@ export default function AccessDeniedView() {
   return (
     <div
       role="alert"
-      className="flex flex-col items-center justify-center py-16 px-6 text-center border border-[#2D305A] rounded-2xl bg-[#1A1B35]/60 max-w-lg mx-auto shadow-2xl backdrop-blur-sm"
+      className="flex flex-col items-center justify-center py-16 px-6 text-center border border-cyber-border rounded-2xl bg-cyber-violet/60 max-w-lg mx-auto shadow-2xl backdrop-blur-sm"
     >
-      <div className="w-16 h-16 rounded-2xl bg-[#FF4757]/10 border border-[#FF4757]/30 flex items-center justify-center mb-5 text-[#FF4757]">
+      <div className="w-16 h-16 rounded-2xl bg-pop-coral/10 border border-pop-coral/30 flex items-center justify-center mb-5 text-pop-coral">
         <ShieldAlert className="w-8 h-8" aria-hidden="true" />
       </div>
 
@@ -27,7 +27,7 @@ export default function AccessDeniedView() {
 
       <Link
         href="/"
-        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#25284D] hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-heading font-bold text-xs transition-all border border-[#3A3E70] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC]"
+        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] active:scale-95 text-slate-200 hover:text-white font-heading font-bold text-xs transition-all border border-[#3A3E70] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
         aria-label="Return to quiz home page"
       >
         <ArrowLeft className="w-4 h-4" aria-hidden="true" />

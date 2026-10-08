@@ -1,11 +1,11 @@
 # components/quiz/QuizCard.tsx
-lines:143 exports:default
+lines:146 exports:default
 ---
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { AnswerSubmissionResult, ClientQuestion } from '@/lib/types';
+import { AnswerSubmissionResult, ClientQuestion, UserStats } from '@/lib/types';
 import QuestionFront from './QuestionFront';
 import AnswerBack from './AnswerBack';
 import useSound from 'use-sound';
@@ -17,6 +17,7 @@ interface QuizCardProps {
   isFlipped: boolean;
   timeLeft: number;
   result: AnswerSubmissionResult | null;
+  stats?: UserStats;
   onSelectAnswer: (index: number) => void;
   onNextQuestion: () => void;
   onOpenTimerSettings: () => void;
@@ -37,7 +38,6 @@ export default function QuizCard({
   isFlipped,
   timeLeft,
   result,
+  stats,
   onSelectAnswer,
   onNextQuestion,
-  onOpenTimerSettings,
-  onUse5050,

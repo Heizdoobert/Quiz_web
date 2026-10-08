@@ -1,6 +1,17 @@
 import QuizLayout from '@/components/quiz/QuizLayout';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  other: {
+    'fc:frame': 'vNext',
+    'fc:frame:image': 'https://quickquiz.app/og/quiz-result',
+    'fc:frame:button:1': 'Play Quiz',
+    'fc:frame:button:1:action': 'post',
+    'fc:frame:post_url': 'https://quickquiz.app/api/frame',
+  },
+};
 
 export default async function Home({
   searchParams,

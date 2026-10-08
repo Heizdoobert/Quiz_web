@@ -27,14 +27,14 @@ export function ListCardDraftPanel({
       <button
         type="button"
         onClick={onAddQuestion}
-        className="px-3 py-1.5 bg-[#00FFCC]/15 text-[#00FFCC] rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-neo-mint/15 text-neo-mint rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Plus className="w-3.5 h-3.5" /> Add Question
       </button>
       <button
         type="button"
         onClick={onEditDetails}
-        className="px-3 py-1.5 bg-[#6C5CE7]/15 text-[#6C5CE7] rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+        className="px-3 py-1.5 bg-electric-indigo/15 text-electric-indigo rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer"
       >
         <Pencil className="w-3.5 h-3.5" /> Edit Details
       </button>

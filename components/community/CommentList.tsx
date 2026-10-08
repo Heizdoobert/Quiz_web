@@ -8,6 +8,7 @@ import {
   deleteComment,
 } from "@/lib/actions/community-actions";
 import { formatRelativeTime } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 interface CommentListProps {
   questionId: string;
@@ -56,7 +57,7 @@ export default function CommentList({
         }
       }
     } catch (err) {
-      console.error("Comment submission error:", err);
+      logger.error("Comment submission error:", err);
       setError("Failed to post comment. Please try again.");
     } finally {
       setSubmitting(false);
@@ -76,7 +77,7 @@ export default function CommentList({
         setError("Failed to delete comment.");
       }
     } catch (err) {
-      console.error("Comment deletion error:", err);
+      logger.error("Comment deletion error:", err);
       setError("Failed to delete comment.");
     } finally {
       setDeletingId(null);

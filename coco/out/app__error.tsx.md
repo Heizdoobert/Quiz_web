@@ -1,10 +1,11 @@
 # app/error.tsx
-lines:49 exports:default
+lines:50 exports:default
 ---
 'use client';
 
 import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
+import { logger } from '@/lib/logger';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -14,14 +15,14 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to server or monitoring
-    console.error('Next.js Page Error caught by boundary:', error);
+    logger.error('Next.js Page Error caught by boundary:', error);
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-[#0A1128] text-white flex flex-col items-center justify-center p-6 text-center" role="alert">
-      <div className="max-w-md w-full p-8 bg-[#1A1B35] border border-[#2D305A] rounded-3xl shadow-2xl shadow-black/60 space-y-4">
+    <div className="min-h-screen bg-deep-space text-white flex flex-col items-center justify-center p-6 text-center" role="alert">
+      <div className="max-w-md w-full p-8 bg-cyber-violet border border-cyber-border rounded-3xl shadow-2xl shadow-black/60 space-y-4">
         <div className="flex justify-center">
-          <div className="p-3 bg-[#FF4757]/15 rounded-2xl border border-[#FF4757]/30 text-[#FF4757]">
+          <div className="p-3 bg-pop-coral/15 rounded-2xl border border-pop-coral/30 text-pop-coral">
             <AlertTriangle className="w-10 h-10" />
           </div>
         </div>
@@ -34,10 +35,9 @@ export default function Error({ error, reset }: ErrorProps) {
           <button
             type="button"
             onClick={() => reset()}
-            className="px-5 py-2.5 bg-gradient-to-r from-[#00FFCC] to-[#6C5CE7] hover:opacity-95 text-[#0A1128] text-xs font-black rounded-xl transition-all shadow-lg shadow-[#00FFCC]/20 cursor-pointer font-heading"
+            className="px-5 py-2.5 bg-linear-to-r from-neo-mint to-electric-indigo hover:opacity-95 text-deep-space text-xs font-black rounded-xl transition-all shadow-lg shadow-neo-mint/20 cursor-pointer font-heading"
           >
             Try Again
           </button>
           <button
             type="button"
-            onClick={() => window.location.reload()}

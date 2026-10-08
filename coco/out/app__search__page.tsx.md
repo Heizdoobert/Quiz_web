@@ -22,7 +22,7 @@ export default async function SearchPage({
   const { results, hasMore } = q ? await searchQuestions(q, page) : { results: [], hasMore: false };
 
   return (
-    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
+    <main className="min-h-screen bg-deep-space text-slate-100 flex flex-col">
       <Header />
       <div className="w-full max-w-3xl mx-auto px-4 py-8 flex flex-col gap-4">
         <h1 className="text-xl font-black font-heading truncate">
@@ -32,7 +32,7 @@ export default async function SearchPage({
         {q && results.length === 0 && (
           <p className="text-sm text-slate-400">
             No questions match &quot;{q}&quot;.{' '}
-            <Link href="/topics" className="text-[#00FFCC] underline">
+            <Link href="/topics" className="text-neo-mint underline">
               Browse topics
             </Link>{' '}
             instead.

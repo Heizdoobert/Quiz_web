@@ -9,6 +9,7 @@ import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount }
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { logger } from '@/lib/logger';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
@@ -88,7 +89,7 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
     const accountId = await ensureAccountForWallet(wallet);
     return accountId !== null && (await setSessionAccount({ id: accountId, wallet }));
   } catch (err) {
-    console.error('signInWithWallet error:', err);
+    logger.error('signInWithWallet error:', err);
     return false;
   }
 }
@@ -120,7 +121,7 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ ok
     const accountId = await ensureAccountForAuthUser(data.user.id);
     return { ok: accountId !== null && (await setSessionAccount({ id: accountId, wallet: null })) };
   } catch (err) {
-    console.error('verifyEmailCode error:', err);
+    logger.error('verifyEmailCode error:', err);
     return { ok: false };
   }
 }
@@ -198,7 +199,7 @@ export async function signUpWithUsername(
     const ok = await setSessionAccount({ id: accountId, wallet: null });
     return { ok, error: ok ? undefined : 'Failed to establish session.' };
   } catch (err) {
-    console.error('signUpWithUsername error:', err);
+    logger.error('signUpWithUsername error:', err);
     return { ok: false, error: 'An unexpected error occurred during registration.' };
   }
 }
@@ -243,7 +244,7 @@ export async function signInWithUsername(
     const ok = await setSessionAccount({ id: accountId, wallet: existingWallet });
     return { ok, error: ok ? undefined : 'Failed to establish session.' };
   } catch (err) {
-    console.error('signInWithUsername error:', err);
+    logger.error('signInWithUsername error:', err);
     return { ok: false, error: 'An unexpected error occurred during sign-in.' };
   }
 }
@@ -284,7 +285,7 @@ export async function linkWallet(
 
     return { ok: await setSessionAccount({ id: account.id, wallet }) };
   } catch (err) {
-    console.error('linkWallet error:', err);
+    logger.error('linkWallet error:', err);
     return { ok: false };
   }
 }

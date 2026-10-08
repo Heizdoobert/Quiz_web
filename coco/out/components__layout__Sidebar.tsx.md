@@ -38,6 +38,6 @@ export default function Sidebar({
         claimableTokens={claimableTokens}
         onOpenRewards={onOpenRewards}
       />
-      <div className="pt-3 border-t border-[#2D305A]">
+      <div className="pt-3 border-t border-cyber-border">
         <HistoryList history={history} onOpenReview={onOpenReview} />
       </div>

@@ -1,5 +1,5 @@
 # lib/services/ai-moderation.ts
-lines:51 exports:ModerationResult,moderateContent
+lines:52 exports:ModerationResult,moderateContent
 ---
 import { GoogleGenAI } from '@google/genai';
 import { logger } from '@/lib/logger';
@@ -33,6 +33,7 @@ Respond ONLY in valid JSON format with this exact structure:
       model: 'gemini-2.5-flash',
       contents: textToAnalyze,
       config: {
+        abortSignal: AbortSignal.timeout(5000),
         responseMimeType: 'application/json',
         temperature: 0.1,
       },
@@ -40,4 +41,3 @@ Respond ONLY in valid JSON format with this exact structure:
 
     const output = response.text?.trim();
     if (!output) {
-      logger.warn('ai_moderation_empty_response');

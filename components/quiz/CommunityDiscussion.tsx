@@ -8,6 +8,7 @@ import {
 import RatingStars from '@/components/community/RatingStars';
 import CommentList from '@/components/community/CommentList';
 import SuggestionForm from '@/components/community/SuggestionForm';
+import { logger } from '@/lib/logger';
 
 export function CommunityDiscussion({ questionId }: { questionId: string }) {
   const { account, requireSignIn } = useSession();
@@ -28,7 +29,7 @@ export function CommunityDiscussion({ questionId }: { questionId: string }) {
       const data = await getQuestionDiscussion(questionId);
       setDiscussion(data);
     } catch (err) {
-      console.error('Failed to load discussion:', err);
+      logger.error('Failed to load discussion:', err);
     }
   }, [questionId]);
 
@@ -39,7 +40,7 @@ export function CommunityDiscussion({ questionId }: { questionId: string }) {
         if (!cancelled) setDiscussion(data);
       })
       .catch((err) => {
-        console.error('Failed to load discussion:', err);
+        logger.error('Failed to load discussion:', err);
       });
     return () => {
       cancelled = true;

@@ -1,7 +1,7 @@
 # ADR-003: Peer-Reviewed Question Lists & Contest Token Voucher Safeguards
 
 ## Status
-Accepted. Decision 2 (pause contest payouts) is superseded by [ADR-006](006-contest-escrow-payouts.md); payouts are live through `ContestEscrow`.
+Accepted. Decision 2 (pause contest payouts) is superseded by [ADR-007](007-contest-escrow-payouts.md); payouts are live through `ContestEscrow`.
 
 ## Date
 2026-09-28
@@ -17,7 +17,7 @@ Two critical vulnerabilities were identified during design and adversarial audit
 1. **Remove Arbitrary Voucher Generation**:
    - `buildTokenClaimVoucher` was completely removed from public Server Action exports.
    - Per-answer global reward claims remain governed strictly by `generateTokenVoucher` which verifies earned balance from settled results and enforces single-open-voucher deduplication via `settlePendingTokenClaims`.
-2. **Pause Contest Payouts (`claimListReward`)** (superseded by ADR-006; historical):
+2. **Pause Contest Payouts (`claimListReward`)** (superseded by ADR-007; historical):
    - Direct contest reward claims returned an explicit `{ error: 'Contest payouts are paused.' }` until an on-chain escrow/staking contract was deployed to lock the creator's tokens upon contest creation.
 3. **Peer Review & Verification Threshold (`REQUIRED_CONFIRMATIONS = 3`)**:
    - Before a list can transition from `draft` / `submitted` to `live`, it must receive at least 3 distinct approvals from non-owner wallets (`question_list_confirmations`).
@@ -37,4 +37,4 @@ Two critical vulnerabilities were identified during design and adversarial audit
 ## Consequences
 - **Positive**: Prevents unauthorized token hyperinflation and Sybil drain attacks.
 - **Positive**: Maintains high question quality and community oversight through peer consensus.
-- **Follow-up (done, see ADR-006)**: `ContestEscrow` locks creator $QUIZ up front and winners redeem EIP-712 vouchers against it.
+- **Follow-up (done, see ADR-007)**: `ContestEscrow` locks creator $QUIZ up front and winners redeem EIP-712 vouchers against it.

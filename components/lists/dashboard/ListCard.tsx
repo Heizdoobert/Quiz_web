@@ -13,6 +13,7 @@ import { OnChainRefundPanel } from './OnChainRefundPanel';
 import { ListQuestionManager } from './ListQuestionManager';
 import { ListCardDraftPanel } from './ListCardDraftPanel';
 import { ListCardEditDetailsPanel } from './ListCardEditDetailsPanel';
+import { logger } from '@/lib/logger';
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
@@ -77,7 +78,7 @@ export function ListCard({
           });
         }
       } catch (e) {
-        console.error('Failed to fetch on-chain contest', e);
+        logger.error('Failed to fetch on-chain contest', e);
       }
     }
     setLoadingDetail(false);

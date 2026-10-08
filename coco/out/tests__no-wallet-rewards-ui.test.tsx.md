@@ -1,5 +1,5 @@
 # tests/no-wallet-rewards-ui.test.tsx
-lines:91 exports:
+lines:92 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
@@ -25,6 +25,7 @@ vi.mock('../lib/actions/question-list-actions', () => ({
   ]),
   getMyContestEntries: vi.fn().mockResolvedValue([]),
   getClaimableContests: vi.fn().mockResolvedValue([]),
+  getContestAnalytics: vi.fn().mockResolvedValue({ success: true, data: { participation_count: 0, completion_rate: 0, avg_score: 0 } }),
 }));
 
 const EMAIL_ACCOUNT = { id: 'acc-1', wallet: null };
@@ -40,4 +41,3 @@ describe('no-wallet rewards disclosure', () => {
 
   it('header shows the disclosure and held amount for an account without a wallet', () => {
     signedInAs(EMAIL_ACCOUNT);
-    render(<Header heldTokens={THIRTY_QUIZ} sweepsAt="2027-03-01T00:00:00.000Z" />);

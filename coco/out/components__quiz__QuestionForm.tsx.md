@@ -1,13 +1,15 @@
 # components/quiz/QuestionForm.tsx
-lines:172 exports:default
+lines:177 exports:default
 ---
 'use client';
+import { useToast } from "@/hooks/use-toast";
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useQuestionForm } from '@/hooks/quiz/use-question-form';
 import { ChevronDown, ChevronUp, Plus, Sparkles, Loader2 } from 'lucide-react';
 import { QuestionOptionsInput } from './QuestionOptionsInput';
+import { AiQuestionGenerator } from './AiQuestionGenerator';
 
 interface QuestionFormProps {
   walletAddress: string | null;
@@ -15,6 +17,7 @@ interface QuestionFormProps {
 }
 
 export default function QuestionForm({ walletAddress, onQuestionAdded }: QuestionFormProps) {
+  const toast = useToast();
   const {
     isOpen,
     setIsOpen,
@@ -28,16 +31,13 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
     explanation,
     setExplanation,
     loading,
-    feedback,
+    setOptions,
     handleOptionChange,
     handleSubmit,
   } = useQuestionForm({ walletAddress, onQuestionAdded });
 
-  return (
-    <section className="w-full glass glass-border glass-edge rounded-3xl shadow-xl overflow-hidden my-4">
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-controls="question-form-body"
-        className="w-full flex items-center justify-between p-4 px-6 text-left hover:bg-[#25284D] active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00FFCC] transition-all cursor-pointer select-none"
+  const handleAiSuccess = (data: { prompt: string; options: string[]; correctIndex: number; explanation: string }) => {
+    setPrompt(data.prompt);
+    setOptions(data.options);
+    setCorrectIndex(data.correctIndex);
+    setExplanation(data.explanation || '');

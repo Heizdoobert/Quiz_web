@@ -1,9 +1,20 @@
 # app/page.tsx
-lines:55 exports:default
+lines:66 exports:metadata,default
 ---
 import QuizLayout from '@/components/quiz/QuizLayout';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  other: {
+    'fc:frame': 'vNext',
+    'fc:frame:image': 'https://quickquiz.app/og/quiz-result',
+    'fc:frame:button:1': 'Play Quiz',
+    'fc:frame:button:1:action': 'post',
+    'fc:frame:post_url': 'https://quickquiz.app/api/frame',
+  },
+};
 
 export default async function Home({
   searchParams,
@@ -30,14 +41,3 @@ export default async function Home({
             eduQuestionType: 'Multiple choice',
             text: initialQuestion.prompt,
             suggestedAnswer: initialQuestion.options.map((opt) => ({
-              '@type': 'Answer',
-              text: opt,
-            })),
-          },
-        ],
-      }
-    : null;
-
-  return (
-    <main className="min-h-screen bg-[#0A1128] text-slate-100 flex flex-col">
-      {quizSchema && (

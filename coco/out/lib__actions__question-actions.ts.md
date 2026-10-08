@@ -1,5 +1,5 @@
 # lib/actions/question-actions.ts
-lines:327 exports:createQuestion,fetchRandomQuestion,getTopics,getPublicQuestion,disputeQuestion,getQuestionCount,get5050EliminatedIndices
+lines:383 exports:createQuestion,fetchRandomQuestion,getTopics,getPublicQuestion,disputeQuestion,getQuestionCount,get5050EliminatedIndices,generateQuestion
 ---
 'use server';
 
@@ -8,6 +8,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount } from '@/lib/services/session';
 import { ClientQuestion } from '@/lib/types';
 import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/utils/validation';
+import { GoogleGenAI } from '@google/genai';
 
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
@@ -40,4 +41,3 @@ export async function createQuestion(params: {
 
     // New questions go live at once and are moderated by disputes, so cap how fast one account adds them.
     const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
-    const { count, error: countErr } = await supabaseAdmin

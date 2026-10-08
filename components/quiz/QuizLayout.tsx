@@ -51,6 +51,7 @@ export default function QuizLayout({
     closeModal,
     claimableRewards,
     hasClaimableRewards,
+    loadLeaderboards,
     loadNextQuestion,
     handleSelectCategory,
     handleAnswerSubmit,
@@ -104,6 +105,7 @@ export default function QuizLayout({
                 isFlipped={isFlipped}
                 timeLeft={timeLeft}
                 result={result}
+                stats={stats}
                 onSelectAnswer={handleAnswerSubmit}
                 onNextQuestion={loadNextQuestion}
                 onOpenTimerSettings={() => openModal('timer')}
@@ -152,6 +154,7 @@ export default function QuizLayout({
                 groupEntries={groupLeaderboard}
                 loading={leaderboardLoading}
                 onOpenGroupModal={() => openModal('group')}
+                refreshLeaderboard={loadLeaderboards}
               />
             </div>
           </div>

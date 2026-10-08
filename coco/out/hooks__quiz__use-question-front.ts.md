@@ -8,15 +8,15 @@ import { useState, useEffect } from 'react';
 function getCategoryBadge(cat: string) {
   const lower = (cat || '').toLowerCase();
   if (lower.includes('defi')) {
-    return 'bg-[#8A2BE2]/15 text-[#8A2BE2] border-[#8A2BE2]/40';
+    return 'bg-cat-defi/15 text-cat-defi border-cat-defi/40';
   }
   if (lower.includes('nft') || lower.includes('game')) {
-    return 'bg-[#FF007F]/15 text-[#FF007F] border-[#FF007F]/40';
+    return 'bg-cat-nft/15 text-cat-nft border-cat-nft/40';
   }
   if (lower.includes('layer') || lower.includes('web3') || lower.includes('crypto')) {
-    return 'bg-[#3071FF]/15 text-[#3071FF] border-[#3071FF]/40';
+    return 'bg-cat-l1/15 text-cat-l1 border-cat-l1/40';
   }
-  return 'bg-[#00FFCC]/15 text-[#00FFCC] border-[#00FFCC]/40';
+  return 'bg-neo-mint/15 text-neo-mint border-neo-mint/40';
 }
 
 interface UseQuestionFrontOptions {

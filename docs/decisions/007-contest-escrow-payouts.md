@@ -1,4 +1,4 @@
-# ADR-006: Contest Payouts Through ContestEscrow Vouchers
+# ADR-007: Contest Payouts Through ContestEscrow Vouchers
 
 ## Status
 Accepted. Supersedes decision 2 of [ADR-003](003-question-lists-and-contest-voucher-safeguards.md) ("pause contest payouts").

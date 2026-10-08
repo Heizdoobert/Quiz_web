@@ -26,7 +26,7 @@ lines:195 exports:
   - `#FFD166` (Crypto Gold rewards/trophy)
   - `#FF4757` (Pop Coral danger/timer)
   - Category accents: `#8A2BE2` (DeFi), `#FF007F` (NFT & Gaming), `#3071FF` (Layer 1)
-- Micro-interactions: `:hover`, `:active:scale-95`, `:focus-visible:ring-2 focus-visible:ring-[#00FFCC]` on all interactive elements.
+- Micro-interactions: `:hover`, `:active:scale-95`, `:focus-visible:ring-2 focus-visible:ring-neo-mint` on all interactive elements.
 - Zero audio assets: Pure browser Web Audio API synthesis.
 - Zero errors on `npm run lint` and `npm run build`.
 - Local Docker container `quick-quiz-web` kept running on `http://localhost:3000`.

@@ -24,7 +24,7 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
           <button
             type="button"
             onClick={onOpenReview}
-            className="text-[11px] text-[#00FFCC] hover:underline active:opacity-70 font-bold font-heading transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#00FFCC]"
+            className="text-[11px] text-neo-mint hover:underline active:opacity-70 font-bold font-heading transition-colors cursor-pointer rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-neo-mint"
           >
             Review All →
           </button>
@@ -38,6 +38,6 @@ export default function HistoryList({ history, onOpenReview }: HistoryListProps)
           {history.slice(0, 6).map((item, idx) => (
             <div
               key={`${item.questionId}-${idx}`}
-              className="bg-elevation-2 glass-border border border-transparent flex items-center justify-between p-2.5 rounded-2xl hover:border-[#6C5CE7]/40 transition-colors text-xs"
+              className="bg-elevation-2 glass-border border border-transparent flex items-center justify-between p-2.5 rounded-2xl hover:border-electric-indigo/40 transition-colors text-xs"
             >
-              <span className="truncate max-w-[150px] text-slate-300 font-medium">
+              <span className="truncate max-w-37.5 text-slate-300 font-medium">

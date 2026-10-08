@@ -20,6 +20,7 @@ vi.mock('../components/layout/Header', () => ({
 vi.mock('../lib/actions/profile-actions', () => ({
   getUserQuizzes: vi.fn(),
   exportUserData: vi.fn(),
+  getQuestionAnalytics: vi.fn().mockResolvedValue({ success: true, data: [] }),
 }));
 
 vi.mock('../lib/actions/community-actions', () => ({

@@ -1,5 +1,5 @@
 # package.json
-lines:65 exports:
+lines:83 exports:
 ---
 {
   "name": "quick-quiz",
@@ -25,19 +25,19 @@ lines:65 exports:
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
-    "@playwright/test": "^1.63.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
-    "@supabase/server": "^1.8.0",
+    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
     "@tanstack/react-query": "^5.104.0",
-    "@x402/core": "^2.27.0",
-    "@x402/evm": "^2.27.0",
-    "@x402/svm": "^2.27.0",
+    "@x402/core": "^2.28.0",
+    "@x402/evm": "^2.28.0",
+    "@x402/svm": "^2.28.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^13.4.4",
+    "lodash.debounce": "^4.0.8",
     "lucide-react": "^1.47.0",
     "next": "16.3.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "use-sound": "^5.0.0",

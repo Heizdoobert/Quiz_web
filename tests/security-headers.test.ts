@@ -6,7 +6,7 @@ type Header = { key: string; value: string };
 async function loadHeaders(env: Record<string, string>): Promise<Record<string, string>> {
   vi.resetModules();
   Object.assign(process.env, env);
-  const config = (await import('../next.config.js')).default as unknown as {
+  const config = (await import('../next.config.mjs')).default as unknown as {
     headers: () => Promise<{ source: string; headers: Header[] }[]>;
   };
   const [{ source, headers }] = await config.headers();
