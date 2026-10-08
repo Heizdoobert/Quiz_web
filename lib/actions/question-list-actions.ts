@@ -898,17 +898,17 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
     if (listErr || !list) return { error: 'Contest not found.' };
     const contestId = (list.onchain_contest_id as `0x${string}`) || getContestId(listId, list.owner_wallet);
 
-    // Verify on-chain contest status if deployed
+    // A live list was funded on-chain when it started, so an unreadable contest means an RPC
+    // failure or a misconfigured escrow address: refuse rather than sign a voucher that cannot pay.
     const onChain = await getContestOnChain(contestId);
-    if (onChain) {
-      if (!onChain.active || onChain.remainingPool < amount) {
-        syncContestStatus(listId).catch((err) => logger.error('error', err));
-        return { error: 'Contest reward pool has been exhausted or closed.' };
-      }
-      if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
-        syncContestStatus(listId).catch((err) => logger.error('error', err));
-        return { error: 'Contest has expired.' };
-      }
+    if (!onChain) return { error: 'Could not verify the contest pool. Please try again shortly.' };
+    if (!onChain.active || onChain.remainingPool < amount) {
+      syncContestStatus(listId).catch((err) => logger.error('error', err));
+      return { error: 'Contest reward pool has been exhausted or closed.' };
+    }
+    if (Math.floor(Date.now() / 1000) >= Number(onChain.expiresAt)) {
+      syncContestStatus(listId).catch((err) => logger.error('error', err));
+      return { error: 'Contest has expired.' };
     }
 
     // Reuse unexpired open voucher if already generated
@@ -961,7 +961,7 @@ export async function claimListReward(listId: string): Promise<RewardVoucher | {
 
     const nonce = newNonce();
     const ttlDeadline = now + VOUCHER_TTL_SECONDS;
-    const effectiveDeadline = onChain ? Math.min(ttlDeadline, Number(onChain.expiresAt)) : ttlDeadline;
+    const effectiveDeadline = Math.min(ttlDeadline, Number(onChain.expiresAt));
     const deadline = BigInt(effectiveDeadline);
 
     const signature = await signer.signTypedData({

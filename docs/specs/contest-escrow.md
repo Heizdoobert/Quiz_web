@@ -3,7 +3,7 @@
 ## Objective
 Enable decentralized, trustless, and Sybil-resistant crypto contests by deploying an on-chain **`ContestEscrow`** smart contract.
 
-Contest creators deposit their chosen `$QUIZ` token reward pool into the escrow contract upfront. Players who complete contests earn EIP-712 signed claim vouchers based on verified quiz performance, which they redeem against the escrow contract. This replaces the currently paused backend minting and completely eliminates unbacked token inflation and creator self-drain exploits.
+Contest creators deposit their chosen `$QUIZ` token reward pool into the escrow contract upfront. Players who complete contests earn EIP-712 signed claim vouchers based on verified quiz performance, which they redeem against the escrow contract. This replaced the earlier paused backend minting (see ADR-007) and completely eliminates unbacked token inflation and creator self-drain exploits.
 
 ---
 
@@ -140,5 +140,5 @@ mapping(bytes32 => mapping(address => mapping(uint256 => bool))) public usedNonc
 - [ ] `ContestEscrow.sol` compiles with zero warnings under Solidity 0.8.24.
 - [ ] 100% test pass rate across new and existing Hardhat tests.
 - [ ] ABI and contract definitions synchronized into frontend `lib/contracts/`.
-- [ ] `claimListReward` server action unpaused and producing valid EIP-712 vouchers.
+- [x] `claimListReward` server action unpaused and producing valid EIP-712 vouchers.
 - [ ] Next.js type check, lint, and build all pass cleanly.

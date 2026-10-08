@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import GlobalLeaderboard from './GlobalLeaderboard';
@@ -13,7 +13,6 @@ interface LeaderboardPanelProps {
   groupEntries: LeaderboardEntry[];
   loading: boolean;
   onOpenGroupModal: () => void;
-  refreshLeaderboard?: () => void;
   onVisibilityChange?: (visible: boolean) => void;
   className?: string;
 }
@@ -23,7 +22,6 @@ export default function LeaderboardPanel({
   groupEntries,
   loading,
   onOpenGroupModal,
-  refreshLeaderboard,
   onVisibilityChange,
   className = '',
 }: LeaderboardPanelProps) {

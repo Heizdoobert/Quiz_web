@@ -362,6 +362,22 @@ describe('question list guards', () => {
     });
   });
 
+  it('refuses claimListReward, and signs nothing, when the contest cannot be read on-chain', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      question_lists: { row: { owner_wallet: WALLET, status: 'live' } },
+      list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
+    });
+    mockIsContestFunded = false; // getContestOnChain resolves null, as on an RPC failure
+    try {
+      const res = await claimListReward(LIST_ID);
+      expect(res).toEqual({ error: 'Could not verify the contest pool. Please try again shortly.' });
+      expect(inserts.reward_claims).toBeUndefined();
+    } finally {
+      mockIsContestFunded = true;
+    }
+  });
+
   it('refuses startContest if contest is not funded on-chain', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = false;

@@ -161,12 +161,9 @@ export function useQuizLogic({
     setAnsweredIds(saved.map((h) => h.questionId));
   }, [account]);
 
-  const loadLeaderboards = useCallback(
-    (overrideGroupId?: string) => {
-      queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
-    },
-    [queryClient]
-  );
+  const loadLeaderboards = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['leaderboard'] });
+  }, [queryClient]);
 
   const loadNextQuestion = useCallback(
     async (overrideAnsweredIds?: string[]) => {
@@ -323,7 +320,7 @@ export function useQuizLogic({
 
   const handleSelectGroup = (groupId: string) => {
     setSelectedGroupId(groupId);
-    loadLeaderboards(groupId);
+    loadLeaderboards();
   };
 
   const handleSaveTimerSettings = (mode: typeof timerMode, duration: number) => {

@@ -8,10 +8,14 @@ import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSec
 import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+const HOUR = 3600;
+const RATE_LIMITED_MESSAGE = 'Too many attempts. Please try again later.';
 
 function usernameToEmail(username: string): string {
   const trimmed = username.trim().toLowerCase();
@@ -61,6 +65,8 @@ export async function requestSignIn(address: string, chainId: number): Promise<s
 
 export async function signInWithWallet(message: string, signature: `0x${string}`): Promise<boolean> {
   try {
+    // Verifying can cost an on-chain call for smart wallets, so cap it per caller IP.
+    if (!(await allowAttemptFromIp('wallet-ip', 30, 600))) return false;
     const store = await cookies();
     const nonce = store.get(CHALLENGE_COOKIE)?.value;
     store.delete(CHALLENGE_COOKIE); // one attempt per challenge
@@ -91,16 +97,25 @@ export async function signInWithWallet(message: string, signature: `0x${string}`
 // Same { sent: true } whether or not the email has an account, so a caller can't
 // use this to enumerate registered emails. shouldCreateUser lets a first-time
 // email register itself right here, with no separate registration step.
-export async function requestEmailCode(email: string): Promise<{ sent: boolean }> {
+export async function requestEmailCode(email: string): Promise<{ sent: boolean; error?: 'RATE_LIMITED' }> {
   const trimmed = email.trim();
   if (EMAIL_RE.test(trimmed)) {
+    // Limits apply to every address alike, so hitting one reveals nothing about an account.
+    if (
+      !(await allowAttempt('email-code', trimmed, 5, HOUR)) ||
+      !(await allowAttemptFromIp('email-code-ip', 20, HOUR))
+    ) {
+      return { sent: false, error: 'RATE_LIMITED' };
+    }
     await supabase.auth.signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
   }
   return { sent: true };
 }
 
-export async function verifyEmailCode(email: string, code: string): Promise<{ ok: boolean }> {
+export async function verifyEmailCode(email: string, code: string): Promise<{ ok: boolean; error?: 'RATE_LIMITED' }> {
   try {
+    // A 6-digit code lives about an hour; 10 tries per hour makes guessing it hopeless.
+    if (!(await allowAttempt('email-verify', email, 10, HOUR))) return { ok: false, error: 'RATE_LIMITED' };
     const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
     if (error || !data.user) return { ok: false };
     const accountId = await ensureAccountForAuthUser(data.user.id);
@@ -128,6 +143,13 @@ export async function signUpWithUsername(
         ok: false,
         error: 'Password must be at least 6 characters.',
       };
+    }
+
+    if (
+      !(await allowAttempt('signup', trimmed, 5, HOUR)) ||
+      !(await allowAttemptFromIp('signup-ip', 10, HOUR))
+    ) {
+      return { ok: false, error: RATE_LIMITED_MESSAGE };
     }
 
     const email = usernameToEmail(trimmed);
@@ -191,6 +213,8 @@ export async function signInWithUsername(
     if (!trimmed || !password) {
       return { ok: false, error: 'Username and password are required.' };
     }
+    // Counts every attempt, not just failures: one counter, and a legitimate user never nears 10.
+    if (!(await allowAttempt('signin', trimmed, 10, 900))) return { ok: false, error: RATE_LIMITED_MESSAGE };
 
     const email = usernameToEmail(trimmed);
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -235,6 +259,7 @@ export async function linkWallet(
   try {
     const account = await getSessionAccount();
     if (!account || account.wallet) return { ok: false };
+    if (!(await allowAttemptFromIp('wallet-ip', 30, 600))) return { ok: false };
 
     const store = await cookies();
     const nonce = store.get(CHALLENGE_COOKIE)?.value;

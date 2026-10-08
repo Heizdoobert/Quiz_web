@@ -1,5 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 
 vi.mock('wagmi', () => ({ useAccount: () => ({ address: '0x' + 'a'.repeat(40), isConnected: true }) }));
@@ -32,6 +34,14 @@ vi.mock('../lib/actions/quiz-actions', () => ({
   submitAnswer: (...args: unknown[]) => submitAnswer(...args),
 }));
 
+const withQuery = () => {
+  const client = new QueryClient();
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  return Wrapper;
+};
+
 describe('useQuizLogic history restore', () => {
   beforeEach(() => {
     getAnswerHistory.mockReset();
@@ -43,7 +53,7 @@ describe('useQuizLogic history restore', () => {
       { questionId: 'q2', prompt: 'What is gas?', isCorrect: false },
     ]);
 
-    const { result } = renderHook(() => useQuizLogic());
+    const { result } = renderHook(() => useQuizLogic(), { wrapper: withQuery() });
 
     await waitFor(() => expect(result.current.history).toHaveLength(2));
     expect(getAnswerHistory).toHaveBeenCalledWith();
@@ -53,7 +63,7 @@ describe('useQuizLogic history restore', () => {
   it('leaves history empty when nothing was saved', async () => {
     getAnswerHistory.mockResolvedValue([]);
 
-    const { result } = renderHook(() => useQuizLogic());
+    const { result } = renderHook(() => useQuizLogic(), { wrapper: withQuery() });
 
     await waitFor(() => expect(getAnswerHistory).toHaveBeenCalled());
     expect(result.current.history).toEqual([]);

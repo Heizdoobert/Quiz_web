@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 import { SessionProvider, useSession } from '../hooks/shared/use-session';
 import { useQuizAuth } from '../hooks/shared/use-quiz-auth';
@@ -125,8 +126,11 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
     (getAnswerHistory as ReturnType<typeof vi.fn>).mockResolvedValue(HISTORY_A);
     (getClaimableRewards as ReturnType<typeof vi.fn>).mockResolvedValue(REWARDS_A);
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
     );
 
     const { result } = renderHook(() => useQuizLogic(), { wrapper });
@@ -153,8 +157,11 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
     (getAnswerHistory as ReturnType<typeof vi.fn>).mockResolvedValue(HISTORY_A);
     (getClaimableRewards as ReturnType<typeof vi.fn>).mockResolvedValue(REWARDS_A);
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
     );
 
     function useCombined() {
@@ -202,8 +209,11 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
     (getAnswerHistory as ReturnType<typeof vi.fn>).mockResolvedValue(HISTORY_A);
     (getClaimableRewards as ReturnType<typeof vi.fn>).mockResolvedValue(REWARDS_A);
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
     );
 
     function useCombined() {
@@ -259,8 +269,11 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
     });
     (getUserStats as ReturnType<typeof vi.fn>).mockResolvedValue(STATS_A);
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
     );
 
     function useCombined() {
@@ -357,8 +370,11 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
     // Stats for A will take a while to resolve
     (getUserStats as ReturnType<typeof vi.fn>).mockReturnValue(slowStatsPromise);
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>{children}</SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>{children}</SessionProvider>
+      </QueryClientProvider>
     );
 
     function useCombined() {
@@ -425,10 +441,13 @@ describe('Wallet and Auth State Synchronization (R1 & Acceptance Criteria)', () 
       return <>{children}</>;
     }
 
+    const queryClient = new QueryClient();
     const wrapper = ({ children }: { children: React.ReactNode }) => (
-      <SessionProvider>
-        <IntegrationBridge>{children}</IntegrationBridge>
-      </SessionProvider>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider>
+          <IntegrationBridge>{children}</IntegrationBridge>
+        </SessionProvider>
+      </QueryClientProvider>
     );
 
     function useCombined() {
