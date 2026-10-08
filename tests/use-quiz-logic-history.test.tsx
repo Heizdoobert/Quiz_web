@@ -36,9 +36,10 @@ vi.mock('../lib/actions/quiz-actions', () => ({
 
 const withQuery = () => {
   const client = new QueryClient();
-  return ({ children }: { children: React.ReactNode }) => (
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={client}>{children}</QueryClientProvider>
   );
+  return Wrapper;
 };
 
 describe('useQuizLogic history restore', () => {
