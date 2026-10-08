@@ -1,20 +1,131 @@
-# Tasks: Auth Popup
+# Tasks: Security Posture Reconciliation
 
 > Plan: [plan.md](./plan.md)
+> Rules: one task per commit on `company/update-code`; verify in an ext4 scratch copy (`npm ci` hangs on NTFS); never touch `main`.
 
 ---
 
-## Task 1: Create UI Components
-- [ ] Create `components/auth/AuthChoiceScreen.tsx`
-- [ ] Create `components/auth/AuthMethodTabs.tsx`
+## Phase 1: Make the record true
 
-## Task 2: Create Container
-- [ ] Create `components/auth/AuthPopup.tsx` wiring up state and animations.
+### Task 1: Bump `next` to 16.4.0
+**Description:** Fix the high `next` advisory (image optimizer SSRF, ISR cache poisoning).
+**Acceptance criteria:**
+- [x] `next` and `eslint-config-next` at 16.4.0 in `package.json` + lockfile (`21ed567`)
+- [x] `npm audit --omit=dev` shows no `next` finding
+**Verification:**
+- [x] `npm run type-check && npm run lint` pass; build passes on 16.4.0
+- [x] Tests: see Task 1b (7 stale tests blocked `test:coverage`, unrelated to the bump)
+- [x] First-load JS did not grow (459 kB vs 469 kB, same ad-hoc method). The 150 kB budget cannot be verified until the repo has a bundle check; absolute numbers do not match the 127 kB in `CONSTRAINTS.md`.
+**Dependencies:** None
+**Files:** `package.json`, `package-lock.json`
+**Scope:** XS
 
-## Task 3: Integration
-- [ ] Update `hooks/shared/use-session.tsx` to import `AuthPopup` instead of `SignInModal`.
-- [ ] Delete `components/auth/SignInModal.tsx`.
+### Task 1b: Repair stale tests so `test:coverage` is green
+**Description:** 7 tests failed on `next` 16.3.6 and 16.4.0 alike because their expectations lagged the source: leaderboard actions now pass `p_offset` to the RPC, and `createQuestion`/`disputeQuestion` return a `{ success, error: { code, message } }` / `{ success, data }` envelope.
+**Acceptance criteria:**
+- [x] `tests/leaderboard-actions.test.ts` expects `p_offset: 0`
+- [x] `tests/answer-and-list-guards.test.ts` expects the envelope shapes; source unchanged
+**Verification:**
+- [x] `npm run test:coverage`: 31 files, 302 tests pass; lines 62.63% (ratchet 62.5%)
+**Dependencies:** Task 1
+**Files:** `tests/leaderboard-actions.test.ts`, `tests/answer-and-list-guards.test.ts`
+**Scope:** XS
+**Known, not fixed:** `components/modals/__tests__/RewardsTokensTab.test.tsx` has 2 failing cases (duplicate "1000 TKN" text). It lives outside `npm test` (`tests/` only), so it is not gated; `npm run test` does not run it.
 
-## Task 4: Testing & Verification
-- [ ] Create `components/auth/__tests__/AuthPopup.test.tsx`
-- [ ] Run tests and checks.
+### Task 2: Verify `ws` fix path and re-triage W1
+**Description:** F2/F6. Check whether patched `ws` (>8.20.1) exists and whether an `overrides` entry is compatible with `@reown/appkit*` / `@walletconnect/utils`. If yes, add override and delete W1; if no, refresh W1 reason text and expiry rationale. Never loosen `CONSTRAINTS.md` to pass.
+**Acceptance criteria:**
+- [ ] Decision recorded: override applied (W1 removed) or W1 kept with updated reason
+- [ ] `npm run check:deps` passes
+- [ ] If W1 removed or still covering: CI audit step no longer swallows failures (`|| echo ::warning::` removed from workflow)
+**Verification:**
+- [ ] `npm audit --omit=dev` output matches the decision
+- [ ] `npm run build` and wallet connect smoke on preview if override applied
+**Dependencies:** Task 1
+**Files:** `package.json`, `package-lock.json`, `CONSTRAINTS.md`, `.github/workflows/ci.yml`
+**Scope:** S
+
+### Task 3: Verify contest claim flow; correct §4.C and ADR-003
+**Description:** F1. Read `claimListReward` end to end (`question-list-actions.ts:868` onward), `ContestEscrow.sol`, and `reward-actions.ts`. Confirm creator funds are escrowed before a voucher can be signed and the self-drain path from ADR-003 is closed. Then fix the doc/ADR status. If the flow is NOT safe, stop and report before editing docs.
+**Acceptance criteria:**
+- [ ] Written finding: what enforces escrow-before-claim (code path + contract check), or the gap
+- [ ] ADR-003 status/consequences and §4.C updated to match (or superseded by a new ADR if the decision changed)
+**Verification:**
+- [ ] Existing tests for `claimListReward` pass: `npx vitest run lib tests -t claim`
+- [ ] Manual: no remaining "payouts are paused" text in docs unless true
+**Dependencies:** None
+**Files:** `SECURITY-TRADE-OFFS.md`, `docs/decisions/003-*.md`, possibly new `docs/decisions/006-*.md`
+**Scope:** S
+
+### Checkpoint: Phase 1
+- [ ] `npm run check:task` and `npm run check:deps` green
+- [ ] Push to `preview` only if asked; CI green before anything else
+
+---
+
+## Phase 2: Close real gaps
+
+### Task 4: Rate-limit auth actions
+**Description:** F3. Add per-identifier attempt limits to `requestEmailCode`, `verifyEmailCode`, `signInWithUsername`, `signUpWithUsername`, and `getAuthNonce`/`signInWithWallet` using the existing windowed-count pattern (see `community-actions.ts:126`). Return a `RATE_LIMITED` result, no raw DB errors.
+**Acceptance criteria:**
+- [ ] Email code request: max N per email per hour (default 5); verify: max 10 attempts per code window
+- [ ] Username sign-in: max 10 failures per username per 15 min
+- [ ] Limits stored via existing admin client; no new dependency
+- [ ] Failures logged server-side, generic message to client
+**Verification:**
+- [ ] New unit tests: under limit passes, over limit returns `RATE_LIMITED`, window expiry resets
+- [ ] `npm run check:task` (changed lines ≥ 80% covered)
+**Dependencies:** None
+**Files:** `lib/actions/auth-actions.ts`, a shared helper in `lib/` (reuse existing if one exists), `supabase/` migration only if a table/index is required, `tests/`
+**Scope:** M
+
+### Task 5: CSP report-only
+**Description:** F4. Add `Content-Security-Policy-Report-Only` in `next.config.js` covering `default-src 'self'`, script/style (Next inline needs), `connect-src` for Supabase, RPC, WalletConnect/Reown relays, `img-src`, `frame-src` for wallet modals, `frame-ancestors 'none'` kept. Collect violations on preview.
+**Acceptance criteria:**
+- [ ] Header present on all routes; existing headers unchanged
+- [ ] Violation endpoint or browser-console review documented
+**Verification:**
+- [ ] `npm run build`; `curl -I` on preview shows header
+- [ ] Wallet, email and username sign-in exercised on preview; list of violations triaged
+**Dependencies:** Task 1
+**Files:** `next.config.js`, possibly `app/` report route
+**Scope:** S
+
+### Task 6: Enforce CSP
+**Description:** Promote the tuned policy from report-only to enforcing after clean preview run.
+**Acceptance criteria:**
+- [ ] `Content-Security-Policy` carries the full policy; no first-party breakage
+**Verification:**
+- [ ] `npm run check:a11y` and `check:perf` on preview; e2e sign-in flow passes
+**Dependencies:** Task 5 + a clean preview observation period
+**Files:** `next.config.js`
+**Scope:** XS
+
+### Checkpoint: Phase 2
+- [ ] Preview full sign-in paths work; no CSP violations from first-party code
+- [ ] Review with human before Phase 3
+
+---
+
+## Phase 3: Rewrite the doc
+
+### Task 7: Update `SECURITY-TRADE-OFFS.md`
+**Description:** Bring all sections to the post-Phase-2 truth: STRIDE rows for email/username auth (brute force, enumeration, code replay) and contest escrow; §2 add CSP and rate limits; §3 replace with Task 2 audit numbers and decision; §4 status per Task 3; refresh ADR list (add ADR-005, any new ADR).
+**Acceptance criteria:**
+- [ ] Each claim cites a file or command that confirms it
+- [ ] Date stamp "as of" updated
+**Verification:**
+- [ ] Re-run `npm audit --omit=dev` and compare numbers
+- [ ] grep every cited path exists
+**Dependencies:** Tasks 2, 3, 4, 6
+**Files:** `SECURITY-TRADE-OFFS.md`
+**Scope:** XS
+
+### Checkpoint: Complete
+- [ ] `npm run check:full` green; CI green on `preview`
+- [ ] Human review before any merge toward `main`
+
+---
+
+## Out of scope (tracked in prod-health plan)
+Dockerfile build args, CD gating on CI, Node 24, PWA/service worker, `/api/health`, CI hygiene, contracts hardening and audit (T10), upstream-blocked majors (T11).
