@@ -6,10 +6,11 @@
 
 ## Task 1: Clean up remaining Phase A dependencies
 **Description:** Remove unused `@x402/*` packages from `package.json` to complete Phase A pruning.
+> [!WARNING] Update: This step is invalid because `@coinbase/cdp-sdk` dynamically imports these packages and Next.js Turbopack fails to compile when they are missing. They must be kept.
 **Acceptance criteria:**
-- [x] `@x402/core`, `@x402/evm`, `@x402/svm` are removed from `package.json`.
+- [ ] `@x402/core`, `@x402/evm`, `@x402/svm` are removed from `package.json`. (Skipped due to upstream dependency)
 **Verification:**
-- [x] Build succeeds: `npm run build`
+- [ ] Build succeeds: `npm run build`
 **Dependencies:** None
 **Files likely touched:** `package.json`
 **Estimated scope:** XS
