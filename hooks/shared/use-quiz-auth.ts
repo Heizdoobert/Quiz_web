@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import type { AuthenticationStatus } from '@rainbow-me/rainbowkit';
 import { getSignedInWallet, signOutWallet } from '@/lib/actions/auth-actions';
 import { createQuizAuthAdapter } from '@/lib/services/auth-adapter';
+import { logger } from '@/lib/logger';
 import type { SessionAccount } from '@/hooks/shared/use-session';
 
 export interface QuizAuthOptions {
@@ -59,7 +60,7 @@ export function useQuizAuth(options?: QuizAuthOptions) {
               }
             }
           } catch (err) {
-            console.error('signOutWallet error on disconnect:', err);
+            logger.error('auth_sign_out_on_disconnect_failed', err);
             if (wasConnected) {
               onSignOut?.();
               if (onSyncSession) {
@@ -78,7 +79,7 @@ export function useQuizAuth(options?: QuizAuthOptions) {
         try {
           signedInWallet = await getSignedInWallet();
         } catch (err) {
-          console.error('getSignedInWallet error:', err);
+          logger.error('auth_get_signed_in_wallet_failed', err);
         }
 
         if (cancelled) return;
@@ -100,7 +101,7 @@ export function useQuizAuth(options?: QuizAuthOptions) {
             try {
               await signOutWallet();
             } catch (err) {
-              console.error('signOutWallet error on switch:', err);
+              logger.error('auth_sign_out_on_switch_failed', err);
             }
           }
           if (cancelled) return;
@@ -125,7 +126,7 @@ export function useQuizAuth(options?: QuizAuthOptions) {
           return isMatch ? 'authenticated' : 'unauthenticated';
         });
       } catch (err) {
-        console.error('checkAuth unexpected error:', err);
+        logger.error('auth_check_failed', err);
         if (!cancelled) setAuthStatus('unauthenticated');
       }
     }
