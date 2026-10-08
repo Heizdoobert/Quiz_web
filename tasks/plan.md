@@ -57,3 +57,91 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 ## Open Questions
 - Is production on Vercel or the GHCR image? (affects whether Dockerfile build args matter; not blocking here)
 - Want the CI audit step made strict (remove `|| echo ::warning::`) as part of Task 2? Default: yes, if W1 still covers the remaining findings.
+
+---
+
+# Part 2: Audit backlog (2026-10-08)
+
+## Overview
+A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `tasks/audit/`) found 273 candidate issues. Part 1 above is the security reconciliation and is complete except Task 6 (CSP enforcement), which waits on a preview observation. Part 2 orders the audit's findings into tasks. Details, acceptance criteria and verification for each task are in `tasks/todo.md` (Part 2). Task ids start with a letter (A1 and so on) so they do not collide with Part 1.
+
+## Architecture decisions
+- **Order by risk, not by lane.** Money and answer secrecy first (A), then correctness, tests and accessibility (B), then performance (C), delivery (D), docs and layout (E).
+- **Re-verify before fixing.** About 230 of the 273 findings were not re-checked by the main thread. Each task starts by re-reading the cited code; if the finding is wrong, the task is dropped and the report corrected.
+- **Test first for bugs.** A1, A2, B1, B2 each start with a failing test.
+- **Reuse before building.** A3 and the auth limiter share `rate_limit_hit`; B3 prefers native `<dialog>` and `inert` to a library; C1 is a small script, not a new dependency.
+- **Moves need approval.** The L1 move groups change many imports and the dev-only exclusion list, so each is its own commit after you approve it.
+- **Branch hygiene.** `company/update-code` is 6 commits behind `preview` (Sentry, migration 19). Task D1 merges it after the `coco/out` edits are dealt with; findings in those files are provisional until then.
+
+## Task list
+
+### Phase A: Fail closed and keep answers secret
+- [ ] Task A1: Fail closed in `isContestVoucherUsed`
+- [ ] Task A2: Gate `get5050EliminatedIndices`
+- [ ] Task A3: Limit guest answer harvesting (needs your decision)
+- [ ] Task A4: Gate CD on CI (you add the required checks in the ruleset)
+- [ ] Task A5: Real `NEXT_PUBLIC_*` in the production image (needs D1)
+- [ ] Task A6 (yours): Apply migrations 17 and 19 in Supabase; confirm backups
+
+### Checkpoint: Phase A
+- [ ] `npm run check:task` green; CI green on `preview`
+
+### Phase B: Correctness, tests, accessibility
+- [ ] Task B1: Confirm and fix the toast re-render loop
+- [ ] Task B2: Show the send-code error in `EmailTab`
+- [ ] Task B3: Modal focus management
+- [ ] Task B4: Labels, live regions and form errors
+- [ ] Task B5: Run the component tests in CI
+- [ ] Task B6: Honest coverage
+- [ ] Task B7: Enforce the Floor rules that nothing enforces
+- [ ] Task B8: Contest reward tests
+
+### Checkpoint: Phase B
+- [ ] `npm run check:full` green
+
+### Phase C: Performance
+- [ ] Task C1: Make the bundle budget measurable
+- [ ] Task C2: Keep the wallet stack off non-wallet routes
+- [ ] Task C3: `/topics` is frozen at build time
+- [ ] Task C4: Cache or index the global leaderboard
+
+### Checkpoint: Phase C
+- [ ] Bundle number reported honestly
+
+### Phase D: Delivery and operations
+- [ ] Task D1: Merge `origin/preview` into this branch
+- [ ] Task D2: Migration ledger and rollback policy
+- [ ] Task D3: `/api/health`
+
+### Checkpoint: Phase D
+- [ ] CI green on `preview`
+
+### Phase E: Docs, structure, dependencies
+- [ ] Task E1: README and environment docs
+- [ ] Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md`
+- [ ] Task E3: ADRs for decisions never recorded
+- [ ] Task E4: Fix the promotion list and AI-file maps
+- [ ] Task E5: Move groups L1-M1 to M8 (one commit each, with approval)
+- [ ] Task E6: Remove dead dependencies
+
+### Checkpoint: Complete
+- [ ] `npm run check:full` green; review with human before any merge toward `main`
+
+## Risks and mitigations
+| Risk | Impact | Mitigation |
+|------|--------|------------|
+| A subagent finding is wrong | Med | Re-read the cited code first; drop and correct the report if so |
+| A3 changes the guest experience | High | Product decision first; the guest reveal is intended in `docs/specs/trivia-guest-access.md` |
+| A4 or the ruleset change blocks hotfixes | Med | Keep the admin bypass; add one aggregate "CI gate" check |
+| B6 lowers the displayed coverage ratchet | Low | Expected; record the honest baseline and the reason in the commit |
+| C1 fails CI immediately (about 450 kB against 150 kB) | Med | Land as measured-only with a ratchet and a `CONSTRAINTS.md` exception until C2 |
+| E5 moves break imports or the exclusion list | Med | One group per commit, `npm run check:task` after each |
+| Merging `preview` (D1) conflicts with uncommitted `coco/out` edits | Low | Commit or set aside those edits first, or merge in a throwaway worktree |
+
+## Open questions
+- D1: where does production run (Vercel or the GHCR image)?
+- D4: is there a multisig and an external contract auditor?
+- A3: keep the guest answer reveal with a rate limit, or require sign-in?
+- Contest integrity (S2-03, S2-04): reviewer model and token-farming limits.
+- D2: Supabase CLI or a manual ledger for migrations?
+- PWA: keep, replace or drop the service worker?
