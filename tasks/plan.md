@@ -11,20 +11,20 @@ The current leaderboard relies on Supabase Realtime (`postgres_changes`) to push
 ## Task List
 
 ### Phase 1: Foundation
-- [ ] Task 1: Integrate React Query for Leaderboards
-- [ ] Task 2: Implement Visibility-Aware Polling
+- [x] Task 1: Integrate React Query for Leaderboards
+- [x] Task 2: Implement Visibility-Aware Polling
 
 ### Checkpoint: Foundation
-- [ ] Manual test: Leaderboard fetches successfully on initial load.
-- [ ] Manual test: Leaderboard polls exactly every 15 seconds when visible, and pauses when scrolled out of view or tab is backgrounded.
-- [ ] Network tab confirms no WebSocket connection is established for `quiz_results`.
+- [x] Manual test: Leaderboard fetches successfully on initial load.
+- [x] Manual test: Leaderboard polls exactly every 15 seconds when visible, and pauses when scrolled out of view or tab is backgrounded.
+- [x] Network tab confirms no WebSocket connection is established for `quiz_results`.
 
 ### Phase 2: Polish
-- [ ] Task 3: Visual Highlights for Leaderboard Changes
+- [x] Task 3: Visual Highlights for Leaderboard Changes
 
 ### Checkpoint: Complete
-- [ ] Leaderboard rows animate gracefully when data updates.
-- [ ] All tests pass locally and the build succeeds.
+- [x] Leaderboard rows animate gracefully when data updates.
+- [x] All tests pass locally and the build succeeds.
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
