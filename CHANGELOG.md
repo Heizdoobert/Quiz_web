@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-10-08
+
+### Added
+- **Toast Notifications**: Interactive application notifications via a custom ToastProvider.
+- **Offline PWA Support**: Implemented progressive web app capabilities, ensuring offline access to previously loaded app shells and assets.
+- **Social Sharing**: Expanded virality with one-click intent sharing to X (Twitter) and Farcaster directly from result screens.
+- **AI Question Generator**: Empowered users to dynamically generate crypto trivia questions using `@google/genai` through a Next.js Server Action.
+- **Vercel Analytics**: Out-of-the-box performance and usage metrics integrated globally via `<Analytics />`.
+- **Test Coverage Improvements**: Added unit tests for question actions (e.g., `generateQuestion`) bringing the total to 311 tests.
+
+### Fixed
+- **Next.js Turbopack Module Resolutions**: Restored required dynamic dependencies (`@x402/core`, `@x402/evm`, `@x402/svm`) needed by the Coinbase CDP SDK, resolving build failures on preview environments.
+
 ## [0.4.0] - 2026-10-05
 
 ### Added
