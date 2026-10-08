@@ -1,5 +1,5 @@
 # lib/actions/quiz-actions.ts
-lines:122 exports:getAnswerHistory,submitAnswer,getUserStats
+lines:123 exports:getAnswerHistory,submitAnswer,getUserStats
 ---
 'use server';
 
@@ -7,6 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount } from '@/lib/services/session';
 import { statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
+import { logger } from '@/lib/logger';
 
 const HISTORY_LIMIT = 20;
 
@@ -27,7 +28,7 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
       .limit(HISTORY_LIMIT);
 
     if (error || !data) {
-      console.error('getAnswerHistory error:', error);
+      logger.error('getAnswerHistory error:', error);
       return [];
     }
 
@@ -39,5 +40,4 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
       })
     );
   } catch (err) {
-    console.error('getAnswerHistory exception:', err);
-    return [];
+    logger.error('getAnswerHistory exception:', err);

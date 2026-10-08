@@ -1,11 +1,12 @@
 # components/community/SuggestionForm.tsx
-lines:142 exports:default
+lines:143 exports:default
 ---
 "use client";
 
 import React, { useState } from "react";
 import { Lightbulb, Send, X, Check } from "lucide-react";
 import { addComment } from "@/lib/actions/community-actions";
+import { logger } from '@/lib/logger';
 
 interface SuggestionFormProps {
   questionId: string;
@@ -40,4 +41,3 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
           setError("Authors cannot send suggestions on their own questions.");
         } else if (res.code === "RATE_LIMITED") {
           setError(
-            "Daily limit reached (max 20 comments or suggestions per day).",

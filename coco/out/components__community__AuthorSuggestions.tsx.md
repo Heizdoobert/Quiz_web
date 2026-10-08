@@ -1,5 +1,5 @@
 # components/community/AuthorSuggestions.tsx
-lines:128 exports:default
+lines:129 exports:default
 ---
 "use client";
 
@@ -11,6 +11,7 @@ import {
   resolveSuggestion,
 } from "@/lib/actions/community-actions";
 import { formatRelativeTime } from "@/lib/utils";
+import { logger } from '@/lib/logger';
 
 interface AuthorSuggestionsProps {
   accountId: string;
@@ -34,10 +35,9 @@ export default function AuthorSuggestions({
       })
       .catch((err) => {
         if (!cancelled) {
-          console.error("Failed to load author suggestions:", err);
+          logger.error("Failed to load author suggestions:", err);
           setLoading(false);
         }
       });
 
     return () => {
-      cancelled = true;

@@ -1,5 +1,5 @@
 # lib/actions/auth-actions.ts
-lines:277 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,signUpWithUsername,signInWithUsername,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
+lines:278 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,signUpWithUsername,signInWithUsername,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
 ---
 'use server';
 
@@ -11,6 +11,7 @@ import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSec
 import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { logger } from '@/lib/logger';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
@@ -40,4 +41,3 @@ export async function getAuthNonce(): Promise<string> {
     sameSite: 'strict',
     path: '/',
     maxAge: CHALLENGE_TTL_SECONDS,
-  });

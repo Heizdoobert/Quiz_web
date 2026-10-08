@@ -1,5 +1,5 @@
 # lib/actions/community-actions.ts
-lines:349 exports:CommunityResult,RatingSummary,CommentView,SuggestionView,rateQuestion,addComment,deleteComment,resolveSuggestion,getQuestionDiscussion,getSuggestionsForAuthor
+lines:350 exports:CommunityResult,RatingSummary,CommentView,SuggestionView,rateQuestion,addComment,deleteComment,resolveSuggestion,getQuestionDiscussion,getSuggestionsForAuthor
 ---
 'use server';
 
@@ -7,6 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { supabase } from '@/lib/supabase/supabase';
 import { getSessionAccount } from '@/lib/services/session';
 import { isUuid } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 
 export type CommunityResult =
   | { ok: true }
@@ -40,4 +41,3 @@ export interface SuggestionView {
 
 const PAGE_SIZE = 20;
 
-async function checkCanDiscuss(

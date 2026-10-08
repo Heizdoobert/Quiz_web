@@ -1,7 +1,8 @@
 # lib/actions/reward-actions.ts
-lines:429 exports:getClaimableRewards,generateTokenVoucher,generateBadgeVoucher,confirmRewardClaim
+lines:430 exports:getClaimableRewards,generateTokenVoucher,generateBadgeVoucher,confirmRewardClaim
 ---
 'use server';
+import { logger } from "@/lib/logger";
 
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
@@ -40,4 +41,3 @@ async function settlePendingTokenClaims(accountId: string, wallet: string): Prom
 
   const now = Math.floor(Date.now() / 1000);
   let open: PendingTokenClaim | null = null;
-  for (const claim of data) {

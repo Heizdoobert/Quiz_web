@@ -1,11 +1,12 @@
 # components/community/RatingStars.tsx
-lines:111 exports:default
+lines:112 exports:default
 ---
 'use client';
 
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
 import { rateQuestion } from '@/lib/actions/community-actions';
+import { logger } from '@/lib/logger';
 
 interface RatingStarsProps {
   questionId: string;
@@ -40,4 +41,3 @@ export default function RatingStars({
       const res = await rateQuestion(questionId, star);
       if (res.ok) {
         setUserRating(star);
-        onRated?.(star);
