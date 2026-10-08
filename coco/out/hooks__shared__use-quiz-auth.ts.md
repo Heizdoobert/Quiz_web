@@ -1,5 +1,5 @@
 # hooks/shared/use-quiz-auth.ts
-lines:187 exports:QuizAuthOptions,useQuizAuth
+lines:188 exports:QuizAuthOptions,useQuizAuth
 ---
 'use client';
 
@@ -8,6 +8,7 @@ import { useAccount } from 'wagmi';
 import type { AuthenticationStatus } from '@rainbow-me/rainbowkit';
 import { getSignedInWallet, signOutWallet } from '@/lib/actions/auth-actions';
 import { createQuizAuthAdapter } from '@/lib/services/auth-adapter';
+import { logger } from '@/lib/logger';
 import type { SessionAccount } from '@/hooks/shared/use-session';
 
 export interface QuizAuthOptions {
@@ -40,4 +41,3 @@ export function useQuizAuth(options?: QuizAuthOptions) {
 
     async function checkAuth() {
       try {
-        if (accountStatus === 'connecting' || accountStatus === 'reconnecting') {

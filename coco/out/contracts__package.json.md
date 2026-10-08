@@ -20,6 +20,6 @@ lines:22 exports:
     "typescript": "^5.5.0"
   },
   "dependencies": {
-    "dotenv": "^18.0.4"
+    "dotenv": "^18.0.5"
   }
 }

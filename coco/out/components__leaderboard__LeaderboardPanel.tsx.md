@@ -1,5 +1,5 @@
 # components/leaderboard/LeaderboardPanel.tsx
-lines:116 exports:default
+lines:97 exports:default
 ---
 'use client';
 
@@ -10,8 +10,6 @@ import GlobalLeaderboard from './GlobalLeaderboard';
 import GroupLeaderboard from './GroupLeaderboard';
 import { Shield, Trophy, Users } from 'lucide-react';
 import { useIntersectionObserver } from '@/hooks/shared/use-intersection';
-import { supabase } from '@/lib/supabase/supabase';
-import debounce from 'lodash.debounce';
 
 interface LeaderboardPanelProps {
   globalEntries: LeaderboardEntry[];
@@ -19,6 +17,7 @@ interface LeaderboardPanelProps {
   loading: boolean;
   onOpenGroupModal: () => void;
   refreshLeaderboard?: () => void;
+  onVisibilityChange?: (visible: boolean) => void;
   className?: string;
 }
 
@@ -28,6 +27,7 @@ export default function LeaderboardPanel({
   loading,
   onOpenGroupModal,
   refreshLeaderboard,
+  onVisibilityChange,
   className = '',
 }: LeaderboardPanelProps) {
   const [activeTab, setActiveTab] = useState<'global' | 'group'>('global');
@@ -36,8 +36,8 @@ export default function LeaderboardPanel({
   const panelRef = useRef<HTMLElement>(null);
   const isVisible = useIntersectionObserver(panelRef, { threshold: 0.1 });
 
-  const debouncedRefresh = useMemo(() => {
-    if (!refreshLeaderboard) return null;
-    return debounce(refreshLeaderboard, 5000, { leading: true, trailing: true });
-  }, [refreshLeaderboard]);
-
+  useEffect(() => {
+    if (onVisibilityChange) {
+      onVisibilityChange(isVisible);
+    }
+  }, [isVisible, onVisibilityChange]);

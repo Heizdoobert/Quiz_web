@@ -1,12 +1,12 @@
 # package.json
-lines:83 exports:
+lines:81 exports:
 ---
 {
   "name": "quick-quiz",
   "version": "0.4.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -28,9 +28,8 @@ lines:83 exports:
     "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
-    "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.2",
-    "@tanstack/react-query": "^5.104.0",
+    "@tanstack/react-query": "^5.104.1",
     "@x402/core": "^2.28.0",
     "@x402/evm": "^2.28.0",
     "@x402/svm": "^2.28.0",
@@ -41,3 +40,4 @@ lines:83 exports:
     "next": "16.3.6",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "use-sound": "^5.0.0",
