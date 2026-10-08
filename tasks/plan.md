@@ -13,7 +13,7 @@ This plan covers the implementation of Phase B from `project-improvements.md`, w
 ## Task List
 
 ### Phase 1: Foundation & Cleanup
-- [ ] Task 1: Clean up remaining Phase A dependencies
+- [~] Task 1: Clean up remaining Phase A dependencies (Skipped: @x402 is required by @coinbase/cdp-sdk)
 - [ ] Task 2: Implement Toast Notifications
 - [ ] Task 3: Implement Offline PWA caching
 
