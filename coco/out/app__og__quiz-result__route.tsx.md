@@ -1,8 +1,9 @@
 # app/og/quiz-result/route.tsx
-lines:122 exports:runtime,GET
+lines:123 exports:runtime,GET
 ---
 import { ImageResponse } from 'next/og';
 import { NextRequest } from 'next/server';
+import { logger } from '@/lib/logger';
 
 export const runtime = 'edge';
 
@@ -40,4 +41,3 @@ export async function GET(req: NextRequest) {
               background: 'radial-gradient(circle, rgba(108,92,231,0.2) 0%, rgba(10,10,22,1) 70%)',
               zIndex: 0,
             }}
-          />

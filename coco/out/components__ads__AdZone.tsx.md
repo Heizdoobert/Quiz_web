@@ -1,7 +1,8 @@
 # components/ads/AdZone.tsx
-lines:117 exports:default
+lines:118 exports:default
 ---
 "use client";
+import { logger } from "@/lib/logger";
 
 import React, { useEffect, useState } from "react";
 import { Zap, Rocket, Shield } from "lucide-react";
@@ -29,7 +30,7 @@ export default function AdZone({
       .then((data) => {
         if (data) setSponsor(data);
       })
-      .catch(console.error);
+      .catch((err) => logger.error('error', err));
   }, [variant]);
 
   if (variant === "sticky-bottom") {
@@ -40,4 +41,3 @@ export default function AdZone({
   let IconComponent = Zap;
   if (sponsor?.icon === "Rocket") IconComponent = Rocket;
   if (sponsor?.icon === "Shield") IconComponent = Shield;
-

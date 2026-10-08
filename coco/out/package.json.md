@@ -1,5 +1,5 @@
 # package.json
-lines:68 exports:
+lines:83 exports:
 ---
 {
   "name": "quick-quiz",
@@ -25,6 +25,7 @@ lines:68 exports:
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
   "dependencies": {
+    "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@supabase/ssr": "^0.12.7",
@@ -38,6 +39,5 @@ lines:68 exports:
     "lodash.debounce": "^4.0.8",
     "lucide-react": "^1.47.0",
     "next": "16.3.6",
-    "next-pwa": "^5.6.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",

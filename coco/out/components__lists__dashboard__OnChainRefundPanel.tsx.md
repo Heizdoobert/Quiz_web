@@ -1,5 +1,5 @@
 # components/lists/dashboard/OnChainRefundPanel.tsx
-lines:84 exports:OnChainRefundPanel
+lines:85 exports:OnChainRefundPanel
 ---
 import React, { useState } from 'react';
 import { useChainId, usePublicClient, useSwitchChain, useWriteContract } from 'wagmi';
@@ -7,6 +7,7 @@ import { Loader2, RefreshCw } from 'lucide-react';
 import { recordContestRefund } from '@/lib/actions/question-list-actions';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
+import { logger } from '@/lib/logger';
 
 export function OnChainRefundPanel({
   listId,
@@ -40,4 +41,3 @@ export function OnChainRefundPanel({
       switchChain({ chainId: TARGET_CHAIN_ID });
       return;
     }
-    setRefunding(true);

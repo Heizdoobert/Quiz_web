@@ -1,5 +1,5 @@
 # components/quiz/CommunityDiscussion.tsx
-lines:97 exports:CommunityDiscussion
+lines:98 exports:CommunityDiscussion
 ---
 import React, { useEffect, useState, useCallback } from 'react';
 import { useSession } from '@/hooks/shared/use-session';
@@ -11,6 +11,7 @@ import {
 import RatingStars from '@/components/community/RatingStars';
 import CommentList from '@/components/community/CommentList';
 import SuggestionForm from '@/components/community/SuggestionForm';
+import { logger } from '@/lib/logger';
 
 export function CommunityDiscussion({ questionId }: { questionId: string }) {
   const { account, requireSignIn } = useSession();
@@ -31,7 +32,7 @@ export function CommunityDiscussion({ questionId }: { questionId: string }) {
       const data = await getQuestionDiscussion(questionId);
       setDiscussion(data);
     } catch (err) {
-      console.error('Failed to load discussion:', err);
+      logger.error('Failed to load discussion:', err);
     }
   }, [questionId]);
 
@@ -40,4 +41,3 @@ export function CommunityDiscussion({ questionId }: { questionId: string }) {
     getQuestionDiscussion(questionId)
       .then((data) => {
         if (!cancelled) setDiscussion(data);
-      })

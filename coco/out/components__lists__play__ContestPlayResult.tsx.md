@@ -1,5 +1,5 @@
 # components/lists/play/ContestPlayResult.tsx
-lines:226 exports:ContestPlayResult
+lines:227 exports:ContestPlayResult
 ---
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useSwitchChain, useChainId } from 'wagmi';
@@ -11,6 +11,7 @@ import { RewardVoucher } from '@/lib/types';
 import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
 import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID, TARGET_CHAIN_NAME } from '@/lib/contracts/addresses';
 import { ContestPlayClaimButton, ClaimStep } from './ContestPlayClaimButton';
+import { logger } from '@/lib/logger';
 
 function formatTokens(weiStr: string): string {
   const wei = BigInt(weiStr || '0');
@@ -40,4 +41,3 @@ export function ContestPlayResult({
 
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
-  const { address } = useAccount();

@@ -1,5 +1,5 @@
 # lib/actions/group-actions.ts
-lines:125 exports:createGroup,joinGroup,leaveGroup,getUserGroups
+lines:126 exports:createGroup,joinGroup,leaveGroup,getUserGroups
 ---
 'use server';
 
@@ -8,6 +8,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { Group } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
+import { logger } from '@/lib/logger';
 const MAX_NAME = 50;
 const MAX_DESCRIPTION = 200;
 
@@ -40,4 +41,3 @@ export async function createGroup(params: {
     const { data: group, error } = await auth.db
       .from('groups')
       .insert({
-        name,
