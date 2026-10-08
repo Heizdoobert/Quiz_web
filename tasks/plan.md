@@ -34,13 +34,13 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 ### Phase 2: Close real gaps
 - [x] Task 4: Rate-limit auth actions
 - [x] Task 5: (code done; preview observation pending) CSP report-only
-- [ ] Task 6: Enforce CSP
+- [ ] Task 6: (BLOCKED: needs preview observation) Enforce CSP
 
 ### Checkpoint: Phase 2
 - [ ] Preview deploy clean for a full wallet + email + username sign-in, no CSP reports for first-party flows
 
 ### Phase 3: Rewrite the doc
-- [ ] Task 7: Update STRIDE table, §2, §3, §4 in `SECURITY-TRADE-OFFS.md`
+- [x] Task 7: Update STRIDE table, §2, §3, §4 in `SECURITY-TRADE-OFFS.md`
 
 ### Checkpoint: Complete
 - [ ] Every claim in `SECURITY-TRADE-OFFS.md` matches code; CI green on `preview`

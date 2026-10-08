@@ -103,6 +103,7 @@
 **Dependencies:** Task 5 + a clean preview observation period
 **Files:** `next.config.js`
 **Scope:** XS
+**Status:** BLOCKED, not started. Needs the preview deploy plus an observation period with real wallet, email and username sign-ins, then a read of the `csp_violation` log lines. Enforcing a guessed policy risks breaking wallet connect in production.
 
 ### Checkpoint: Phase 2
 - [ ] Preview full sign-in paths work; no CSP violations from first-party code
@@ -115,12 +116,13 @@
 ### Task 7: Update `SECURITY-TRADE-OFFS.md`
 **Description:** Bring all sections to the post-Phase-2 truth: STRIDE rows for email/username auth (brute force, enumeration, code replay) and contest escrow; §2 add CSP and rate limits; §3 replace with Task 2 audit numbers and decision; §4 status per Task 3; refresh ADR list (add ADR-005, any new ADR).
 **Acceptance criteria:**
-- [ ] Each claim cites a file or command that confirms it
-- [ ] Date stamp "as of" updated
+- [x] Each claim cites a file or command that confirms it (every cited path and identifier grep-checked)
+- [x] Date stamp "as of" updated (2026-10-08); CSP and the rate-limit migration are marked pending where they are
 **Verification:**
-- [ ] Re-run `npm audit --omit=dev` and compare numbers
-- [ ] grep every cited path exists
+- [x] `npm audit --omit=dev`: 21 moderate, 0 high, matches section 3
+- [x] every cited path exists
 **Dependencies:** Tasks 2, 3, 4, 6
+**Note:** written with CSP still report-only (Task 6 blocked); update section 2 when it is enforced.
 **Files:** `SECURITY-TRADE-OFFS.md`
 **Scope:** XS
 
