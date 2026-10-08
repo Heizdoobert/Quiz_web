@@ -33,7 +33,7 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 
 ### Phase 2: Close real gaps
 - [x] Task 4: Rate-limit auth actions
-- [ ] Task 5: CSP report-only
+- [x] Task 5: (code done; preview observation pending) CSP report-only
 - [ ] Task 6: Enforce CSP
 
 ### Checkpoint: Phase 2

@@ -84,11 +84,12 @@
 ### Task 5: CSP report-only
 **Description:** F4. Add `Content-Security-Policy-Report-Only` in `next.config.js` covering `default-src 'self'`, script/style (Next inline needs), `connect-src` for Supabase, RPC, WalletConnect/Reown relays, `img-src`, `frame-src` for wallet modals, `frame-ancestors 'none'` kept. Collect violations on preview.
 **Acceptance criteria:**
-- [ ] Header present on all routes; existing headers unchanged
-- [ ] Violation endpoint or browser-console review documented
+- [x] `Content-Security-Policy-Report-Only` on `/:path*`; existing headers (including enforcing `frame-ancestors 'none'`) unchanged. Policy: `next.config.js`. `script-src` keeps `'unsafe-inline'` for Next's hydration scripts (nonces are a later upgrade); `connect-src` lists Supabase (from `NEXT_PUBLIC_SUPABASE_URL` at build), WalletConnect/Reown/Coinbase/MetaMask hosts and viem's default RPCs.
+- [x] Violations POST to `app/api/csp-report/route.ts` (204, 8 kB cap) and appear in the server log as `csp_violation`; also visible in the browser console
 **Verification:**
-- [ ] `npm run build`; `curl -I` on preview shows header
-- [ ] Wallet, email and username sign-in exercised on preview; list of violations triaged
+- [x] `npm run build` passes; `curl -I` against a local `next start` shows both headers; report endpoint answers 204. `tests/security-headers.test.ts` (5 tests)
+- [ ] `curl -I` on the preview deploy
+- [ ] Wallet, email and username sign-in exercised on preview; list of `csp_violation` log lines triaged and the policy adjusted (needs a deploy; not possible from this session)
 **Dependencies:** Task 1
 **Files:** `next.config.js`, possibly `app/` report route
 **Scope:** S
