@@ -369,6 +369,11 @@
 **Dependencies:** your `coco/out` edits dealt with
 **Files:** merge
 **Scope:** S
+**Not merged (2026-10-09), dry run done in a throwaway worktree:** 17 of your uncommitted `coco/out` files are also changed by `origin/preview`, so a real merge here would overwrite or conflict with your edits, and I do not commit or stash them. Result of the dry run on the committed state (28 ahead, 6 behind):
+- Conflicts: `AGENTS.md` (keep the `web3-fundamentals` wording from this branch and add preview's item 4, "Codebase Exploration & Searching") and `package-lock.json` (take ours, then `npm install --legacy-peer-deps` to add `@sentry/nextjs` and `posthog-js`). Everything else merged cleanly.
+- After that: type-check, lint, 411 tests and the build pass; `npm audit --omit=dev --audit-level=high` reports 0.
+- **CI would fail on the merge unless the ratchets move:** Sentry and PostHog add about 108 kB gzip to every route (462 to 570 kB, so `scripts/check-bundle.mjs` needs `RATCHET_KB` raised to about 580 and `CONSTRAINTS.md` updated), and the new untested files lower coverage to 53.46 / 50.14 / 49.11 (lines / functions / branches) against thresholds of 53.5 / 50.3 / 49.2.
+- To do it: commit or discard the `coco/out` edits, `git merge origin/preview`, resolve as above, adjust the two ratchets, run `npm run check:task`.
 
 ### Task D2: Migration ledger and rollback policy
 **Description:** S8-08, S8-09. Migrations are pasted by hand with no record of what production has applied.
