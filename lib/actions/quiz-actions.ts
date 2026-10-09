@@ -16,8 +16,13 @@ const ANSWERS_PER_IP_PER_HOUR = 120;
 // The session account's most recent answers, newest first, so history and answeredIds
 // survive a reload. Never anyone else's.
 export async function getAnswerHistory(): Promise<HistoryItem[]> {
-  const account = await getSessionAccount();
-  return account ? historyForAccount(account.id) : [];
+  try {
+    const account = await getSessionAccount();
+    return account ? await historyForAccount(account.id) : [];
+  } catch (err) {
+    logger.error('getAnswerHistory exception:', err);
+    return [];
+  }
 }
 
 export async function submitAnswer(params: {
