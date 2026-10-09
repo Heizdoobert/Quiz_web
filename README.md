@@ -66,10 +66,12 @@ All files are in [`supabase/migrations/`](supabase/migrations/):
 17. [`17-analytics.sql`](supabase/migrations/17-analytics.sql) — question and contest analytics functions.
 18. [`17-auth-rate-limit.sql`](supabase/migrations/17-auth-rate-limit.sql) — attempt counter behind the auth and answer rate limits. Until it is applied the limiter fails open (ADR-008).
 19. [`18-ai-usage.sql`](supabase/migrations/18-ai-usage.sql) — daily AI generation usage.
+20. [`19-secure-ai-usage.sql`](supabase/migrations/19-secure-ai-usage.sql) — closes `user_ai_usage` to the public key (RLS on, no policies).
+21. [`20-drop-web3-schema.sql`](supabase/migrations/20-drop-web3-schema.sql) — drops the wallet, reward and escrow schema (ADR-013). Destructive: take a backup first, and on an existing database apply it only once production runs code that reads `questions.created_by_user`.
 
 [`ecosystem-v1-migration.sql`](supabase/migrations/ecosystem-v1-migration.sql) is only for databases created before `schema.sql` held the contest columns; skip it on a fresh database.
 
-The reward, escrow, voucher and payee tables from the older scripts stay in the schema, but nothing in the app reads or writes them any more; dropping them is a separate, reviewed migration.
+The older scripts still create the reward, escrow, voucher and payee schema; step 21 removes it again. `bash supabase/tests/run-drop-web3-schema.sh` checks that step against a copy of production's history.
 
 Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
 
