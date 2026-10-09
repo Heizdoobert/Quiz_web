@@ -3,12 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/auth_provider.dart';
-import '../auth/auth_screen.dart' show BrandMark;
+import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
+import 'board_panels.dart';
+import 'board_provider.dart';
 import 'quiz_provider.dart';
 
 typedef Question = Map<String, dynamic>;
 
 const _letters = ['A', 'B', 'C', 'D'];
+
+/// What playing and connecting both need: an account first (sign-in screen), then a linked
+/// wallet. Guests can browse without either. A failure is shown as a snackbar.
+Future<bool> connectAccount(BuildContext context, WidgetRef ref) async {
+  if (!await requireSignIn(context, ref)) return false;
+  if (await ref.read(authProvider.notifier).connectWallet()) return true;
+  if (context.mounted) {
+    final message = ref.read(authProvider).error;
+    if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+  return false;
+}
 
 /// One question at a time, laid out like the web's QuestionFront / AnswerBack flip card.
 /// Answers are queued offline, so the correct option is not shown here: the server only
@@ -28,7 +42,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   final Set<String> _seen = {};
   String? _pickedId;
   int? _pickedIndex;
-  int _answeredCount = 0;
 
   List<String> _topics(List<Question> qs) =>
       [_all, ...{for (final q in qs) if ((q['category'] as String?)?.isNotEmpty ?? false) q['category'] as String}];
@@ -46,15 +59,14 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     return null;
   }
 
-  int _remaining(List<Question> qs) =>
-      qs.where((q) => (_category == _all || q['category'] == _category) && !_seen.contains(q['id'])).length;
-
-  void _answer(Question q, int index) {
+  Future<void> _answer(Question q, int index) async {
+    // Playing needs an account, and an answer only counts with a wallet, so the first
+    // pick asks a guest for both.
+    if (!await connectAccount(context, ref) || !mounted) return;
     ref.read(quizProvider.notifier).submitAnswer(q['id'] as String, index);
     setState(() {
       _pickedId = q['id'] as String;
       _pickedIndex = index;
-      _answeredCount++;
     });
   }
 
@@ -66,9 +78,45 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     });
   }
 
+  // The web's centre column: category bar, then the question card.
+  Widget _quizColumn(List<Question> qs) {
+    final current = _current(qs);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _CategoryBar(
+          topics: _topics(qs),
+          selected: _category,
+          onSelect: (t) => setState(() {
+            _category = t;
+            _pickedId = null;
+            _pickedIndex = null;
+          }),
+        ),
+        const SizedBox(height: 16),
+        if (qs.isEmpty)
+          const _Message(text: 'No questions available offline.')
+        else if (current == null)
+          const _Message(text: 'You have gone through every question here. Pull a fresh set with refresh.')
+        else if (_pickedId != null)
+          _AnswerCard(question: current, pickedIndex: _pickedIndex!, onNext: () => _next(current))
+        else
+          _QuestionCard(
+            question: current,
+            onPick: (i) => _answer(current, i),
+            onSkip: () => _next(current),
+          ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final quiz = ref.watch(quizProvider);
+    final boardAsync = ref.watch(boardProvider);
+    final board = boardAsync.value ?? const Board();
+    // Signing in or out changes whose stats and history the board shows.
+    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, _) => ref.invalidate(boardProvider));
 
     return Scaffold(
       body: SafeArea(
@@ -80,35 +128,45 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                 loading: () => const Center(child: CircularProgressIndicator(color: AppColors.neoMint)),
                 error: (err, _) => _Message(text: 'Could not load questions.\n$err'),
                 data: (qs) {
-                  final current = _current(qs);
-                  return ListView(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                    children: [
-                      _StatsRow(answered: _answeredCount, queued: quiz.pendingSyncCount, left: _remaining(qs)),
-                      const SizedBox(height: 14),
-                      _CategoryBar(
-                        topics: _topics(qs),
-                        selected: _category,
-                        onSelect: (t) => setState(() {
-                          _category = t;
-                          _pickedId = null;
-                          _pickedIndex = null;
-                        }),
-                      ),
-                      const SizedBox(height: 14),
-                      if (qs.isEmpty)
-                        const _Message(text: 'No questions available offline.')
-                      else if (current == null)
-                        const _Message(text: 'You have gone through every question here. Pull a fresh set with refresh.')
-                      else if (_pickedId != null)
-                        _AnswerCard(question: current, pickedIndex: _pickedIndex!, onNext: () => _next(current))
-                      else
-                        _QuestionCard(
-                          question: current,
-                          onPick: (i) => _answer(current, i),
-                          onSkip: () => _next(current),
+                  final scoreboard = ScoreboardPanel(board: board);
+                  final leaderboard = LeaderboardPanel(
+                    entries: board.leaderboard,
+                    loading: boardAsync.isLoading && !boardAsync.hasValue,
+                  );
+                  return LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Same breakpoint as the web's lg:grid-cols-12: scoreboard 3, quiz 6, leaderboard 3.
+                      final wide = constraints.maxWidth >= 1024;
+                      return SingleChildScrollView(
+                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1152),
+                            child: wide
+                                ? Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Expanded(flex: 3, child: scoreboard),
+                                      const SizedBox(width: 24),
+                                      Expanded(flex: 6, child: _quizColumn(qs)),
+                                      const SizedBox(width: 24),
+                                      Expanded(flex: 3, child: leaderboard),
+                                    ],
+                                  )
+                                : Column(
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      _quizColumn(qs),
+                                      const SizedBox(height: 24),
+                                      scoreboard,
+                                      const SizedBox(height: 24),
+                                      leaderboard,
+                                    ],
+                                  ),
+                          ),
                         ),
-                    ],
+                      );
+                    },
                   );
                 },
               ),
@@ -127,6 +185,7 @@ class _Header extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
@@ -148,13 +207,27 @@ class _Header extends ConsumerWidget {
           _HeaderButton(
             icon: Icons.refresh,
             tooltip: 'Refresh questions',
-            onTap: () => ref.read(quizProvider.notifier).loadData(),
+            onTap: () {
+              ref.read(quizProvider.notifier).loadData();
+              ref.invalidate(boardProvider);
+            },
           ),
-          _HeaderButton(
-            icon: Icons.logout,
-            tooltip: 'Sign out',
-            onTap: () => ref.read(authProvider.notifier).logout(),
-          ),
+          if (!auth.hasWallet)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GradientButton(
+                label: auth.isAuthenticated ? 'Add wallet' : 'Connect',
+                loading: auth.walletBusy,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                onPressed: () => connectAccount(context, ref),
+              ),
+            ),
+          if (auth.isAuthenticated)
+            _HeaderButton(
+              icon: Icons.logout,
+              tooltip: 'Sign out',
+              onTap: () => ref.read(authProvider.notifier).logout(),
+            ),
         ],
       ),
     );
@@ -220,66 +293,6 @@ class _Pill extends StatelessWidget {
             style: TextStyle(fontFamily: headingFont, fontSize: 11, fontWeight: FontWeight.bold, color: color),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Counterpart of the web StatsPanel. Score, streak and accuracy are computed server side
-/// when answers sync, so offline the tiles show what the device itself knows.
-class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.answered, required this.queued, required this.left});
-
-  final int answered;
-  final int queued;
-  final int left;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _StatTile(icon: Icons.emoji_events_outlined, color: AppColors.cryptoGold, label: 'ANSWERED', value: '$answered'),
-        const SizedBox(width: 10),
-        _StatTile(icon: Icons.cloud_upload_outlined, color: AppColors.popCoral, label: 'QUEUED', value: '$queued'),
-        const SizedBox(width: 10),
-        _StatTile(icon: Icons.gps_fixed, color: AppColors.neoMint, label: 'LEFT', value: '$left'),
-      ],
-    );
-  }
-}
-
-class _StatTile extends StatelessWidget {
-  const _StatTile({required this.icon, required this.color, required this.label, required this.value});
-
-  final IconData icon;
-  final Color color;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: AppColors.elevation2,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.cyberBorder),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 16, color: color),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1, color: AppColors.slate400),
-            ),
-            Text(
-              value,
-              style: TextStyle(fontFamily: headingFont, fontSize: 20, fontWeight: FontWeight.w900, color: color),
-            ),
-          ],
-        ),
       ),
     );
   }

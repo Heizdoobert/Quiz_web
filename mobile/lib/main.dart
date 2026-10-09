@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'features/auth/auth_provider.dart';
-import 'features/auth/auth_screen.dart';
 import 'features/quiz/quiz_screen.dart';
 import 'theme/app_theme.dart';
 
@@ -9,6 +7,8 @@ void main() {
   runApp(const ProviderScope(child: QuickQuizApp()));
 }
 
+/// Opens straight onto the quiz, as a guest. Signing in is asked for only when the player
+/// answers or connects (see requireSignIn).
 class QuickQuizApp extends StatelessWidget {
   const QuickQuizApp({super.key});
 
@@ -18,17 +18,7 @@ class QuickQuizApp extends StatelessWidget {
       title: 'Quick Quiz',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: const _AuthGate(),
+      home: const QuizScreen(),
     );
-  }
-}
-
-class _AuthGate extends ConsumerWidget {
-  const _AuthGate();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authProvider);
-    return auth.isAuthenticated ? const QuizScreen() : const AuthScreen();
   }
 }

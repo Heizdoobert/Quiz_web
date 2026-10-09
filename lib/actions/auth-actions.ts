@@ -7,20 +7,13 @@ import { publicClientFor } from '@/lib/services/chain';
 import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/services/session';
 import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
 import { supabase } from '@/lib/supabase/supabase';
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { signInAccount, signUpAccount } from '@/lib/services/credentials';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 
 const HOUR = 3600;
-const RATE_LIMITED_MESSAGE = 'Too many attempts. Please try again later.';
-
-function usernameToEmail(username: string): string {
-  const trimmed = username.trim().toLowerCase();
-  return trimmed.includes('@') ? trimmed : `${trimmed}@player.quiz`;
-}
 
 // Sign-In with Ethereum (EIP-4361): the wallet signs a message bound to this
 // domain and a one-time nonce, which proves the player owns the address.
@@ -126,127 +119,25 @@ export async function verifyEmailCode(email: string, code: string): Promise<{ ok
   }
 }
 
+
 export async function signUpWithUsername(
   username: string,
   password: string
 ): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const trimmed = username.trim();
-    if (!USERNAME_RE.test(trimmed)) {
-      return {
-        ok: false,
-        error: 'Username must be 3-20 characters (letters, numbers, underscores).',
-      };
-    }
-    if (!password || password.length < 6) {
-      return {
-        ok: false,
-        error: 'Password must be at least 6 characters.',
-      };
-    }
-
-    if (
-      !(await allowAttempt('signup', trimmed, 5, HOUR)) ||
-      !(await allowAttemptFromIp('signup-ip', 10, HOUR))
-    ) {
-      return { ok: false, error: RATE_LIMITED_MESSAGE };
-    }
-
-    const email = usernameToEmail(trimmed);
-    let authUserId: string | null = null;
-
-    if (supabaseAdmin?.auth?.admin?.createUser) {
-      const { data, error } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { username: trimmed },
-      });
-      if (error) {
-        const msg = error.message.toLowerCase();
-        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('unique')) {
-          return { ok: false, error: 'Username is already taken.' };
-        }
-      } else if (data?.user) {
-        authUserId = data.user.id;
-      }
-    }
-
-    if (!authUserId) {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { data: { username: trimmed } },
-      });
-      if (error) {
-        const msg = error.message.toLowerCase();
-        if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('unique')) {
-          return { ok: false, error: 'Username is already taken.' };
-        }
-        return { ok: false, error: error.message || 'Failed to create account.' };
-      }
-      if (!data.user) {
-        return { ok: false, error: 'Registration failed. Try a different username.' };
-      }
-      authUserId = data.user.id;
-    }
-
-    const accountId = await ensureAccountForAuthUser(authUserId, trimmed);
-    if (!accountId) {
-      return { ok: false, error: 'Could not create user account.' };
-    }
-
-    const ok = await setSessionAccount({ id: accountId, wallet: null });
-    return { ok, error: ok ? undefined : 'Failed to establish session.' };
-  } catch (err) {
-    logger.error('signUpWithUsername error:', err);
-    return { ok: false, error: 'An unexpected error occurred during registration.' };
-  }
+  const result = await signUpAccount(username, password);
+  if (!result.ok) return result;
+  const ok = await setSessionAccount(result.account);
+  return { ok, error: ok ? undefined : 'Failed to establish session.' };
 }
 
 export async function signInWithUsername(
   username: string,
   password: string
 ): Promise<{ ok: boolean; error?: string }> {
-  try {
-    const trimmed = username.trim();
-    if (!trimmed || !password) {
-      return { ok: false, error: 'Username and password are required.' };
-    }
-    // Counts every attempt, not just failures: one counter, and a legitimate user never nears 10.
-    if (!(await allowAttempt('signin', trimmed, 10, 900))) return { ok: false, error: RATE_LIMITED_MESSAGE };
-
-    const email = usernameToEmail(trimmed);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error || !data?.user) {
-      return { ok: false, error: 'Invalid username or password.' };
-    }
-
-    const accountId = await ensureAccountForAuthUser(data.user.id, trimmed);
-    if (!accountId) {
-      return { ok: false, error: 'Account not found.' };
-    }
-
-    let existingWallet: string | null = null;
-    if (supabaseAdmin) {
-      const { data: userRow } = await supabaseAdmin
-        .from('users')
-        .select('wallet_address')
-        .eq('id', accountId)
-        .maybeSingle();
-      existingWallet = userRow?.wallet_address ?? null;
-    }
-
-    const ok = await setSessionAccount({ id: accountId, wallet: existingWallet });
-    return { ok, error: ok ? undefined : 'Failed to establish session.' };
-  } catch (err) {
-    logger.error('signInWithUsername error:', err);
-    return { ok: false, error: 'An unexpected error occurred during sign-in.' };
-  }
+  const result = await signInAccount(username, password);
+  if (!result.ok) return result;
+  const ok = await setSessionAccount(result.account);
+  return { ok, error: ok ? undefined : 'Failed to establish session.' };
 }
 
 // Adds a wallet to the signed-in account (it must not have one yet). Same SIWE

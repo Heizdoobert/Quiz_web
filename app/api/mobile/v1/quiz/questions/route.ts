@@ -1,19 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
-import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
 
-export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+// No request argument, so Next would prerender this at build time and freeze one question set.
+export const dynamic = 'force-dynamic';
 
-  const token = authHeader.split(' ')[1];
-  const account = verifyMobileAuthToken(token);
-  if (!account) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
+export async function GET() {
+  // Open to guests like the web's home page: questions carry no answer key. Only answering
+  // needs an account (quiz/sync).
   const questions = [];
   const excludeIds: string[] = [];
   

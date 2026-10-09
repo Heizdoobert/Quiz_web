@@ -4,47 +4,149 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import 'auth_provider.dart';
 
-/// Mirrors the web's AuthChoiceScreen: "Ready to play?" with a single wallet sign-in.
-class AuthScreen extends ConsumerWidget {
+/// Opens the sign-in screen unless the player already has an account. Resolves to whether
+/// they now do; backing out leaves them a guest.
+Future<bool> requireSignIn(BuildContext context, WidgetRef ref) async {
+  if (ref.read(authProvider).isAuthenticated) return true;
+  await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AuthScreen()));
+  return context.mounted && ref.read(authProvider).isAuthenticated;
+}
+
+/// Mirrors the web's auth popup: Google, or a username and password. No wallet here;
+/// the quiz asks for one when the player first answers.
+class AuthScreen extends ConsumerStatefulWidget {
   const AuthScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AuthScreen> createState() => _AuthScreenState();
+}
+
+class _AuthScreenState extends ConsumerState<AuthScreen> {
+  final _username = TextEditingController();
+  final _password = TextEditingController();
+  bool _signUp = false;
+
+  @override
+  void dispose() {
+    _username.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    ref.read(authProvider.notifier).signInWithPassword(_username.text, _password.text, signUp: _signUp);
+  }
+
+  InputDecoration _field(String label, IconData icon) {
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color),
+        );
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 20, color: AppColors.slate400),
+      filled: true,
+      fillColor: AppColors.deepSpace.withValues(alpha: 0.6),
+      border: border(AppColors.cyberBorder),
+      enabledBorder: border(AppColors.cyberBorder),
+      focusedBorder: border(AppColors.neoMint),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    // Signed in: hand control back to whatever asked for the account.
+    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
+      if (signedIn) Navigator.of(context).maybePop();
+    });
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: GlassCard(
               padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const BrandMark(size: 28),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Ready to play?',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Sign in with your wallet to save your progress and earn rewards.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: AppColors.slate400),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: GradientButton(
-                      label: 'Connect Wallet',
-                      icon: Icons.account_balance_wallet_outlined,
-                      loading: auth.isLoading,
-                      onPressed: () => ref.read(authProvider.notifier).login(),
+              child: AutofillGroup(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(child: BrandMark(size: 28)),
+                    const SizedBox(height: 24),
+                    const Text(
+                      'Ready to play?',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Sign in to save your progress and earn rewards.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: AppColors.slate400),
+                    ),
+                    const SizedBox(height: 24),
+                    TextField(
+                      controller: _username,
+                      enabled: !auth.isLoading,
+                      autocorrect: false,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.username],
+                      decoration: _field('Username', Icons.person_outline),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _password,
+                      enabled: !auth.isLoading,
+                      obscureText: true,
+                      textInputAction: TextInputAction.done,
+                      onSubmitted: (_) => _submit(),
+                      autofillHints: [_signUp ? AutofillHints.newPassword : AutofillHints.password],
+                      decoration: _field('Password', Icons.lock_outline),
+                    ),
+                    if (auth.error != null) ...[
+                      const SizedBox(height: 12),
+                      Text(auth.error!, style: const TextStyle(color: AppColors.popCoral, fontSize: 13)),
+                    ],
+                    const SizedBox(height: 16),
+                    GradientButton(
+                      label: _signUp ? 'Create Account' : 'Sign In',
+                      loading: auth.isLoading,
+                      onPressed: _submit,
+                    ),
+                    TextButton(
+                      onPressed: auth.isLoading ? null : () => setState(() => _signUp = !_signUp),
+                      child: Text(
+                        _signUp ? 'Already have an account? Sign in' : 'New here? Create an account',
+                        style: const TextStyle(color: AppColors.neoMint),
+                      ),
+                    ),
+                    const Row(
+                      children: [
+                        Expanded(child: Divider(color: AppColors.cyberBorder)),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          child: Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
+                        ),
+                        Expanded(child: Divider(color: AppColors.cyberBorder)),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: auth.isLoading ? null : () => ref.read(authProvider.notifier).signInWithGoogle(),
+                      icon: const Icon(Icons.g_mobiledata, size: 28),
+                      label: const Text('Continue with Google'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        side: const BorderSide(color: AppColors.cyberBorder),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

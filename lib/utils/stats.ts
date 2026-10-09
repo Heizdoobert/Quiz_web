@@ -1,9 +1,42 @@
 import 'server-only';
 import { supabase } from '@/lib/supabase/supabase';
-import { UserStats } from '@/lib/types';
+import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { HistoryItem, UserStats } from '@/lib/types';
 import { logger } from '@/lib/logger';
 
-const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
+export const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
+const HISTORY_LIMIT = 20;
+
+// An account's most recent answers, newest first. Never answer_index or correct_index
+// (that would reveal the correct option). Shared by the web session (getAnswerHistory)
+// and the mobile board route, which resolve the account id their own way.
+export async function historyForAccount(accountId: string): Promise<HistoryItem[]> {
+  try {
+    if (!supabaseAdmin) return [];
+    const { data, error } = await supabaseAdmin
+      .from('quiz_results')
+      .select('question_id, is_correct, answered_at, questions(prompt)')
+      .eq('user_id', accountId)
+      .order('answered_at', { ascending: false })
+      .limit(HISTORY_LIMIT);
+
+    if (error || !data) {
+      logger.error('historyForAccount error:', error);
+      return [];
+    }
+
+    return (data as unknown as Array<{ question_id: string; is_correct: boolean; questions: { prompt: string } | null }>).map(
+      (row) => ({
+        questionId: row.question_id,
+        prompt: row.questions?.prompt ?? '',
+        isCorrect: row.is_correct,
+      })
+    );
+  } catch (err) {
+    logger.error('historyForAccount exception:', err);
+    return [];
+  }
+}
 
 // Aggregated in Postgres (lib/sql/stats-functions.sql); raw rows are capped at 1000.
 // Not a server action: it takes an account id straight from the caller, which
