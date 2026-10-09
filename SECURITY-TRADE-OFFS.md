@@ -65,7 +65,7 @@ As of 2026-10-08 the command reports **0 vulnerabilities at every severity** on 
 
 ### A. Cryptographic Session Authentication (SIWE) — RESOLVED
 - **Implementation**: EIP-4361 Sign-In with Ethereum (`lib/actions/auth-actions.ts`, `lib/services/session.ts`).
-- **Enforcement**: state-changing Server Actions (`createQuestion`, `submitAnswer`, `createList`, `exportUserData`) authenticate the caller through the signed `quiz_session` cookie, issued only after a verified signature, email code or password.
+- **Enforcement**: state-changing Server Actions that write for an account (`createQuestion`, `createList`, `exportUserData`) authenticate the caller through the signed `quiz_session` cookie, issued only after a verified signature, email code or password. `submitAnswer` is the exception by design: guests may answer and see the result (`docs/specs/trivia-guest-access.md`), but a result is recorded only for a signed-in account, and answers are limited to 120 per IP per hour (see the Information Disclosure row in section 1).
 - **Impact**: eliminates wallet spoofing and IDOR across data export and submission.
 
 ### B. Supabase RLS Write Lock-Down — RESOLVED

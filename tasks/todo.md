@@ -409,9 +409,9 @@
 ### Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md`
 **Description:** Section 4 of the report: fix 4.A, 4.B and the "writes require a session" row after A2 and A3 decide the behaviour; remove the pointer to `tasks/todo.md` (not on `main`); version 0.4.0 vs 0.5.0; add the 2026-10-08 entries; drop the Vercel Analytics claim.
 **Acceptance criteria:**
-- [ ] Every claim cites a file or command; changelog and `package.json` versions agree
+- [x] Every claim cites a file or command; changelog and `package.json` versions agree
 **Verification:**
-- [ ] grep every cited path
+- [x] grep every cited path
 **Dependencies:** A2, A3
 **Files:** `SECURITY-TRADE-OFFS.md`, `CHANGELOG.md`, `package.json`
 **Scope:** S
