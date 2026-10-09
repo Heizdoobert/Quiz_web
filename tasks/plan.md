@@ -91,8 +91,8 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [x] Task B2: Show the send-code error in `EmailTab`
 - [x] Task B3: Modal focus management
 - [ ] Task B4: Labels, live regions and form errors
-- [ ] Task B5: Run the component tests in CI
-- [ ] Task B6: Honest coverage
+- [x] Task B5: Run the component tests in CI (widened the script, no file moves)
+- [x] Task B6: Honest coverage (lines 51.7, functions 48, branches 47.7)
 - [ ] Task B7: Enforce the Floor rules that nothing enforces
 - [ ] Task B8: Contest reward tests
 

@@ -261,9 +261,9 @@
 ### Task B5: Run the component tests in CI
 **Description:** S5-01, S5-02, S1-02. Five component test files never run. Move them into `tests/` (move group L1-M1) or widen the script, and fix the two stale `RewardsTokensTab` cases (duplicate "1000 TKN" text; button now reads "Claim … $QUIZ").
 **Acceptance criteria:**
-- [ ] `npm test` runs all 5 files, all pass
+- [x] `npm test` runs all 5 files, all pass
 **Verification:**
-- [ ] `npm run test:coverage`; coverage ratchet not lower
+- [x] `npm run test:coverage`; coverage ratchet not lower
 **Dependencies:** None
 **Files:** `package.json`, the five test files
 **Scope:** S
@@ -271,9 +271,9 @@
 ### Task B6: Honest coverage
 **Description:** S5-03, S5-04, S5-22. Add `coverage.include`, re-baseline, add `functions` and `branches` thresholds, refresh the numbers in `CONSTRAINTS.md`. The ratchet number will fall; record the real one and explain why in the commit.
 **Acceptance criteria:**
-- [ ] `coverage.include` covers `app`, `lib`, `hooks`, `components`; thresholds set at the new baseline
+- [x] `coverage.include` covers `app`, `lib`, `hooks`, `components`; thresholds set at the new baseline
 **Verification:**
-- [ ] `npm run test:coverage` passes at the new thresholds
+- [x] `npm run test:coverage` passes at the new thresholds
 **Dependencies:** B5
 **Files:** `vitest.config.ts`, `CONSTRAINTS.md`
 **Scope:** S
