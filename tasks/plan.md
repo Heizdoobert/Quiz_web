@@ -1,7 +1,7 @@
 # Implementation Plan: Security Posture Reconciliation
 
 ## Overview
-`SECURITY-TRADE-OFFS.md` has drifted from the code (checked 2026-10-08). This plan makes the document true again and closes the real gaps it exposes. Work happens only on `company/update-code`, one task per commit, merged to `preview` first (see `AGENTS.md`, `CONSTRAINTS.md`). It overlaps with the prod-health plan (T1 `next` bump, T4 CI audit, T7 CSP); those tasks are done here once, not twice.
+`docs/security-trade-offs.md` has drifted from the code (checked 2026-10-08). This plan makes the document true again and closes the real gaps it exposes. Work happens only on `company/update-code`, one task per commit, merged to `preview` first (see `AGENTS.md`, `CONSTRAINTS.md`). It overlaps with the prod-health plan (T1 `next` bump, T4 CI audit, T7 CSP); those tasks are done here once, not twice.
 
 ## Findings (evidence, 2026-10-08)
 | # | Doc claim | Reality |
@@ -40,10 +40,10 @@ Details, acceptance criteria and verification are in `tasks/todo.md`.
 - [ ] Preview deploy clean for a full wallet + email + username sign-in, no CSP reports for first-party flows
 
 ### Phase 3: Rewrite the doc
-- [x] Task 7: Update STRIDE table, §2, §3, §4 in `SECURITY-TRADE-OFFS.md`
+- [x] Task 7: Update STRIDE table, §2, §3, §4 in `docs/security-trade-offs.md`
 
 ### Checkpoint: Complete
-- [ ] Every claim in `SECURITY-TRADE-OFFS.md` matches code; CI green on `preview`
+- [ ] Every claim in `docs/security-trade-offs.md` matches code; CI green on `preview`
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
@@ -118,10 +118,10 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 
 ### Phase E: Docs, structure, dependencies
 - [x] Task E1: README and environment docs (README + .env.example; clean-checkout run not done)
-- [x] Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md` (paths checked; version 0.5.0)
+- [x] Task E2: Truth in `docs/security-trade-offs.md` and `CHANGELOG.md` (paths checked; version 0.5.0)
 - [x] Task E3: ADRs for decisions never recorded (ADR-008 to 012; links checked)
 - [x] Task E4: Fix the promotion list and AI-file maps (paths verified by script)
-- [ ] Task E5: Move groups L1-M1 to M8 (one commit each, with approval)
+- [x] Task E5: Move groups L1-M2 to M8 (one commit each; M1 skipped because B5 already runs those tests)
 - [x] Task E6: Remove dead dependencies (webpack kept (next-pwa peer); axe via npx)
 
 ### Checkpoint: Complete

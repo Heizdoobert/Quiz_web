@@ -50,12 +50,12 @@
 **Description:** F1. Read `claimListReward` end to end (`question-list-actions.ts:868` onward), `ContestEscrow.sol`, and `reward-actions.ts`. Confirm creator funds are escrowed before a voucher can be signed and the self-drain path from ADR-003 is closed. Then fix the doc/ADR status. If the flow is NOT safe, stop and report before editing docs.
 **Acceptance criteria:**
 - [x] Written finding: `docs/decisions/007-contest-escrow-payouts.md` (escrow gate in `startContest`, bounded amounts, contract-level checks, unique-index voucher dedupe). Flow is safe. Residuals: signer key trust root, Sybil dilution, `claimListReward` signs when the on-chain read returns null (fail-closed follow-up, not done here), contract unaudited.
-- [x] ADR-003 annotated as superseded in part; new ADR-007; §4.C and ADR list in `SECURITY-TRADE-OFFS.md` and `docs/specs/contest-escrow.md` updated
+- [x] ADR-003 annotated as superseded in part; new ADR-007; §4.C and ADR list in `docs/security-trade-offs.md` and `docs/specs/contest-escrow.md` updated
 **Verification:**
 - [x] Existing `claimListReward` tests pass: `npx vitest run tests/answer-and-list-guards.test.ts -t claim` (7 pass)
 - [x] Manual: no remaining "payouts are paused" text in docs unless true
 **Dependencies:** None
-**Files:** `SECURITY-TRADE-OFFS.md`, `docs/decisions/003-*.md`, possibly new `docs/decisions/006-*.md`
+**Files:** `docs/security-trade-offs.md`, `docs/decisions/003-*.md`, possibly new `docs/decisions/006-*.md`
 **Scope:** S
 
 ### Checkpoint: Phase 1
@@ -113,7 +113,7 @@
 
 ## Phase 3: Rewrite the doc
 
-### Task 7: Update `SECURITY-TRADE-OFFS.md`
+### Task 7: Update `docs/security-trade-offs.md`
 **Description:** Bring all sections to the post-Phase-2 truth: STRIDE rows for email/username auth (brute force, enumeration, code replay) and contest escrow; §2 add CSP and rate limits; §3 replace with Task 2 audit numbers and decision; §4 status per Task 3; refresh ADR list (add ADR-005, any new ADR).
 **Acceptance criteria:**
 - [x] Each claim cites a file or command that confirms it (every cited path and identifier grep-checked)
@@ -123,7 +123,7 @@
 - [x] every cited path exists
 **Dependencies:** Tasks 2, 3, 4, 6
 **Note:** written with CSP still report-only (Task 6 blocked); update section 2 when it is enforced.
-**Files:** `SECURITY-TRADE-OFFS.md`
+**Files:** `docs/security-trade-offs.md`
 **Scope:** XS
 
 ### Checkpoint: Complete
@@ -169,7 +169,7 @@
 ### Task A3: Limit guest answer harvesting
 **Description:** S2-02, S4-01. `submitAnswer` shows the correct answer to guests with no rate limit, so a script can read the whole key. **Needs your decision first:** the guest reveal is intended (`docs/specs/trivia-guest-access.md`). Default: keep the guest reveal, add a per-IP limit through `rate_limit_hit`, and reveal nothing for questions the account has not yet answered when signed in.
 **Acceptance criteria:**
-- [x] Decision recorded (reveal policy and limit values) in the spec and `SECURITY-TRADE-OFFS.md` (default taken: keep guest reveal, 120 answers per IP per hour; the line "reveal nothing for unanswered questions when signed in" was dropped, it describes no real flow)
+- [x] Decision recorded (reveal policy and limit values) in the spec and `docs/security-trade-offs.md` (default taken: keep guest reveal, 120 answers per IP per hour; the line "reveal nothing for unanswered questions when signed in" was dropped, it describes no real flow)
 - [x] Per-IP limit on `submitAnswer`, `'rate-limited'` result (not `RATE_LIMITED`: the result type has `notSavedReason`, not error codes), `isUuid` check on the id
 **Verification:**
 - [x] Tests for the limit and the unchanged signed-in scoring path
@@ -412,20 +412,20 @@
 **Scope:** S
 **Done 2026-10-09 except two checks:** the README steps were not followed on a clean checkout; the migration list was built from `supabase/migrations` and the code, not run against a fresh database. `tests/sql/run-accounts-migration.sh` pointed at `lib/` paths that no longer exist; its paths are fixed and it runs, but its check `A stats by account` (`tests/sql/30-checks.sql:92`) fails; not investigated (it never ran since the move to `supabase/migrations`). Migration 19 (`19-secure-ai-usage.sql`) exists only on `preview`; add it to the README list when D1 merges it.
 
-### Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md`
+### Task E2: Truth in `docs/security-trade-offs.md` and `CHANGELOG.md`
 **Description:** Section 4 of the report: fix 4.A, 4.B and the "writes require a session" row after A2 and A3 decide the behaviour; remove the pointer to `tasks/todo.md` (not on `main`); version 0.4.0 vs 0.5.0; add the 2026-10-08 entries; drop the Vercel Analytics claim.
 **Acceptance criteria:**
 - [x] Every claim cites a file or command; changelog and `package.json` versions agree
 **Verification:**
 - [x] grep every cited path
 **Dependencies:** A2, A3
-**Files:** `SECURITY-TRADE-OFFS.md`, `CHANGELOG.md`, `package.json`
+**Files:** `docs/security-trade-offs.md`, `CHANGELOG.md`, `package.json`
 **Scope:** S
 
 ### Task E3: ADRs for decisions never recorded
 **Description:** S9-13. Postgres rate limiter and its fail-open choice, report-only CSP, polling leaderboard, no-wallet payee, accounts model.
 **Acceptance criteria:**
-- [x] One ADR per decision in `docs/decisions/`, linked from `SECURITY-TRADE-OFFS.md` and the README
+- [x] One ADR per decision in `docs/decisions/`, linked from `docs/security-trade-offs.md` and the README
 **Verification:**
 - [x] Links resolve
 **Dependencies:** None
@@ -445,12 +445,13 @@
 ### Task E5: Move groups L1-M1 to M8
 **Description:** Report section 8. **Each group is its own commit, with your approval first.** M1 may already be done by B5.
 **Acceptance criteria:**
-- [ ] Per group: moves done with `git mv`, imports fixed, tests and lint green
+- [x] Per group: moves done with `git mv`, imports fixed, tests and lint green (M2 to M8; M1 skipped, see below)
 **Verification:**
-- [ ] `npm run check:task` after every group
+- [x] type-check, architecture check and all 427 tests after every group in the scratch copy; lint and coverage once at the end (clean, ratchet unchanged)
 **Dependencies:** your approval per group
 **Files:** see `tasks/audit/L1-structure.md`
 **Scope:** S each
+**Done 2026-10-09, one commit per group, approved by you:** M2 `lib/utils.ts` to `lib/utils/format.ts`, M3 `tests/sql` to `supabase/tests`, M4 `Modal` into `components/ui`, M5 `use-toast` into `hooks/shared`, M6 `audio.ts` to `lib/client`, M7 `chain.ts` to `lib/services` (test renamed `chain.test.ts`), M8 the Security Trade-offs doc and the commercialization guide into `docs/` (`docs/security-trade-offs.md`, `docs/production-commercialization-guide.md`; links in the README, the ADR links inside the doc, and one code comment updated). **M1 skipped:** B5 already made `npm test` run `components/`, so the five component tests run where they are; moving them would only rename. The old paths remain in the CHANGELOG, in older ADR text and in `tasks/audit/` on purpose (history). `supabase/tests/run-accounts-migration.sh` runs against Docker and still fails its known check `A stats by account`, as before the move. The dev-only root docs (`SPEC-realtime-leaderboard.md`, `project-improvements.md`, `AGENT_MAP.md`, `CAPABILITY-MAP.md`) were not moved; `tasks/production-exclusions.md` still lists them by name.
 
 ### Task E6: Remove dead dependencies
 **Description:** `lodash.debounce`, `@types/lodash.debounce`, `webpack`, `@types/jest` have no imports (confirmed). Add `@axe-core/cli` as a devDependency so `check:a11y` runs (S9-14). Re-run `npm audit` and the build; the `webpack` removal also affects the PWA decision (prod-health T6).

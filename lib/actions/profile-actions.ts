@@ -16,7 +16,7 @@ import {
 
 // Validates that input looks like an Ethereum address (0x + 40 hex chars).
 // This is format validation only — it does NOT prove the caller owns this address.
-// See SECURITY-TRADE-OFFS.md for the full threat model.
+// See docs/security-trade-offs.md for the full threat model.
 function isValidEthAddress(address: string): boolean {
   return typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address);
 }
