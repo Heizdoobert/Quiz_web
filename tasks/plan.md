@@ -102,7 +102,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 ### Phase C: Performance
 - [ ] Task C1: Make the bundle budget measurable
 - [ ] Task C2: Keep the wallet stack off non-wallet routes
-- [ ] Task C3: `/topics` is frozen at build time
+- [x] Task C3: `/topics` is frozen at build time (route is dynamic)
 - [ ] Task C4: Cache or index the global leaderboard
 
 ### Checkpoint: Phase C
@@ -111,7 +111,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 ### Phase D: Delivery and operations
 - [ ] Task D1: Merge `origin/preview` into this branch
 - [ ] Task D2: Migration ledger and rollback policy
-- [ ] Task D3: `/api/health`
+- [x] Task D3: `/api/health` (tests/health-route.test.ts)
 
 ### Checkpoint: Phase D
 - [ ] CI green on `preview`

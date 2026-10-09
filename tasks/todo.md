@@ -331,12 +331,13 @@
 ### Task C3: `/topics` is frozen at build time
 **Description:** S6-04. The page prerenders with empty data and never revalidates.
 **Acceptance criteria:**
-- [ ] `force-dynamic`, or `revalidate = 300` with a build that does not bake empty data
+- [x] `force-dynamic`, or `revalidate = 300` with a build that does not bake empty data
 **Verification:**
-- [ ] Build output shows the route as dynamic or revalidating
+- [x] Build output shows the route as dynamic or revalidating
 **Dependencies:** None
 **Files:** `app/topics/page.tsx`
 **Scope:** XS
+**Verified 2026-10-09:** the build route table lists `/topics` as dynamic (ƒ).
 
 ### Task C4: Cache or index the global leaderboard
 **Description:** S6-05. `get_global_leaderboard` aggregates all of `quiz_results` per call, on each home render, every 15 s per viewer, and after each answer.
@@ -378,9 +379,9 @@
 ### Task D3: `/api/health`
 **Description:** S8-06. Prod-health T8.
 **Acceptance criteria:**
-- [ ] Returns 200 only when Supabase is reachable; no secrets in the body
+- [x] Returns 200 only when Supabase is reachable; no secrets in the body
 **Verification:**
-- [ ] Test with a failing Supabase mock returns 503
+- [x] Test with a failing Supabase mock returns 503
 **Dependencies:** None
 **Files:** `app/api/health/route.ts`, `tests/`
 **Scope:** S
