@@ -35,7 +35,7 @@ const withPWA = withPWAInit({
 const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
 // Report-only for now: a tuned policy ships enforcing once preview shows no first-party violations
-// (tasks/todo.md, Task 6). Violations are POSTed to /api/csp-report and land in the server log.
+// (docs/decisions/009-report-only-content-security-policy.md). Violations are POSTed to /api/csp-report and land in the server log.
 // script-src needs 'unsafe-inline' for Next's inline hydration scripts until nonces are rolled out,
 // so the policy mainly constrains connect-src, frame-src, object-src, base-uri and form-action.
 function supabaseOrigins() {

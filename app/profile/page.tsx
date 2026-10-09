@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { getUserQuizzes, exportUserData } from '@/lib/actions/profile-actions';
 import { ClientQuestion } from '@/lib/types';
-import { downloadJson } from '@/lib/utils';
+import { downloadJson } from '@/lib/utils/format';
 import { useSession } from '@/hooks/shared/use-session';
 import Header from '@/components/layout/Header';
 import CreatorDashboardHeader from '@/components/profile/CreatorDashboardHeader';

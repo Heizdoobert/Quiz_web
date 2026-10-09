@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import { useGroupModal } from '@/hooks/modals/use-group-modal';
 import { Shield, Users, UserPlus, Plus, Loader2 } from 'lucide-react';
 import { GroupList } from './group/GroupList';
@@ -87,6 +87,7 @@ export default function GroupModal({
         {/* Message Banner */}
         {message && (
           <div
+            role={message.type === 'error' ? 'alert' : 'status'}
             className={`p-4 rounded-xl text-xs font-semibold ${
               message.type === 'error'
                 ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/30'
@@ -111,8 +112,9 @@ export default function GroupModal({
         {tab === 'create' && (
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-white mb-1">Group Name *</label>
+              <label htmlFor="group-name" className="block text-xs font-bold text-white mb-1">Group Name *</label>
               <input
+                id="group-name"
                 type="text"
                 required
                 maxLength={40}
@@ -123,8 +125,9 @@ export default function GroupModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-bold text-white mb-1">Description (Optional)</label>
+              <label htmlFor="group-description" className="block text-xs font-bold text-white mb-1">Description (Optional)</label>
               <textarea
+                id="group-description"
                 maxLength={200}
                 rows={2}
                 value={groupDesc}
@@ -151,8 +154,9 @@ export default function GroupModal({
         {tab === 'join' && (
           <form onSubmit={handleJoin} className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-white mb-1">Group ID (UUID) *</label>
+              <label htmlFor="group-join-id" className="block text-xs font-bold text-white mb-1">Group ID (UUID) *</label>
               <input
+                id="group-join-id"
                 type="text"
                 required
                 value={joinId}

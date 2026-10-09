@@ -20,18 +20,30 @@ import { validateQuestionInput } from '../lib/utils/validation';
 import { REQUIRED_CONFIRMATIONS } from '../lib/constants/list-constants';
 
 let mockIsContestFunded = true;
+let mockVoucherCheckFails = false;
+let mockAnswerLimitHit = false;
+const answerLimitCalls: unknown[][] = [];
 
 vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/rate-limit', () => ({
+  allowAttemptFromIp: async (...args: unknown[]) => {
+    answerLimitCalls.push(args);
+    return !mockAnswerLimitHit;
+  },
+}));
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
   getContestId: (listId: string, creator?: string) =>
     ('0x' + (listId + (creator || '')).replace(/[^a-f0-9]/gi, '').padEnd(64, '0').slice(0, 64)),
   newNonce: () => BigInt(7),
   getSignerAccount: () => ({ signTypedData: async () => ('0x' + 's'.repeat(130)) }),
-  isContestVoucherUsed: async () => false,
+  isContestVoucherUsed: async () => {
+    if (mockVoucherCheckFails) throw new Error('rpc down');
+    return false;
+  },
   isContestFundedOnChain: async () => mockIsContestFunded,
   getContestOnChain: async () =>
     mockIsContestFunded
@@ -105,7 +117,30 @@ function mockPublicTables(tables: TableStubs) {
 }
 
 describe('submitAnswer guards', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mockAnswerLimitHit = false;
+    answerLimitCalls.length = 0;
+  });
+
+  it('reveals nothing once the caller is over the per-IP answer limit, signed in or not', async () => {
+    mockAnswerLimitHit = true;
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    mockTables({
+      questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
+    });
+    const res = await submitAnswer({ questionId: Q_ID, answerIndex: 1 });
+    expect(res).toEqual({ isCorrect: false, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'rate-limited' });
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+    expect(answerLimitCalls).toEqual([['submit-answer-ip', 120, 3600]]);
+  });
+
+  it('rejects a malformed question id before the limiter or the database', async () => {
+    const res = await submitAnswer({ questionId: 'not-a-uuid', answerIndex: 1 });
+    expect(res.notSavedReason).toBe('error');
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+    expect(answerLimitCalls).toEqual([]);
+  });
 
   it('reveals nothing when the question does not exist', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
@@ -378,6 +413,26 @@ describe('question list guards', () => {
     }
   });
 
+  it('signs no new voucher for an expired pending one when the on-chain nonce check fails', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      question_lists: { row: { owner_wallet: WALLET, status: 'live' } },
+      list_entries: { row: { status: 'completed', reward_amount: '10000000000000000000' } },
+      reward_claims: {
+        rows: [{ id: 'c1', nonce: '5', amount: '10000000000000000000', deadline: 1, signature: '0x' + 'a'.repeat(130) }],
+      },
+    });
+    mockVoucherCheckFails = true; // the old voucher may already have been redeemed
+    try {
+      const res = await claimListReward(LIST_ID);
+      expect(res).toEqual({ error: 'Failed to claim contest reward.' });
+      expect(inserts.reward_claims).toBeUndefined();
+      expect(inserts._updates!.reward_claims).toBeUndefined();
+    } finally {
+      mockVoucherCheckFails = false;
+    }
+  });
+
   it('refuses startContest if contest is not funded on-chain', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockIsContestFunded = false;
@@ -588,27 +643,44 @@ describe('validateQuestionInput', () => {
 });
 
 describe('get5050EliminatedIndices', () => {
+  const verified = (correct_index: number) => ({ correct_index, status: 'verified', list_id: null });
+
   it('returns two distinct wrong indices without eliminating the correct index', async () => {
-    mockTables({ questions: { row: { correct_index: 2 } } });
-    const eliminated = await get5050EliminatedIndices('q-test-123');
+    mockTables({ questions: { row: verified(2) } });
+    const eliminated = await get5050EliminatedIndices(Q_ID);
     expect(eliminated).toHaveLength(2);
     expect(eliminated).not.toContain(2);
     expect(eliminated[0]).toBeLessThan(eliminated[1]);
   });
 
   it('is deterministic for the same question ID', async () => {
-    mockTables({ questions: { row: { correct_index: 0 } } });
-    const run1 = await get5050EliminatedIndices('q-deterministic');
-    const run2 = await get5050EliminatedIndices('q-deterministic');
+    mockTables({ questions: { row: verified(0) } });
+    const run1 = await get5050EliminatedIndices(Q_ID);
+    const run2 = await get5050EliminatedIndices(Q_ID);
     expect(run1).toEqual(run2);
   });
 
   it('returns empty array when question is not found or correct_index is invalid', async () => {
     mockTables({ questions: { row: null } });
-    expect(await get5050EliminatedIndices('q-not-found')).toEqual([]);
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
 
-    mockTables({ questions: { row: { correct_index: 99 } } });
-    expect(await get5050EliminatedIndices('q-invalid-index')).toEqual([]);
+    mockTables({ questions: { row: verified(99) } });
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
+  });
+
+  it.each([
+    ['a pending question', { correct_index: 1, status: 'pending', list_id: null }],
+    ['a quarantined question', { correct_index: 1, status: 'quarantined', list_id: null }],
+    ['a contest question', { correct_index: 1, status: 'verified', list_id: LIST_ID }],
+  ])('reveals nothing for %s', async (_name, row) => {
+    mockTables({ questions: { row } });
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
+  });
+
+  it('answers a malformed id without touching the database', async () => {
+    mockTables({ questions: { row: verified(2) } });
+    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockClear();
+    expect(await get5050EliminatedIndices('not-a-uuid')).toEqual([]);
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
   });
 });
-
