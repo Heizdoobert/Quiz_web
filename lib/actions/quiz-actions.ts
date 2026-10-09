@@ -1,7 +1,7 @@
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
-import { getSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { isUuid } from '@/lib/utils/validation';
 import { statsForAccount } from '@/lib/utils/stats';
@@ -51,7 +51,7 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
 export async function submitAnswer(params: {
   questionId: string;
   answerIndex: number;
-}): Promise<AnswerSubmissionResult> {
+}, mobileAccount?: SessionAccount): Promise<AnswerSubmissionResult> {
   const failed = (notSavedReason: NonNullable<AnswerSubmissionResult['notSavedReason']>): AnswerSubmissionResult => ({
     isCorrect: false,
     correctIndex: 0,
@@ -78,7 +78,7 @@ export async function submitAnswer(params: {
       logger.error('Question not found for answer submission:', qError);
       return failed('error');
     }
-    const account = await getSessionAccount();
+    const account = mobileAccount ?? await getSessionAccount();
     // Contest questions stay 'pending' (out of the global pool) and are only answerable
     // by an account playing that contest, so their answers can't be looked up beforehand;
     // owners and reviewers never get an entry. Other non-verified questions reveal nothing.
