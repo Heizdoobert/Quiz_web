@@ -122,7 +122,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [ ] Task E3: ADRs for decisions never recorded
 - [ ] Task E4: Fix the promotion list and AI-file maps
 - [ ] Task E5: Move groups L1-M1 to M8 (one commit each, with approval)
-- [ ] Task E6: Remove dead dependencies
+- [x] Task E6: Remove dead dependencies (webpack kept (next-pwa peer); axe via npx)
 
 ### Checkpoint: Complete
 - [ ] `npm run check:full` green; review with human before any merge toward `main`

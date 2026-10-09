@@ -449,12 +449,13 @@
 ### Task E6: Remove dead dependencies
 **Description:** `lodash.debounce`, `@types/lodash.debounce`, `webpack`, `@types/jest` have no imports (confirmed). Add `@axe-core/cli` as a devDependency so `check:a11y` runs (S9-14). Re-run `npm audit` and the build; the `webpack` removal also affects the PWA decision (prod-health T6).
 **Acceptance criteria:**
-- [ ] Removed; `npm run build` and `npm run check:deps` green
+- [x] Removed; `npm run build` and `npm run check:deps` green
 **Verification:**
-- [ ] Full `npm run check:task`
+- [x] Full `npm run check:task`
 **Dependencies:** None
 **Files:** `package.json`, `package-lock.json`
 **Scope:** XS
+**Done with two deviations (2026-10-09):** `webpack` was kept because `@ducanh2912/next-pwa` lists it as a peer and CI installs with `--legacy-peer-deps`, so removing it is part of the PWA decision, not a dead-dependency cleanup. `@axe-core/cli` was not added as a devDependency (it pulls in chromedriver and selenium); `check:a11y` now runs it through `npx @axe-core/cli@4.13.0` instead. Removed `lodash.debounce`, `@types/lodash.debounce`, `@types/jest`. `npm audit --omit=dev --audit-level=high` reports 0 vulnerabilities; type-check and tests pass; the production build was not re-run for this change alone.
 
 ### Checkpoint: Phase E
 - [ ] `npm run check:full` green; review with human before any merge toward `main`
