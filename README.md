@@ -89,6 +89,13 @@ For technical architecture decisions and design trade-offs, consult:
   - [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](docs/decisions/003-question-lists-and-contest-voucher-safeguards.md)
   - [ADR-004: Next.js Server Action Bundling & Module Separation](docs/decisions/004-server-action-module-separation.md)
   - [ADR-005: Adopt Component Manager Pattern for UI Code Splitting](docs/decisions/005-component-manager-pattern.md)
+  - [ADR-006: Resolving High-Severity NPM Vulnerabilities via PWA Fork and Dependency Overrides](docs/decisions/006-npm-vulnerabilities-and-pwa-fork.md)
+  - [ADR-007: Contest Payouts Through ContestEscrow Vouchers](docs/decisions/007-contest-escrow-payouts.md)
+  - [ADR-008: Postgres Rate Limiter That Fails Open](docs/decisions/008-postgres-auth-rate-limiter-fails-open.md)
+  - [ADR-009: Content-Security-Policy Ships Report-Only First](docs/decisions/009-report-only-content-security-policy.md)
+  - [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](docs/decisions/010-polling-leaderboard-with-short-cache.md)
+  - [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](docs/decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
+  - [ADR-012: Accounts With an Optional Wallet](docs/decisions/012-accounts-with-optional-wallet.md)
 - [Security Threat Model & STRIDE Analysis](SECURITY-TRADE-OFFS.md)
 
 ## Branches

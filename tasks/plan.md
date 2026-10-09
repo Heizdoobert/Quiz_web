@@ -119,7 +119,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 ### Phase E: Docs, structure, dependencies
 - [ ] Task E1: README and environment docs
 - [ ] Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md`
-- [ ] Task E3: ADRs for decisions never recorded
+- [x] Task E3: ADRs for decisions never recorded (ADR-008 to 012; links checked)
 - [x] Task E4: Fix the promotion list and AI-file maps (paths verified by script)
 - [ ] Task E5: Move groups L1-M1 to M8 (one commit each, with approval)
 - [x] Task E6: Remove dead dependencies (webpack kept (next-pwa peer); axe via npx)

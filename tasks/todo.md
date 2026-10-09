@@ -419,9 +419,9 @@
 ### Task E3: ADRs for decisions never recorded
 **Description:** S9-13. Postgres rate limiter and its fail-open choice, report-only CSP, polling leaderboard, no-wallet payee, accounts model.
 **Acceptance criteria:**
-- [ ] One ADR per decision in `docs/decisions/`, linked from `SECURITY-TRADE-OFFS.md` and the README
+- [x] One ADR per decision in `docs/decisions/`, linked from `SECURITY-TRADE-OFFS.md` and the README
 **Verification:**
-- [ ] Links resolve
+- [x] Links resolve
 **Dependencies:** None
 **Files:** `docs/decisions/008-*.md` onward
 **Scope:** M
