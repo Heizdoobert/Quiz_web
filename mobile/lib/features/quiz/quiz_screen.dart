@@ -49,7 +49,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   int _remaining(List<Question> qs) =>
       qs.where((q) => (_category == _all || q['category'] == _category) && !_seen.contains(q['id'])).length;
 
-  void _answer(Question q, int index) {
+  Future<void> _answer(Question q, int index) async {
+    // Signing in doesn't need a wallet, but an answer only counts with one, so the first
+    // pick asks the player to connect it.
+    if (!await ref.read(authProvider.notifier).connectWallet()) {
+      if (!mounted) return;
+      final message = ref.read(authProvider).error;
+      if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      return;
+    }
+    if (!mounted) return;
     ref.read(quizProvider.notifier).submitAnswer(q['id'] as String, index);
     setState(() {
       _pickedId = q['id'] as String;
