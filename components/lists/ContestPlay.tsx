@@ -7,7 +7,7 @@ import { useSession } from '@/hooks/shared/use-session';
 import { ClientQuestion, QuestionListWithMeta } from '@/lib/types';
 import { ContestPlayResult } from './play/ContestPlayResult';
 import { ContestPlayQuestion } from './play/ContestPlayQuestion';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/shared/use-toast';
 
 export default function ContestPlay({
   list,

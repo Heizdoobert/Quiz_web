@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ToastContext, ToastMessage, ToastType } from '@/hooks/use-toast';
+import { ToastContext, ToastMessage, ToastType } from '@/hooks/shared/use-toast';
 import { CheckCircle, Info, AlertTriangle, XCircle, X } from 'lucide-react';
 
 const icons = {

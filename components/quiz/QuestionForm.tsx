@@ -1,5 +1,5 @@
 'use client';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/shared/use-toast";
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

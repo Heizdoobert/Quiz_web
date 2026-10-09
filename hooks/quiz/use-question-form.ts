@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createQuestion } from '@/lib/actions/question-actions';
 import { useSession } from '@/hooks/shared/use-session';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/shared/use-toast';
 
 interface UseQuestionFormOptions {
   walletAddress: string | null;
