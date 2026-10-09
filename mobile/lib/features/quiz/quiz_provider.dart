@@ -1,6 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../db/quiz_repository.dart';
-import '../../api/api_client.dart';
 import '../auth/auth_provider.dart';
 
 final quizRepositoryProvider = Provider((ref) => QuizRepository());

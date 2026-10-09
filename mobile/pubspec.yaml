@@ -35,11 +35,17 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.4.3
+<<<<<<< HEAD
   flutter_secure_storage: ^10.3.4
   url_launcher: ^6.3.0
+=======
+  flutter_secure_storage: ^11.2.0
+  walletconnect_flutter_v2: ^2.1.5
+>>>>>>> feat/mobile-ui-parity
   http: ^1.1.0
   sqflite: ^2.4.4+1
-  state_notifier: ^1.0.0
+  google_sign_in: ^7.0.0
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:

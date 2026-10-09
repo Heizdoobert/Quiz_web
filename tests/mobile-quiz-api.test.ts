@@ -12,8 +12,24 @@ describe('Mobile Quiz Sync API', () => {
     vi.clearAllMocks();
   });
 
-  it('rejects future timestamps', async () => {
+  it('refuses an account with no wallet, since its answers would not count', async () => {
     vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1', wallet: null });
+
+    const req = new NextRequest('http://localhost/api/mobile/v1/quiz/sync', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer valid-token' },
+      body: JSON.stringify([{ questionId: 'q1', answerIndex: 1 }]),
+    });
+
+    const res = await POST(req);
+
+    expect(res.status).toBe(403);
+    expect(await res.json()).toEqual({ error: 'wallet-required' });
+    expect(quizActions.submitAnswer).not.toHaveBeenCalled();
+  });
+
+  it('rejects future timestamps', async () => {
+    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1', wallet: '0xabc' });
     
     // Future timestamp (10 mins in future)
     const futureTime = Date.now() + 10 * 60 * 1000;
@@ -36,7 +52,7 @@ describe('Mobile Quiz Sync API', () => {
   });
 
   it('accepts valid timestamps and calls submitAnswer', async () => {
-    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1', wallet: null });
+    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1', wallet: '0xabc' });
     vi.mocked(quizActions.submitAnswer).mockResolvedValue({
       isCorrect: true,
       correctIndex: 1,
