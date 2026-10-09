@@ -292,12 +292,13 @@
 ### Task B8: Contest reward tests
 **Description:** S5-05, S5-06, S5-07. `getContestId` is never tested; `claimListReward` has only the happy path; voucher signatures are asserted by interaction only.
 **Acceptance criteria:**
-- [ ] Known-vector test for `getContestId`; five `claimListReward` branch tests; `verifyTypedData` against a fixed test key
+- [x] Known-vector test for `getContestId`; five `claimListReward` branch tests; `verifyTypedData` against a fixed test key
 **Verification:**
-- [ ] `npx vitest run tests/answer-and-list-guards.test.ts`
+- [x] `npx vitest run tests/answer-and-list-guards.test.ts`
 **Dependencies:** A1
 **Files:** `tests/`
 **Scope:** M
+**Done in a new file, `tests/contest-claim-reward.test.ts` (16 tests):** the existing file mocks the chain module wholesale, which cannot support signature checks. Signature test uses a real viem account from a fixed test key and `verifyTypedData`. Observations left alone: with several pending vouchers, an expired or used one is marked and the loop moves on, tested only for one voucher; `getContestId` falls back to the list id alone when the owner is empty, so such a list could not match a funded contest (the claim is then refused, not signed).
 
 ### Checkpoint: Phase B
 - [ ] `npm run check:full` green; review with human
