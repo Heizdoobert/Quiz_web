@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Runs supabase/migrations/accounts.sql then stats-functions.sql, twice, against a throwaway
 # Postgres (Docker) loaded with production's shape and sample data, and fails if counts,
-# stats or leaderboards change or any check in 30-checks.sql fails. Usage: bash tests/sql/run-accounts-migration.sh
+# stats or leaderboards change or any check in 30-checks.sql fails. Usage: bash supabase/tests/run-accounts-migration.sh
 set -u
 REPO=$(cd "$(dirname "$0")/../.." && pwd)
-T="$REPO/tests/sql"
+T="$REPO/supabase/tests"
 OUT=$(mktemp -d)
 N="quiz-accounts-migration-$$"
 trap 'docker rm -f "$N" >/dev/null 2>&1; rm -rf "$OUT"' EXIT
