@@ -226,9 +226,9 @@
 ### Task B2: Show the send-code error in `EmailTab`
 **Description:** S7-08 (confirmed). The `RATE_LIMITED` error is set but only rendered in step 2.
 **Acceptance criteria:**
-- [ ] The step-1 form renders `error` with `role="alert"`
+- [x] The step-1 form renders `error` with `role="alert"`
 **Verification:**
-- [ ] Test: send-code returns `RATE_LIMITED`, the message is visible
+- [x] Test: send-code returns `RATE_LIMITED`, the message is visible
 **Dependencies:** None
 **Files:** `components/auth/tabs/EmailTab.tsx`, `tests/`
 **Scope:** XS

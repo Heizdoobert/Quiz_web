@@ -61,6 +61,11 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
           placeholder="you@example.com"
           className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
         />
+        {error && (
+          <p role="alert" className="text-xs text-pop-coral">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
           disabled={pending}

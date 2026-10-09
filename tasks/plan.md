@@ -88,7 +88,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 
 ### Phase B: Correctness, tests, accessibility
 - [ ] Task B1: Confirm and fix the toast re-render loop
-- [ ] Task B2: Show the send-code error in `EmailTab`
+- [x] Task B2: Show the send-code error in `EmailTab`
 - [ ] Task B3: Modal focus management
 - [ ] Task B4: Labels, live regions and form errors
 - [ ] Task B5: Run the component tests in CI
