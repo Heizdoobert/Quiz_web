@@ -10,7 +10,7 @@ const _googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID');
 
 // The callback reads authProvider when a 401 arrives, not while building, so the two
 // providers do not depend on each other at build time.
-final apiClientProvider = Provider(
+final Provider<ApiClient> apiClientProvider = Provider(
   (ref) => ApiClient(onUnauthorized: () => ref.read(authProvider.notifier).sessionExpired()),
 );
 
