@@ -33,7 +33,6 @@ export async function POST(req: NextRequest) {
         results[questionId] = {
           isCorrect: false,
           correctIndex: 0,
-          explanation: null,
           recorded: false,
           notSavedReason: 'error'
         };

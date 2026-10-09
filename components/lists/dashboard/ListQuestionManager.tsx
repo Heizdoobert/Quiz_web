@@ -11,7 +11,6 @@ function questionToFormValues(q: Question): QuestionFormValues {
     options: q.options,
     correctIndex: q.correct_index,
     category: q.category,
-    explanation: q.explanation || '',
   };
 }
 
@@ -55,7 +54,6 @@ export function ListQuestionManager({
                   options: values.options,
                   correctIndex: values.correctIndex,
                   category: values.category,
-                  explanation: values.explanation,
                 })
               )
             }

@@ -11,6 +11,7 @@ import { logger } from '@/lib/logger';
 // wallet_address is null for an email account with no wallet.
 type LeaderboardRow = {
   user_id: string;
+  display_name: string;
   score: number;
   accuracy: number;
 };

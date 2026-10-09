@@ -40,7 +40,6 @@ describe('Mobile Quiz Sync API', () => {
     vi.mocked(quizActions.submitAnswer).mockResolvedValue({
       isCorrect: true,
       correctIndex: 1,
-      explanation: 'Test',
       recorded: true,
     });
     

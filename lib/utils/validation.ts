@@ -19,9 +19,8 @@ export function validateQuestionInput(params: {
   options: string[];
   correctIndex: number;
   category?: string;
-  explanation?: string;
 }):
-  | { valid: true; prompt: string; options: string[]; correctIndex: number; category: string; explanation: string }
+  | { valid: true; prompt: string; options: string[]; correctIndex: number; category: string }
   | { valid: false; error: string } {
   const trimmedPrompt = typeof params.prompt === 'string' ? params.prompt.trim() : '';
   if (trimmedPrompt.length < 15) {
@@ -57,24 +56,12 @@ export function validateQuestionInput(params: {
     return { valid: false, error: `Category must be between ${MIN_CATEGORY} and ${MAX_CATEGORY} characters.` };
   }
 
-  const trimmedExplanation = typeof params.explanation === 'string' ? params.explanation.trim() : '';
-  if (trimmedExplanation.length < 20) {
-    return {
-      valid: false,
-      error: 'An educational explanation of at least 20 characters is required to ensure quiz quality.',
-    };
-  }
-  if (trimmedExplanation.length > MAX_EXPLANATION) {
-    return { valid: false, error: `Explanation must be at most ${MAX_EXPLANATION} characters.` };
-  }
-
   return {
     valid: true,
     prompt: trimmedPrompt,
     options: trimmedOptions,
     correctIndex: params.correctIndex,
     category,
-    explanation: trimmedExplanation,
   };
 }
 

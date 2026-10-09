@@ -20,7 +20,7 @@ export default function ContestPlay({
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<{ isCorrect: boolean; correctIndex: number } | null>(null);
-  const [result, setResult] = useState<{ correctCount: number; rewardAmount: string; claimed?: boolean } | null>(null);
+  const [result, setResult] = useState<{ correctCount: number; claimed?: boolean } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { account, requireSignIn: ensureSession } = useSession();
@@ -40,14 +40,14 @@ export default function ContestPlay({
         return;
       }
       if (res.result) {
-        setResult({ correctCount: res.result.correctCount, rewardAmount: res.result.rewardAmount, claimed: res.result.claimed });
+        setResult({ correctCount: res.result.correctCount, claimed: res.result.claimed });
       } else {
         const answeredCount = res.answeredQuestionIds?.length || 0;
         setQuestions(res.questions || []);
         if (res.questions && res.questions.length > 0 && answeredCount >= res.questions.length) {
           const completeRes = await completeListAttempt(list.id);
           if (completeRes.success) {
-            setResult({ correctCount: completeRes.correctCount || 0, rewardAmount: completeRes.rewardAmount || '0' });
+            setResult({ correctCount: completeRes.correctCount || 0 });
           } else {
             toast.error(completeRes.error || 'Failed to finalize contest.');
             setError(completeRes.error || 'Failed to finalize contest.');
@@ -85,7 +85,7 @@ export default function ContestPlay({
       return;
     }
     toast.success('Contest completed successfully!');
-    setResult({ correctCount: res.correctCount || 0, rewardAmount: res.rewardAmount || '0' });
+    setResult({ correctCount: res.correctCount || 0 });
   };
 
   if (error) {

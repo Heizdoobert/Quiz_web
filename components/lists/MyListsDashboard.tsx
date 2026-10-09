@@ -16,7 +16,6 @@ export default function MyListsDashboard() {
   const [lists, setLists] = useState<QuestionListWithMeta[]>([]);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [message, setMessage] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -40,13 +39,13 @@ export default function MyListsDashboard() {
       setMessage({ type: 'error', text: SIGN_IN_ERROR });
       return;
     }
-    const res = await createList({ title, description });
+    const res = await createList({ title });
     if (!res.success) {
       setMessage({ type: 'error', text: res.error || 'Failed to create list.' });
       return;
     }
     setTitle('');
-    setDescription('');
+
     setMessage({ type: 'success', text: `List "${res.list?.title}" created. Add at least ${MIN_LIST_QUESTIONS} questions to submit it.` });
     refresh();
   };
@@ -95,15 +94,6 @@ export default function MyListsDashboard() {
           onChange={(e) => setTitle(e.target.value)}
           aria-label="List title"
           placeholder="List title, e.g. DeFi Fundamentals"
-          className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
-        />
-        <textarea
-          rows={2}
-          maxLength={200}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          aria-label="List description (optional)"
-          placeholder="Optional description"
           className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />
         <button

@@ -49,8 +49,6 @@ export default function QuizLayout({
     activeModal,
     openModal,
     closeModal,
-    claimableRewards,
-    hasClaimableRewards,
     setLeaderboardVisible,
     loadNextQuestion,
     handleSelectCategory,
@@ -59,7 +57,6 @@ export default function QuizLayout({
     handleSkip,
     handleSelectGroup,
     handleSaveTimerSettings,
-    handleCloseRewards,
     isUnlocked,
     handleUnlock,
   } = useQuizLogic({ initialQuestion, initialLeaderboard, initialCategory });
@@ -68,11 +65,7 @@ export default function QuizLayout({
   return (
     <>
       <Header
-        onOpenRewards={() => openModal('rewards')}
         onOpenProfile={() => openModal('profile')}
-        hasClaimable={hasClaimableRewards}
-        heldTokens={claimableRewards?.heldTokens}
-        sweepsAt={claimableRewards?.sweepsAt}
       />
       <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-21' : 'pb-6'}`}>
       <div className="w-full max-w-385 flex gap-6 justify-center items-start">
@@ -89,8 +82,6 @@ export default function QuizLayout({
                 stats={stats}
                 history={history}
                 onOpenReview={() => openModal('review')}
-                claimableTokens={claimableRewards?.claimableTokens}
-                onOpenRewards={() => openModal('rewards')}
               />
             </div>
 
@@ -177,9 +168,7 @@ export default function QuizLayout({
         address={address}
         handleSelectGroup={handleSelectGroup}
         history={history}
-        handleCloseRewards={handleCloseRewards}
         stats={stats}
-        claimableRewards={claimableRewards}
         currentQuestionId={currentQuestion?.id}
       />
     </div>

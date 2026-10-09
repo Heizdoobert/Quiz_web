@@ -88,38 +88,24 @@ export default function ContestBrowser() {
                     <span className="flex items-center gap-1 text-crypto-gold">
                       <Users className="w-3.5 h-3.5" /> {list.participantCount ?? 0}/{list.max_participants ?? 10} players
                     </span>
-                    <span className="flex items-center gap-1 text-neo-mint">
-                      <Coins className="w-3.5 h-3.5" />
-                      {(Number(list.perQuestionReward || '0') / 1e18).toString()} QUIZ / correct answer
-                    </span>
                   </p>
                 </div>
-                {account.wallet ? (
-                  <button
-                    type="button"
-                    onClick={() => setSelected(list)}
-                    disabled={isClaimed}
-                    className={`shrink-0 px-4 py-2 rounded-xl font-black text-sm flex items-center gap-1.5 ${
-                      isClaimed
-                        ? 'bg-cyber-violet text-slate-500 border border-cyber-border'
-                        : isCompleted
-                        ? 'bg-linear-to-r from-crypto-gold to-[#FF9F1C] text-deep-space cursor-pointer'
-                        : 'bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space cursor-pointer'
-                    }`}
-                  >
-                    {isClaimed ? (
-                      'Claimed'
-                    ) : isCompleted ? (
-                      <><Coins className="w-4 h-4" /> Claim</>
-                    ) : (
-                      <><Play className="w-4 h-4" /> Play</>
-                    )}
-                  </button>
-                ) : (
-                  <div className="shrink-0">
-                    
-                  </div>
-                )}
+                <button
+                  type="button"
+                  onClick={() => setSelected(list)}
+                  disabled={isCompleted}
+                  className={`shrink-0 px-4 py-2 rounded-xl font-black text-sm flex items-center gap-1.5 ${
+                    isCompleted
+                      ? 'bg-cyber-violet text-slate-500 border border-cyber-border'
+                      : 'bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space cursor-pointer'
+                  }`}
+                >
+                  {isCompleted ? (
+                    'Completed'
+                  ) : (
+                    <><Play className="w-4 h-4" /> Play</>
+                  )}
+                </button>
               </div>
             );
           })}

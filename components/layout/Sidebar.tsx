@@ -10,8 +10,6 @@ interface SidebarProps {
   history: HistoryItem[];
   onOpenReview: () => void;
   className?: string;
-  claimableTokens?: string;
-  onOpenRewards?: () => void;
 }
 
 export default function Sidebar({
@@ -19,8 +17,6 @@ export default function Sidebar({
   history,
   onOpenReview,
   className = '',
-  claimableTokens,
-  onOpenRewards,
 }: SidebarProps) {
   return (
     <aside
@@ -32,8 +28,6 @@ export default function Sidebar({
       </h3>
       <StatsPanel
         stats={stats}
-        claimableTokens={claimableTokens}
-        onOpenRewards={onOpenRewards}
       />
       <div className="pt-3 border-t border-cyber-border">
         <HistoryList history={history} onOpenReview={onOpenReview} />

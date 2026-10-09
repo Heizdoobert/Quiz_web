@@ -137,7 +137,6 @@ function ReviewCard({
             </div>
           )}
 
-          {list.description && <p className="text-xs text-slate-400">{list.description}</p>}
 
           {loadingDetail ? (
             <p className="text-xs text-slate-400 py-3">Loading questions...</p>

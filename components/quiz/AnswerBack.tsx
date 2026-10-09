@@ -95,16 +95,6 @@ export default function AnswerBack({
           </p>
         </div>
 
-        {result.explanation && (
-          <div className="pt-3 border-t border-[#1C1E3A]">
-            <span className="text-xs font-bold font-heading text-slate-400 uppercase tracking-wider">
-              Explanation:
-            </span>
-            <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-              {result.explanation}
-            </p>
-          </div>
-        )}
       </div>
 
       <CommunityDiscussion questionId={question.id} />

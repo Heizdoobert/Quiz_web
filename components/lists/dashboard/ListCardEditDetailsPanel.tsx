@@ -5,21 +5,18 @@ import { useSession } from "@/hooks/shared/use-session";
 export function ListCardEditDetailsPanel({
   listId,
   initialTitle,
-  initialDescription,
   onSave,
   onCancel,
   setError,
 }: {
   listId: string;
   initialTitle: string;
-  initialDescription: string;
   onSave: () => void;
   onCancel: () => void;
   setError: (err: string | null) => void;
 }) {
   const { requireSignIn: ensureSession } = useSession();
   const [editTitle, setEditTitle] = useState(initialTitle);
-  const [editDescription, setEditDescription] = useState(initialDescription);
 
   const asSignedIn = async <T,>(
     action: () => Promise<T>,
@@ -34,7 +31,7 @@ export function ListCardEditDetailsPanel({
   const handleSaveListEdit = async () => {
     setError(null);
     const res = await asSignedIn(() =>
-      updateList(listId, { title: editTitle, description: editDescription }),
+      updateList(listId, { title: editTitle }),
     );
     if (!res.success) {
       setError(res.error || "Failed to update list.");
@@ -52,14 +49,6 @@ export function ListCardEditDetailsPanel({
         aria-label="List title"
         value={editTitle}
         onChange={(e) => setEditTitle(e.target.value)}
-        className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
-      />
-      <textarea
-        rows={2}
-        maxLength={200}
-        aria-label="List description"
-        value={editDescription}
-        onChange={(e) => setEditDescription(e.target.value)}
         className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
       />
       <div className="flex gap-2">

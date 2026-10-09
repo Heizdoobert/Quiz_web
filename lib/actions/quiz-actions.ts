@@ -55,7 +55,6 @@ export async function submitAnswer(params: {
   const failed = (notSavedReason: NonNullable<AnswerSubmissionResult['notSavedReason']>): AnswerSubmissionResult => ({
     isCorrect: false,
     correctIndex: 0,
-    explanation: null,
     recorded: false,
     notSavedReason,
   });

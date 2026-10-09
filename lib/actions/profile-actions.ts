@@ -132,7 +132,6 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
 
     const exportData: UserBackupData = {
-      walletAddress: account.wallet ?? '',
       exportedAt: new Date().toISOString(),
       version: BACKUP_SCHEMA_VERSION,
       quizzes,

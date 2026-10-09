@@ -29,9 +29,7 @@ export function GroupList({
             >
               <div>
                 <h4 className="font-bold text-white text-sm">{g.name}</h4>
-                {g.description && (
-                  <p className="text-xs text-slate-400 line-clamp-1">{g.description}</p>
-                )}
+
                 <span className="text-[10px] text-slate-500 font-mono">ID: {g.id}</span>
               </div>
               <div className="flex gap-2">

@@ -79,11 +79,6 @@ async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | 
 
       const confirmationCount = confirmations?.length ?? 0;
       
-      const perQuestionReward =
-        questionCount > 0 && maxParticipants > BigInt(0)
-          ? (BigInt(list.reward_pool_tokens || '0') / maxParticipants / BigInt(questionCount)).toString()
-          : '0';
-
       return {
         ...list,
         questionCount,
@@ -92,7 +87,6 @@ async function attachListMeta(lists: QuestionList[], viewerAccountId?: string | 
         hasConfirmed: viewerAccountId
           ? confirmations?.some((c) => c.confirmer_user === viewerAccountId) ?? false
           : undefined,
-        perQuestionReward,
       };
     })
   );
@@ -113,10 +107,9 @@ async function markReviewer(db: NonNullable<typeof supabaseAdmin>, listId: strin
 
 export async function createList(params: {
   title: string;
-  description?: string;
 }): Promise<{ success: boolean; list?: QuestionList; error?: string }> {
   try {
-    const invalid = validateListText({ title: params.title ?? '', description: params.description ?? '' });
+    const invalid = validateListText({ title: params.title ?? '' });
     if (invalid) return { success: false, error: invalid };
     const auth = await signedIn();
     if ('error' in auth) return { success: false, error: auth.error };
@@ -126,7 +119,6 @@ export async function createList(params: {
       .insert({
         owner_user: auth.account.id,
         title: params.title.trim(),
-        description: params.description?.trim() || null,
       })
       .select()
       .single();
@@ -157,7 +149,7 @@ async function getOwnedDraftList(listId: string) {
   return { ...auth, list } as const;
 }
 
-export async function updateList(listId: string, params: { title?: string; description?: string }): Promise<Result> {
+export async function updateList(listId: string, params: { title?: string }): Promise<Result> {
   try {
     const invalid = validateListText(params);
     if (invalid) return { success: false, error: invalid };
@@ -166,7 +158,6 @@ export async function updateList(listId: string, params: { title?: string; descr
 
     const update: Record<string, string | null> = {};
     if (params.title !== undefined) update.title = params.title.trim();
-    if (params.description !== undefined) update.description = params.description.trim() || null;
 
     const { error } = await owned.db.from('question_lists').update(update).eq('id', listId);
     if (error) {
@@ -251,7 +242,6 @@ type QuestionParams = {
   options: string[];
   correctIndex: number;
   category?: string;
-  explanation?: string;
 };
 
 // Rejects a prompt that duplicates another in the list (copy-pasted, or re-typed with
@@ -290,7 +280,6 @@ export async function addListQuestion(
         options: validated.options,
         correct_index: validated.correctIndex,
         category: validated.category,
-        explanation: validated.explanation,
         created_by_user: owned.account.id,
         created_by: owned.account.wallet,
         list_id: listId,
@@ -341,7 +330,6 @@ export async function updateListQuestion(questionId: string, params: QuestionPar
         options: validated.options,
         correct_index: validated.correctIndex,
         category: validated.category,
-        explanation: validated.explanation,
       })
       .eq('id', questionId);
 
@@ -562,15 +550,7 @@ export async function getLiveLists(): Promise<QuestionListWithMeta[]> {
       .order('started_at', { ascending: false });
     if (error || !lists) return [];
 
-    const now = new Date();
-    const activeLists = [];
-    for (const list of (lists as QuestionList[])) {
-      if (list.expires_at && new Date(list.expires_at) < now) {
-        syncContestStatus(list.id).catch((err) => logger.error('error', err));
-      } else {
-        activeLists.push(list);
-      }
-    }
+    const activeLists = lists as QuestionList[];
 
     return await attachListMeta(activeLists);
   } catch (err) {
@@ -655,15 +635,15 @@ export async function recordContestRefund(listId: string, txHash: string): Promi
 
 export async function startListAttempt(
   listId: string
-): Promise<{ success: boolean; questions?: ClientQuestion[]; answeredQuestionIds?: string[]; result?: { correctCount: number; rewardAmount: string; claimed: boolean }; error?: string } & WalletRequired> {
+): Promise<{ success: boolean; questions?: ClientQuestion[]; answeredQuestionIds?: string[]; result?: { correctCount: number; claimed: boolean }; error?: string }> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'This contest is not live.' };
-    const auth = await signedInWithWallet();
-    if ('error' in auth) return { success: false, error: auth.error, code: auth.code };
+    const auth = await signedIn();
+    if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('status, owner_user')
+      .select('status, owner_user, max_participants')
       .eq('id', listId)
       .maybeSingle();
     // Allow playing/claiming if it's completed, but not if it's draft or rejected.
@@ -750,15 +730,15 @@ export async function startListAttempt(
 
 export async function completeListAttempt(
   listId: string
-): Promise<{ success: boolean; correctCount?: number; rewardAmount?: string; error?: string }> {
+): Promise<{ success: boolean; correctCount?: number; error?: string }> {
   try {
     if (!isUuid(listId)) return { success: false, error: 'List not found.' };
-    const auth = await signedInWithWallet();
+    const auth = await signedIn();
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: list, error: listErr } = await auth.db
       .from('question_lists')
-      .select('reward_pool_tokens')
+      .select('id')
       .eq('id', listId)
       .maybeSingle();
     if (listErr || !list) return { success: false, error: 'List not found.' };

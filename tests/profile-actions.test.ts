@@ -204,7 +204,6 @@ describe('profile-actions', () => {
         expect(result.data.version).toBe('1.0');
         expect(result.data.quizzes).toEqual(mockQuizzes);
         expect(result.data.stats).toEqual(mockStats);
-        expect(result.data.walletAddress).toBe(VALID_ADDRESS);
         expect(result.data.isTruncated).toBe(false);
       }
     });

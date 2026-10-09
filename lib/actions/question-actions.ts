@@ -78,7 +78,7 @@ export async function createQuestion(params: {
       options: validated.options,
       correct_index: validated.correctIndex,
       category: validated.category,
-      explanation: validated.explanation,
+
       created_by_user: account.id,
       created_by: account.wallet,
       status: 'verified',

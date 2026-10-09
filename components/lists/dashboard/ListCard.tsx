@@ -122,7 +122,6 @@ export function ListCard({
             <ListCardEditDetailsPanel
               listId={list.id}
               initialTitle={list.title}
-              initialDescription={list.description || ''}
               onSave={() => {
                 setEditingList(false);
                 onChanged();
@@ -146,7 +145,6 @@ export function ListCard({
                     options: values.options,
                     correctIndex: values.correctIndex,
                     category: values.category,
-                    explanation: values.explanation,
                   })
                 )
               }

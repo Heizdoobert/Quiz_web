@@ -8,7 +8,6 @@ import {
   ClientQuestion,
   LeaderboardEntry,
   UserStats,
-  ClaimableRewards,
   HistoryItem,
 } from '@/lib/types';
 import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/question-actions';
@@ -113,9 +112,6 @@ export function useQuizLogic({
   const openModal = (modal: Exclude<ActiveModal, null>) => setActiveModal(modal);
   const closeModal = () => setActiveModal(null);
 
-  // Rewards
-  const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
-
   const refreshStats = useCallback(async () => {
     const targetId = account?.id;
     if (!targetId) {
@@ -131,16 +127,6 @@ export function useQuizLogic({
     const userStats = await getUserStats();
     if (accountRef.current?.id !== targetId) return;
     setStats(userStats);
-  }, [account]);
-
-  const refreshRewards = useCallback(async () => {
-    const targetId = account?.id;
-    if (!targetId) {
-      setClaimableRewards(null);
-      return;
-    }
-    if (accountRef.current?.id !== targetId) return;
-    setClaimableRewards(data);
   }, [account]);
 
   // Loads the signed-in account's saved answers so history and the "already answered"
@@ -245,9 +231,8 @@ export function useQuizLogic({
 
       // Refresh leaderboards
       loadLeaderboards();
-      refreshRewards();
     },
-    [currentQuestion, isSubmitting, isFlipped,  ensureSession, loadLeaderboards, refreshRewards]
+    [currentQuestion, isSubmitting, isFlipped,  ensureSession, loadLeaderboards]
   );
 
   // Initial stats and history fetch (the account itself is created at sign-in)
@@ -255,9 +240,8 @@ export function useQuizLogic({
     accountRef.current = account;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshStats();
-    void refreshRewards();
     void refreshHistory();
-  }, [account, refreshStats, refreshRewards, refreshHistory]);
+  }, [account, refreshStats, refreshHistory]);
 
   // Only fetch initial question if not supplied via SSR
   useEffect(() => {
@@ -326,15 +310,6 @@ export function useQuizLogic({
     setTimeLeft(duration);
   };
 
-  const handleCloseRewards = () => {
-    closeModal();
-    refreshRewards();
-  };
-
-  const hasClaimableRewards =
-    BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) ||
-    (claimableRewards?.eligibleBadges?.length ?? 0) > 0;
-
   return {
     address: account?.id,
     
@@ -359,9 +334,6 @@ export function useQuizLogic({
     activeModal,
     openModal,
     closeModal,
-    claimableRewards,
-    hasClaimableRewards,
-    refreshRewards,
     setLeaderboardVisible,
     loadLeaderboards,
     loadNextQuestion,
@@ -371,7 +343,6 @@ export function useQuizLogic({
     handleSkip,
     handleSelectGroup,
     handleSaveTimerSettings,
-    handleCloseRewards,
     isUnlocked,
     handleUnlock,
   };

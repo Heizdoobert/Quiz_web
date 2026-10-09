@@ -8,7 +8,6 @@ export interface QuestionFormValues {
   options: string[];
   correctIndex: number;
   category: string;
-  explanation: string;
 }
 
 interface ListQuestionEditorProps {
@@ -24,7 +23,6 @@ const EMPTY: QuestionFormValues = {
   options: ['', '', '', ''],
   correctIndex: 0,
   category: 'General',
-  explanation: '',
 };
 
 export default function ListQuestionEditor({
@@ -123,18 +121,6 @@ export default function ListQuestionEditor({
             value={values.category}
             onChange={(e) => setValues({ ...values, category: e.target.value })}
             className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
-          />
-        </div>
-        <div>
-          <label htmlFor="list-question-explanation" className="block text-xs font-bold text-slate-300 mb-1">Explanation * (min 20 chars)</label>
-          <input
-            id="list-question-explanation"
-            type="text"
-            required
-            value={values.explanation}
-            onChange={(e) => setValues({ ...values, explanation: e.target.value })}
-            placeholder="Why this answer is correct..."
-            className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
           />
         </div>
       </div>

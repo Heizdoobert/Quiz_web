@@ -15,13 +15,14 @@ export interface ClientQuestion {
   prompt: string;
   options: string[];
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
+  created_by?: string | null;
   created_at?: string;
 }
 
 export interface QuestionDispute {
   id: string;
   question_id: string;
-  reporter_wallet: string;
+  reporter_id: string;
   reason: string;
   created_at: string;
 }
@@ -37,7 +38,7 @@ export interface QuizResult {
 export interface Group {
   id: string;
   name: string;
-  owner_wallet: string;
+  owner_user: string;
   created_at: string;
 }
 
@@ -45,7 +46,7 @@ export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | '
 
 export interface QuestionList {
   id: string;
-  owner_wallet: string;
+  owner_user: string;
   title: string;
   status: QuestionListStatus;
   max_participants?: number;
@@ -75,6 +76,7 @@ export interface UserStats {
 
 export interface LeaderboardEntry {
   user_id: string;
+  display_name: string;
   score: number;
   accuracy: number;
   rank: number;
@@ -154,7 +156,6 @@ export interface GetUserQuizzesFilter extends PaginationParams {
 }
 
 export interface UserBackupData {
-  walletAddress: string;
   exportedAt: string;
   version: string;
   quizzes: Question[];
