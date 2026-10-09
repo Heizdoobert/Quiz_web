@@ -1,30 +1,20 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:mobile/main.dart';
+import 'package:mobile/theme/app_theme.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('category colors follow the web keyword rules', () {
+    expect(AppColors.forCategory('DeFi Basics'), AppColors.catDefi);
+    expect(AppColors.forCategory('NFT & Gaming'), AppColors.catNft);
+    expect(AppColors.forCategory('Layer 2'), AppColors.catL1);
+    expect(AppColors.forCategory(null), AppColors.neoMint);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('theme is dark on the deep-space background', (tester) async {
+    final theme = buildAppTheme();
+    expect(theme.brightness, Brightness.dark);
+    expect(theme.scaffoldBackgroundColor, AppColors.deepSpace);
+    await tester.pumpWidget(MaterialApp(theme: theme, home: const Scaffold(body: Text('ok'))));
+    expect(find.text('ok'), findsOneWidget);
   });
 }
