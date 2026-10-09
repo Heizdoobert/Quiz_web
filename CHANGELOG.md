@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Empty `catch` blocks are now a lint error.
 
 ### Fixed
+- Questions added by email accounts were badged "Verified" instead of "Community": the badge read the wallet column `questions.created_by`, which wallet-less accounts leave empty. It now reads `created_by_user`, and the mobile app shows a "Community" pill instead of the first characters of a wallet address.
 - The email step shows the send-code rate-limit message.
 - Toasts no longer re-run effects that depend on the toast handle (the contest start request could repeat after a failure).
 - Modals move focus in, keep Tab inside and restore focus on close; toasts, form errors and the answer result are announced and form controls have accessible names.
