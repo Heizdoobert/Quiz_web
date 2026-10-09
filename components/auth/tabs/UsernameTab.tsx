@@ -45,11 +45,12 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
     <form onSubmit={handleUsernameAuth} className="space-y-4">
       <div className="space-y-3">
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1">
+          <label htmlFor="auth-username" className="block text-xs font-bold text-slate-300 mb-1">
             Username
           </label>
           <div className="relative">
             <input
+              id="auth-username"
               type="text"
               required
               autoFocus
@@ -63,11 +64,12 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
         </div>
 
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1">
+          <label htmlFor="auth-password" className="block text-xs font-bold text-slate-300 mb-1">
             Password
           </label>
           <div className="relative">
             <input
+              id="auth-password"
               type="password"
               required
               minLength={6}
@@ -86,7 +88,11 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
         Web3 wallet anytime later to withdraw your rewards!
       </p>
 
-      {error && <p className="text-xs text-pop-coral font-medium">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-pop-coral font-medium">
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"

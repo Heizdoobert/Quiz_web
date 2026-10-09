@@ -12,11 +12,11 @@ export function QuestionOptionsInput({
   onCorrectIndexChange: (idx: number) => void;
 }) {
   return (
-    <div>
+    <div role="group" aria-labelledby="answer-options-label">
       <div className="flex items-center justify-between mb-1.5">
-        <label className="text-xs font-bold text-slate-300">
-          Answer Options <span className="text-pop-coral">*</span>
-        </label>
+        <span id="answer-options-label" className="text-xs font-bold text-slate-300">
+          Answer Options <span className="text-pop-coral" aria-hidden="true">*</span>
+        </span>
         <span className="text-[11px] text-slate-400">Radio button selects correct answer</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -33,6 +33,7 @@ export function QuestionOptionsInput({
               <input
                 type="radio"
                 name="correct-option"
+                aria-label={`Mark option ${letter} as correct`}
                 checked={correctIndex === idx}
                 onChange={() => onCorrectIndexChange(idx)}
                 className="w-4 h-4 text-neo-mint accent-neo-mint bg-cyber-violet border-cyber-border cursor-pointer"
@@ -47,6 +48,7 @@ export function QuestionOptionsInput({
               maxLength={120}
               value={options[idx]}
               onChange={(e) => onOptionChange(idx, e.target.value)}
+              aria-label={`Option ${letter} text`}
               placeholder={`Option ${letter}`}
               className="flex-1 bg-transparent border-none text-white text-xs focus:outline-none placeholder:text-slate-500"
             />

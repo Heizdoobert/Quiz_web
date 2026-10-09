@@ -51,6 +51,7 @@ export default function AnswerBack({
     <div className="flex flex-col h-full justify-between p-6 sm:p-8 glass glass-border glass-edge rounded-3xl shadow-2xl">
       {/* Top Banner */}
       <div
+        role="status"
         className={`flex items-center gap-3.5 p-4 rounded-2xl border ${
           result.isCorrect
             ? 'bg-neo-mint/10 border-neo-mint/40 text-neo-mint'

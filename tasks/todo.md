@@ -251,12 +251,13 @@
 ### Task B4: Labels, live regions and form errors
 **Description:** S7-02, S7-04, S7-05, S7-09, S7-10. Toast live region and close-button name; `htmlFor` on labels; labels for placeholder-only inputs; `aria-invalid` and `aria-describedby` on forms; announce the answer result.
 **Acceptance criteria:**
-- [ ] Each listed control has an accessible name; toasts are in a live region; auth form errors are announced
+- [x] Each listed control has an accessible name; toasts are in a live region; auth form errors are announced
 **Verification:**
-- [ ] Testing-library `getByLabelText` and `getByRole('alert')` tests; axe run when a URL exists
+- [x] Testing-library `getByLabelText` and `getByRole('alert')` tests; axe run when a URL exists
 **Dependencies:** B2
 **Files:** `components/ui/Toast.tsx`, `components/quiz/*`, `components/auth/tabs/*`, `components/community/*`
 **Scope:** M (split by folder if it grows past 5 files)
+**Done 2026-10-09 for `Toast`, `auth/tabs`, `quiz` and `community`.** Not done, left as follow-up B4b: the same label, placeholder-only and error-announcement fixes in `DisputeModal`, `TimerSettingsModal`, `GroupModal`, `ListQuestionEditor`, `MyListsDashboard`, `ContestActionPanel`, `ListCardEditDetailsPanel`, `ContestPlay`, `RewardsTokensTab`, `RewardsBadgesTab`, `RatingStars` (S7-04, S7-05, S7-09 in `tasks/audit/L7-accessibility.md`); moving focus to the result banner or the Next button after an answer (S7-10, the banner is only announced); pausing toast auto-dismiss on hover; `aria-invalid` and `aria-describedby` on individual fields. axe was not run (no URL).
 
 ### Task B5: Run the component tests in CI
 **Description:** S5-01, S5-02, S1-02. Five component test files never run. Move them into `tests/` (move group L1-M1) or widen the script, and fix the two stale `RewardsTokensTab` cases (duplicate "1000 TKN" text; button now reads "Claim … $QUIZ").

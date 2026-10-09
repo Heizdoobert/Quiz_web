@@ -90,7 +90,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [x] Task B1: Confirm and fix the toast re-render loop (loop was real: 27 calls before the fix, 1 after)
 - [x] Task B2: Show the send-code error in `EmailTab`
 - [x] Task B3: Modal focus management
-- [ ] Task B4: Labels, live regions and form errors
+- [x] Task B4: Labels, live regions and form errors (Toast, auth, quiz, community; follow-up B4b listed in todo.md)
 - [x] Task B5: Run the component tests in CI (widened the script, no file moves)
 - [x] Task B6: Honest coverage (lines 51.7, functions 48, branches 47.7)
 - [ ] Task B7: Enforce the Floor rules that nothing enforces
