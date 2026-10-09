@@ -37,20 +37,20 @@ Last reviewed: 2026-10-08 by @alexheiz
 - **Security scanning**: Semgrep scans source code for OWASP Top Ten and framework vulnerabilities without slowing down the edit loop.
 - **Security dependencies**: `npm audit --omit=dev` targets production runtime risk; transitive exceptions require specific deprecation plans.
 - **Accessibility & Lighthouse**: Core Web Vitals (LCP ≤ 2.5s, CLS ≤ 0.1) and WCAG 2.1 AA zero critical/serious issues prevent UX and accessibility degradation on deployed preview routes.
-- **Bundle size budget (150 kB gzip)**: The target for first-load JS. The earlier 127 kB figure could not be reproduced (Turbopack prints no size table). `scripts/check-bundle.mjs` now measures it: every prerendered route loads the wallet stack (wagmi, RainbowKit, viem) and weighs about 460 kB gzip, so the script fails only above the 470 kB ratchet until the wallet stack leaves non-wallet routes.
+- **Bundle size budget (150 kB gzip)**: The target for first-load JS. The earlier 127 kB figure could not be reproduced (Turbopack prints no size table). `scripts/check-bundle.mjs` now measures it: it reads only the `<script>` tags in prerendered HTML, so it misses chunks loaded later by `next/dynamic` (the wallet stack is now one). Wallet routes weigh about 450 kB gzip in that count; a browser measurement (Playwright, transferred bytes, 2026-10-09) is more honest: about 950 kB on `/` and 450 kB on `/topics` and `/search`, which no longer load the wallet stack. The script fails above the 470 kB ratchet; 150 kB is still out of reach.
 
 ## Measured, not yet enforced
 
 | Metric | Today | Direction |
 |--------|-------|-----------|
 | Statements | 52.3% (2026-10-09, all of `app`, `lib`, `hooks`, `components`) | must not fall |
-| First-load JS (gzip, per prerendered route) | 455 to 463 kB (`/contest`, `/my-lists`, `/profile`, `/review`, 2026-10-09; dynamic routes have no prerendered HTML to measure) | must not grow past 470 kB, target 150 kB |
+| First-load JS (gzip, per prerendered route, `check-bundle`) | 445 to 453 kB (`/contest`, `/my-lists`, `/review`; 2026-10-09; excludes `next/dynamic` chunks and dynamic routes) | must not grow past 470 kB, target 150 kB |
 
 ## Exceptions
 
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
-| X-1 | Performance (bundle): 150 kB per route | all prerendered routes | The wallet stack loads on every route; fixed by splitting it off non-wallet routes (todo.md Task C2). The ratchet at 470 kB stops it growing meanwhile | alexheiz | 2026-12-31 |
+| X-1 | Performance (bundle): 150 kB per route | all prerendered routes | The wallet stack is off `/topics` and `/search` (Task C2, `components/WalletBoundary.tsx`) but still loads on every other route, and the non-wallet routes still weigh about 450 kB. The ratchet at 470 kB stops growth meanwhile | alexheiz | 2026-12-31 |
 
 
 ## Lifecycle mapping

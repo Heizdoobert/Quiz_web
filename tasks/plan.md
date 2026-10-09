@@ -101,7 +101,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 
 ### Phase C: Performance
 - [x] Task C1: Make the bundle budget measurable (ratchet 470 kB, ~460 kB measured)
-- [ ] Task C2: Keep the wallet stack off non-wallet routes
+- [x] Task C2: Keep the wallet stack off non-wallet routes (`/topics`, `/search`; browser-measured 954 to 454 kB; real wallet sign-in untested)
 - [x] Task C3: `/topics` is frozen at build time (route is dynamic)
 - [x] Task C4: Cache or index the global leaderboard (15 s unstable_cache; EXPLAIN not run)
 

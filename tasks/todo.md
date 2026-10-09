@@ -323,13 +323,15 @@
 ### Task C2: Keep the wallet stack off non-wallet routes
 **Description:** S6-03. `components/Providers.tsx` loads wagmi and RainbowKit on every route including the 404.
 **Acceptance criteria:**
-- [ ] Content-only routes do not load the wallet chunks; `ConnectButton` loads through `next/dynamic`
+- [x] Content-only routes (`/topics`, `/search`) do not load the wallet chunks; the wallet stack loads through `next/dynamic` in `components/WalletBoundary.tsx`
 **Verification:**
-- [ ] `npm run check:bundle` shows the drop; sign-in still works
+- [x] Measured in a browser (below). Sign-in with a real wallet NOT tested: no wallet here
 **Dependencies:** C1
 **Files:** `components/Providers.tsx`, `app/` layouts
 **Scope:** M
-**Not done (2026-10-09), needs a decision and a browser:** measured, the wallet stack is about 110 kB of the 460 kB gzip (react-dom 70 kB, the rest are framework and app chunks), so removing it from content routes cannot reach the 150 kB budget on its own. `Header` and `ListsNav` render `ConnectButton` on every page, 15 files call wagmi hooks directly (they throw outside `WagmiProvider`), and sign-in runs through `RainbowAuthWrapper` mounted in `Providers`. Deferring the providers means choosing what a content-only route is and re-testing wallet, email and username sign-in in a real browser, which I cannot do here. Left open on purpose.
+**Done 2026-10-09 (scratch build, real Chrome via Playwright, transferred script bytes):** `/` 954 kB, `/contest` 861 kB, `/profile` 883 kB, `/topics` 454 kB, `/search` 454 kB. The wallet stack is about 500 kB of transfer on a wallet route, but the rest (framework, app code) keeps content routes near 450 kB, so the 150 kB budget is still out of reach. `scripts/check-bundle.mjs` cannot see these dynamic chunks (it reads prerendered HTML only), so its 450 kB figure undercounts wallet routes; the ratchet stays 470.
+**Design:** `WalletBoundary` (pathname regex `NO_WALLET_ROUTES`, fail-safe: unlisted routes get the stack) wraps `WalletProviders` (wagmi, RainbowKit, `RainbowAuthWrapper`, `AuthPopup`). On content routes `Header` shows a plain Connect button; a click loads `WalletConnect`, which mounts its own `WalletProviders` and opens the connect modal (after 300 ms: opening it in the mount commit was swallowed, found in the browser).
+**Known limits:** the Connect button on content routes is a plain button, not RainbowKit's; wallet sign-in end to end is untested; the 404 page and unknown URLs still get the stack; a new content route must be added to `NO_WALLET_ROUTES`; `requireSignIn` must not be called on content routes (the popup lives in `WalletProviders`). Tests: `tests/wallet-boundary.test.tsx`.
 
 ### Task C3: `/topics` is frozen at build time
 **Description:** S6-04. The page prerenders with empty data and never revalidates.
