@@ -367,11 +367,7 @@ class _CategoryBadge extends StatelessWidget {
           ),
         ),
         if (createdBy != null && createdBy.isNotEmpty)
-          _Pill(
-            icon: Icons.groups_outlined,
-            label: '${createdBy.substring(0, createdBy.length < 6 ? createdBy.length : 6)}...',
-            color: AppColors.gold,
-          )
+          const _Pill(icon: Icons.groups_outlined, label: 'Community', color: AppColors.gold)
         else
           const _Pill(icon: Icons.verified_user_outlined, label: 'Verified', color: AppColors.neoMint),
       ],

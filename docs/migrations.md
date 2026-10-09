@@ -9,9 +9,9 @@ Keep the manual process and record it here, rather than adopting `supabase db pu
 ## Rules
 
 - **Forward-fix only.** There are no down scripts. A bad migration is corrected by a new script, never edited after it has been applied anywhere shared.
-- **New scripts are idempotent** (`IF NOT EXISTS`, `CREATE OR REPLACE`, `DROP ... IF EXISTS`) and take the next free number, `19-` and up (unused numbers on `preview` count, so merge before numbering).
+- **New scripts are idempotent** (`IF NOT EXISTS`, `CREATE OR REPLACE`, `DROP ... IF EXISTS`) and take the next free number, `21-` and up (unused numbers on `preview` count, so merge before numbering).
 - **Apply to a Supabase branch first, then production**, and write the date in the ledger below.
-- **Take a backup or confirm point-in-time recovery is on** before applying anything that rewrites data (`accounts.sql`, `reward-payee.sql`, `widen-reward-claims-amount.sql`).
+- **Take a backup or confirm point-in-time recovery is on** before applying anything that rewrites data (`accounts.sql`, `reward-payee.sql`, `widen-reward-claims-amount.sql`, `20-drop-web3-schema.sql`).
 - **Check on a fresh database:** `bash scripts/verify-migrations.sh` applies the whole order to a throwaway Postgres in Docker and lists the errors per script.
 
 ## Known quirks (found 2026-10-09)
@@ -48,3 +48,4 @@ Fill in the date each script was applied to production. "Unknown" means no recor
 | 18 | `17-auth-rate-limit.sql` | auth and answer rate limits (fails open until applied, ADR-008) | **not applied as of 2026-10-09 (owner task A6)** |
 | 19 | `18-ai-usage.sql` | daily AI usage | unknown |
 | 20 | `19-secure-ai-usage.sql` | on `preview` only; merge first | not applied |
+| 21 | `20-drop-web3-schema.sql` | drop the wallet, reward and escrow schema (ADR-013); destructive, so back up first and apply only once production reads `questions.created_by_user`; test with `bash supabase/tests/run-drop-web3-schema.sh` | not applied |

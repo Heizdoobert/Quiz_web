@@ -104,7 +104,7 @@ export async function fetchRandomQuestion(
   try {
     let query = supabase
       .from('questions')
-      .select('id, category, prompt, options, created_by, status')
+      .select('id, category, prompt, options, created_by_user, status')
       .eq('status', 'verified')
       .is('list_id', null);
 
@@ -123,7 +123,7 @@ export async function fetchRandomQuestion(
       logger.info('fetch_random_question_fallback_triggered', { category, excludedCount: ids.length });
       const fallbackQuery = supabase
         .from('questions')
-        .select('id, category, prompt, options, created_by, status')
+        .select('id, category, prompt, options, created_by_user, status')
         .eq('status', 'verified')
         .is('list_id', null)
         .ilike('category', escapeLikePattern(category))
@@ -139,7 +139,7 @@ export async function fetchRandomQuestion(
       logger.info('fetch_random_question_general_fallback_triggered', { category });
       const generalQuery = await supabase
         .from('questions')
-        .select('id, category, prompt, options, created_by, status')
+        .select('id, category, prompt, options, created_by_user, status')
         .eq('status', 'verified')
         .is('list_id', null)
         .limit(20);
@@ -158,7 +158,7 @@ export async function fetchRandomQuestion(
       category: row.category,
       prompt: row.prompt,
       options: Array.isArray(row.options) ? (row.options as string[]) : [],
-      created_by: row.created_by || null,
+      created_by: row.created_by_user || null,
       status: row.status || 'verified',
     };
   } catch (err) {
@@ -187,7 +187,7 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
     if (!isUuid(id)) return null;
     const { data, error } = await supabase
       .from('questions')
-      .select('id, category, prompt, options, created_by, status')
+      .select('id, category, prompt, options, created_by_user, status')
       .eq('id', id)
       .eq('status', 'verified')
       .is('list_id', null)
@@ -198,7 +198,7 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
       category: data.category,
       prompt: data.prompt,
       options: Array.isArray(data.options) ? (data.options as string[]) : [],
-      created_by: data.created_by || null,
+      created_by: data.created_by_user || null,
       status: data.status || 'verified',
     };
   } catch (err) {
