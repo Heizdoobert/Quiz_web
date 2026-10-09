@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToastContext, ToastMessage, ToastType } from '@/hooks/use-toast';
 import { CheckCircle, Info, AlertTriangle, XCircle, X } from 'lucide-react';
@@ -40,14 +40,22 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const warning = useCallback((msg: string) => addToast('warning', msg), [addToast]);
   const error = useCallback((msg: string) => addToast('error', msg), [addToast]);
 
+  // Only the stable callbacks go in the context: consumers put `toast` in effect deps, so a value
+  // that changed with every toast would re-run those effects (and re-fire their requests).
+  const value = useMemo(
+    () => ({ success, info, warning, error, removeToast }),
+    [success, info, warning, error, removeToast],
+  );
+
   return (
-    <ToastContext.Provider value={{ toasts, success, info, warning, error, removeToast }}>
+    <ToastContext.Provider value={value}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none">
+      <div role="region" aria-label="Notifications" aria-live="polite" className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none">
         <AnimatePresence>
           {toasts.map((toast) => (
             <motion.div
               key={toast.id}
+              role={toast.type === 'error' ? 'alert' : 'status'}
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
@@ -57,6 +65,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <div className="flex-1 text-sm font-medium leading-relaxed">{toast.message}</div>
               <button
                 onClick={() => removeToast(toast.id)}
+                aria-label="Dismiss notification"
                 className="flex-shrink-0 p-1 rounded-md opacity-70 hover:opacity-100 hover:bg-slate-800 transition-colors"
               >
                 <X className="w-4 h-4" />

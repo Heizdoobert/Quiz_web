@@ -75,12 +75,17 @@ describe('isContestFundedOnChain', () => {
 });
 
 describe('voucher nonce checks', () => {
-  it('isContestVoucherUsed reports the on-chain flag and treats a failed read as unused', async () => {
+  it('isContestVoucherUsed reports the on-chain flag', async () => {
     readContract.mockResolvedValueOnce(true);
     expect(await isContestVoucherUsed(CONTEST, WALLET, '7')).toBe(true);
     expect(readContract.mock.calls[0][0]).toMatchObject({ functionName: 'isNonceUsed', args: [CONTEST, WALLET, BigInt(7)] });
+    readContract.mockResolvedValueOnce(false);
+    expect(await isContestVoucherUsed(CONTEST, WALLET, '8')).toBe(false);
+  });
+
+  it('isContestVoucherUsed throws when the read fails, so callers cannot mistake it for "unused"', async () => {
     readContract.mockImplementationOnce(async () => { throw new Error('rpc down'); });
-    expect(await isContestVoucherUsed(CONTEST, WALLET, '7')).toBe(false);
+    await expect(isContestVoucherUsed(CONTEST, WALLET, '7')).rejects.toThrow('rpc down');
   });
 
   it('isVoucherUsed reads usedNonces from the token or the badge contract', async () => {

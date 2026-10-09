@@ -10,7 +10,7 @@ As of 2026-10-08. Every claim below names the file or command that confirms it. 
 | **S**poofing (brute force, enumeration, replay) | Guessing a 6-digit email code or a password; learning which emails or usernames are registered; replaying a SIWE signature. | Per-identifier and per-IP attempt limits in Postgres (section 2). `requestEmailCode` answers `{ sent: true }` for known and unknown emails alike and applies the same limit to both. The SIWE nonce lives in an HTTP-only cookie, is deleted on first use and expires in 10 minutes (`CHALLENGE_COOKIE`). Known gap: `signUpWithUsername` reports "Username is already taken", so usernames can be enumerated (rate-limited, not hidden). |
 | **T**ampering | Client manipulates query parameters or sends malicious payloads to Server Actions. | Bounded limits (`MAX_LIMIT = 500`); parameterized queries through Supabase PostgREST; input validation in `lib/utils/validation.ts`. |
 | **R**epudiation | State-changing operations performed without attribution. | Writes require a session account (`getSessionAccount`) and are keyed by account id; database timestamps on `questions`, `quiz_results` and `reward_claims`. Rate-limit hits are logged server-side as `auth_rate_limited`. |
-| **I**nformation Disclosure | Reading `correct_index` and `explanation` before answering. | `getUserQuizzes` selects only display fields (`id, category, prompt, options, status, created_at, created_by`; `lib/actions/profile-actions.ts`). Raw database errors are logged server-side and replaced with generic messages. |
+| **I**nformation Disclosure | Reading `correct_index` and `explanation` before answering. | `getUserQuizzes` selects only display fields (`id, category, prompt, options, status, created_at, created_by`; `lib/actions/profile-actions.ts`). Raw database errors are logged server-side and replaced with generic messages. `get5050EliminatedIndices` returns nothing for pending, quarantined or contest questions. Known gap: `submitAnswer` shows the key to guests by design (`docs/specs/trivia-guest-access.md`); it is limited to 120 answers per IP per hour, which slows but does not stop a script using many addresses. |
 | **D**enial of Service | Large queries, floods of writes, or abuse of expensive paths. | Query caps (`MAX_LIMIT 500`, export capped at `MAX_EXPORT_QUIZZES 1000` and `MAX_EXPORT_STATS 5000`). Daily cap on new questions (`QUESTIONS_PER_DAY` in `lib/actions/question-actions.ts`). Auth attempt limits (section 2). Known gap: the 10-per-15-minute username limit lets an attacker lock one victim out of password sign-in for 15 minutes; email and wallet sign-in still work. |
 | **E**levation of Privilege | A standard user acts as admin or as another user. | All writes go through server actions using `supabaseAdmin`; the public key cannot write (section 4.B). Ownership is checked on the session account id, for example `list.owner_user !== auth.account.id` in `startContest`. |
 
@@ -65,7 +65,7 @@ As of 2026-10-08 the command reports **0 vulnerabilities at every severity** on 
 
 ### A. Cryptographic Session Authentication (SIWE) — RESOLVED
 - **Implementation**: EIP-4361 Sign-In with Ethereum (`lib/actions/auth-actions.ts`, `lib/services/session.ts`).
-- **Enforcement**: state-changing Server Actions (`createQuestion`, `submitAnswer`, `createList`, `exportUserData`) authenticate the caller through the signed `quiz_session` cookie, issued only after a verified signature, email code or password.
+- **Enforcement**: state-changing Server Actions that write for an account (`createQuestion`, `createList`, `exportUserData`) authenticate the caller through the signed `quiz_session` cookie, issued only after a verified signature, email code or password. `submitAnswer` is the exception by design: guests may answer and see the result (`docs/specs/trivia-guest-access.md`), but a result is recorded only for a signed-in account, and answers are limited to 120 per IP per hour (see the Information Disclosure row in section 1).
 - **Impact**: eliminates wallet spoofing and IDOR across data export and submission.
 
 ### B. Supabase RLS Write Lock-Down — RESOLVED
@@ -90,3 +90,8 @@ For detailed design decisions and trade-offs, consult:
 - [ADR-005: Component Manager Pattern](docs/decisions/005-component-manager-pattern.md)
 - [ADR-006: Resolving High-Severity NPM Vulnerabilities via PWA Fork and Dependency Overrides](docs/decisions/006-npm-vulnerabilities-and-pwa-fork.md)
 - [ADR-007: Contest Payouts Through ContestEscrow Vouchers](docs/decisions/007-contest-escrow-payouts.md)
+- [ADR-008: Postgres Rate Limiter That Fails Open](docs/decisions/008-postgres-auth-rate-limiter-fails-open.md)
+- [ADR-009: Content-Security-Policy Ships Report-Only First](docs/decisions/009-report-only-content-security-policy.md)
+- [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](docs/decisions/010-polling-leaderboard-with-short-cache.md)
+- [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](docs/decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
+- [ADR-012: Accounts With an Optional Wallet](docs/decisions/012-accounts-with-optional-wallet.md)

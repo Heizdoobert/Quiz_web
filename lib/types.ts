@@ -108,7 +108,7 @@ export interface AnswerSubmissionResult {
   // False when the answer didn't count: not signed in, or the question was already answered.
   recorded: boolean;
   // Set only when recorded is false, so the UI can say why instead of claiming a point was earned.
-  notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'error';
+  notSavedReason?: 'signed-out' | 'already-answered' | 'own-question' | 'rate-limited' | 'error';
 }
 
 export interface SearchResult {

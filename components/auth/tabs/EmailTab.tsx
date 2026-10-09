@@ -58,9 +58,15 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
           autoFocus
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          aria-label="Email address"
           placeholder="you@example.com"
           className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
         />
+        {error && (
+          <p role="alert" className="text-xs text-pop-coral">
+            {error}
+          </p>
+        )}
         <button
           type="submit"
           disabled={pending}
@@ -86,10 +92,15 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
         autoFocus
         value={code}
         onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+        aria-label="6-digit code"
         placeholder="123456"
         className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white tracking-[0.3em] text-center placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
       />
-      {error && <p className="text-xs text-pop-coral">{error}</p>}
+      {error && (
+        <p role="alert" className="text-xs text-pop-coral">
+          {error}
+        </p>
+      )}
       <button
         type="submit"
         disabled={pending || code.length !== 6}

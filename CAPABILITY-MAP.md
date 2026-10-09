@@ -2,12 +2,12 @@
 
 | Module id | Responsibility | Depends on |
 |---|---|---|
-| identity | Accounts (email code or wallet sign-in), optional wallet link, session (`lib/wallet-session.ts`, `lib/actions/auth-actions.ts`, `lib/users.ts`) | — |
-| trivia | Quiz engine, questions, play, create (signed-in only), guest read-only (`lib/actions/question-actions.ts`, `quiz-actions.ts`, `app/page.tsx`) | identity |
+| identity | Accounts (email code or wallet sign-in), optional wallet link, session (`lib/services/session.ts`, `lib/actions/auth-actions.ts`, `lib/services/users.ts`) | — |
+| trivia | Quiz engine, questions, play, create (signed-in only), guest read-only (`lib/actions/question-actions.ts`, `lib/actions/quiz-actions.ts`, `app/page.tsx`) | identity |
 | discovery | Question search, topic list newest first, topic browse (`lib/actions/discovery-actions.ts`, `app/search`, `app/topics`) | trivia |
 | community | Question ratings, comments, suggestions to authors (`lib/actions/community-actions.ts`, `components/community/`) | identity, trivia |
 | lists | Peer-reviewed lists, review, contest hosting (`lib/actions/question-list-actions.ts`, `app/my-lists`, `app/review`, `app/contest`) | identity, trivia |
-| rankings | Global/group leaderboards, stats SQL (`lib/actions/leaderboard-actions.ts`, `group-actions.ts`, `lib/sql/stats-functions.sql`) | identity, trivia |
+| rankings | Global/group leaderboards, stats SQL (`lib/actions/leaderboard-actions.ts`, `lib/actions/group-actions.ts`, `supabase/migrations/stats-functions.sql`) | identity, trivia |
 | profile | Creator dashboard, export, suggestions received (`lib/actions/profile-actions.ts`, `app/profile`) | identity, trivia, community |
 | rewards | $QUIZ ERC-20, Badge NFT, ContestEscrow, EIP-712 vouchers, payee rule for accounts without a wallet (`lib/actions/reward-actions.ts`, `contracts/`) | identity, lists |
 

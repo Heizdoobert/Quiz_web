@@ -98,6 +98,7 @@ export default function CommentList({
             <textarea
               value={body}
               onChange={(e) => setBody(e.target.value)}
+              aria-label="Add a comment"
               placeholder="Add a comment..."
               maxLength={500}
               rows={2}
@@ -118,7 +119,7 @@ export default function CommentList({
             </div>
           </div>
           {error && (
-            <p className="text-xs text-pop-coral font-medium">{error}</p>
+            <p role="alert" className="text-xs text-pop-coral font-medium">{error}</p>
           )}
         </form>
       ) : (

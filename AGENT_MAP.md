@@ -6,17 +6,17 @@ Each snippet: line count, exports, first 40 lines. Never grep blind.
 
 | Module | Lives in | Docs |
 |---|---|---|
-| identity | `lib/wallet-session.ts`, `lib/actions/auth-actions.ts`, `lib/users.ts` | `docs/specs/identity-accounts.md` |
-| trivia | `lib/actions/question-actions.ts`, `quiz-actions.ts`, `app/page.tsx` | `docs/specs/trivia-guest-access.md`, `answer-persistence.md` |
+| identity | `lib/services/session.ts`, `lib/actions/auth-actions.ts`, `lib/services/users.ts` | `docs/specs/identity-accounts.md` |
+| trivia | `lib/actions/question-actions.ts`, `lib/actions/quiz-actions.ts`, `app/page.tsx` | `docs/specs/trivia-guest-access.md`, `docs/specs/answer-persistence.md` |
 | discovery | `lib/actions/discovery-actions.ts`, `app/search`, `app/topics` | `docs/specs/discovery.md` |
 | community | `lib/actions/community-actions.ts`, `components/community/` | `docs/specs/community.md` |
 | lists | `lib/actions/question-list-actions.ts`, `app/my-lists`, `app/review`, `app/contest` | `docs/specs/contest-escrow.md` |
-| rankings | `lib/actions/leaderboard-actions.ts`, `group-actions.ts`, `lib/sql/` | `CAPABILITY-MAP.md` |
+| rankings | `lib/actions/leaderboard-actions.ts`, `lib/actions/group-actions.ts`, `supabase/migrations/stats-functions.sql` | `CAPABILITY-MAP.md` |
 | profile | `lib/actions/profile-actions.ts`, `app/profile` | `docs/specs/profile-dashboard.md` |
 | rewards | `lib/actions/reward-actions.ts`, `contracts/` | `docs/specs/rewards-no-wallet-payee.md` |
 
 Entry points: `app/page.tsx` (play), `app/profile/page.tsx` (creator),
-`contracts/contracts/` (on-chain), `lib/schema.sql` (tables).
+`contracts/contracts/` (on-chain), `supabase/migrations/schema.sql` (tables).
 Full capability map: `CAPABILITY-MAP.md`. Intent log: `docs/intent/`.
 
 Regen index: `uv run --project coco cocoindex update coco/main.py`

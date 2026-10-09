@@ -1,0 +1,12 @@
+type-check exit=0 secs=7
+lint exit=0 secs=6
+architecture exit=0 secs=0
+deps exit=0 secs=2
+coverage exit=0 secs=16
+build exit=0 secs=12
+gitleaks exit=126 secs=0
+semgrep exit=0 secs=7
+contracts exit=1 secs=6
+DONE
+install exit=0
+contracts(rerun) exit=0

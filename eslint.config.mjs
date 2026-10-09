@@ -19,6 +19,10 @@ const eslintConfig = defineConfig([
     "coverage/**",
   ]),
   {
+    // An empty catch hides failures; say why ignoring is safe in a comment instead.
+    rules: { "no-empty": ["error", { allowEmptyCatch: false }] },
+  },
+  {
     files: ["components/**/*.tsx", "components/**/*.jsx"],
     rules: {
       "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }]

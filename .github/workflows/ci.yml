@@ -5,6 +5,8 @@ on:
     branches: [main, preview]
   pull_request:
     branches: [main, preview]
+  # cd.yml calls this so nothing is published unless these jobs pass on the same commit.
+  workflow_call:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
@@ -161,6 +163,9 @@ jobs:
           NEXT_PUBLIC_CHAIN_ID: '84532'
           REWARD_SIGNER_PRIVATE_KEY: '0x9999999999999999999999999999999999999999999999999999999999999999'
 
+      - name: Bundle size per route
+        run: npm run check:bundle
+
   security:
     name: Security & Dependencies Audit
     needs: [secrets, typecheck, lint, architecture]
@@ -179,3 +184,15 @@ jobs:
         run: |
           echo "Scanning dependencies against production runtime risk..."
           npm run check:deps
+
+  # The single check to require in the branch ruleset: it fails when any job above failed,
+  # was cancelled or was skipped, so a new job only has to be added to `needs` here.
+  ci-gate:
+    name: CI gate
+    if: always()
+    needs: [secrets, typecheck, lint, architecture, test, contracts, build, security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail unless every job succeeded
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped') }}
+        run: exit 1

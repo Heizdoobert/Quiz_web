@@ -87,3 +87,4 @@ if (!account) return { success: false, code: 'UNAUTHORIZED' as const };
 ## Decisions
 - 2026-09-28: guests keep playing (the result is shown, never saved).
 - The create button stays where it is now (below the quiz), shown only to signed-in players. Moving it into the header is a later, separate change if wanted.
+- 2026-10-09: guests still see the answer after each play, but `submitAnswer` is capped at 120 answers per IP per hour (`rate_limit_hit`, scope `submit-answer-ip`) and returns `notSavedReason: 'rate-limited'` with nothing revealed once over. This slows a script reading the whole question bank; it does not stop one using many addresses. The alternative, requiring sign-in to see an answer, was not chosen because it would end guest play.

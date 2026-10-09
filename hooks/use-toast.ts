@@ -11,7 +11,6 @@ export interface ToastMessage {
 }
 
 export interface ToastContextType {
-  toasts: ToastMessage[];
   success: (message: string) => void;
   info: (message: string) => void;
   warning: (message: string) => void;

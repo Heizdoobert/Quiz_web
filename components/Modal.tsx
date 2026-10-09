@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useSyncExternalStore } from "react";
+import React, { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
@@ -17,6 +17,9 @@ interface ModalProps {
 
 const emptySubscribe = () => () => {};
 
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
 export default function Modal({
   isOpen,
   onClose,
@@ -31,6 +34,40 @@ export default function Modal({
     () => true,
     () => false,
   );
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus goes in on open, Tab stays inside, and focus returns to the opener on close.
+  // Kept apart from the effect below because `onClose` is usually a new function every render.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!isOpen || !dialog) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const focusables = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
+
+    if (!dialog.contains(document.activeElement)) (focusables()[0] ?? dialog).focus();
+
+    const trapTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return e.preventDefault();
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !dialog.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trapTab);
+    return () => {
+      window.removeEventListener("keydown", trapTab);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [isOpen, mounted]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -69,6 +106,8 @@ export default function Modal({
             onClick={onClose}
           />
           <motion.div
+            ref={dialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
             aria-label={title}
@@ -85,7 +124,7 @@ export default function Modal({
               y: 6,
               transition: { duration: 0.15, ease: "easeIn" },
             }}
-            className={`glass glass-border glass-edge relative w-full ${maxWidth} rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
+            className={`glass glass-border glass-edge focus:outline-none relative w-full ${maxWidth} rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-cyber-border bg-deep-space/70 select-none">

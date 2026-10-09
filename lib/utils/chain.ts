@@ -47,6 +47,8 @@ export async function isVoucherUsed(
 }
 
 // True once a contest claim voucher's nonce has been spent on ContestEscrow.
+// Throws when the chain cannot be read: "unknown" must not look like "unused", or a redeemed
+// voucher could be expired and replaced by a new one.
 export async function isContestVoucherUsed(
   contestId: `0x${string}`,
   recipient: string,
@@ -55,16 +57,12 @@ export async function isContestVoucherUsed(
   const client = publicClientFor(REWARD_CHAIN_ID);
   if (!client) throw new Error(`Unsupported reward chain ${REWARD_CHAIN_ID}`);
   if (CONTEST_ESCROW_ADDRESS === '0x0000000000000000000000000000000000000000') return false;
-  try {
-    return (await client.readContract({
-      address: CONTEST_ESCROW_ADDRESS,
-      abi: ContestEscrowABI,
-      functionName: 'isNonceUsed',
-      args: [contestId, recipient as `0x${string}`, BigInt(nonce)],
-    })) as boolean;
-  } catch {
-    return false;
-  }
+  return (await client.readContract({
+    address: CONTEST_ESCROW_ADDRESS,
+    abi: ContestEscrowABI,
+    functionName: 'isNonceUsed',
+    args: [contestId, recipient as `0x${string}`, BigInt(nonce)],
+  })) as boolean;
 }
 
 // True if the contest has been initialized with escrowed funds on-chain.
