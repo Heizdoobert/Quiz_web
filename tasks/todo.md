@@ -365,17 +365,13 @@
 ### Task D1: Merge `origin/preview` into this branch
 **Description:** Section 5 of the report. Brings Sentry, PostHog and migration 19. Conflicts with the uncommitted `coco/out` edits, so commit or set those aside first, or merge in a throwaway worktree.
 **Acceptance criteria:**
-- [ ] Merge done, type-check, lint, tests and build green
+- [x] Merge done, type-check, lint, tests and build green (scratch copy)
 **Verification:**
-- [ ] `npm run check:task`
+- [x] type-check, lint, 427 tests with coverage, build and `check:bundle` run in the scratch copy; the full `npm run check:task` was not run as one command
 **Dependencies:** your `coco/out` edits dealt with
 **Files:** merge
 **Scope:** S
-**Not merged (2026-10-09), dry run done in a throwaway worktree:** 17 of your uncommitted `coco/out` files are also changed by `origin/preview`, so a real merge here would overwrite or conflict with your edits, and I do not commit or stash them. Result of the dry run on the committed state (28 ahead, 6 behind):
-- Conflicts: `AGENTS.md` (keep the `web3-fundamentals` wording from this branch and add preview's item 4, "Codebase Exploration & Searching") and `package-lock.json` (take ours, then `npm install --legacy-peer-deps` to add `@sentry/nextjs` and `posthog-js`). Everything else merged cleanly.
-- After that: type-check, lint, 411 tests and the build pass; `npm audit --omit=dev --audit-level=high` reports 0.
-- **CI would fail on the merge unless the ratchets move:** Sentry and PostHog add about 108 kB gzip to every route (462 to 570 kB, so `scripts/check-bundle.mjs` needs `RATCHET_KB` raised to about 580 and `CONSTRAINTS.md` updated), and the new untested files lower coverage to 53.46 / 50.14 / 49.11 (lines / functions / branches) against thresholds of 53.5 / 50.3 / 49.2.
-- To do it: commit or discard the `coco/out` edits, `git merge origin/preview`, resolve as above, adjust the two ratchets, run `npm run check:task`.
+**Done 2026-10-09:** the remote branch already carried preview (`c02a827`, PR #75), so the local branch merged `origin/company/update-code` in a throwaway worktree; there were no conflicts. The generated `coco/out` files kept this branch's version so your uncommitted edits are untouched (cocoindex rebuilds them). Ratchets: coverage rose to 53.8 / 50.7 / 49.4 (new tests for `WalletConnect` and `PostHogProvider`); bundle ratchet raised 470 to 570 kB because Sentry and PostHog add about 108 kB gzip to every route. Browser measure after the merge: `/` 1071 kB, `/topics` 567 kB. In a build without `NEXT_PUBLIC_POSTHOG_KEY` the browser logs "PostHog was initialized without a token"; set the key in Vercel.
 
 ### Task D2: Migration ledger and rollback policy
 **Description:** S8-08, S8-09. Migrations are pasted by hand with no record of what production has applied.

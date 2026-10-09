@@ -109,7 +109,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [ ] Bundle number reported honestly
 
 ### Phase D: Delivery and operations
-- [ ] Task D1: Merge `origin/preview` into this branch
+- [x] Task D1: Merge `origin/preview` into this branch (via `origin/company/update-code`; ratchets moved, coco/out kept as ours)
 - [x] Task D2: Migration ledger and rollback policy (manual ledger + verify script)
 - [x] Task D3: `/api/health` (tests/health-route.test.ts)
 
