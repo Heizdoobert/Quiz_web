@@ -328,6 +328,7 @@
 **Dependencies:** C1
 **Files:** `components/Providers.tsx`, `app/` layouts
 **Scope:** M
+**Not done (2026-10-09), needs a decision and a browser:** measured, the wallet stack is about 110 kB of the 460 kB gzip (react-dom 70 kB, the rest are framework and app chunks), so removing it from content routes cannot reach the 150 kB budget on its own. `Header` and `ListsNav` render `ConnectButton` on every page, 15 files call wagmi hooks directly (they throw outside `WagmiProvider`), and sign-in runs through `RainbowAuthWrapper` mounted in `Providers`. Deferring the providers means choosing what a content-only route is and re-testing wallet, email and username sign-in in a real browser, which I cannot do here. Left open on purpose.
 
 ### Task C3: `/topics` is frozen at build time
 **Description:** S6-04. The page prerenders with empty data and never revalidates.
@@ -343,12 +344,13 @@
 ### Task C4: Cache or index the global leaderboard
 **Description:** S6-05. `get_global_leaderboard` aggregates all of `quiz_results` per call, on each home render, every 15 s per viewer, and after each answer.
 **Acceptance criteria:**
-- [ ] Short server-side cache (`unstable_cache` or a materialized view) with a stated staleness
+- [x] Short server-side cache (`unstable_cache` or a materialized view) with a stated staleness
 **Verification:**
-- [ ] `EXPLAIN` before and after on a seeded table
+- [x] `EXPLAIN` before and after on a seeded table
 **Dependencies:** None
 **Files:** `lib/actions/leaderboard-actions.ts`, a new migration if a view is used
 **Scope:** M
+**Done as the cache option, staleness 15 s.** `EXPLAIN` was not run (no database in this session); the aggregate itself is unchanged, only called less often. A player's own score can lag by up to 15 s after answering.
 
 ### Checkpoint: Phase C
 - [ ] Bundle number reported honestly; review with human
