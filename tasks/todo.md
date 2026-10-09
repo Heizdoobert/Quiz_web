@@ -372,12 +372,13 @@
 ### Task D2: Migration ledger and rollback policy
 **Description:** S8-08, S8-09. Migrations are pasted by hand with no record of what production has applied.
 **Acceptance criteria:**
-- [ ] Decision on Supabase CLI (`supabase db push`) or a documented manual ledger; forward-fix policy written down
+- [x] Decision on Supabase CLI (`supabase db push`) or a documented manual ledger; forward-fix policy written down
 **Verification:**
-- [ ] A fresh database reaches the current schema from the documented steps
+- [x] A fresh database reaches the current schema from the documented steps
 **Dependencies:** your decision on tooling
 **Files:** `supabase/`, `README.md`
 **Scope:** M
+**Done 2026-10-09 with a default for your decision:** I kept the manual process and wrote it down (`docs/migrations.md`: forward-fix policy, ledger with every production date "unknown" for you to fill in, known quirks). `scripts/verify-migrations.sh` applied the documented order to an empty Postgres in Docker and reached the current schema with only the expected `schema.sql` first-pass errors. It also found that re-running `stats-functions.sql` after migration 16 leaves two `get_global_leaderboard` overloads (a one-argument call becomes ambiguous). Moving to the Supabase CLI is left to you.
 
 ### Task D3: `/api/health`
 **Description:** S8-06. Prod-health T8.

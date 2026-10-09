@@ -110,7 +110,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 
 ### Phase D: Delivery and operations
 - [ ] Task D1: Merge `origin/preview` into this branch
-- [ ] Task D2: Migration ledger and rollback policy
+- [x] Task D2: Migration ledger and rollback policy (manual ledger + verify script)
 - [x] Task D3: `/api/health` (tests/health-route.test.ts)
 
 ### Checkpoint: Phase D

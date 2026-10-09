@@ -48,7 +48,7 @@ Variables prefixed `NEXT_PUBLIC_` are compiled into the browser bundle at build 
 
 ### Database Setup
 
-Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Every script is idempotent and safe to re-run. There is no migration ledger yet, so note which scripts you have applied. Migrations are forward-fix only: there are no down scripts, so correct a bad one with a new script.
+Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Most scripts are idempotent; the exceptions are listed in [`docs/migrations.md`](docs/migrations.md), which is also the ledger of what has been applied and the forward-fix rule (there are no down scripts). `bash scripts/verify-migrations.sh` applies this whole order to a throwaway Postgres and reports errors.
 
 All files are in [`supabase/migrations/`](supabase/migrations/):
 
@@ -61,7 +61,7 @@ All files are in [`supabase/migrations/`](supabase/migrations/):
 7. [`widen-reward-claims-amount.sql`](supabase/migrations/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
 8. [`accounts.sql`](supabase/migrations/accounts.sql) — key every table by account id (`users.id`), so a wallet is optional.
 9. [`stats-functions.sql`](supabase/migrations/stats-functions.sql) — stats and leaderboard functions (needs step 8).
-10. [`retire-sample-questions.sql`](supabase/migrations/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing).
+10. [`retire-sample-questions.sql`](supabase/migrations/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing) Skip it on a fresh database: it asserts the old seed questions exist.
 11. [`topics.sql`](supabase/migrations/topics.sql) — `get_topics()`.
 12. [`search.sql`](supabase/migrations/search.sql) — `pg_trgm` search.
 13. [`community.sql`](supabase/migrations/community.sql) — ratings, comments, suggestions.
