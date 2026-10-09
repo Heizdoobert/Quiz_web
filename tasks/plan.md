@@ -77,7 +77,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 
 ### Phase A: Fail closed and keep answers secret
 - [x] Task A1: Fail closed in `isContestVoucherUsed`
-- [ ] Task A2: Gate `get5050EliminatedIndices`
+- [x] Task A2: Gate `get5050EliminatedIndices` (the guest part moves to A3)
 - [ ] Task A3: Limit guest answer harvesting (needs your decision)
 - [ ] Task A4: Gate CD on CI (you add the required checks in the ruleset)
 - [ ] Task A5: Real `NEXT_PUBLIC_*` in the production image (needs D1)

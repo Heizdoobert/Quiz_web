@@ -156,10 +156,12 @@
 ### Task A2: Gate `get5050EliminatedIndices`
 **Description:** S2-01. The action has no session, status or contest check, so any caller learns two wrong options for any question, including contest ones.
 **Acceptance criteria:**
-- [ ] Only `verified` questions without a `list_id` are served; contest questions need an `in_progress` entry for the session account
-- [ ] Other cases return `[]`
+- [x] Only `verified` questions without a `list_id` are served; everything else returns `[]`. Changed from the draft ("contest questions need an `in_progress` entry"): the only caller is the main quiz (`use-quiz-logic.ts`), the contest player has no 50/50, so no entry gate was built.
+- [x] A malformed question id is answered with `[]` before any database read (`isUuid`)
+- [ ] Guests still get the 50/50 on verified questions. That leaks nothing new while `submitAnswer` shows guests the answer (Task A3 decides that policy).
 **Verification:**
-- [ ] Tests in `tests/question-actions.test.ts` for guest, verified, pending and contest cases
+- [x] Tests in `tests/answer-and-list-guards.test.ts`: pending, quarantined and contest questions, and a malformed id, failed before the fix (`expected [ +0, 2 ] to deeply equal []`); verified question still returns two wrong options
+- [x] type-check, lint, architecture pass; `test:coverage`: 351 tests, lines 66.35% (ratchet 65.5%)
 **Dependencies:** None
 **Files:** `lib/actions/question-actions.ts`, `tests/question-actions.test.ts`
 **Scope:** S

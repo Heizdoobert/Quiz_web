@@ -612,27 +612,44 @@ describe('validateQuestionInput', () => {
 });
 
 describe('get5050EliminatedIndices', () => {
+  const verified = (correct_index: number) => ({ correct_index, status: 'verified', list_id: null });
+
   it('returns two distinct wrong indices without eliminating the correct index', async () => {
-    mockTables({ questions: { row: { correct_index: 2 } } });
-    const eliminated = await get5050EliminatedIndices('q-test-123');
+    mockTables({ questions: { row: verified(2) } });
+    const eliminated = await get5050EliminatedIndices(Q_ID);
     expect(eliminated).toHaveLength(2);
     expect(eliminated).not.toContain(2);
     expect(eliminated[0]).toBeLessThan(eliminated[1]);
   });
 
   it('is deterministic for the same question ID', async () => {
-    mockTables({ questions: { row: { correct_index: 0 } } });
-    const run1 = await get5050EliminatedIndices('q-deterministic');
-    const run2 = await get5050EliminatedIndices('q-deterministic');
+    mockTables({ questions: { row: verified(0) } });
+    const run1 = await get5050EliminatedIndices(Q_ID);
+    const run2 = await get5050EliminatedIndices(Q_ID);
     expect(run1).toEqual(run2);
   });
 
   it('returns empty array when question is not found or correct_index is invalid', async () => {
     mockTables({ questions: { row: null } });
-    expect(await get5050EliminatedIndices('q-not-found')).toEqual([]);
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
 
-    mockTables({ questions: { row: { correct_index: 99 } } });
-    expect(await get5050EliminatedIndices('q-invalid-index')).toEqual([]);
+    mockTables({ questions: { row: verified(99) } });
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
+  });
+
+  it.each([
+    ['a pending question', { correct_index: 1, status: 'pending', list_id: null }],
+    ['a quarantined question', { correct_index: 1, status: 'quarantined', list_id: null }],
+    ['a contest question', { correct_index: 1, status: 'verified', list_id: LIST_ID }],
+  ])('reveals nothing for %s', async (_name, row) => {
+    mockTables({ questions: { row } });
+    expect(await get5050EliminatedIndices(Q_ID)).toEqual([]);
+  });
+
+  it('answers a malformed id without touching the database', async () => {
+    mockTables({ questions: { row: verified(2) } });
+    (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockClear();
+    expect(await get5050EliminatedIndices('not-a-uuid')).toEqual([]);
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
   });
 });
-
