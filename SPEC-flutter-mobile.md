@@ -1,68 +1,58 @@
-# Spec: Flutter Mobile Companion App & Mobile API
-
-> **Out of date**: the wallet, token and contract parts of this document describe code removed in [ADR-013](docs/decisions/013-web2-only.md).
+# Spec: Flutter Mobile App & Mobile API
 
 ## Objective
-Build a Flutter companion app for iOS and Android that allows users to play the Web3 quiz natively on their devices. The app must feature secure offline question caching (with server-side delayed grading to prevent cheating) and native Web3 wallet connections. To support this without compromising the existing Next.js security model, a dedicated Bearer-token REST API will be built within the Next.js application.
+A Flutter app for Android and iOS that plays the same trivia game as the web: guests browse questions, signed-in players answer them, and the score, streak and leaderboard rank are the reward ([ADR-013](docs/decisions/013-web2-only.md): no wallets, tokens or contracts). Answers given offline are queued on the device and graded by the server when they sync, so the device never holds an answer key.
 
 ## Tech Stack
-- **Mobile Client:** Flutter (Dart), Riverpod (State Management), `flutter_secure_storage` (Token/Data Encryption), `walletconnect_flutter_v2` (Web3 Integration).
-- **Backend (Existing Repo):** Next.js App Router API (`app/api/mobile/v1`), Supabase (Admin SDK for DB operations).
+- **Mobile:** Flutter (Dart), Riverpod 3, `http`, `flutter_secure_storage` (token and account id), `sqflite` (question cache and answer queue), `google_sign_in`, `sentry_flutter`.
+- **Backend (this repo):** Next.js route handlers under `app/api/mobile/v1`, authenticated with a Bearer token (`lib/services/mobile-auth.ts`).
 
 ## Commands
-**Mobile (Run from the `mobile/` directory):**
-- Build iOS: `flutter build ios`
-- Build Android: `flutter build apk`
-- Test: `flutter test`
-- Lint: `flutter analyze`
-- Dev: `flutter run`
-
-**Backend (Run from root):**
-- Dev: `npm run dev`
+Mobile, from `mobile/`:
+```
+flutter pub get
+flutter analyze
+flutter test
+flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api/mobile/v1
+```
+Backend, from the root: `npm run dev`, `npm test`.
 
 ## Project Structure
-To avoid tooling conflicts, the Flutter app will live in a clearly isolated `mobile/` directory, and Vercel/Next.js CI will be explicitly configured to ignore it.
-
 ```text
-/ (Root Next.js Repo)
-├── app/api/mobile/v1/       → New Bearer-token REST API for the mobile app
-│   ├── auth/                → SIWE & Session endpoints
-│   ├── quiz/                → Fetch questions & submit queued answers
-├── mobile/                  → The isolated Flutter application
-│   ├── lib/
-│   │   ├── api/             → API client for connecting to Next.js
-│   │   ├── features/        → UI and logic (Riverpod providers)
-│   │   ├── models/          → Data models
-│   ├── pubspec.yaml         → Flutter dependencies
+app/api/mobile/v1/
+├── auth/google/        POST  Google ID token -> { token, accountId }
+├── auth/password/      POST  username + password, signin or signup -> { token, accountId }
+├── quiz/questions/     GET   10 questions, no answer key (open to guests)
+├── quiz/sync/          POST  queued answers -> per-question verdicts (Bearer)
+├── quiz/board/         GET   stats, history, leaderboard (guest without a header, 401 for a bad token)
+└── profile/quizzes/    GET   the player's own questions (Bearer)
+mobile/lib/
+├── api/                ApiClient: Bearer header, 401 reporting, token and account id storage
+├── db/                 sqflite: question cache, answer queue
+├── services/           SyncService: sends the queue, keeps what the server has not settled
+├── features/auth/      sign-in screen, AuthNotifier (session expiry, queue ownership)
+├── features/quiz/      quiz screen, scoreboard and leaderboard panels
+└── features/profile/   profile screen
 ```
 
-## Code Style
-**Backend (TypeScript):** Follow existing Next.js conventions (strict typing, functional components).
-**Mobile (Dart):** Follow official Dart style guidelines. Use Riverpod for dependency injection and state.
-```dart
-// Example: Riverpod State Provider
-final quizSyncProvider = StateNotifierProvider<QuizSyncNotifier, AsyncValue<void>>((ref) {
-  final apiClient = ref.watch(apiClientProvider);
-  return QuizSyncNotifier(apiClient);
-});
-```
+## Sessions and the Answer Queue
+- A mobile token is `id.exp.mac` and lives 30 days. There is no refresh: the player signs in again.
+- Any request that carried the token and gets a 401 signs the player out with `sessionExpired` set. The app says so and offers sign-in. The answer queue is kept.
+- The queue belongs to the account id saved at sign-in. The same account signing back in syncs it at once; a different account drops it first. Explicit sign-out syncs what it can, then clears the queue.
+- A queued answer leaves the queue once the server settles it: recorded, already answered, own question, gone. Rate-limited answers stay and the app pauses syncing for 10 minutes.
+
+## Builds and Releases
+- `.github/workflows/mobile.yml` runs `flutter analyze` and `flutter test` on every push that touches `mobile/`.
+- Pushing a `mobile-v*` tag also builds a release APK and app bundle and publishes them as a GitHub prerelease. The build number is the workflow run number.
+- Release signing uses the `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD` secrets; without them the build is debug-signed (sideloading only).
+- Repository variables: `MOBILE_API_BASE_URL` (defaults to the production API), `GOOGLE_SERVER_CLIENT_ID`, `MOBILE_SENTRY_DSN`.
+- App id: `com.quiz3web.mobile` (Android and iOS). iOS builds are not automated.
 
 ## Testing Strategy
-- **Backend API:** Integration tests hitting the new `/api/mobile/v1` routes using mock Bearer tokens to ensure business logic matches the web interface.
-- **Mobile:** 
-  - Unit tests for API serialization and offline queue logic (`flutter test`).
-  - Widget tests for critical UI paths (Wallet connection prompt, quiz answering).
+- **Backend:** Vitest suites `tests/mobile-*.test.ts` cover every mobile route.
+- **Mobile:** unit tests for the sync rules, ApiClient 401 handling and queue ownership; widget tests for the theme and the profile screen.
 
 ## Boundaries
-- **Always do:** Route all database reads/writes through the Next.js `/api/mobile/v1` endpoints. Use `flutter_secure_storage` for caching auth tokens.
-- **Ask first:** Modifying Next.js CI/CD pipelines (to ensure Flutter doesn't break Vercel builds). Changing the WalletConnect SIWE flow on the backend.
-- **Never do:** Connect to Supabase directly from Dart using `supabase_flutter`. Cache the `correct_index` or `explanation` for quizzes offline (only cache the question text and options to prevent cheating).
-
-## Success Criteria
-1. The Next.js API can issue and validate JWT Bearer tokens for mobile users.
-2. The Flutter app runs on iOS/Android and can authenticate a user via a native WalletConnect prompt.
-3. Users can fetch a list of questions, go offline, answer them, and the app securely queues those answers.
-4. Upon reconnecting, the queued answers are submitted to the Next.js API, which grades them server-side using the `first-answer-wins` logic and rewards the user.
-
-## Open Questions
-- Do we want to completely isolate the Flutter app into a **separate GitHub repository** to guarantee zero CI/CD tooling friction, or are you strictly committed to keeping it in a `mobile/` directory within this monorepo?
+- **Always:** route all reads and writes through `/api/mobile/v1`. Keep tokens and account ids in `flutter_secure_storage`.
+- **Ask first:** changing the token format or TTL, adding token refresh, changing grading in `/quiz/sync`.
+- **Never:** connect to Supabase from Dart. Cache `correct_index` or `explanation` on the device.
