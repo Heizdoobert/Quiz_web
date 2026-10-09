@@ -172,6 +172,7 @@ export function ContestActionPanel({
         min={1}
         value={poolAmount}
         onChange={(e) => setPoolAmount(e.target.value)}
+        aria-label="Reward pool in QUIZ tokens"
         placeholder="e.g. 500"
         className="w-28 px-2 py-1 bg-deep-space border border-cyber-border rounded-lg text-white text-xs"
       />
@@ -180,6 +181,7 @@ export function ContestActionPanel({
         type="number"
         min={1}
         max={1000}
+        aria-label="Maximum players"
         value={maxParticipants}
         onChange={(e) => setMaxParticipants(e.target.value)}
         className="w-20 px-2 py-1 bg-deep-space border border-cyber-border rounded-lg text-white text-xs"

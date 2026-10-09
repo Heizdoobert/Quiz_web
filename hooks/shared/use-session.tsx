@@ -9,13 +9,8 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
 import { logger } from '@/lib/logger';
-
-const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), {
-  ssr: false,
-});
 
 export interface SessionAccount {
   id: string;
@@ -26,10 +21,13 @@ interface SessionContextValue {
   account: SessionAccount | null;
   refresh: () => Promise<SessionAccount | null>;
   // Resolves true once signed in. If already signed in, resolves immediately;
-  // otherwise opens SignInModal and resolves when it closes (true on success,
-  // false if the player cancels).
+  // otherwise opens the sign-in popup and resolves when it closes (true on success,
+  // false if the player cancels). The popup lives in WalletProviders, so only
+  // routes under it may call this.
   requireSignIn: () => Promise<boolean>;
   clearSession: () => void;
+  modalOpen: boolean;
+  cancelSignIn: () => void;
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
@@ -97,9 +95,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <SessionContext.Provider value={{ account, refresh, requireSignIn, clearSession }}>
+    <SessionContext.Provider
+      value={{ account, refresh, requireSignIn, clearSession, modalOpen, cancelSignIn }}
+    >
       {children}
-      <AuthPopup isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />
     </SessionContext.Provider>
   );
 }

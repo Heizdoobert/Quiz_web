@@ -1,13 +1,20 @@
 "use client";
 
-import React from "react";
+import React, { useContext, useState } from "react";
 import Link from "next/link";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import dynamic from "next/dynamic";
 import { Gift, Zap, Volume2, VolumeX, User, Trophy, Info } from "lucide-react";
 import { useSoundToggle } from "@/hooks/shared/use-sound-toggle";
 import { useSession } from "@/hooks/shared/use-session";
 import SearchBox from "@/components/discovery/SearchBox";
 import NoWalletNotice from "@/components/rewards/NoWalletNotice";
+import { WalletHostContext } from "@/components/wallet/host-context";
+
+// Pulls in wagmi and RainbowKit, so it loads only where the wallet stack is already
+// mounted or after the player clicks Connect on a route without it.
+const WalletConnect = dynamic(() => import("@/components/wallet/WalletConnect"), {
+  ssr: false,
+});
 
 interface HeaderProps {
   onOpenRewards?: () => void;
@@ -26,6 +33,9 @@ export default function Header({
 }: HeaderProps) {
   const { isMuted, handleToggleSound } = useSoundToggle();
   const { account } = useSession();
+  const inWallet = useContext(WalletHostContext);
+  const [connectRequested, setConnectRequested] = useState(false);
+  const connectLabel = account && !account.wallet ? "Add wallet" : "Connect";
 
   return (
     <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-cyber-border sticky top-0 z-30 shadow-lg">
@@ -116,10 +126,17 @@ export default function Header({
             </div>
           </details>
         )}
-        <ConnectButton
-          label={account && !account.wallet ? "Add wallet" : "Connect"}
-          showBalance={false}
-        />
+        {inWallet || connectRequested ? (
+          <WalletConnect label={connectLabel} />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setConnectRequested(true)}
+            className="px-4 py-2 rounded-xl bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space font-black font-heading text-sm cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          >
+            {connectLabel}
+          </button>
+        )}
       </div>
     </header>
   );

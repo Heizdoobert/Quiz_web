@@ -15,7 +15,7 @@ import {
   getSignerAccount,
   newNonce,
   getContestId,
-} from '@/lib/utils/chain';
+} from '@/lib/services/chain';
 
 const TOKENS_PER_CORRECT = BigInt(10) * BigInt(10) ** BigInt(18); // 10 QUIZ tokens (in wei) per correct answer
 const VOUCHER_TTL_SECONDS = 3600;

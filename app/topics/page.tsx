@@ -7,6 +7,9 @@ export const metadata: Metadata = {
   title: 'Topics',
 };
 
+// Topics change as questions are verified; prerendering at build time froze an empty list.
+export const dynamic = 'force-dynamic';
+
 export default async function TopicsPage() {
   const topics = await getTopics();
 

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { SearchResult } from "@/lib/types";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils/format";
 
 export default function SearchResultList({
   results,

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import { useIntroModal } from '@/hooks/modals/use-intro-modal';
 import { Lightbulb, FileEdit, Boxes, Trophy, ArrowRight, ArrowLeft, Rocket } from 'lucide-react';
 

@@ -30,7 +30,7 @@ vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn(
 vi.mock('../lib/supabase/supabase', () => ({
   supabase: { auth: { signInWithOtp: vi.fn(), verifyOtp: vi.fn() } },
 }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   publicClientFor: () => ({ verifySiweMessage: async () => state.siweValid }),
 }));
 vi.mock('viem/siwe', () => ({

@@ -106,7 +106,7 @@ export default function RatingStars({
         <span className="text-xs text-slate-400">({count})</span>
       </div>
 
-      {error && <p className="text-xs text-pop-coral font-medium">{error}</p>}
+      {error && <p role="alert" className="text-xs text-pop-coral font-medium">{error}</p>}
     </div>
   );
 }

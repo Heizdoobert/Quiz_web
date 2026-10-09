@@ -7,7 +7,7 @@ describe('RewardsTokensTab', () => {
   const mockRewards: ClaimableRewards = {
     totalEarned: '2000',
     totalClaimed: '1000',
-    claimableTokens: '1000',
+    claimableTokens: '750',
     eligibleBadges: [],
     alreadyClaimedBadges: [],
   };
@@ -30,7 +30,8 @@ describe('RewardsTokensTab', () => {
     );
     expect(screen.getByText('2000 TKN')).toBeTruthy();
     expect(screen.getByText('1000 TKN')).toBeTruthy();
-    expect(screen.getByText('Claim 1000 TKN (Gasless)')).toBeTruthy();
+    expect(screen.getByText('750 TKN')).toBeTruthy();
+    expect(screen.getByText('Claim 750 TKN $QUIZ (Gasless)')).toBeTruthy();
   });
 
   it('renders done state', () => {
@@ -67,7 +68,7 @@ describe('RewardsTokensTab', () => {
       />
     );
     
-    const claimBtn = screen.getByText('Claim 1000 TKN');
+    const claimBtn = screen.getByText('Claim 750 TKN $QUIZ');
     fireEvent.click(claimBtn);
     expect(handleClaim).toHaveBeenCalled();
   });

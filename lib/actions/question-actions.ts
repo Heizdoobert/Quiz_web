@@ -301,15 +301,19 @@ export async function getQuestionCount(): Promise<number> {
 export async function get5050EliminatedIndices(questionId: string): Promise<number[]> {
   try {
     // correct_index is only readable with the secret key.
-    if (!supabaseAdmin) return [];
+    if (!isUuid(questionId) || !supabaseAdmin) return [];
     const { data } = await supabaseAdmin
       .from('questions')
-      .select('correct_index')
+      .select('correct_index, status, list_id')
       .eq('id', questionId)
       .single();
     if (!data || typeof data.correct_index !== 'number' || data.correct_index < 0 || data.correct_index > 3) {
       return [];
     }
+    // Eliminating two wrong options narrows the answer to one of two, so this is only offered for
+    // public verified questions (whose answers submitAnswer shows anyway). Contest, pending and
+    // quarantined questions reveal nothing; the contest player has no 50/50.
+    if (data.status !== 'verified' || data.list_id) return [];
     const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
 
     // Deterministic selection based on questionId hash so repeat calls return the exact same 2 wrong answers

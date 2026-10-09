@@ -104,6 +104,7 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
+            aria-label="Suggest a correction, typo fix, or explanation update"
             placeholder="Suggest a correction, typo fix, or explanation update..."
             maxLength={500}
             rows={2}
@@ -134,7 +135,7 @@ export default function SuggestionForm({ questionId }: SuggestionFormProps) {
           </div>
 
           {error && (
-            <p className="text-xs text-pop-coral font-medium">{error}</p>
+            <p role="alert" className="text-xs text-pop-coral font-medium">{error}</p>
           )}
         </form>
       )}

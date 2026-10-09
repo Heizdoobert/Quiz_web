@@ -15,7 +15,7 @@ import {
   getSignerAccount,
   newNonce,
   getContestId,
-} from '@/lib/utils/chain';
+} from '@/lib/services/chain';
 
 // Every write acts for the signed-in wallet (never a wallet argument) and goes through
 // the secret key: the public key can only read lists, confirmations and entries

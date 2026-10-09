@@ -1,0 +1,168 @@
+"use client";
+
+import React, { useEffect, useRef, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { X } from "lucide-react";
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
+  maxWidth?: string;
+}
+
+const emptySubscribe = () => () => {};
+
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+export default function Modal({
+  isOpen,
+  onClose,
+  title,
+  icon,
+  children,
+  footer,
+  maxWidth = "max-w-md",
+}: ModalProps) {
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  );
+
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  // Focus goes in on open, Tab stays inside, and focus returns to the opener on close.
+  // Kept apart from the effect below because `onClose` is usually a new function every render.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!isOpen || !dialog) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const focusables = () => Array.from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE));
+
+    if (!dialog.contains(document.activeElement)) (focusables()[0] ?? dialog).focus();
+
+    const trapTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const items = focusables();
+      if (items.length === 0) return e.preventDefault();
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+      if (e.shiftKey && (active === first || !dialog.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (active === last || !dialog.contains(active))) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    window.addEventListener("keydown", trapTab);
+    return () => {
+      window.removeEventListener("keydown", trapTab);
+      if (opener?.isConnected) opener.focus();
+    };
+  }, [isOpen, mounted]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {isOpen && (
+        <div
+          key="modal-backdrop-root"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              opacity: 0,
+              transition: { duration: 0.15, ease: "easeIn" },
+            }}
+            className="fixed inset-0 bg-black/75 backdrop-blur-xs"
+            onClick={onClose}
+          />
+          <motion.div
+            ref={dialogRef}
+            tabIndex={-1}
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
+            initial={{ opacity: 0, scale: 0.95, y: 8 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] }, // snappy Apple/Framer pro-curve
+            }}
+            exit={{
+              opacity: 0,
+              scale: 0.96,
+              y: 6,
+              transition: { duration: 0.15, ease: "easeIn" },
+            }}
+            className={`glass glass-border glass-edge focus:outline-none relative w-full ${maxWidth} rounded-2xl shadow-2xl shadow-black/70 overflow-hidden flex flex-col z-10 max-h-[90vh]`}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-cyber-border bg-deep-space/70 select-none">
+              <div className="flex items-center gap-2.5">
+                {icon && (
+                  <span className="text-xl flex items-center justify-center">
+                    {icon}
+                  </span>
+                )}
+                <h2 className="text-lg font-bold text-white tracking-wide">
+                  {title}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-neo-mint hover:bg-cyber-violet active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint transition-all cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto overscroll-contain">
+              {children}
+            </div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="px-6 py-4 border-t border-cyber-border bg-deep-space/70 flex justify-end gap-3">
+                {footer}
+              </div>
+            )}
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    document.body,
+  );
+}

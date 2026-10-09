@@ -17,7 +17,12 @@ const eslintConfig = defineConfig([
     "contracts/**",
     ".agents/**",
     "coverage/**",
+    "mobile/**",
   ]),
+  {
+    // An empty catch hides failures; say why ignoring is safe in a comment instead.
+    rules: { "no-empty": ["error", { allowEmptyCatch: false }] },
+  },
   {
     files: ["components/**/*.tsx", "components/**/*.jsx"],
     rules: {

@@ -71,6 +71,7 @@ export default function MyListsDashboard() {
 
       {message && (
         <div
+          role={message.type === 'error' ? 'alert' : 'status'}
           className={`p-3 rounded-xl text-xs font-bold ${
             message.type === 'error'
               ? 'bg-pop-coral/15 text-pop-coral border border-pop-coral/40'
@@ -92,6 +93,7 @@ export default function MyListsDashboard() {
           maxLength={80}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          aria-label="List title"
           placeholder="List title, e.g. DeFi Fundamentals"
           className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />
@@ -100,6 +102,7 @@ export default function MyListsDashboard() {
           maxLength={200}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          aria-label="List description (optional)"
           placeholder="Optional description"
           className="w-full px-3 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint placeholder:text-slate-500"
         />

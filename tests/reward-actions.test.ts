@@ -5,7 +5,7 @@ import { statsForAccount } from '../lib/utils/stats';
 import { getGlobalLeaderboard } from '../lib/actions/leaderboard-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { getSignerAccount, isVoucherUsed, isContestVoucherUsed } from '../lib/utils/chain';
+import { getSignerAccount, isVoucherUsed, isContestVoucherUsed } from '../lib/services/chain';
 
 const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
@@ -14,7 +14,7 @@ const ZERO_STATS = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswe
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/utils/stats', () => ({ statsForAccount: vi.fn() }));
 vi.mock('../lib/actions/leaderboard-actions', () => ({ getGlobalLeaderboard: vi.fn() }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),

@@ -17,8 +17,13 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],
+      // Without `include`, only files a test happens to import are counted and the number flatters.
+      include: ['app/**', 'lib/**', 'hooks/**', 'components/**'],
+      exclude: ['**/*.d.ts', '**/__tests__/**', '**/*.test.*'],
       thresholds: {
-        lines: 65.5,
+        lines: 53.8,
+        functions: 50.7,
+        branches: 49.4,
       },
     },
   },

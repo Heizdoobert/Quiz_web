@@ -49,6 +49,7 @@ export function ListCardEditDetailsPanel({
         type="text"
         minLength={5}
         maxLength={80}
+        aria-label="List title"
         value={editTitle}
         onChange={(e) => setEditTitle(e.target.value)}
         className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"
@@ -56,6 +57,7 @@ export function ListCardEditDetailsPanel({
       <textarea
         rows={2}
         maxLength={200}
+        aria-label="List description"
         value={editDescription}
         onChange={(e) => setEditDescription(e.target.value)}
         className="w-full px-3 py-2 bg-cyber-violet border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-neo-mint"

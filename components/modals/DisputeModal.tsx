@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '../Modal';
+import Modal from '@/components/ui/Modal';
 import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/modals/use-dispute-modal';
 import { AlertTriangle, Flag, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 
@@ -74,16 +74,16 @@ export default function DisputeModal({
           </p>
 
           {error && (
-            <div className="p-4 rounded-xl bg-pop-coral/15 border border-pop-coral/40 text-pop-coral text-xs font-medium">
+            <div role="alert" className="p-4 rounded-xl bg-pop-coral/15 border border-pop-coral/40 text-pop-coral text-xs font-medium">
               {error}
             </div>
           )}
 
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-300 font-heading uppercase tracking-wider">
+            <span id="dispute-reason-label" className="block text-xs font-bold text-slate-300 font-heading uppercase tracking-wider">
               Dispute Reason
-            </label>
-            <div className="space-y-2">
+            </span>
+            <div role="radiogroup" aria-labelledby="dispute-reason-label" className="space-y-2">
               {DISPUTE_REASONS.map((r) => (
                 <label
                   key={r.id}
@@ -108,10 +108,11 @@ export default function DisputeModal({
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-300 font-heading uppercase tracking-wider mb-1.5">
+            <label htmlFor="dispute-details" className="block text-xs font-bold text-slate-300 font-heading uppercase tracking-wider mb-1.5">
               Additional Details (Optional)
             </label>
             <textarea
+              id="dispute-details"
               value={details}
               onChange={(e) => setDetails(e.target.value)}
               placeholder="Cite verified sources or explanation..."

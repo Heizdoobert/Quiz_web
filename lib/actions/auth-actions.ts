@@ -3,7 +3,7 @@
 import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
-import { publicClientFor } from '@/lib/utils/chain';
+import { publicClientFor } from '@/lib/services/chain';
 import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/services/session';
 import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
 import { supabase } from '@/lib/supabase/supabase';
