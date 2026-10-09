@@ -4,7 +4,7 @@ Confirmed with the owner on 2026-10-09 through an interview. This file is dev-on
 
 ## Statement of intent
 
-- **Outcome:** (1) The list of quizzes created by other users shows 5 random quizzes and appears fast. (2) The login popup opens almost instantly. (3) Users register with email, a username and a password, and afterwards can sign in with the username or the email.
+- **Outcome:** (1) The list of other users on the home page (the leaderboard) shows 5 random players and appears fast. (2) The login popup opens almost instantly. (3) Users register with email, a username and a password, and afterwards can sign in with the username or the email.
 - **User:** web players, both new registrations and people using the old flow.
 - **Why now:** after the web2-only update the page opens slowly and the list appears only after a long wait, all at once. The login popup is slow to open too.
 - **Success:** the list renders quickly when the page opens, and each page load shows a different set of 5. The login popup appears almost immediately. A newly registered user can sign in again with the username.
@@ -19,6 +19,8 @@ Confirmed with the owner on 2026-10-09 through an interview. This file is dev-on
 4. Sign-in accepts the username or the email.
 5. Username rule: 3 to 20 characters, lowercase letters, digits and underscore, unique ignoring case.
 
-## Open question
+## Answers to the spec's open questions (2026-10-09)
 
-Which screen is "the list of quizzes created by other users"? The home page loads one random question plus the global leaderboard of 50. The topic pages (`/topics/[topic]`) and search page list questions with pagination. The spec lists the candidates and asks the owner to confirm one before the work starts.
+- The list in outcome (1) is the home page leaderboard (players), not a list of quizzes. It shows 5 random players.
+- Registration confirms the email.
+- The mobile app keeps username-only registration.

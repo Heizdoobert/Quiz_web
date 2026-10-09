@@ -6,7 +6,7 @@ Source of truth for the intent: `intent.md` in this folder. Status: draft, waiti
 
 Three changes, in this order, each shippable on its own:
 
-1. **Quiz list.** The list of quizzes created by other users shows 5 random quizzes and appears fast, instead of loading everything and showing it after a long wait.
+1. **Home list.** The list of other users on the home page (the leaderboard, confirmed by the owner) shows 5 random players and appears fast, instead of loading 50 and showing them after a long wait.
 2. **Login popup.** The popup opens almost instantly after the click.
 3. **Register with email, sign in with username.** The register form takes email, username and password. After that the user signs in with the username (or the email) and the password.
 
@@ -17,14 +17,20 @@ Users: web players, new and returning. Existing accounts keep working with no ac
 1. `AuthPopup` is loaded with `dynamic(..., { ssr: false })` in `components/Providers.tsx`. The chunk (with framer-motion and the Modal) is fetched on the first click, which is the likely cause of the slow popup. Not measured yet.
 2. Today "username" accounts are Supabase Auth users with a made-up email `<username>@player.quiz` (`usernameToEmail` in `lib/services/credentials.ts`). No real email is stored for them, and no `username` column exists on `users`.
 3. `signInAccount` and `signUpAccount` are shared by the web server actions and the mobile routes (`app/api/mobile/v1/auth/*`). The mobile app sends a username and password only. It must not break.
-4. `fetchRandomQuestion` (`lib/actions/question-actions.ts`) does `.limit(20)` with no ordering, then picks one in JavaScript. That is not random across the table: it picks among the same first 20 rows. PostgREST cannot `ORDER BY random()`, so a real random pick needs an RPC.
-5. The home page (`app/page.tsx`) awaits `fetchRandomQuestion` and `getGlobalLeaderboard(50)` on every request. Reading `searchParams` makes the page dynamic, so nothing is prerendered.
+4. The home page (`app/page.tsx`) awaits `fetchRandomQuestion` and `getGlobalLeaderboard(50)` on every request, and reading `searchParams` makes it dynamic. `getGlobalLeaderboard` is cached 15 s (`unstable_cache`), but the `get_global_leaderboard` RPC aggregates every `quiz_results` row, so a cold or expired cache makes the whole page wait. That fits "long wait, all at once".
+5. The same list is fetched again on the client in `hooks/quiz/use-quiz-logic.ts` (`useQuery`, `initialData` from the server, refetch every 15 s while the panel is visible).
+6. `fetchRandomQuestion` (`lib/actions/question-actions.ts`) does `.limit(20)` with no ordering, then picks one in JavaScript, so it picks among the same first 20 rows. Not part of this work (see below).
 
-## Open questions (need the owner before the work starts)
+## Decisions from the owner (2026-10-09)
 
-- **Q1. Which screen is "the list of quizzes created by other users"?** I could not find a screen that lists other users' quizzes in the first-load path. Candidates: the global leaderboard on the home page (50 users), `/topics/[topic]` (paginated questions), `/search`. The spec for change 1 stays generic until this is answered, and step 0 below measures it.
-- **Q2. Email confirmation.** Today accounts are created with `email_confirm: true`. If a real email is accepted unverified, anyone can register `victim@mail.com` with a password they chose, and the victim then signs in through the email-code tab and lands in the attacker's account. Recommended: do not mark the email confirmed; Supabase sends a confirmation mail and the username sign-in works only after the user confirms. This needs SMTP and the "Confirm email" setting in Supabase, which only the owner can configure. The alternative is to accept unverified emails and treat them as untrusted.
-- **Q3. Mobile registration.** Keep username-only registration for the mobile app (email optional in the service, required in the web form)? Assumed yes, so the mobile app does not break. The Flutter app is out of scope.
+- **Q1.** The list is the home page leaderboard.
+- **Q2.** Registration confirms the email.
+- **Q3.** The mobile app keeps username-only registration (email optional in the service, required in the web form).
+
+## Open questions
+
+- **Q4. What does "5 random" do to the ranking?** A random 5 is not a top 5, and a global rank needs the full aggregate, which is the slow part. My default: the home list shows 5 random players with name, score and accuracy and no rank number; opening the full leaderboard (the panel's "load more") still loads the ranked top 50 as today, only when opened. Say so if you want something else, for example 5 random from the top 50 with their real ranks (still needs the aggregate, so it would stay slow on a cold cache).
+- **Q5. Does the email-code tab stay?** Assumed yes. See the risk under change 3.
 
 ## Commands
 
@@ -47,19 +53,24 @@ components/auth/AuthPopup.tsx              popup shell (change 2)
 components/auth/tabs/UsernameTab.tsx       register form gets email (change 3)
 lib/services/credentials.ts                signUpAccount / signInAccount (change 3)
 lib/actions/auth-actions.ts                server actions, pass email through (change 3)
-lib/actions/question-actions.ts            random list fetch (change 1)
-supabase/migrations/20-username.sql        NEW: users.username, unique index, backfill, random RPC
+app/page.tsx                               stop awaiting the 50-row aggregate (change 1)
+lib/actions/leaderboard-actions.ts         random sample action (change 1)
+hooks/quiz/use-quiz-logic.ts               load the ranked board only when opened (change 1)
+supabase/migrations/20-username.sql        NEW: users.username, unique index, backfill
+supabase/migrations/21-random-players.sql  NEW: get_random_players RPC
 tests/                                     new and updated vitest files
 ```
 
-## Change 1: quiz list, 5 random
+## Change 1: home list, 5 random players
 
-0. **Measure first.** Time the server render of the home page (`fetchRandomQuestion` plus `getGlobalLeaderboard(50)`) and the Supabase calls behind the list from Q1, on `preview`. Record the numbers in the PR. No fix without a baseline.
-1. One RPC `get_random_questions(p_limit int, p_category text default null, p_exclude uuid[] default '{}')` that returns `p_limit` verified, non-list questions in `ORDER BY random()`, public columns only (same columns as the existing select). The list asks for 5.
-2. The list fetch calls it with `p_limit = 5` and renders what it gets. Fewer than 5 available means fewer shown, no error.
-3. Cost note: `ORDER BY random()` scans the matching rows. Fine at the current table size; if the table grows past tens of thousands of rows, switch to a sampled approach.
+0. **Measure first.** Time the home page server render with a cold and a warm leaderboard cache, and the `get_global_leaderboard` RPC alone (`EXPLAIN ANALYZE` on Supabase, owner runs it). Record the numbers in the PR. No fix without a baseline.
+1. One RPC `get_random_players(p_limit int)` (migration `21-random-players.sql`) returns `p_limit` random players who have at least one answer, with `user_id`, `display_name`, `score`, `accuracy`. It aggregates only those players' rows, not the whole table. It clamps `p_limit` to 1..20 like the existing functions clamp theirs, and returns public fields only (no wallet column, no username, no email).
+2. `lib/actions/leaderboard-actions.ts` gets `getRandomPlayers(limit = 5)` that calls it, shaped like `LeaderboardEntry` with no rank. An error returns an empty list, as `getGlobalLeaderboard` does.
+3. `app/page.tsx` fetches the random 5 instead of `getGlobalLeaderboard(50)`. The ranked top 50 loads when the leaderboard panel is opened (Q4 default), through the existing `useQuery` in `use-quiz-logic.ts`, which should not run before it is opened.
+4. Fewer than 5 players available shows fewer, no error.
+5. Cost note: a random pick scans the players who have answers. Fine at today's size; switch to a sampled approach if it grows to tens of thousands of players.
 
-Out of this change: moving `fetchRandomQuestion` to the same RPC. It has the "first 20 rows" problem from assumption 4. Worth doing, kept separate to keep this diff small. Say so if you want it in.
+Out of this change: `fetchRandomQuestion` picking among the same first 20 rows (assumption 6). Worth a separate fix with its own RPC; say so if you want it in.
 
 ## Change 2: login popup
 
@@ -83,6 +94,8 @@ Data (migration `20-username.sql`, written here, reviewed and applied by the own
 Behaviour:
 
 - Register (web): email, username, password. Username is checked against the rule, stored lowercase. A taken username or an already used email returns the same kind of message as today, without leaking more than "already taken".
+- Confirm email (Q2): with an email, the account is created with `supabase.auth.signUp`, not `admin.createUser({ email_confirm: true })`, so Supabase sends a confirmation mail. The `users` row with the username is created at sign-up to reserve the name. Sign-in before confirming is refused with "Confirm your email first." (Supabase only says so after a correct password). Owner side: SMTP and "Confirm email" must be on in Supabase, and the redirect URL for the mail must be allowed. Without them nobody can finish registering, so check on a preview first.
+- Risk to test on `preview`: an attacker signs up with a victim's email (unconfirmed), then the victim uses the email-code tab for that address. If that signs the victim into the attacker's account, the attacker's password still works there. If the test shows it, the email-code tab must refuse an address whose account was created by password sign-up and is not yet confirmed (Q5).
 - Sign in: the input is an email if it contains `@`, otherwise a username. A username is resolved to the account's Auth email on the server (`users.username` to `auth_user_id`, then the Auth user's email) and checked with `signInWithPassword`. Every failure returns the same `Invalid username or password.` The existing rate limit (`allowAttempt('signin', ...)`) stays in front of the lookup.
 - Legacy: `<name>@player.quiz` accounts sign in by `name` exactly as before, now through the `username` column.
 - Service shape: `signUpAccount(username, password, email?)`. With no email (mobile) it keeps the made-up email, so the mobile routes behave the same. The web form always sends an email.
@@ -102,7 +115,8 @@ export type CredentialResult = { ok: true; account: SessionAccount } | { ok: fal
 Vitest, files in `tests/` (and `components/**/__tests__`). Real code over mocks; Supabase is mocked at the client boundary like `tests/auth-actions.test.ts` and `tests/mobile-auth-service.test.ts` do today.
 
 - Credentials: register with email stores the username lowercase; duplicate username and duplicate email give the taken message; sign in by username resolves the email and succeeds; sign in by email still works; an unknown username and a wrong password give the identical error; the rate limit still applies; mobile call with no email still registers.
-- Random list: asks the RPC for 5; fewer rows than 5 renders fewer; error returns an empty list, not a throw.
+- Credentials, confirm email: a new web registration is not signed in until confirmed; sign-in before confirming gives the confirm message; the mobile no-email path is unchanged.
+- Random players: `getRandomPlayers` asks the RPC for 5; fewer rows than 5 returns fewer; an RPC error returns an empty list, not a throw; the ranked board is not fetched until the panel opens.
 - Popup: opening shows the form; the preload runs once.
 - Changed lines ≥ 80% covered, project ratchet not lowered (lines 53.8, functions 50.7, branches 49.4).
 - Migration: reviewed by the owner and run on a Supabase branch or staging first; the SQL checks from `docs/migrations.md` apply.
@@ -115,7 +129,7 @@ Vitest, files in `tests/` (and `components/**/__tests__`). Real code over mocks;
 
 ## Success criteria
 
-1. The list shows exactly 5 random quizzes, and two page loads usually differ.
+1. The home list shows exactly 5 random players (or fewer if fewer exist), two page loads usually differ, and the page no longer waits for the 50-row aggregate.
 2. Click to visible popup under 100 ms warm, and lower than baseline cold.
 3. A new user registers with email, username and password, then signs in by username, in a test and by hand on `preview`.
 4. An existing `<name>@player.quiz` account and an existing email-code account both still sign in.
@@ -124,4 +138,4 @@ Vitest, files in `tests/` (and `components/**/__tests__`). Real code over mocks;
 
 ## Rollout and rollback
 
-Order: PR 1 (login popup, no migration) → PR 2 (list, needs the RPC) → PR 3 (username, needs the column). The two SQL parts live in one file `20-username.sql`, or split into two if the owner prefers to apply them separately. Rollback of code is a revert of the PR. Rollback of SQL is the down block in the file header; dropping `username` loses the backfilled names, so take a backup first.
+Order: PR 1 (login popup, no migration) → PR 2 (home list, needs `21-random-players.sql`) → PR 3 (username and confirm email, needs `20-username.sql` plus the Supabase email settings). Each SQL file is applied by the owner before its PR is promoted to `main`; the code must also be safe to merge into `preview` before the SQL runs (the random list falls back to an empty list, sign-in by email keeps working). Rollback of code is a revert of the PR. Rollback of SQL is the down block in the file header; dropping `username` loses the backfilled names, so take a backup first.
