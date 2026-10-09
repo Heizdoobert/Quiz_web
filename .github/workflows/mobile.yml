@@ -1,6 +1,8 @@
 name: Mobile
 
-# Push on any branch, so a branch's run shows as a check on its pull request too.
+# Push on any branch, so a branch's run shows as a check on its pull request too. Pushing a
+# mobile-v* tag also builds an APK and publishes it as a GitHub prerelease (path filters do
+# not apply to tag pushes).
 on:
   push:
     paths:
@@ -43,3 +45,46 @@ jobs:
 
       - name: Test
         run: flutter test
+
+  release:
+    name: Build APK and publish prerelease
+    needs: check
+    if: startsWith(github.ref, 'refs/tags/mobile-v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      # ponytail: debug-signed until mobile-release adds a release keystore; fine for sideloading, not for a store.
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --dart-define=API_BASE_URL=${{ vars.MOBILE_API_BASE_URL || 'https://quiz-web-woad.vercel.app/api/mobile/v1' }} \
+            --dart-define=GOOGLE_SERVER_CLIENT_ID=${{ vars.GOOGLE_SERVER_CLIENT_ID }}
+          mv build/app/outputs/flutter-apk/app-release.apk "quick-quiz-${GITHUB_REF_NAME}.apk"
+
+      - name: Publish prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" "quick-quiz-${GITHUB_REF_NAME}.apk" \
+            --prerelease --verify-tag \
+            --title "Mobile ${GITHUB_REF_NAME#mobile-v} (Android, test build)" \
+            --notes "Debug-signed Android build of ${GITHUB_SHA::7} for sideloading. Not for the Play Store."
