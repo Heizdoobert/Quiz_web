@@ -1,5 +1,5 @@
 # components/leaderboard/GlobalLeaderboard.tsx
-lines:174 exports:default
+lines:165 exports:default
 ---
 "use client";
 

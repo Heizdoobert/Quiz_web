@@ -1,11 +1,10 @@
 # app/error.tsx
-lines:50 exports:default
+lines:49 exports:default
 ---
 'use client';
 
 import { useEffect } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { logger } from '@/lib/logger';
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -15,7 +14,7 @@ interface ErrorProps {
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
     // Log the error to server or monitoring
-    logger.error('Next.js Page Error caught by boundary:', error);
+    console.error('Next.js Page Error caught by boundary:', error);
   }, [error]);
 
   return (
@@ -41,3 +40,4 @@ export default function Error({ error, reset }: ErrorProps) {
           </button>
           <button
             type="button"
+            onClick={() => window.location.reload()}

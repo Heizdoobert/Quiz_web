@@ -1,5 +1,5 @@
 # components/lists/dashboard/ContestActionPanel.tsx
-lines:201 exports:ContestActionPanel
+lines:200 exports:ContestActionPanel
 ---
 import React, { useState } from "react";
 import {
@@ -22,7 +22,6 @@ import {
   TARGET_CHAIN_NAME,
 } from "@/lib/contracts/addresses";
 import { useSession } from "@/hooks/shared/use-session";
-import { logger } from '@/lib/logger';
 
 const SIGN_IN_ERROR = "Sign the message in your wallet to manage your lists.";
 
@@ -41,3 +40,4 @@ export function ContestActionPanel({
   const [poolAmount, setPoolAmount] = useState("");
   const [maxParticipants, setMaxParticipants] = useState("10");
   const [funding, setFunding] = useState<null | "approving" | "creating">(null);
+

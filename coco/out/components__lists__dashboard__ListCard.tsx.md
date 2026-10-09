@@ -1,5 +1,5 @@
 # components/lists/dashboard/ListCard.tsx
-lines:217 exports:ListCard
+lines:216 exports:ListCard
 ---
 import React, { useCallback, useEffect, useState } from 'react';
 import { usePublicClient } from 'wagmi';
@@ -16,7 +16,6 @@ import { OnChainRefundPanel } from './OnChainRefundPanel';
 import { ListQuestionManager } from './ListQuestionManager';
 import { ListCardDraftPanel } from './ListCardDraftPanel';
 import { ListCardEditDetailsPanel } from './ListCardEditDetailsPanel';
-import { logger } from '@/lib/logger';
 
 const STATUS_STYLES: Record<string, string> = {
   draft: 'bg-slate-500/15 text-slate-300 border-slate-500/40',
@@ -41,3 +40,4 @@ export function ListCard({
 }) {
   const { requireSignIn: ensureSession } = useSession();
   const asSignedIn = async <T,>(action: () => Promise<T>): Promise<T | { success: false; error: string }> =>
+    (await ensureSession()) ? action() : { success: false, error: SIGN_IN_ERROR };

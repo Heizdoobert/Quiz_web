@@ -1,5 +1,5 @@
 # components/Providers.tsx
-lines:106 exports:Providers
+lines:100 exports:Providers
 ---
 'use client';
 

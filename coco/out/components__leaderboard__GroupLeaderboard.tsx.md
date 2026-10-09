@@ -1,5 +1,5 @@
 # components/leaderboard/GroupLeaderboard.tsx
-lines:149 exports:default
+lines:140 exports:default
 ---
 "use client";
 

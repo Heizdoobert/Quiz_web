@@ -1,5 +1,5 @@
 # components/community/CommentList.tsx
-lines:179 exports:default
+lines:178 exports:default
 ---
 "use client";
 
@@ -11,7 +11,6 @@ import {
   deleteComment,
 } from "@/lib/actions/community-actions";
 import { formatRelativeTime } from "@/lib/utils";
-import { logger } from '@/lib/logger';
 
 interface CommentListProps {
   questionId: string;
@@ -41,3 +40,4 @@ export default function CommentList({
     if (!trimmed || trimmed.length > 500 || submitting) return;
 
     setSubmitting(true);
+    setError(null);
