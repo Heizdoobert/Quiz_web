@@ -92,7 +92,7 @@ export default function ContestPlay({
   if (error) {
     return (
       <div className="max-w-xl mx-auto p-6 text-center space-y-3">
-        <p className="text-sm text-pop-coral">{error}</p>
+        <p role="alert" className="text-sm text-pop-coral">{error}</p>
         <button onClick={onExit} className="text-sm text-neo-mint cursor-pointer">
           Back to contests
         </button>

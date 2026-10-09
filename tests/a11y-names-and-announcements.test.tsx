@@ -98,4 +98,11 @@ describe('answer result', () => {
     render(<AnswerBack question={question} result={result} onNext={vi.fn()} />);
     expect(screen.getByRole('status').textContent).toContain('Correct');
   });
+
+  it('moves focus to the Next Question button', () => {
+    const question = { id: 'q1', prompt: 'P', options: ['a', 'b', 'c', 'd'] } as unknown as ClientQuestion;
+    const result = { isCorrect: false, correctIndex: 1, recorded: true } as AnswerSubmissionResult;
+    render(<AnswerBack question={question} result={result} onNext={vi.fn()} />);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: /Next Question/ }));
+  });
 });

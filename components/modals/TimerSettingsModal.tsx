@@ -59,8 +59,9 @@ export default function TimerSettingsModal({
     >
       <div className="space-y-6">
         <div>
-          <label className="block text-sm font-bold text-white mb-2">Timer Mode</label>
+          <label htmlFor="timer-mode" className="block text-sm font-bold text-white mb-2">Timer Mode</label>
           <select
+            id="timer-mode"
             value={mode}
             onChange={(e) => setMode(e.target.value as 'per-question' | 'total' | 'stopwatch')}
             className="w-full px-4 py-3 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
@@ -73,7 +74,7 @@ export default function TimerSettingsModal({
 
         {mode !== 'stopwatch' && (
           <div>
-            <label className="block text-sm font-bold text-white mb-2">
+            <label htmlFor="timer-duration" className="block text-sm font-bold text-white mb-2">
               Time Limit (Seconds)
             </label>
             <div className="flex gap-2 mb-3">
@@ -93,6 +94,7 @@ export default function TimerSettingsModal({
               ))}
             </div>
             <input
+              id="timer-duration"
               type="number"
               min="5"
               max="600"

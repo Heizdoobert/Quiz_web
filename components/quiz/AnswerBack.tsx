@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { AnswerSubmissionResult, ClientQuestion, UserStats } from '@/lib/types';
 import { ArrowRight, CheckCircle2, XCircle, Flag } from 'lucide-react';
@@ -23,6 +23,13 @@ export default function AnswerBack({
   onOpenDispute,
 }: AnswerBackProps) {
   const letters = ['A', 'B', 'C', 'D'];
+  const nextRef = useRef<HTMLButtonElement>(null);
+
+  // The answered option sat on the face that just turned away, so focus would drop to <body>;
+  // put it on the next step instead. A no-op while this face is still inert.
+  useEffect(() => {
+    nextRef.current?.focus({ preventScroll: true });
+  }, []);
 
   const notSavedMessage: Record<NonNullable<AnswerSubmissionResult['notSavedReason']>, string> = {
     'signed-out': 'Sign in with your wallet so this counts.',
@@ -120,6 +127,7 @@ export default function AnswerBack({
           )}
 
           <motion.button
+            ref={nextRef}
             type="button"
             onClick={onNext}
             whileHover={{ scale: 1.03 }}
