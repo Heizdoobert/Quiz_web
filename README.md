@@ -14,46 +14,71 @@ A Web3 trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, *
 
 ## Getting Started
 
+You need Node 22, a Supabase project and a WalletConnect (Reown) project ID.
+
 ```bash
-npm install
+npm install --legacy-peer-deps
+cp .env.example .env.local   # then fill it in, see below
+# apply the SQL in "Database Setup" to your Supabase project
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000).
+Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/contracts/addresses.ts`, `components/Providers.tsx`, `lib/supabase/supabase.ts`).
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your credentials:
+Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your credentials.
+
+Required:
 - `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Public Supabase client configuration.
-- `SUPABASE_URL` & `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording). The session cookie's HMAC key is derived from `SUPABASE_SECRET_KEY`, so rotating it signs everyone out.
+- `SUPABASE_URL` & `SUPABASE_PUBLISHABLE_KEY`: The same project and publishable key, read by server code.
+- `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording, rate limits). The session cookie's HMAC key is derived from it, so rotating it signs everyone out.
 - `REWARD_SIGNER_PRIVATE_KEY`: Private key authorized to sign EIP-712 reward vouchers.
 - `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`: Reown/WalletConnect project ID for RainbowKit.
-- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain (defaults in `lib/contracts/addresses.ts`).
+- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain. There are no defaults: the app throws at startup without them (placeholders are used only during `next build`).
+
+Optional:
+- `GEMINI_API_KEY`: Google Gemini key for AI question generation and content moderation. Read by `@google/genai`; without it those features fail.
 - `NEXT_PUBLIC_APP_URL`: Public base URL for canonical links, sitemap and Open Graph tags. Falls back to Vercel's production domain, then `http://localhost:3000`.
-- `TREASURY_WALLET_ADDRESS` (optional): Wallet that receives $QUIZ swept from wallet-less accounts after 180 days. Unset means no sweep.
-- `NEXT_PUBLIC_PAYMASTER_URL` (optional): Paymaster for gasless claims. `NEXT_PUBLIC_SPONSOR_AD_URL` (optional): sponsor link.
-- `NEXT_PUBLIC_APP_ENV=preview` (optional): Marks a non-Vercel deployment as preview (noindex).
+- `TREASURY_WALLET_ADDRESS`: Wallet that receives $QUIZ swept from wallet-less accounts after 180 days. Unset means no sweep.
+- `NEXT_PUBLIC_PAYMASTER_URL`: Paymaster for gasless claims. `NEXT_PUBLIC_SPONSOR_AD_URL`: sponsor link.
+- `NEXT_PUBLIC_APP_ENV=preview`: Marks a non-Vercel deployment as preview (noindex).
+
+Variables prefixed `NEXT_PUBLIC_` are compiled into the browser bundle at build time, so set them before building. Hardhat deployment variables live in the last block of `.env.example`.
 
 ### Database Setup
 
-Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Every script is idempotent and safe to re-run. This is the order `tests/sql/run-accounts-migration.sh` verifies.
+Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Every script is idempotent and safe to re-run. There is no migration ledger yet, so note which scripts you have applied. Migrations are forward-fix only: there are no down scripts, so correct a bad one with a new script.
 
-1. [`lib/schema.sql`](lib/schema.sql) — tables and constraints (run it twice on a fresh database: `reward_claims` references `question_lists` before the file creates it).
-2. [`lib/sql/lock-down-public-writes.sql`](lib/sql/lock-down-public-writes.sql) — server-only writes, no public read of answers.
-3. [`lib/sql/question-lists.sql`](lib/sql/question-lists.sql) — peer-reviewed lists and contests.
-4. [`lib/sql/secure-rewards-and-answers.sql`](lib/sql/secure-rewards-and-answers.sql) — one open voucher per account.
-5. [`lib/sql/restrict-quiz-results-insert.sql`](lib/sql/restrict-quiz-results-insert.sql) — only the server records answers.
-6. [`lib/sql/contest-escrow.sql`](lib/sql/contest-escrow.sql) — contest claims in `reward_claims`.
-7. [`lib/sql/widen-reward-claims-amount.sql`](lib/sql/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
-8. [`lib/sql/accounts.sql`](lib/sql/accounts.sql) — key every table by account id (`users.id`), so a wallet is optional.
-9. [`lib/sql/stats-functions.sql`](lib/sql/stats-functions.sql) — stats and leaderboard functions (needs step 8).
-10. [`lib/sql/retire-sample-questions.sql`](lib/sql/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing).
-11. [`lib/sql/topics.sql`](lib/sql/topics.sql) — `get_topics()`.
-12. [`lib/sql/search.sql`](lib/sql/search.sql) — `pg_trgm` search.
-13. [`lib/sql/community.sql`](lib/sql/community.sql) — ratings, comments, suggestions.
-14. [`lib/sql/reward-payee.sql`](lib/sql/reward-payee.sql) — treasury sweep for wallet-less accounts.
+All files are in [`supabase/migrations/`](supabase/migrations/):
+
+1. [`schema.sql`](supabase/migrations/schema.sql) — tables and constraints (run it twice on a fresh database: `reward_claims` references `question_lists` before the file creates it).
+2. [`lock-down-public-writes.sql`](supabase/migrations/lock-down-public-writes.sql) — server-only writes, no public read of answers.
+3. [`question-lists.sql`](supabase/migrations/question-lists.sql) — peer-reviewed lists and contests.
+4. [`secure-rewards-and-answers.sql`](supabase/migrations/secure-rewards-and-answers.sql) — one open voucher per account.
+5. [`restrict-quiz-results-insert.sql`](supabase/migrations/restrict-quiz-results-insert.sql) — only the server records answers.
+6. [`contest-escrow.sql`](supabase/migrations/contest-escrow.sql) — contest claims in `reward_claims`.
+7. [`widen-reward-claims-amount.sql`](supabase/migrations/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
+8. [`accounts.sql`](supabase/migrations/accounts.sql) — key every table by account id (`users.id`), so a wallet is optional.
+9. [`stats-functions.sql`](supabase/migrations/stats-functions.sql) — stats and leaderboard functions (needs step 8).
+10. [`retire-sample-questions.sql`](supabase/migrations/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing).
+11. [`topics.sql`](supabase/migrations/topics.sql) — `get_topics()`.
+12. [`search.sql`](supabase/migrations/search.sql) — `pg_trgm` search.
+13. [`community.sql`](supabase/migrations/community.sql) — ratings, comments, suggestions.
+14. [`reward-payee.sql`](supabase/migrations/reward-payee.sql) — treasury sweep for wallet-less accounts.
+15. [`15-sponsors.sql`](supabase/migrations/15-sponsors.sql) — ad sponsors.
+16. [`16-leaderboard-pagination.sql`](supabase/migrations/16-leaderboard-pagination.sql) — paginated `get_global_leaderboard`.
+17. [`17-analytics.sql`](supabase/migrations/17-analytics.sql) — question and contest analytics functions.
+18. [`17-auth-rate-limit.sql`](supabase/migrations/17-auth-rate-limit.sql) — attempt counter behind the auth and answer rate limits. Until it is applied the limiter fails open (ADR-008).
+19. [`18-ai-usage.sql`](supabase/migrations/18-ai-usage.sql) — daily AI generation usage.
+
+[`ecosystem-v1-migration.sql`](supabase/migrations/ecosystem-v1-migration.sql) is only for databases created before `schema.sql` held the contest columns; skip it on a fresh database.
 
 Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
+
+### Deploying
+
+Production runs on Vercel. Set every required variable above in the Vercel project's Production scope before the build, because `NEXT_PUBLIC_*` values are baked into the bundle. Promote by merging `preview` into `main` only after CI is green on `preview` (`AGENTS.md`). `/api/health` answers 200 when the database is reachable, for uptime checks. The `Dockerfile` and the CD workflow publish a container image to GHCR, but that image is built with placeholder public values and is not what production serves.
 
 ### Testing & Quality Gates
 

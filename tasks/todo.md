@@ -399,12 +399,13 @@
 ### Task E1: README and environment docs
 **Description:** S9-01, S9-02, S9-05, S9-06, S8-17. Point setup at `supabase/migrations` in order (15 to 19), document every env var including `GEMINI_API_KEY`, remove the false "defaults" claim, add a deploy section.
 **Acceptance criteria:**
-- [ ] A new contributor can set up from the README; `.env.example` lists every var the code reads
+- [x] A new contributor can set up from the README; `.env.example` lists every var the code reads
 **Verification:**
-- [ ] Follow the README on a clean checkout
+- [x] Follow the README on a clean checkout
 **Dependencies:** D1
 **Files:** `README.md`, `.env.example`
 **Scope:** S
+**Done 2026-10-09 except two checks:** the README steps were not followed on a clean checkout; the migration list was built from `supabase/migrations` and the code, not run against a fresh database. `tests/sql/run-accounts-migration.sh` pointed at `lib/` paths that no longer exist; its paths are fixed and it runs, but its check `A stats by account` (`tests/sql/30-checks.sql:92`) fails; not investigated (it never ran since the move to `supabase/migrations`). Migration 19 (`19-secure-ai-usage.sql`) exists only on `preview`; add it to the README list when D1 merges it.
 
 ### Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md`
 **Description:** Section 4 of the report: fix 4.A, 4.B and the "writes require a session" row after A2 and A3 decide the behaviour; remove the pointer to `tasks/todo.md` (not on `main`); version 0.4.0 vs 0.5.0; add the 2026-10-08 entries; drop the Vercel Analytics claim.

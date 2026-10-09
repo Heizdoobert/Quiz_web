@@ -117,7 +117,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [ ] CI green on `preview`
 
 ### Phase E: Docs, structure, dependencies
-- [ ] Task E1: README and environment docs
+- [x] Task E1: README and environment docs (README + .env.example; clean-checkout run not done)
 - [x] Task E2: Truth in `SECURITY-TRADE-OFFS.md` and `CHANGELOG.md` (paths checked; version 0.5.0)
 - [x] Task E3: ADRs for decisions never recorded (ADR-008 to 012; links checked)
 - [x] Task E4: Fix the promotion list and AI-file maps (paths verified by script)
