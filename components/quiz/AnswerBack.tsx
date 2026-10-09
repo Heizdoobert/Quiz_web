@@ -28,6 +28,7 @@ export default function AnswerBack({
     'signed-out': 'Sign in with your wallet so this counts.',
     'already-answered': 'Already answered — this one only counts once.',
     'own-question': "You wrote this question, so it doesn't count for you.",
+    'rate-limited': 'Too many answers from this connection. Try again in a while.',
     error: 'Not saved — something went wrong, try again.',
   };
 

@@ -21,10 +21,18 @@ import { REQUIRED_CONFIRMATIONS } from '../lib/constants/list-constants';
 
 let mockIsContestFunded = true;
 let mockVoucherCheckFails = false;
+let mockAnswerLimitHit = false;
+const answerLimitCalls: unknown[][] = [];
 
 vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('../lib/services/rate-limit', () => ({
+  allowAttemptFromIp: async (...args: unknown[]) => {
+    answerLimitCalls.push(args);
+    return !mockAnswerLimitHit;
+  },
+}));
 vi.mock('../lib/utils/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
@@ -109,7 +117,30 @@ function mockPublicTables(tables: TableStubs) {
 }
 
 describe('submitAnswer guards', () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => {
+    vi.resetAllMocks();
+    mockAnswerLimitHit = false;
+    answerLimitCalls.length = 0;
+  });
+
+  it('reveals nothing once the caller is over the per-IP answer limit, signed in or not', async () => {
+    mockAnswerLimitHit = true;
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+    mockTables({
+      questions: { row: { correct_index: 1, explanation: 'why', status: 'verified', list_id: null, created_by: '0xowner' } },
+    });
+    const res = await submitAnswer({ questionId: Q_ID, answerIndex: 1 });
+    expect(res).toEqual({ isCorrect: false, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'rate-limited' });
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+    expect(answerLimitCalls).toEqual([['submit-answer-ip', 120, 3600]]);
+  });
+
+  it('rejects a malformed question id before the limiter or the database', async () => {
+    const res = await submitAnswer({ questionId: 'not-a-uuid', answerIndex: 1 });
+    expect(res.notSavedReason).toBe('error');
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+    expect(answerLimitCalls).toEqual([]);
+  });
 
   it('reveals nothing when the question does not exist', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);

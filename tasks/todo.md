@@ -169,10 +169,10 @@
 ### Task A3: Limit guest answer harvesting
 **Description:** S2-02, S4-01. `submitAnswer` shows the correct answer to guests with no rate limit, so a script can read the whole key. **Needs your decision first:** the guest reveal is intended (`docs/specs/trivia-guest-access.md`). Default: keep the guest reveal, add a per-IP limit through `rate_limit_hit`, and reveal nothing for questions the account has not yet answered when signed in.
 **Acceptance criteria:**
-- [ ] Decision recorded (reveal policy and limit values) in the spec and `SECURITY-TRADE-OFFS.md`
-- [ ] Per-IP limit on `submitAnswer`, `RATE_LIMITED` result, `isUuid` check on the id
+- [x] Decision recorded (reveal policy and limit values) in the spec and `SECURITY-TRADE-OFFS.md` (default taken: keep guest reveal, 120 answers per IP per hour; the line "reveal nothing for unanswered questions when signed in" was dropped, it describes no real flow)
+- [x] Per-IP limit on `submitAnswer`, `'rate-limited'` result (not `RATE_LIMITED`: the result type has `notSavedReason`, not error codes), `isUuid` check on the id
 **Verification:**
-- [ ] Tests for the limit and the unchanged signed-in scoring path
+- [x] Tests for the limit and the unchanged signed-in scoring path
 **Dependencies:** A2 (shared limiter pattern), your decision
 **Files:** `lib/actions/quiz-actions.ts`, `lib/services/rate-limit.ts`, a migration only if the limiter needs a new action key, `tests/`
 **Scope:** M

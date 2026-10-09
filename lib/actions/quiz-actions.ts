@@ -2,11 +2,17 @@
 
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { getSessionAccount } from '@/lib/services/session';
+import { allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { isUuid } from '@/lib/utils/validation';
 import { statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
 import { logger } from '@/lib/logger';
 
 const HISTORY_LIMIT = 20;
+const HOUR = 3600;
+// Every answer shows its key, guests included (docs/specs/trivia-guest-access.md), so this caps
+// how fast a script can read the question bank from one address. Generous for shared networks.
+const ANSWERS_PER_IP_PER_HOUR = 120;
 
 // The session account's most recent answers, newest first, so history and answeredIds
 // survive a reload. Never anyone else's, and never answer_index or correct_index
@@ -54,11 +60,13 @@ export async function submitAnswer(params: {
     notSavedReason,
   });
   try {
+    if (!isUuid(params.questionId)) return failed('error');
     // correct_index and explanation are not readable with the public key.
     if (!supabaseAdmin) {
       logger.error('submitAnswer: SUPABASE_SECRET_KEY is not set', new Error('submitAnswer: SUPABASE_SECRET_KEY is not set'));
       return failed('error');
     }
+    if (!(await allowAttemptFromIp('submit-answer-ip', ANSWERS_PER_IP_PER_HOUR, HOUR))) return failed('rate-limited');
     // '*' so this keeps working before lib/sql/question-lists.sql adds list_id.
     const { data: qData, error: qError } = await supabaseAdmin
       .from('questions')
