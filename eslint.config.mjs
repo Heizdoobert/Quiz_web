@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     "contracts/**",
     ".agents/**",
     "coverage/**",
+    "mobile/**",
   ]),
   {
     // An empty catch hides failures; say why ignoring is safe in a comment instead.

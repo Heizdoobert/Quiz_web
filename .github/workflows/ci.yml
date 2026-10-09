@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
   pull_request:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
   # cd.yml calls this so nothing is published unless these jobs pass on the same commit.
   workflow_call:
 
