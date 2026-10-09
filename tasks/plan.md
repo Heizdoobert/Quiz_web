@@ -79,7 +79,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [x] Task A1: Fail closed in `isContestVoucherUsed`
 - [x] Task A2: Gate `get5050EliminatedIndices` (the guest part moves to A3)
 - [x] Task A3: Limit guest answer harvesting (default policy taken: keep guest reveal, 120 per IP per hour)
-- [ ] Task A4: Gate CD on CI (you add the required checks in the ruleset)
+- [x] Task A4: Gate CD on CI (code done, red-commit check not run; you add the required "CI gate" check in the ruleset)
 - [ ] Task A5: Real `NEXT_PUBLIC_*` in the production image (needs D1)
 - [ ] Task A6 (yours): Apply migrations 17 and 19 in Supabase; confirm backups
 

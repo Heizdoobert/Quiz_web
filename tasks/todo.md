@@ -180,10 +180,10 @@
 ### Task A4: Gate CD on CI
 **Description:** S8-01, S2-13. `cd.yml` runs on push and does not wait for CI. The ruleset has no required status checks (S8-02); adding them is **yours** to do in GitHub.
 **Acceptance criteria:**
-- [ ] `ci.yml` exposes `workflow_call`; `cd.yml` runs it first and every deploy job `needs` it (or CD triggers from a successful `workflow_run` on the same sha)
-- [ ] One aggregate "CI gate" job, so the ruleset needs a single required check
+- [x] `ci.yml` exposes `workflow_call`; `cd.yml` runs it first and every deploy job `needs` it (or CD triggers from a successful `workflow_run` on the same sha). Done with `workflow_call`; a manual rollback (`rollback_sha` set) skips the gate
+- [x] One aggregate "CI gate" job, so the ruleset needs a single required check
 **Verification:**
-- [ ] Push a deliberately red commit to a scratch branch: CD does not run. Revert.
+- [ ] (not run: needs a push, left to you) Push a deliberately red commit to a scratch branch: CD does not run. Revert.
 **Dependencies:** None
 **Files:** `.github/workflows/ci.yml`, `.github/workflows/cd.yml`
 **Scope:** M
