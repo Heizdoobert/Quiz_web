@@ -104,6 +104,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final board = boardAsync.value ?? const Board();
     // Signing in or out changes whose stats and history the board shows.
     ref.listen(authProvider.select((a) => a.isAuthenticated), (_, _) => ref.invalidate(boardProvider));
+    ref.listen(authProvider.select((a) => a.sessionExpired), (_, expired) {
+      if (!expired) return;
+      final pending = ref.read(quizProvider).pendingSyncCount;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(pending == 0
+            ? 'Your session expired. Sign in again.'
+            : 'Your session expired. Sign in again to sync $pending answer${pending == 1 ? '' : 's'}.'),
+        action: SnackBarAction(label: 'Sign in', onPressed: () => requireSignIn(context, ref)),
+      ));
+    });
 
     return Scaffold(
       body: SafeArea(
