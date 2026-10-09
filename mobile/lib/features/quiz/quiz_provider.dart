@@ -1,7 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_riverpod/legacy.dart';
 import '../../db/quiz_repository.dart';
-import '../../api/api_client.dart';
 import '../auth/auth_provider.dart';
 
 final quizRepositoryProvider = Provider((ref) => QuizRepository());
@@ -26,36 +24,32 @@ class QuizState {
   }
 }
 
-final quizProvider = StateNotifierProvider<QuizNotifier, QuizState>((ref) {
-  final repo = ref.watch(quizRepositoryProvider);
-  final api = ref.watch(apiClientProvider);
-  return QuizNotifier(repo, api);
-});
+final quizProvider = NotifierProvider<QuizNotifier, QuizState>(QuizNotifier.new);
 
-class QuizNotifier extends StateNotifier<QuizState> {
-  final QuizRepository _repo;
-  final ApiClient _api;
-
-  QuizNotifier(this._repo, this._api) : super(QuizState(questions: const AsyncValue.loading())) {
-    loadData();
+class QuizNotifier extends Notifier<QuizState> {
+  @override
+  QuizState build() {
+    Future.microtask(loadData);
+    return QuizState(questions: const AsyncValue.loading());
   }
 
   Future<void> loadData() async {
     state = state.copyWith(questions: const AsyncValue.loading());
+    final repo = ref.read(quizRepositoryProvider);
+    final api = ref.read(apiClientProvider);
+
     try {
-      // Refresh questions from API if possible
       try {
-        final response = await _api.get('/quiz/questions'); // baseUrl already has /api/mobile/v1
+        final response = await api.get('/quiz/questions');
         final data = response['questions'] as List;
         final questionsList = List<Map<String, dynamic>>.from(data);
-        await _repo.cacheQuestions(questionsList);
+        await repo.cacheQuestions(questionsList);
       } catch (e) {
-        // Ignore API errors, fallback to cache
         print("Failed to fetch questions from API: \$e");
       }
 
-      final cached = await _repo.getCachedQuestions();
-      final queued = await _repo.getQueuedAnswers();
+      final cached = await repo.getCachedQuestions();
+      final queued = await repo.getQueuedAnswers();
       
       state = state.copyWith(
         questions: AsyncValue.data(cached),
@@ -67,13 +61,10 @@ class QuizNotifier extends StateNotifier<QuizState> {
   }
 
   Future<void> submitAnswer(String questionId, int answerIndex) async {
-    // 1. Queue locally
-    await _repo.queueAnswer(questionId, answerIndex);
+    final repo = ref.read(quizRepositoryProvider);
+    await repo.queueAnswer(questionId, answerIndex);
     
-    // 2. Update state to reflect pending sync
-    final queued = await _repo.getQueuedAnswers();
+    final queued = await repo.getQueuedAnswers();
     state = state.copyWith(pendingSyncCount: queued.length);
-    
-    // Attempt sync is done by background sync engine, but we could also trigger an immediate sync here
   }
 }
