@@ -72,19 +72,43 @@ jobs:
           channel: stable
           cache: true
 
-      # ponytail: debug-signed until mobile-release adds a release keystore; fine for sideloading, not for a store.
-      - name: Build APK
+      # Secrets: ANDROID_KEYSTORE_BASE64 (base64 of the upload .jks), ANDROID_KEYSTORE_PASSWORD,
+      # ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD. Without them the build is debug-signed: fine for
+      # sideloading, refused by the Play Store.
+      - name: Set up release signing
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          flutter build apk --release \
-            --dart-define=API_BASE_URL=${{ vars.MOBILE_API_BASE_URL || 'https://quiz-web-woad.vercel.app/api/mobile/v1' }} \
-            --dart-define=GOOGLE_SERVER_CLIENT_ID=${{ vars.GOOGLE_SERVER_CLIENT_ID }}
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "SIGNING=debug-signed, for sideloading only" >> "$GITHUB_ENV"
+            exit 0
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          printf 'storeFile=upload-keystore.jks\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+            "$KEYSTORE_PASSWORD" "$KEY_ALIAS" "$KEY_PASSWORD" > android/key.properties
+          echo "SIGNING=release-signed" >> "$GITHUB_ENV"
+
+      # The run number is the build number, so every published build has a higher versionCode.
+      - name: Build APK and app bundle
+        env:
+          API_BASE_URL: ${{ vars.MOBILE_API_BASE_URL || 'https://quiz-web-woad.vercel.app/api/mobile/v1' }}
+          GOOGLE_SERVER_CLIENT_ID: ${{ vars.GOOGLE_SERVER_CLIENT_ID }}
+          SENTRY_DSN: ${{ vars.MOBILE_SENTRY_DSN }}
+        run: |
+          defines="--dart-define=API_BASE_URL=$API_BASE_URL --dart-define=GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID --dart-define=SENTRY_DSN=$SENTRY_DSN"
+          flutter build apk --release --build-number=$GITHUB_RUN_NUMBER $defines
+          flutter build appbundle --release --build-number=$GITHUB_RUN_NUMBER $defines
           mv build/app/outputs/flutter-apk/app-release.apk "quick-quiz-${GITHUB_REF_NAME}.apk"
+          mv build/app/outputs/bundle/release/app-release.aab "quick-quiz-${GITHUB_REF_NAME}.aab"
 
       - name: Publish prerelease
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "$GITHUB_REF_NAME" "quick-quiz-${GITHUB_REF_NAME}.apk" \
+          gh release create "$GITHUB_REF_NAME" "quick-quiz-${GITHUB_REF_NAME}.apk" "quick-quiz-${GITHUB_REF_NAME}.aab" \
             --prerelease --verify-tag \
-            --title "Mobile ${GITHUB_REF_NAME#mobile-v} (Android, test build)" \
-            --notes "Debug-signed Android build of ${GITHUB_SHA::7} for sideloading. Not for the Play Store."
+            --title "Mobile ${GITHUB_REF_NAME#mobile-v} (Android)" \
+            --notes "Android build of ${GITHUB_SHA::7}, build number ${GITHUB_RUN_NUMBER}, ${SIGNING}. The .apk installs directly; the .aab is for the Play Console."
