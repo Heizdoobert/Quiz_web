@@ -27,7 +27,9 @@ class SoundEngine {
     this.listeners.forEach((listener) => {
       try {
         listener();
-      } catch {}
+      } catch {
+        // One failing subscriber must not stop the others from being told.
+      }
     });
   }
 
@@ -54,7 +56,9 @@ class SoundEngine {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('quick_quiz_sound_enabled', String(!this.muted));
-      } catch {}
+      } catch {
+        // Storage can be blocked (private mode); the choice then lasts for this page only.
+      }
     }
     this.notify();
     return this.muted;
@@ -65,7 +69,9 @@ class SoundEngine {
     if (typeof window !== 'undefined') {
       try {
         localStorage.setItem('quick_quiz_sound_enabled', String(!muted));
-      } catch {}
+      } catch {
+        // Storage can be blocked (private mode); the choice then lasts for this page only.
+      }
     }
     this.notify();
   }

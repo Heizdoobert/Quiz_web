@@ -282,9 +282,9 @@
 ### Task B7: Enforce the Floor rules that nothing enforces
 **Description:** S4-11. Remove the empty `catch {}` in `lib/services/audio.ts` (log or comment why ignoring is safe) and add a lint rule so it cannot return.
 **Acceptance criteria:**
-- [ ] `no-empty` (with `allowEmptyCatch: false`) enabled; `npm run lint` passes
+- [x] `no-empty` (with `allowEmptyCatch: false`) enabled; `npm run lint` passes
 **Verification:**
-- [ ] Reintroduce one empty catch locally: lint fails; remove it
+- [x] Reintroduce one empty catch locally: lint fails; remove it
 **Dependencies:** None
 **Files:** `lib/services/audio.ts`, `eslint.config.mjs`
 **Scope:** S

@@ -93,7 +93,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [x] Task B4: Labels, live regions and form errors (Toast, auth, quiz, community; follow-up B4b listed in todo.md)
 - [x] Task B5: Run the component tests in CI (widened the script, no file moves)
 - [x] Task B6: Honest coverage (lines 51.7, functions 48, branches 47.7)
-- [ ] Task B7: Enforce the Floor rules that nothing enforces
+- [x] Task B7: Enforce the Floor rules that nothing enforces
 - [ ] Task B8: Contest reward tests
 
 ### Checkpoint: Phase B
