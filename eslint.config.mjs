@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     "contracts/**",
     ".agents/**",
     "coverage/**",
+    "mobile/**",
   ]),
   {
     files: ["components/**/*.tsx", "components/**/*.jsx"],

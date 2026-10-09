@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
   pull_request:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
