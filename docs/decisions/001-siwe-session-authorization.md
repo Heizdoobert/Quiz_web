@@ -1,5 +1,7 @@
 # ADR-001: Sign-In with Ethereum (SIWE) & Server Action Session Authorization
 
+> **Superseded by [ADR-013](013-web2-only.md)**: the wallet, token and contract code this record describes was removed. Kept for history.
+
 ## Status
 Accepted
 

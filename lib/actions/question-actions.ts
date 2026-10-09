@@ -80,7 +80,6 @@ export async function createQuestion(params: {
       category: validated.category,
       explanation: validated.explanation,
       created_by_user: account.id,
-      created_by: account.wallet,
       status: 'verified',
       dispute_count: 0,
     });
@@ -244,7 +243,6 @@ export async function disputeQuestion(params: {
     const { error: disputeErr } = await supabaseAdmin.from('question_disputes').insert({
       question_id: params.questionId,
       reporter_user: account.id,
-      reporter_wallet: account.wallet,
       reason,
     });
     

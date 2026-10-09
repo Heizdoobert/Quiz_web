@@ -22,14 +22,6 @@ function usernameToEmail(username: string): string {
   return trimmed.includes('@') ? trimmed : `${trimmed}@player.quiz`;
 }
 
-// The wallet already linked to an account, if any: a returning player who linked one
-// keeps it in the session, so they are not asked to connect again.
-async function walletOf(accountId: string): Promise<string | null> {
-  if (!supabaseAdmin) return null;
-  const { data } = await supabaseAdmin.from('users').select('wallet_address').eq('id', accountId).maybeSingle();
-  return data?.wallet_address ?? null;
-}
-
 export async function signUpAccount(username: string, password: string): Promise<CredentialResult> {
   try {
     const trimmed = username.trim();
@@ -88,7 +80,7 @@ export async function signUpAccount(username: string, password: string): Promise
 
     const accountId = await ensureAccountForAuthUser(authUserId, trimmed);
     if (!accountId) return { ok: false, error: 'Could not create user account.' };
-    return { ok: true, account: { id: accountId, wallet: null } };
+    return { ok: true, account: { id: accountId } };
   } catch (err) {
     logger.error('signUpAccount error:', err);
     return { ok: false, error: 'An unexpected error occurred during registration.' };
@@ -112,7 +104,7 @@ export async function signInAccount(username: string, password: string): Promise
 
     const accountId = await ensureAccountForAuthUser(data.user.id, trimmed);
     if (!accountId) return { ok: false, error: 'Account not found.' };
-    return { ok: true, account: { id: accountId, wallet: await walletOf(accountId) } };
+    return { ok: true, account: { id: accountId } };
   } catch (err) {
     logger.error('signInAccount error:', err);
     return { ok: false, error: 'An unexpected error occurred during sign-in.' };
@@ -130,7 +122,7 @@ export async function signInAccountWithGoogle(idToken: string): Promise<Credenti
 
     const accountId = await ensureAccountForAuthUser(data.user.id, data.user.user_metadata?.name);
     if (!accountId) return { ok: false, error: 'Account not found.' };
-    return { ok: true, account: { id: accountId, wallet: await walletOf(accountId) } };
+    return { ok: true, account: { id: accountId } };
   } catch (err) {
     logger.error('signInAccountWithGoogle error:', err);
     return { ok: false, error: 'An unexpected error occurred during sign-in.' };

@@ -26,7 +26,7 @@ describe('signInAccountWithGoogle', () => {
 
     expect(signInWithIdToken).toHaveBeenCalledWith({ provider: 'google', token: 'id-token' });
     expect(ensureAccountForAuthUser).toHaveBeenCalledWith('auth1', 'Ada');
-    expect(result).toEqual({ ok: true, account: { id: 'acct1', wallet: null } });
+    expect(result).toEqual({ ok: true, account: { id: 'acct1' } });
   });
 
   it('refuses without asking Supabase when the address is rate limited', async () => {

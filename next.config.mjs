@@ -58,15 +58,9 @@ const cspReportOnly = [
   [
     "connect-src 'self'",
     ...supabaseOrigins(),
-    // WalletConnect / Reown relays, verify and explorer APIs, and the wallet SDKs RainbowKit loads.
-    'https://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.com wss://*.walletconnect.org',
-    'https://*.reown.com wss://*.reown.com https://*.web3modal.org https://*.web3modal.com',
-    'https://*.coinbase.com wss://www.walletlink.org https://*.metamask.io wss://*.metamask.io',
-    // Default public RPCs viem uses for the offered chains.
-    'https://eth.merkle.io https://polygon-rpc.com https://mainnet.optimism.io https://arb1.arbitrum.io https://mainnet.base.org https://sepolia.base.org',
     ...(isDev ? ['ws://localhost:*'] : []),
   ].join(' '),
-  "frame-src https://verify.walletconnect.com https://verify.walletconnect.org https://secure.walletconnect.com https://secure.walletconnect.org https://*.coinbase.com",
+  "frame-src 'none'",
   "object-src 'none'",
   "base-uri 'self'",
   "form-action 'self'",

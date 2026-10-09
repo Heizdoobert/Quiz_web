@@ -26,7 +26,7 @@ vi.mock('../lib/actions/community-actions', () => ({
 
 const QUESTION: ClientQuestion = {
   id: 'q1',
-  category: 'Web3',
+  category: 'General',
   prompt: 'What is Base?',
   options: ['A rollup', 'A coin', 'A wallet', 'A bridge'],
 };
@@ -40,7 +40,7 @@ async function renderWith(result: AnswerSubmissionResult) {
 describe('AnswerBack', () => {
   it('claims the point only when the answer was actually recorded', async () => {
     await renderWith({ isCorrect: true, correctIndex: 0, explanation: null, recorded: true });
-    expect(screen.getByText('+1 Score point & tokens earned')).toBeDefined();
+    expect(screen.getByText('+1 Score point')).toBeDefined();
   });
 
   it('resets the streak message on a recorded wrong answer', async () => {
@@ -50,8 +50,8 @@ describe('AnswerBack', () => {
 
   it('tells a signed-out player to sign in instead of claiming a point', async () => {
     await renderWith({ isCorrect: true, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'signed-out' });
-    expect(screen.getByText('Sign in with your wallet so this counts.')).toBeDefined();
-    expect(screen.queryByText('+1 Score point & tokens earned')).toBeNull();
+    expect(screen.getByText('Sign in so this counts.')).toBeDefined();
+    expect(screen.queryByText('+1 Score point')).toBeNull();
   });
 
   it('tells a player a repeat answer only counts once', async () => {

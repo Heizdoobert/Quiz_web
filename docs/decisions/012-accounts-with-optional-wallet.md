@@ -1,5 +1,7 @@
 # ADR-012: Accounts With an Optional Wallet
 
+> **Superseded by [ADR-013](013-web2-only.md)**: the wallet, token and contract code this record describes was removed. Kept for history.
+
 ## Status
 Accepted (approved 2026-09-28). Full design in `docs/specs/identity-accounts.md`. Supersedes the wallet-only identity of ADR-001; the signed session cookie approach stays.
 

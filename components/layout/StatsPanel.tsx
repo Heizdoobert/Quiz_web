@@ -1,22 +1,14 @@
 'use client';
 
 import React from 'react';
-import { motion } from 'framer-motion';
 import { UserStats } from '@/lib/types';
-import { Flame, Trophy, Target, Coins } from 'lucide-react';
+import { Flame, Trophy, Target } from 'lucide-react';
 
 interface StatsPanelProps {
   stats: UserStats;
-  claimableTokens?: string;
-  onOpenRewards?: () => void;
 }
 
-export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: StatsPanelProps) {
-  const formattedClaimable = claimableTokens
-    ? (BigInt(claimableTokens) / (BigInt(10) ** BigInt(18))).toString()
-    : '0';
-  const hasClaimable = BigInt(claimableTokens || '0') > BigInt(0);
-
+export default function StatsPanel({ stats }: StatsPanelProps) {
   return (
     <div className="space-y-2.5">
       <div className="grid grid-cols-3 gap-2.5">
@@ -50,30 +42,6 @@ export default function StatsPanel({ stats, claimableTokens, onOpenRewards }: St
           <span className="text-[10px] text-slate-500 font-medium whitespace-nowrap">{stats.totalAnswered} total</span>
         </div>
       </div>
-
-      {/* Rewards Summary */}
-      {onOpenRewards && (
-        <motion.button
-          type="button"
-          onClick={onOpenRewards}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          transition={{ type: 'spring', stiffness: 450, damping: 25 }}
-          className="bg-elevation-2 glass-border border border-transparent w-full p-3 rounded-2xl flex items-center justify-between hover:border-neo-mint/50 hover:bg-cyber-violet-light cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
-        >
-          <div className="flex items-center gap-2">
-            <Coins className="w-4 h-4 text-crypto-gold group-hover:rotate-12 transition-transform" />
-            <span className="text-xs font-semibold text-slate-300">
-              {hasClaimable ? (
-                <span className="text-neo-mint font-bold font-heading">{formattedClaimable} $QUIZ claimable</span>
-              ) : (
-                'No tokens to claim'
-              )}
-            </span>
-          </div>
-          <span className="text-[10px] text-neo-mint font-bold font-heading group-hover:underline">View Rewards →</span>
-        </motion.button>
-      )}
     </div>
   );
 }

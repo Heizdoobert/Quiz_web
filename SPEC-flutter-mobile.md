@@ -1,5 +1,7 @@
 # Spec: Flutter Mobile Companion App & Mobile API
 
+> **Out of date**: the wallet, token and contract parts of this document describe code removed in [ADR-013](docs/decisions/013-web2-only.md).
+
 ## Objective
 Build a Flutter companion app for iOS and Android that allows users to play the Web3 quiz natively on their devices. The app must feature secure offline question caching (with server-side delayed grading to prevent cheating) and native Web3 wallet connections. To support this without compromising the existing Next.js security model, a dedicated Bearer-token REST API will be built within the Next.js application.
 

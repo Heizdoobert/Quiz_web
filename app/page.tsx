@@ -29,8 +29,8 @@ export default async function Home({
     ? {
         '@context': 'https://schema.org',
         '@type': 'Quiz',
-        name: 'Web3 & Crypto Knowledge Trivia',
-        description: 'Interactive cryptocurrency trivia quiz covering DeFi, Layer 1s, and Smart Contracts.',
+        name: 'Quick Quiz Trivia',
+        description: 'Interactive multiple-choice trivia quiz.',
         educationalLevel: 'Beginner to Advanced',
         hasPart: [
           {

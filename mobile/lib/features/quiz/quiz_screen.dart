@@ -12,18 +12,6 @@ typedef Question = Map<String, dynamic>;
 
 const _letters = ['A', 'B', 'C', 'D'];
 
-/// What playing and connecting both need: an account first (sign-in screen), then a linked
-/// wallet. Guests can browse without either. A failure is shown as a snackbar.
-Future<bool> connectAccount(BuildContext context, WidgetRef ref) async {
-  if (!await requireSignIn(context, ref)) return false;
-  if (await ref.read(authProvider.notifier).connectWallet()) return true;
-  if (context.mounted) {
-    final message = ref.read(authProvider).error;
-    if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-  }
-  return false;
-}
-
 /// One question at a time, laid out like the web's QuestionFront / AnswerBack flip card.
 /// Answers are queued offline, so the correct option is not shown here: the server only
 /// reveals it (and scores it) when the queue syncs.
@@ -60,9 +48,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Future<void> _answer(Question q, int index) async {
-    // Playing needs an account, and an answer only counts with a wallet, so the first
-    // pick asks a guest for both.
-    if (!await connectAccount(context, ref) || !mounted) return;
+    // Playing needs an account, so the first pick asks a guest to sign in.
+    if (!await requireSignIn(context, ref) || !mounted) return;
     ref.read(quizProvider.notifier).submitAnswer(q['id'] as String, index);
     setState(() {
       _pickedId = q['id'] as String;
@@ -212,21 +199,20 @@ class _Header extends ConsumerWidget {
               ref.invalidate(boardProvider);
             },
           ),
-          if (!auth.hasWallet)
-            Padding(
-              padding: const EdgeInsets.only(left: 6),
-              child: GradientButton(
-                label: auth.isAuthenticated ? 'Add wallet' : 'Connect',
-                loading: auth.walletBusy,
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-                onPressed: () => connectAccount(context, ref),
-              ),
-            ),
           if (auth.isAuthenticated)
             _HeaderButton(
               icon: Icons.logout,
               tooltip: 'Sign out',
               onTap: () => ref.read(authProvider.notifier).logout(),
+            )
+          else
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GradientButton(
+                label: 'Sign In',
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                onPressed: () => requireSignIn(context, ref),
+              ),
             ),
         ],
       ),

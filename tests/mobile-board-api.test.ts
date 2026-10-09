@@ -13,7 +13,7 @@ vi.mock('@/lib/utils/stats', async (importOriginal) => ({
   historyForAccount: vi.fn(),
 }));
 
-const ROW = { user_id: 'u9', wallet_address: null, display_name: 'ada', score: 9, accuracy: 90, rank: 1 };
+const ROW = { user_id: 'u9', display_name: 'ada', score: 9, accuracy: 90, rank: 1 };
 
 describe('Mobile board API', () => {
   beforeEach(() => {
@@ -44,7 +44,7 @@ describe('Mobile board API', () => {
   });
 
   it("adds a signed-in player's own stats and history", async () => {
-    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1', wallet: null });
+    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1' });
     vi.mocked(stats.statsForAccount).mockResolvedValue({ score: 7, streak: 3, bestStreak: 5, accuracy: 70, totalAnswered: 10 });
     vi.mocked(stats.historyForAccount).mockResolvedValue([{ questionId: 'q1', prompt: 'Why?', isCorrect: true }]);
 

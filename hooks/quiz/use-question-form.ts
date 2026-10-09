@@ -6,11 +6,10 @@ import { useSession } from '@/hooks/shared/use-session';
 import { useToast } from '@/hooks/shared/use-toast';
 
 interface UseQuestionFormOptions {
-  walletAddress: string | null;
   onQuestionAdded?: () => void;
 }
 
-export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionFormOptions) {
+export function useQuestionForm({ onQuestionAdded }: UseQuestionFormOptions) {
   const toast = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [prompt, setPrompt] = useState('');
@@ -39,15 +38,10 @@ export function useQuestionForm({ walletAddress, onQuestionAdded }: UseQuestionF
       return;
     }
 
-    if (!walletAddress) {
-      toast.error('Connect your wallet to add questions.');
-      return;
-    }
-
     setLoading(true);
     try {
       if (!(await ensureSession())) {
-        toast.error('Sign the message in your wallet to add questions.');
+        toast.error('Sign in to add questions.');
         return;
       }
       const res = await createQuestion({ prompt, options, correctIndex, category, explanation });

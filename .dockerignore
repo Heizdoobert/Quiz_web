@@ -3,11 +3,6 @@ node_modules
 .git
 .worktrees
 .superpowers
-contracts/artifacts
-contracts/cache
-contracts/typechain-types
-contracts/node_modules
-contracts
 docs
 tasks
 tests

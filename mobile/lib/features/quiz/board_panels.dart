@@ -316,10 +316,7 @@ class _LeaderboardRow extends StatelessWidget {
 
   String get _name {
     final display = entry['display_name'] as String?;
-    if (display != null && display.isNotEmpty) return display;
-    final wallet = entry['wallet_address'] as String?;
-    if (wallet != null && wallet.isNotEmpty) return wallet.substring(0, wallet.length < 10 ? wallet.length : 10);
-    return 'Player';
+    return display != null && display.isNotEmpty ? display : 'Player';
   }
 
   Widget _rank(int rank) {

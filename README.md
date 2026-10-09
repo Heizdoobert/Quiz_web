@@ -1,20 +1,19 @@
-# Quick Quiz — Web3 Trivia & On-Chain Rewards
+# Quick Quiz — Trivia Game & Leaderboards
 
-A Web3 trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, **Supabase**, and **Wagmi / RainbowKit**. Players answer crypto trivia questions, climb global & group leaderboards, and earn **$QUIZ (ERC-20)** tokens and **Achievement Badge NFTs (ERC-721)** on Base Sepolia.
+A trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4** and **Supabase**, plus a Flutter client in [`mobile/`](mobile/). Players answer questions, build streaks and climb global and group leaderboards. It is a plain web2 app: sign in with a username and password or an email code (Google on mobile), and your score is kept per account. There is no wallet, token or blockchain component.
 
 ## Features
 
 - **Trivia Engine**: 3D flip-card quiz UI with countdown timer, 50:50 lifeline, skip, and instant educational explanations.
-- **Creator Dashboard (`/profile`)**: Manage your authored questions and download portable JSON backups with GDPR-compliant data portability.
-- **Peer-Reviewed Question Lists (`/my-lists`, `/review`, `/contest`)**: Author custom question lists, submit them for peer-review consensus, and host community crypto contests.
-- **On-Chain Rewards**: Earn **$QUIZ (ERC-20)** tokens and **Achievement Badge NFTs (ERC-721)** on Base Sepolia signed via EIP-712 typed vouchers.
-- **Rankings & Groups**: Global & custom group leaderboards computed with PostgreSQL aggregation functions.
-- **Hardened Security**: Cryptographic SIWE session authentication, dual-key Supabase RLS lockdown, anti-cheat answer masking, and OWASP HTTP security headers.
+- **Creator Dashboard (`/profile`)**: Manage your authored questions and download portable JSON backups.
+- **Score & Rankings**: One point per correct answer, streaks, and global and group leaderboards computed with PostgreSQL aggregation functions.
+- **Groups & Community**: Create or join groups, add questions, and rate, comment on and report questions.
+- **Hardened Security**: Signed session cookies, dual-key Supabase RLS lockdown, anti-cheat answer masking, rate limits and OWASP HTTP security headers.
 - **SEO & PWA Ready**: Dynamic metadata, sitemap, robots.txt, JSON-LD structured data, and web manifest.
 
 ## Getting Started
 
-You need Node 22, a Supabase project and a WalletConnect (Reown) project ID.
+You need Node 22 and a Supabase project.
 
 ```bash
 npm install --legacy-peer-deps
@@ -23,7 +22,7 @@ cp .env.example .env.local   # then fill it in, see below
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/contracts/addresses.ts`, `components/Providers.tsx`, `lib/supabase/supabase.ts`).
+Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/supabase/supabase.ts`).
 
 ### Environment Variables
 
@@ -32,19 +31,15 @@ Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your cr
 Required:
 - `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Public Supabase client configuration.
 - `SUPABASE_URL` & `SUPABASE_PUBLISHABLE_KEY`: The same project and publishable key, read by server code.
-- `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording, rate limits). The session cookie's HMAC key is derived from it, so rotating it signs everyone out.
-- `REWARD_SIGNER_PRIVATE_KEY`: Private key authorized to sign EIP-712 reward vouchers.
-- `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`: Reown/WalletConnect project ID for RainbowKit.
-- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain. There are no defaults: the app throws at startup without them (placeholders are used only during `next build`).
+- `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, rate limits). The session cookie's HMAC key is derived from it, so rotating it signs everyone out.
 
 Optional:
 - `GEMINI_API_KEY`: Google Gemini key for AI question generation and content moderation. Read by `@google/genai`; without it those features fail.
 - `NEXT_PUBLIC_APP_URL`: Public base URL for canonical links, sitemap and Open Graph tags. Falls back to Vercel's production domain, then `http://localhost:3000`.
-- `TREASURY_WALLET_ADDRESS`: Wallet that receives $QUIZ swept from wallet-less accounts after 180 days. Unset means no sweep.
-- `NEXT_PUBLIC_PAYMASTER_URL`: Paymaster for gasless claims. `NEXT_PUBLIC_SPONSOR_AD_URL`: sponsor link.
+- `NEXT_PUBLIC_SPONSOR_AD_URL`: sponsor link.
 - `NEXT_PUBLIC_APP_ENV=preview`: Marks a non-Vercel deployment as preview (noindex).
 
-Variables prefixed `NEXT_PUBLIC_` are compiled into the browser bundle at build time, so set them before building. Hardhat deployment variables live in the last block of `.env.example`.
+Variables prefixed `NEXT_PUBLIC_` are compiled into the browser bundle at build time, so set them before building.
 
 ### Database Setup
 
@@ -59,7 +54,7 @@ All files are in [`supabase/migrations/`](supabase/migrations/):
 5. [`restrict-quiz-results-insert.sql`](supabase/migrations/restrict-quiz-results-insert.sql) — only the server records answers.
 6. [`contest-escrow.sql`](supabase/migrations/contest-escrow.sql) — contest claims in `reward_claims`.
 7. [`widen-reward-claims-amount.sql`](supabase/migrations/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
-8. [`accounts.sql`](supabase/migrations/accounts.sql) — key every table by account id (`users.id`), so a wallet is optional.
+8. [`accounts.sql`](supabase/migrations/accounts.sql) — key every table by account id (`users.id`).
 9. [`stats-functions.sql`](supabase/migrations/stats-functions.sql) — stats and leaderboard functions (needs step 8).
 10. [`retire-sample-questions.sql`](supabase/migrations/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing) Skip it on a fresh database: it asserts the old seed questions exist.
 11. [`topics.sql`](supabase/migrations/topics.sql) — `get_topics()`.
@@ -73,6 +68,8 @@ All files are in [`supabase/migrations/`](supabase/migrations/):
 19. [`18-ai-usage.sql`](supabase/migrations/18-ai-usage.sql) — daily AI generation usage.
 
 [`ecosystem-v1-migration.sql`](supabase/migrations/ecosystem-v1-migration.sql) is only for databases created before `schema.sql` held the contest columns; skip it on a fresh database.
+
+The reward, escrow, voucher and payee tables from the older scripts stay in the schema, but nothing in the app reads or writes them any more; dropping them is a separate, reviewed migration.
 
 Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
 
@@ -91,19 +88,7 @@ Production runs on Vercel. Set every required variable above in the Vercel proje
 | `npm run check:task` | Types, lint, secrets, architecture and coverage in one go |
 | `npm run build` | Generate production build with static prerendering |
 
-CI (`.github/workflows/ci.yml`) runs lint, types, architecture, tests with coverage, the Hardhat contract tests, the production build and the dependency audit on every push and PR to `main` and `preview`.
-
-### Smart Contracts
-
-```bash
-cd contracts
-npm install
-npm run compile
-npm run test
-```
-
-Contract addresses on Base Sepolia:
-- **QuizToken (ERC-20)**, **QuizBadgeNFT (ERC-721)**, **ContestEscrow**: See [`lib/contracts/addresses.ts`](lib/contracts/addresses.ts)
+CI (`.github/workflows/ci.yml`) runs lint, types, architecture, tests with coverage, the production build and the dependency audit on every push and PR to `main` and `preview`.
 
 ## Architecture & Decisions
 
@@ -121,6 +106,7 @@ For technical architecture decisions and design trade-offs, consult:
   - [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](docs/decisions/010-polling-leaderboard-with-short-cache.md)
   - [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](docs/decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
   - [ADR-012: Accounts With an Optional Wallet](docs/decisions/012-accounts-with-optional-wallet.md)
+  - [ADR-013: Web2 Only: Remove Wallet, Token and Contract Code](docs/decisions/013-web2-only.md)
 - [Security Threat Model & STRIDE Analysis](docs/security-trade-offs.md)
 
 ## Branches

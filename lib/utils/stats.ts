@@ -40,7 +40,7 @@ export async function historyForAccount(accountId: string): Promise<HistoryItem[
 
 // Aggregated in Postgres (lib/sql/stats-functions.sql); raw rows are capped at 1000.
 // Not a server action: it takes an account id straight from the caller, which
-// resolves it from the session (getUserStats) or a wallet lookup (reward-actions,
+// resolves it from the session (getUserStats) or a lookup (reward-actions,
 // until Task 9 moves that to the session too).
 export async function statsForAccount(accountId: string): Promise<UserStats> {
   try {

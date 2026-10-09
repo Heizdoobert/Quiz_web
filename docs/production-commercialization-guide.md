@@ -1,4 +1,6 @@
 # 🚀 HƯỚNG DẪN THỰC THI THƯƠNG MẠI HÓA TOÀN DIỆN (MAINNET & MONETIZATION)
+
+> **Out of date**: the wallet, token and contract parts of this document describe code removed in [ADR-013](../docs/decisions/013-web2-only.md).
 ## Dự án: Quick Quiz — Learn to Earn Crypto Web3 Platform
 
 Tài liệu này hướng dẫn chi tiết từng bước để đưa dự án **Quick Quiz** từ môi trường thử nghiệm (Testnet / Localhost) ra **vận hành thương mại thật (Mainnet)** trên thị trường toàn cầu, thu hút người chơi và tạo ra dòng tiền thật cho chủ dự án.

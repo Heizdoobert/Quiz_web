@@ -15,11 +15,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  // Players can sign in and browse without a wallet, but answers only count with one.
-  if (!account.wallet) {
-    return NextResponse.json({ error: 'wallet-required' }, { status: 403 });
-  }
-
   try {
     const body = await req.json();
     if (!Array.isArray(body)) {
