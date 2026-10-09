@@ -163,6 +163,9 @@ jobs:
           NEXT_PUBLIC_CHAIN_ID: '84532'
           REWARD_SIGNER_PRIVATE_KEY: '0x9999999999999999999999999999999999999999999999999999999999999999'
 
+      - name: Bundle size per route
+        run: npm run check:bundle
+
   security:
     name: Security & Dependencies Audit
     needs: [secrets, typecheck, lint, architecture]

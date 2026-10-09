@@ -100,7 +100,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [ ] `npm run check:full` green
 
 ### Phase C: Performance
-- [ ] Task C1: Make the bundle budget measurable
+- [x] Task C1: Make the bundle budget measurable (ratchet 470 kB, ~460 kB measured)
 - [ ] Task C2: Keep the wallet stack off non-wallet routes
 - [x] Task C3: `/topics` is frozen at build time (route is dynamic)
 - [ ] Task C4: Cache or index the global leaderboard

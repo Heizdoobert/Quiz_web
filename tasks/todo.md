@@ -309,14 +309,15 @@
 ### Task C1: Make the bundle budget measurable
 **Description:** S6-01, S6-02. Turbopack prints no size table, so the 150 kB gate is unmeasured and about 450 kB gzip today. Add a script that sums gzip of the scripts in each prerendered page and fails over the budget.
 **Acceptance criteria:**
-- [ ] `npm run check:bundle` prints per-route gzip and fails over the budget; in CI after the build
-- [ ] `CONSTRAINTS.md` states the measured number and the method
+- [x] `npm run check:bundle` prints per-route gzip and fails over the budget; in CI after the build
+- [x] `CONSTRAINTS.md` states the measured number and the method
 **Verification:**
-- [ ] The script reports about 450 kB for `/contest` today
+- [x] The script reports about 450 kB for `/contest` today
 **Dependencies:** None
 **Files:** `scripts/`, `package.json`, `.github/workflows/ci.yml`, `CONSTRAINTS.md`
 **Scope:** S
 **Note:** the budget will fail at once. Land it as measured-only (warn) with a ratchet, and record the exception in `CONSTRAINTS.md`, until C2 lands.
+**Note (done):** landed as measured-only with a ratchet at 470 kB; exception X-1 in `CONSTRAINTS.md`. Measured 455 to 463 kB gzip. Not run in this session: the CI step itself (needs a push).
 
 ### Task C2: Keep the wallet stack off non-wallet routes
 **Description:** S6-03. `components/Providers.tsx` loads wagmi and RainbowKit on every route including the 404.
