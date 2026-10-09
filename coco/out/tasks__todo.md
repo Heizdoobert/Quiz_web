@@ -1,43 +1,43 @@
 # tasks/todo.md
-lines:52 exports:
+lines:115 exports:
 ---
-# Tasks: Polling-Based Realtime Leaderboard
-
-> Plan: [plan.md](./plan.md)
-
----
-
-## Task 1: Integrate React Query for Leaderboards
-**Description:** Refactor leaderboard data fetching from manual React state (`useState`) to `@tanstack/react-query` (`useQuery`). 
+## Task 1: Isolate `mobile/` from Next.js CI
+**Description:** Configure the monorepo tooling to completely ignore the `mobile/` directory so Vercel builds, linting, and TS compilers don't fail when encountering Dart code.
 **Acceptance criteria:**
-- [ ] `useQuizLogic` hook uses `useQuery` for both global and group leaderboards instead of manual async functions and state.
-- [ ] Submitting an answer calls `queryClient.invalidateQueries({ queryKey: ['leaderboard'] })` rather than manually invoking `loadLeaderboards()`.
-- [ ] The `leaderboardLoading` state is derived from React Query's `isPending` / `isFetching` properties, ensuring background refetches do not trigger hard loading spinners (preventing UI flicker).
+- [x] `.vercelignore`, `.eslintignore`, `tsconfig.json`, and `.prettierignore` correctly exclude `mobile/`.
+- [x] `.github/workflows` (if applicable) is updated to ignore `mobile/` changes for Next.js builds.
 **Verification:**
-- [ ] Tests pass: `npm run test`
-- [ ] Build succeeds: `npm run build`
-- [ ] Manual check: Submit an answer and verify the leaderboard updates immediately without a loading spinner flash.
+- [x] `npm run lint` and `npm run build` in root pass successfully.
 **Dependencies:** None
-**Files likely touched:** `hooks/quiz/use-quiz-logic.ts`, `components/leaderboard/LeaderboardPanel.tsx`
-**Estimated scope:** M
+**Files likely touched:** `.vercelignore`, `.eslintignore`, `tsconfig.json`
+**Estimated scope:** Small
 
-## Task 2: Implement Visibility-Aware Polling
-**Description:** Add a conditional polling interval to the leaderboard queries that activates exclusively when the leaderboard panel is visible on screen.
+## Task 2: Initialize Flutter Project & Dependencies
+**Description:** Create the base Flutter project inside the `mobile/` directory and add the core dependencies required for architecture.
 **Acceptance criteria:**
-- [ ] Remove all Supabase Realtime WebSocket logic (`supabase.channel().on(...)`) from `LeaderboardPanel.tsx`.
-- [ ] Pass the `isVisible` boolean (from `useIntersectionObserver`) into `useQuizLogic` or directly to the `useQuery` hook.
-- [ ] Set `refetchInterval: isVisible ? 15000 : false` on the leaderboard queries.
+- [x] Flutter project created at `mobile/`.
+- [x] `pubspec.yaml` includes `flutter_riverpod`, `flutter_secure_storage`, `walletconnect_flutter_v2`, `http`, and `sqflite`.
 **Verification:**
-- [ ] Tests pass: `npm run test`
-- [ ] Manual check: Open network tab, scroll the leaderboard into view, wait 15 seconds, and confirm an RPC network request is fired. Scroll out of view and confirm requests stop.
-**Dependencies:** Task 1
-**Files likely touched:** `components/leaderboard/LeaderboardPanel.tsx`, `hooks/quiz/use-quiz-logic.ts`
-**Estimated scope:** S
+- [x] `cd mobile && flutter build ios --simulator` succeeds.
+**Dependencies:** 1
+**Files likely touched:** `mobile/pubspec.yaml`, `mobile/lib/main.dart`
+**Estimated scope:** Small
 
 ## Checkpoint: Foundation
-- [ ] Manual test: Leaderboard fetches successfully on initial load.
-- [ ] Manual test: Leaderboard polls exactly every 15 seconds when visible, and pauses when scrolled out of view or tab is backgrounded.
-- [ ] Network tab confirms no WebSocket connection is established for `quiz_results`.
+- [x] Next.js Vercel builds succeed without trying to parse Dart.
+- [x] Flutter app builds to simulator successfully.
 
-## Task 3: Visual Highlights for Leaderboard Changes
-**Description:** Add subtle animation cues to leaderboard rows when they update, so users notice changes that occur passively in the background.
+## Task 3: Build Next.js Mobile SIWE API endpoints
+**Description:** Create a new REST API specifically for mobile that handles Sign-In With Ethereum (SIWE), bypassing the Next.js cookie restrictions by issuing a Bearer JWT.
+**Acceptance criteria:**
+- [x] `POST /api/mobile/v1/auth/nonce` returns a secure nonce.
+- [x] `POST /api/mobile/v1/auth/verify` accepts a SIWE signature, verifies it, and returns a signed JWT Bearer token valid for mobile use.
+**Verification:**
+- [x] Tests pass: Verify the endpoints using curl/Postman with valid signatures.
+**Dependencies:** 2
+**Files likely touched:** `app/api/mobile/v1/auth/nonce/route.ts`, `app/api/mobile/v1/auth/verify/route.ts`, `lib/services/mobile-auth.ts`
+**Estimated scope:** Medium
+
+## Task 4: Configure WalletConnect v2 & Deep Linking in Flutter
+**Description:** Set up WalletConnect v2 inside the Flutter app and configure OS-level deep linking so wallet apps can return the user to the Flutter app after signing.
+**Acceptance criteria:**

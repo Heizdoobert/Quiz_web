@@ -1,5 +1,5 @@
 # components/modals/__tests__/RewardsTokensTab.test.tsx
-lines:93 exports:
+lines:94 exports:
 ---
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
@@ -10,7 +10,7 @@ describe('RewardsTokensTab', () => {
   const mockRewards: ClaimableRewards = {
     totalEarned: '2000',
     totalClaimed: '1000',
-    claimableTokens: '1000',
+    claimableTokens: '750',
     eligibleBadges: [],
     alreadyClaimedBadges: [],
   };
@@ -33,11 +33,11 @@ describe('RewardsTokensTab', () => {
     );
     expect(screen.getByText('2000 TKN')).toBeTruthy();
     expect(screen.getByText('1000 TKN')).toBeTruthy();
-    expect(screen.getByText('Claim 1000 TKN (Gasless)')).toBeTruthy();
+    expect(screen.getByText('750 TKN')).toBeTruthy();
+    expect(screen.getByText('Claim 750 TKN $QUIZ (Gasless)')).toBeTruthy();
   });
 
   it('renders done state', () => {
     render(
       <RewardsTokensTab
         rewards={mockRewards}
-        claimStep="done"

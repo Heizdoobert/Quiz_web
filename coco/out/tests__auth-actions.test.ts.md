@@ -14,7 +14,7 @@ import {
 } from '../lib/actions/auth-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { publicClientFor } from '../lib/utils/chain';
+import { publicClientFor } from '../lib/services/chain';
 
 // In-memory cookie store
 const cookieStore = new Map<string, { value: string; [key: string]: unknown }>();

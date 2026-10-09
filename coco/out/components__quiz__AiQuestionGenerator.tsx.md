@@ -1,5 +1,5 @@
 # components/quiz/AiQuestionGenerator.tsx
-lines:91 exports:AiQuestionGenerator
+lines:92 exports:AiQuestionGenerator
 ---
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';

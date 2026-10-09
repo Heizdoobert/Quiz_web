@@ -1,5 +1,5 @@
 # components/auth/tabs/EmailTab.tsx
-lines:103 exports:EmailTabProps,EmailTab
+lines:122 exports:EmailTabProps,EmailTab
 ---
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
@@ -24,8 +24,12 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
     e.preventDefault();
     setPending(true);
     setError(null);
-    await requestEmailCode(email);
+    const res = await requestEmailCode(email);
     setPending(false);
+    if (res.error === "RATE_LIMITED") {
+      setError("Too many requests. Please try again later.");
+      return;
+    }
     setEmailStep("code");
   };
 
@@ -36,8 +40,4 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
     const res = await verifyEmailCode(email, code);
     setPending(false);
     if (!res.ok) {
-      setError("Wrong or expired code. Try again.");
-      return;
-    }
-    await refresh();
-    onSuccess();
+      setError(

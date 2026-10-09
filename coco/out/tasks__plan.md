@@ -1,36 +1,43 @@
 # tasks/plan.md
-lines:33 exports:
+lines:48 exports:
 ---
-# Implementation Plan: Polling-Based Realtime Leaderboard
+# Implementation Plan: Flutter Mobile Companion App
 
 ## Overview
-The current leaderboard relies on Supabase Realtime (`postgres_changes`) to push live updates to users. However, a critical architectural flaw prevents this from working: the `quiz_results` table is heavily restricted by Row-Level Security (RLS) to prevent cheating, meaning Supabase Realtime drops the INSERT events for all users. We will replace this completely with a Visibility-Aware Polling mechanism using React Query, which respects RLS (via Security Definer RPCs), prevents connection thrashing, and stops UI flickering.
+Building a native iOS/Android Flutter companion app for the Web3 quiz platform. It will feature offline-capable quiz gameplay and native WalletConnect v2 integration. All communication with the database will be routed through a new Bearer-token authenticated REST API in the existing Next.js application to preserve security.
 
 ## Architecture Decisions
-- **Data Fetching Strategy**: Replace manual React state fetching inside `use-quiz-logic.ts` with `@tanstack/react-query` to handle caching, background refetches, and window focus behaviors natively.
-- **Polling over WebSockets**: React Query will poll the database (e.g., every 15 seconds) strictly when the `LeaderboardPanel` is intersecting the viewport and the browser tab is focused.
-- **Cache Invalidation**: When a user submits an answer, we simply invalidate the `leaderboard` query cache, forcing an immediate background refetch without UI flickering.
+- **Monorepo Isolation:** We are placing the app in `mobile/` but heavily ignoring it in Next.js/Vercel configs to prevent CI bloat.
+- **REST API:** Bypassing direct Supabase connections in favor of a versioned Next.js API (`/api/mobile/v1`) to maintain business logic and anti-cheat consistency.
+- **Offline Security:** Only quiz questions (without correct answers) are cached offline. Answers are queued locally and graded securely on the server upon syncing.
+- **Token Auth:** Next.js will issue JWT Bearer tokens to the mobile app, stored in `flutter_secure_storage`.
 
 ## Task List
 
-### Phase 1: Foundation
-- [x] Task 1: Integrate React Query for Leaderboards
-- [x] Task 2: Implement Visibility-Aware Polling
+### Phase 1: Foundation & Tooling
+- [x] Task 1: Isolate `mobile/` from Next.js CI
+- [x] Task 2: Initialize Flutter Project & Dependencies
 
 ### Checkpoint: Foundation
-- [x] Manual test: Leaderboard fetches successfully on initial load.
-- [x] Manual test: Leaderboard polls exactly every 15 seconds when visible, and pauses when scrolled out of view or tab is backgrounded.
-- [x] Network tab confirms no WebSocket connection is established for `quiz_results`.
+- [x] Next.js Vercel builds succeed without trying to parse Dart.
+- [x] Flutter app builds to simulator successfully.
 
-### Phase 2: Polish
-- [x] Task 3: Visual Highlights for Leaderboard Changes
+### Phase 2: Web3 Authentication
+- [x] Task 3: Build Next.js Mobile SIWE API endpoints
+- [x] Task 4: Configure WalletConnect v2 & Deep Linking in Flutter
+- [x] Task 5: Implement Flutter Auth State & JWT Storage
+
+### Checkpoint: Authentication
+- [x] User can tap "Connect Wallet" on simulator, sign via wallet app, and receive a JWT Bearer token from the Next.js API.
+
+### Phase 3: Offline Quiz & Syncing
+- [x] Task 6: Build Next.js Mobile Quiz API (GET questions, POST sync)
+- [x] Task 7: Flutter local caching & offline queue database schema
+- [x] Task 8: Flutter Quiz UI (fetch -> play -> queue answers)
+- [x] Task 9: Flutter Background Sync Engine
 
 ### Checkpoint: Complete
-- [x] Leaderboard rows animate gracefully when data updates.
-- [x] All tests pass locally and the build succeeds.
+- [x] User can download questions, go offline, submit answers, reconnect, and see their rewards synced successfully without leaking answers offline.
+- [x] Ready for App Store / Play Store review.
 
 ## Risks and Mitigations
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Polling causes DB load | Low | 15-second polling interval per active user is significantly less overhead than constant WebSocket messaging, especially since it pauses off-screen. |
-| UI flicker on poll | Low | React Query background refetches leave the old data on-screen, completely eliminating the current `leaderboardLoading` boolean spinner flicker. |

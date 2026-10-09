@@ -1,20 +1,24 @@
 # lib/actions/auth-actions.ts
-lines:278 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,signUpWithUsername,signInWithUsername,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
+lines:303 exports:getAuthNonce,requestSignIn,signInWithWallet,requestEmailCode,verifyEmailCode,signUpWithUsername,signInWithUsername,linkWallet,getSignedInWallet,getSessionInfo,signOutWallet
 ---
 'use server';
 
 import { cookies, headers } from 'next/headers';
 import { getAddress } from 'viem';
 import { createSiweMessage, generateSiweNonce, parseSiweMessage } from 'viem/siwe';
-import { publicClientFor } from '@/lib/utils/chain';
+import { publicClientFor } from '@/lib/services/chain';
 import { getSessionAccount, setSessionAccount, clearSessionAccount, shouldUseSecureCookies } from '@/lib/services/session';
 import { ensureAccountForWallet, ensureAccountForAuthUser, linkWalletToAccount } from '@/lib/services/users';
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+
+const HOUR = 3600;
+const RATE_LIMITED_MESSAGE = 'Too many attempts. Please try again later.';
 
 function usernameToEmail(username: string): string {
   const trimmed = username.trim().toLowerCase();
@@ -37,7 +41,3 @@ export async function getAuthNonce(): Promise<string> {
   const nonce = generateSiweNonce();
   (await cookies()).set(CHALLENGE_COOKIE, nonce, {
     httpOnly: true,
-    secure: await shouldUseSecureCookies(),
-    sameSite: 'strict',
-    path: '/',
-    maxAge: CHALLENGE_TTL_SECONDS,

@@ -1,10 +1,11 @@
 # lib/services/contest.ts
-lines:14 exports:getContestId,CONTEST_DURATION_SECONDS
+lines:15 exports:getContestId,CONTEST_DURATION_SECONDS
 ---
 import { keccak256, toHex } from 'viem';
 
 // Client-safe contest helpers (no 'server-only': imported by client components).
-// Must match lib/chain.ts getContestId: bytes32 contestId = keccak256(bytes(listId)).
+// lib/services/chain.ts re-exports this. bytes32 contestId = keccak256(utf8 "<listId>:<creator>"), both lowercased;
+// with no creator it is keccak256 of the lowercased listId alone.
 
 export function getContestId(listId: string, creatorAddress?: string): `0x${string}` {
   const normalized = creatorAddress

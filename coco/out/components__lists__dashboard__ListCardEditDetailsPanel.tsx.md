@@ -1,5 +1,5 @@
 # components/lists/dashboard/ListCardEditDetailsPanel.tsx
-lines:81 exports:ListCardEditDetailsPanel
+lines:83 exports:ListCardEditDetailsPanel
 ---
 import React, { useState } from "react";
 import { updateList } from "@/lib/actions/question-list-actions";

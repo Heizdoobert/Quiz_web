@@ -6,7 +6,7 @@ lines:66 exports:AuthPopupProps,default
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Zap } from 'lucide-react';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import AuthChoiceScreen from './AuthChoiceScreen';
 import AuthMethodTabs, { AuthMode } from './AuthMethodTabs';
 

@@ -1,5 +1,5 @@
 # components/community/CommentList.tsx
-lines:179 exports:default
+lines:180 exports:default
 ---
 "use client";
 
@@ -10,7 +10,7 @@ import {
   addComment,
   deleteComment,
 } from "@/lib/actions/community-actions";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils/format";
 import { logger } from '@/lib/logger';
 
 interface CommentListProps {

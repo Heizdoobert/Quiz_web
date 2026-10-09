@@ -33,5 +33,5 @@ lines:34 exports:
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "contracts", ".agents"]
+  "exclude": ["node_modules", "contracts", ".agents", "mobile"]
 }

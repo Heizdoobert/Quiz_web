@@ -1,5 +1,5 @@
 # lib/actions/question-actions.ts
-lines:383 exports:createQuestion,fetchRandomQuestion,getTopics,getPublicQuestion,disputeQuestion,getQuestionCount,get5050EliminatedIndices,generateQuestion
+lines:387 exports:createQuestion,fetchRandomQuestion,getTopics,getPublicQuestion,disputeQuestion,getQuestionCount,get5050EliminatedIndices,generateQuestion
 ---
 'use server';
 

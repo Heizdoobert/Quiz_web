@@ -1,8 +1,10 @@
 # tests/use-quiz-logic-history.test.tsx
-lines:61 exports:
+lines:71 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import React from 'react';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 
 vi.mock('wagmi', () => ({ useAccount: () => ({ address: '0x' + 'a'.repeat(40), isConnected: true }) }));
@@ -13,7 +15,7 @@ vi.mock('../hooks/shared/use-session', () => ({
     requireSignIn: vi.fn().mockResolvedValue(true),
   }),
 }));
-vi.mock('../lib/services/audio', () => ({
+vi.mock('../lib/client/audio', () => ({
   soundEngine: { playFlip: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(), playTick: vi.fn(), playPowerup: vi.fn() },
 }));
 vi.mock('../lib/actions/question-actions', () => ({
@@ -35,9 +37,7 @@ vi.mock('../lib/actions/quiz-actions', () => ({
   submitAnswer: (...args: unknown[]) => submitAnswer(...args),
 }));
 
-describe('useQuizLogic history restore', () => {
-  beforeEach(() => {
-    getAnswerHistory.mockReset();
-  });
-
-  it('loads saved history and folds it into answeredIds on connect', async () => {
+const withQuery = () => {
+  const client = new QueryClient();
+  const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>

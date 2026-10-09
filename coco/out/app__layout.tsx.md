@@ -1,10 +1,11 @@
 # app/layout.tsx
-lines:185 exports:viewport,metadata,default
+lines:188 exports:viewport,metadata,default
 ---
 import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from '@/components/Providers';
+import { PostHogProvider } from '@/components/providers/PostHogProvider';
 import AdZone from '@/components/ads/AdZone';
 import { FAQ_DATA } from '@/lib/constants/seo-data';
 import { getSiteUrl } from '@/lib/utils/site-url';
@@ -40,4 +41,3 @@ export const metadata: Metadata = {
     'learn to earn crypto',
     'base blockchain quiz',
     'base sepolia rewards',
-    'blockchain trivia game',

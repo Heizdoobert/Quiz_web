@@ -1,11 +1,11 @@
 # components/modals/TimerSettingsModal.tsx
-lines:108 exports:default
+lines:110 exports:default
 ---
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import { useTimerSettingsModal } from '@/hooks/modals/use-timer-settings-modal';
 import { Clock } from 'lucide-react';
 

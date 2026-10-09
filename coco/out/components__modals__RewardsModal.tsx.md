@@ -4,7 +4,7 @@ lines:134 exports:default
 'use client';
 
 import React from 'react';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import { useRewardsModal } from '@/hooks/modals/use-rewards-modal';
 import NoWalletNotice from '@/components/rewards/NoWalletNotice';
 import { ConnectButton } from '@rainbow-me/rainbowkit';

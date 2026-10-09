@@ -1,11 +1,11 @@
 # components/modals/DisputeModal.tsx
-lines:156 exports:default
+lines:157 exports:default
 ---
 'use client';
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '../Modal';
+import Modal from '@/components/ui/Modal';
 import { DISPUTE_REASONS, useDisputeModal } from '@/hooks/modals/use-dispute-modal';
 import { AlertTriangle, Flag, CheckCircle2, Loader2, ShieldAlert } from 'lucide-react';
 

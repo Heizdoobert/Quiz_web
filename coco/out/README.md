@@ -1,5 +1,5 @@
 # README.md
-lines:101 exports:
+lines:133 exports:
 ---
 # Quick Quiz — Web3 Trivia & On-Chain Rewards
 
@@ -17,27 +17,27 @@ A Web3 trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4**, *
 
 ## Getting Started
 
+You need Node 22, a Supabase project and a WalletConnect (Reown) project ID.
+
 ```bash
-npm install
+npm install --legacy-peer-deps
+cp .env.example .env.local   # then fill it in, see below
+# apply the SQL in "Database Setup" to your Supabase project
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000).
+Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/contracts/addresses.ts`, `components/Providers.tsx`, `lib/supabase/supabase.ts`).
 
 ### Environment Variables
 
-Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your credentials:
+Copy `.env.example` to `.env.local` (or `.env` for Docker) and configure your credentials.
+
+Required:
 - `NEXT_PUBLIC_SUPABASE_URL` & `NEXT_PUBLIC_SUPABASE_ANON_KEY`: Public Supabase client configuration.
-- `SUPABASE_URL` & `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording). The session cookie's HMAC key is derived from `SUPABASE_SECRET_KEY`, so rotating it signs everyone out.
+- `SUPABASE_URL` & `SUPABASE_PUBLISHABLE_KEY`: The same project and publishable key, read by server code.
+- `SUPABASE_SECRET_KEY`: Service-role access used only by Server Actions (answer grading, claim recording, rate limits). The session cookie's HMAC key is derived from it, so rotating it signs everyone out.
 - `REWARD_SIGNER_PRIVATE_KEY`: Private key authorized to sign EIP-712 reward vouchers.
 - `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`: Reown/WalletConnect project ID for RainbowKit.
-- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain (defaults in `lib/contracts/addresses.ts`).
-- `NEXT_PUBLIC_APP_URL`: Public base URL for canonical links, sitemap and Open Graph tags. Falls back to Vercel's production domain, then `http://localhost:3000`.
-- `TREASURY_WALLET_ADDRESS` (optional): Wallet that receives $QUIZ swept from wallet-less accounts after 180 days. Unset means no sweep.
-- `NEXT_PUBLIC_PAYMASTER_URL` (optional): Paymaster for gasless claims. `NEXT_PUBLIC_SPONSOR_AD_URL` (optional): sponsor link.
-- `NEXT_PUBLIC_APP_ENV=preview` (optional): Marks a non-Vercel deployment as preview (noindex).
+- `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_CHAIN_ID`: Deployed contracts and chain. There are no defaults: the app throws at startup without them (placeholders are used only during `next build`).
 
-### Database Setup
-
-Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Every script is idempotent and safe to re-run. This is the order `tests/sql/run-accounts-migration.sh` verifies.
-
+Optional:

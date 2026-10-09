@@ -4,7 +4,7 @@ lines:21 exports:useSoundToggle
 'use client';
 
 import { useSyncExternalStore } from 'react';
-import { soundEngine } from '@/lib/services/audio';
+import { soundEngine } from '@/lib/client/audio';
 
 export function useSoundToggle() {
   const isMuted = useSyncExternalStore(

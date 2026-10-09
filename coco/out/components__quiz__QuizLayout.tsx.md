@@ -1,5 +1,5 @@
 # components/quiz/QuizLayout.tsx
-lines:195 exports:default
+lines:193 exports:default
 ---
 'use client';
 

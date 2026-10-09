@@ -1,5 +1,5 @@
 # components/quiz/QuestionOptionsInput.tsx
-lines:58 exports:QuestionOptionsInput
+lines:60 exports:QuestionOptionsInput
 ---
 import React from 'react';
 
@@ -15,11 +15,11 @@ export function QuestionOptionsInput({
   onCorrectIndexChange: (idx: number) => void;
 }) {
   return (
-    <div>
+    <div role="group" aria-labelledby="answer-options-label">
       <div className="flex items-center justify-between mb-1.5">
-        <label className="text-xs font-bold text-slate-300">
-          Answer Options <span className="text-pop-coral">*</span>
-        </label>
+        <span id="answer-options-label" className="text-xs font-bold text-slate-300">
+          Answer Options <span className="text-pop-coral" aria-hidden="true">*</span>
+        </span>
         <span className="text-[11px] text-slate-400">Radio button selects correct answer</span>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -36,8 +36,8 @@ export function QuestionOptionsInput({
               <input
                 type="radio"
                 name="correct-option"
+                aria-label={`Mark option ${letter} as correct`}
                 checked={correctIndex === idx}
                 onChange={() => onCorrectIndexChange(idx)}
                 className="w-4 h-4 text-neo-mint accent-neo-mint bg-cyber-violet border-cyber-border cursor-pointer"
               />
-              <span className="font-black text-xs px-2 py-0.5 rounded-lg bg-cyber-violet text-slate-300 font-heading">

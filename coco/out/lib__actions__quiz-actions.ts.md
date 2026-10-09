@@ -1,15 +1,21 @@
 # lib/actions/quiz-actions.ts
-lines:123 exports:getAnswerHistory,submitAnswer,getUserStats
+lines:131 exports:getAnswerHistory,submitAnswer,getUserStats
 ---
 'use server';
 
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
-import { getSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
+import { allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { isUuid } from '@/lib/utils/validation';
 import { statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';
 import { logger } from '@/lib/logger';
 
 const HISTORY_LIMIT = 20;
+const HOUR = 3600;
+// Every answer shows its key, guests included (docs/specs/trivia-guest-access.md), so this caps
+// how fast a script can read the question bank from one address. Generous for shared networks.
+const ANSWERS_PER_IP_PER_HOUR = 120;
 
 // The session account's most recent answers, newest first, so history and answeredIds
 // survive a reload. Never anyone else's, and never answer_index or correct_index
@@ -35,9 +41,3 @@ export async function getAnswerHistory(): Promise<HistoryItem[]> {
     return (data as unknown as Array<{ question_id: string; is_correct: boolean; questions: { prompt: string } | null }>).map(
       (row) => ({
         questionId: row.question_id,
-        prompt: row.questions?.prompt ?? '',
-        isCorrect: row.is_correct,
-      })
-    );
-  } catch (err) {
-    logger.error('getAnswerHistory exception:', err);

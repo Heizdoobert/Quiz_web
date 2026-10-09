@@ -1,5 +1,5 @@
 # components/auth/tabs/UsernameTab.tsx
-lines:101 exports:UsernameTabProps,UsernameTab
+lines:107 exports:UsernameTabProps,UsernameTab
 ---
 import React, { useState } from "react";
 import { User, KeyRound, Loader2 } from "lucide-react";

@@ -1,5 +1,5 @@
 # app/topics/page.tsx
-lines:27 exports:metadata,default
+lines:30 exports:metadata,dynamic,default
 ---
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
@@ -9,6 +9,9 @@ import { getTopics } from '@/lib/actions/question-actions';
 export const metadata: Metadata = {
   title: 'Topics',
 };
+
+// Topics change as questions are verified; prerendering at build time froze an empty list.
+export const dynamic = 'force-dynamic';
 
 export default async function TopicsPage() {
   const topics = await getTopics();

@@ -1,9 +1,10 @@
 # tests/wallet-auth-sync.test.tsx
-lines:548 exports:
+lines:567 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useQuizLogic } from '../hooks/quiz/use-quiz-logic';
 import { SessionProvider, useSession } from '../hooks/shared/use-session';
 import { useQuizAuth } from '../hooks/shared/use-quiz-auth';
@@ -40,4 +41,3 @@ vi.mock('../lib/actions/question-actions', () => ({
 
 vi.mock('../lib/actions/leaderboard-actions', () => ({
   getGlobalLeaderboard: vi.fn().mockResolvedValue([]),
-  getGroupLeaderboard: vi.fn().mockResolvedValue([]),

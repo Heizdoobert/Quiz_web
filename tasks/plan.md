@@ -1,59 +1,48 @@
-# Implementation Plan: Security Posture Reconciliation
+# Implementation Plan: Flutter Mobile Companion App
 
 ## Overview
-`SECURITY-TRADE-OFFS.md` has drifted from the code (checked 2026-10-08). This plan makes the document true again and closes the real gaps it exposes. Work happens only on `company/update-code`, one task per commit, merged to `preview` first (see `AGENTS.md`, `CONSTRAINTS.md`). It overlaps with the prod-health plan (T1 `next` bump, T4 CI audit, T7 CSP); those tasks are done here once, not twice.
-
-## Findings (evidence, 2026-10-08)
-| # | Doc claim | Reality |
-|---|-----------|---------|
-| F1 | §4.C / ADR-003: `claimListReward` returns "Contest payouts are paused" | `lib/actions/question-list-actions.ts:868` is live: signs a voucher for `ContestEscrow` after on-chain status check. `contracts/contracts/ContestEscrow.sol` exists. No "paused" string anywhere in `lib/` or `app/`. |
-| F2 | §3: 23 moderate + 1 high, `ws` via `viem` | `npm audit --omit=dev`: 26 vulns, 22 moderate, 4 high, all `ws <=8.20.1` nested under `@reown/appkit*` and `@walletconnect/utils` (two advisories). `package.json` has no `overrides`. |
-| F3 | STRIDE table covers wallet auth only | Auth now also has email code (`requestEmailCode`, `verifyEmailCode`) and username (`signUpWithUsername`, `signInWithUsername`) in `lib/actions/auth-actions.ts`. No rate limit on any auth action (rate limits exist only in `community-actions.ts` and `question-actions.ts`). |
-| F4 | §2 lists headers | Accurate, but CSP is only `frame-ancestors 'none'` (no script/connect/img policy). |
-| F5 | n/a | `next` 16.3.6 has a high advisory fixed in 16.4.0 (image optimizer SSRF, ISR cache poisoning). Not in the doc. |
-| F6 | `CONSTRAINTS.md` W1 exception (expires 2026-12-27) | Still valid per F2; the earlier assumption that an override already clears `ws` is false. |
+Building a native iOS/Android Flutter companion app for the Web3 quiz platform. It will feature offline-capable quiz gameplay and native WalletConnect v2 integration. All communication with the database will be routed through a new Bearer-token authenticated REST API in the existing Next.js application to preserve security.
 
 ## Architecture Decisions
-- Auth rate limiting reuses the existing pattern (count rows in a window via `supabaseAdmin`, return `RATE_LIMITED`), not a new dependency or Redis. Ceiling: per-account/IP counting in Postgres; move to edge limiter if traffic demands.
-- CSP ships report-only first, then enforce, because wagmi/RainbowKit/WalletConnect need broad `connect-src`/`frame-src`.
-- Docs are corrected from code, not from memory: each doc task starts by re-reading the cited file.
-- No contract deployment or external audit in this plan; those need the user (prod-health T10).
+- **Monorepo Isolation:** We are placing the app in `mobile/` but heavily ignoring it in Next.js/Vercel configs to prevent CI bloat.
+- **REST API:** Bypassing direct Supabase connections in favor of a versioned Next.js API (`/api/mobile/v1`) to maintain business logic and anti-cheat consistency.
+- **Offline Security:** Only quiz questions (without correct answers) are cached offline. Answers are queued locally and graded securely on the server upon syncing.
+- **Token Auth:** Next.js will issue JWT Bearer tokens to the mobile app, stored in `flutter_secure_storage`.
 
 ## Task List
-Details, acceptance criteria and verification are in `tasks/todo.md`.
 
-### Phase 1: Make the record true (low risk, docs + deps)
-- [x] Task 1: Bump `next` and `eslint-config-next` to 16.4.0
-- [x] Task 1b: Repair 7 stale tests so `test:coverage` is green
-- [x] Task 2: Verify `ws` fix path and re-triage W1
-- [x] Task 3: Verify contest claim flow; correct §4.C and ADR-003
+### Phase 1: Foundation & Tooling
+- [x] Task 1: Isolate `mobile/` from Next.js CI
+- [x] Task 2: Initialize Flutter Project & Dependencies
 
-### Checkpoint: Phase 1
-- [ ] `npm run check:task` and `npm run check:deps` pass; first-load JS ≤ 150 kB
+### Checkpoint: Foundation
+- [x] Next.js Vercel builds succeed without trying to parse Dart.
+- [x] Flutter app builds to simulator successfully.
 
-### Phase 2: Close real gaps
-- [x] Task 4: Rate-limit auth actions
-- [x] Task 5: (code done; preview observation pending) CSP report-only
-- [ ] Task 6: (BLOCKED: needs preview observation) Enforce CSP
+### Phase 2: Web3 Authentication
+- [x] Task 3: Build Next.js Mobile SIWE API endpoints
+- [x] Task 4: Configure WalletConnect v2 & Deep Linking in Flutter
+- [x] Task 5: Implement Flutter Auth State & JWT Storage
 
-### Checkpoint: Phase 2
-- [ ] Preview deploy clean for a full wallet + email + username sign-in, no CSP reports for first-party flows
+### Checkpoint: Authentication
+- [x] User can tap "Connect Wallet" on simulator, sign via wallet app, and receive a JWT Bearer token from the Next.js API.
 
-### Phase 3: Rewrite the doc
-- [x] Task 7: Update STRIDE table, §2, §3, §4 in `SECURITY-TRADE-OFFS.md`
+### Phase 3: Offline Quiz & Syncing
+- [x] Task 6: Build Next.js Mobile Quiz API (GET questions, POST sync)
+- [x] Task 7: Flutter local caching & offline queue database schema
+- [x] Task 8: Flutter Quiz UI (fetch -> play -> queue answers)
+- [x] Task 9: Flutter Background Sync Engine
 
 ### Checkpoint: Complete
-- [ ] Every claim in `SECURITY-TRADE-OFFS.md` matches code; CI green on `preview`
+- [x] User can download questions, go offline, submit answers, reconnect, and see their rewards synced successfully without leaking answers offline.
+- [x] Ready for App Store / Play Store review.
 
 ## Risks and Mitigations
 | Risk | Impact | Mitigation |
 |------|--------|------------|
-| `next` 16.4.0 changes build output or bundle size | Med | Verify build + first-load JS before commit; revert if over 150 kB |
-| Strict CSP breaks wallet modal / WalletConnect | High | Report-only first; test wallet connect on preview before enforcing |
-| `ws` has no patched release reachable without `wagmi@3` | Low | Keep W1 with fresh reasoning; do not weaken `CONSTRAINTS.md` |
-| F1 is wrong (claims actually unsafe) | High | Task 3 reads full claim flow before editing docs; if unsafe, stop and report |
-| Auth rate limit locks out shared-IP users | Med | Key by normalized identifier (email/username/address) first, IP only as secondary |
+| Vercel attempts to build Dart | High | Strict `.vercelignore` and Next.js config exclusions |
+| WalletConnect deep-link drops | High | Careful OS-level intents setup (Android AppLinks, iOS Universal Links) |
+| App Store rejects Crypto rewards | Med | Design the app to function primarily as an educational quiz game, deferring reward claims to the web app if blocked by reviewers. |
 
 ## Open Questions
-- Is production on Vercel or the GHCR image? (affects whether Dockerfile build args matter; not blocking here)
-- Want the CI audit step made strict (remove `|| echo ::warning::`) as part of Task 2? Default: yes, if W1 still covers the remaining findings.
+- None at this time.

@@ -1,6 +1,7 @@
 # next.config.mjs
-lines:59 exports:default
+lines:126 exports:default
 ---
+import { withSentryConfig } from '@sentry/nextjs/config';
 import withPWAInit from '@ducanh2912/next-pwa';
 
 const withPWA = withPWAInit({
@@ -36,8 +37,7 @@ const withPWA = withPWAInit({
 
 const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
-const securityHeaders = [
-  { key: 'X-Content-Type-Options', value: 'nosniff' },
-  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-  { key: 'X-Frame-Options', value: 'DENY' },
-  { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+// Report-only for now: a tuned policy ships enforcing once preview shows no first-party violations
+// (docs/decisions/009-report-only-content-security-policy.md). Violations are POSTed to /api/csp-report and land in the server log.
+// script-src needs 'unsafe-inline' for Next's inline hydration scripts until nonces are rolled out,
+// so the policy mainly constrains connect-src, frame-src, object-src, base-uri and form-action.

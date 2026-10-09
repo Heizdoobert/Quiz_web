@@ -1,5 +1,5 @@
 # eslint.config.mjs
-lines:29 exports:default
+lines:34 exports:default
 ---
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
@@ -20,7 +20,12 @@ const eslintConfig = defineConfig([
     "contracts/**",
     ".agents/**",
     "coverage/**",
+    "mobile/**",
   ]),
+  {
+    // An empty catch hides failures; say why ignoring is safe in a comment instead.
+    rules: { "no-empty": ["error", { allowEmptyCatch: false }] },
+  },
   {
     files: ["components/**/*.tsx", "components/**/*.jsx"],
     rules: {
