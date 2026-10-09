@@ -25,8 +25,8 @@ The production **image** already excludes them: the runtime stage of the `Docker
 |---|---|
 | `.github/workflows/opencode.yml` | An AI bot that reacts to `/oc` comments and uses `OPENCODE_API_KEY`. GitHub runs `issue_comment` workflows from the **default branch**, so removing it from `main` switches the bot off entirely. Keeping it on `main` puts an AI workflow with a secret on the production repo. |
 | `CONSTRAINTS.md` | The quality bar read by agents and mirrored by the `check:*` scripts (CI runs the scripts, not the file). `AGENTS.md` points at it. Human-useful, not needed to run production. |
-| `SECURITY-TRADE-OFFS.md`, `docs/decisions/` | Security posture and ADRs. Useful documentation, not agent-only. Your call. |
-| `PRODUCTION_COMMERCIALIZATION_GUIDE.md`, `CHANGELOG.md` | Human documents. Normally kept. |
+| `docs/security-trade-offs.md`, `docs/decisions/` | Security posture and ADRs. Useful documentation, not agent-only. Your call. |
+| `docs/production-commercialization-guide.md`, `CHANGELOG.md` | Human documents. Normally kept. |
 
 ## Keep on `main` (CI, deploy or ops need them)
 

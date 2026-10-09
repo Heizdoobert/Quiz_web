@@ -13,7 +13,7 @@ const ZERO_STATS = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswe
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/utils/stats', () => ({ statsForAccount: vi.fn() }));
 vi.mock('../lib/actions/leaderboard-actions', () => ({ getGlobalLeaderboard: vi.fn() }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),

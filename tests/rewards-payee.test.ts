@@ -9,7 +9,7 @@ import { statsForAccount } from '../lib/utils/stats';
 import { getGlobalLeaderboard } from '../lib/actions/leaderboard-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { getSignerAccount, isVoucherUsed } from '../lib/utils/chain';
+import { getSignerAccount, isVoucherUsed } from '../lib/services/chain';
 
 vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
@@ -23,7 +23,7 @@ vi.mock('../lib/actions/leaderboard-actions', () => ({
   getGlobalLeaderboard: vi.fn(),
 }));
 
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   isVoucherUsed: vi.fn(),
   isContestVoucherUsed: vi.fn(),

@@ -7,7 +7,7 @@ import {
   getSuggestionsForAuthor,
   resolveSuggestion,
 } from "@/lib/actions/community-actions";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatRelativeTime } from "@/lib/utils/format";
 import { logger } from '@/lib/logger';
 
 interface AuthorSuggestionsProps {

@@ -33,7 +33,7 @@ vi.mock('../lib/services/rate-limit', () => ({
     return !mockAnswerLimitHit;
   },
 }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
   getContestId: (listId: string, creator?: string) =>

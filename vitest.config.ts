@@ -21,9 +21,9 @@ export default defineConfig({
       include: ['app/**', 'lib/**', 'hooks/**', 'components/**'],
       exclude: ['**/*.d.ts', '**/__tests__/**', '**/*.test.*'],
       thresholds: {
-        lines: 53.5,
-        functions: 50.3,
-        branches: 49.2,
+        lines: 53.8,
+        functions: 50.7,
+        branches: 49.4,
       },
     },
   },

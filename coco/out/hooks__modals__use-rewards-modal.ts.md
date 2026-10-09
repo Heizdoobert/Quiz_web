@@ -1,5 +1,5 @@
 # hooks/modals/use-rewards-modal.ts
-lines:361 exports:ClaimStep,useRewardsModal
+lines:360 exports:ClaimStep,useRewardsModal
 ---
 'use client';
 
@@ -14,7 +14,6 @@ import {
   generateBadgeVoucher,
   confirmRewardClaim,
 } from '@/lib/actions/reward-actions';
-import { logger } from '@/lib/logger';
 import { QuizTokenABI } from '@/lib/contracts/QuizTokenABI';
 import { QuizBadgeNFTABI } from '@/lib/contracts/QuizBadgeNFTABI';
 import {
@@ -41,3 +40,4 @@ export function useRewardsModal({ isOpen, walletAddress }: UseRewardsModalOption
   const [currentNonce, setCurrentNonce] = useState<string | null>(null);
   const [callId, setCallId] = useState<string | null>(null);
   const [eoaTxHash, setEoaTxHash] = useState<`0x${string}` | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);

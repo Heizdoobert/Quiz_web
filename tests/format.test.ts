@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { downloadJson } from '@/lib/utils';
+import { downloadJson } from '@/lib/utils/format';
 
 describe('downloadJson', () => {
   beforeEach(() => {

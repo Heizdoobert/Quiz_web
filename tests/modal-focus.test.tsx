@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import React, { useState } from 'react';
-import Modal from '../components/Modal';
+import Modal from '@/components/ui/Modal';
 
 function Harness() {
   const [open, setOpen] = useState(false);

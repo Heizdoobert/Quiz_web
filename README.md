@@ -121,7 +121,7 @@ For technical architecture decisions and design trade-offs, consult:
   - [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](docs/decisions/010-polling-leaderboard-with-short-cache.md)
   - [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](docs/decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
   - [ADR-012: Accounts With an Optional Wallet](docs/decisions/012-accounts-with-optional-wallet.md)
-- [Security Threat Model & STRIDE Analysis](SECURITY-TRADE-OFFS.md)
+- [Security Threat Model & STRIDE Analysis](docs/security-trade-offs.md)
 
 ## Branches
 

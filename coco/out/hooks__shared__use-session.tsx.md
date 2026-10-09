@@ -1,5 +1,5 @@
 # hooks/shared/use-session.tsx
-lines:111 exports:SessionAccount,SessionProvider,useSession
+lines:110 exports:SessionAccount,SessionProvider,useSession
 ---
 'use client';
 
@@ -14,7 +14,6 @@ import {
 } from 'react';
 import dynamic from 'next/dynamic';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
-import { logger } from '@/lib/logger';
 
 const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), {
   ssr: false,
@@ -41,3 +40,4 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [account, setAccount] = useState<SessionAccount | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const resolversRef = useRef<Array<(ok: boolean) => void>>([]);
+  const reqIdRef = useRef(0);

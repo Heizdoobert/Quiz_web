@@ -14,7 +14,7 @@ import {
   publicClientFor,
   getSignerAccount,
   newNonce,
-} from '../lib/utils/chain';
+} from '../lib/services/chain';
 
 const CONTEST = ('0x' + 'ab'.repeat(32)) as `0x${string}`;
 const CREATOR = '0x' + 'c'.repeat(40);

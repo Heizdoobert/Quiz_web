@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { ToastProvider } from '../components/ui/Toast';
-import { useToast } from '../hooks/use-toast';
+import { useToast } from '@/hooks/shared/use-toast';
 import { EmailTab } from '../components/auth/tabs/EmailTab';
 import { UsernameTab } from '../components/auth/tabs/UsernameTab';
 import { QuestionOptionsInput } from '../components/quiz/QuestionOptionsInput';

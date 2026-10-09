@@ -56,7 +56,7 @@ Trade-offs: the limiter **fails open** if the counter is unreachable or the migr
 
 As of 2026-10-08 the command reports **0 vulnerabilities at every severity** on the merged `preview` + this branch tree. `CONSTRAINTS.md` lists no exceptions, and CI fails on any high finding (`npm run check:deps`, `.github/workflows/ci.yml`).
 
-- **How it is held at zero**: targeted `overrides` in `package.json` (`braces`, `micromatch`, `serialize-javascript`, `uuid`, `ws`, `viem`, and the `@walletconnect/*` packages) instead of the breaking `wagmi@3` upgrade, as recorded in [ADR-006](docs/decisions/006-npm-vulnerabilities-and-pwa-fork.md). `next` is 16.4.0 (high advisory in 16.3.6), and `sharp` and `source-map-js` resolve to patched versions.
+- **How it is held at zero**: targeted `overrides` in `package.json` (`braces`, `micromatch`, `serialize-javascript`, `uuid`, `ws`, `viem`, and the `@walletconnect/*` packages) instead of the breaking `wagmi@3` upgrade, as recorded in [ADR-006](decisions/006-npm-vulnerabilities-and-pwa-fork.md). `next` is 16.4.0 (high advisory in 16.3.6), and `sharp` and `source-map-js` resolve to patched versions.
 - **Trade-off**: the overrides pin transitive versions by hand. Re-run `npm audit --omit=dev` on every dependency change, and re-evaluate the overrides when `wagmi` is upgraded.
 
 ---
@@ -76,22 +76,22 @@ As of 2026-10-08 the command reports **0 vulnerabilities at every severity** on 
 ### C. Contest Payout Escrow & Anti-Drain — RESOLVED (residual risks noted)
 - **Constraint**: list creators define contest reward pools and know all correct answers.
 - **Enforcement**: public arbitrary voucher signing (`buildTokenClaimVoucher`) no longer exists in `lib/` or `app/`. `startContest` sets a list `live` only after confirming the creator's pool is locked in `ContestEscrow` on-chain. `claimListReward` re-reads the pool on-chain (and refuses if it cannot) before signing EIP-712 vouchers against it, and `ContestEscrow.claimReward` pays only from deposited funds, bounded by the contest's `remainingPool`, with single-use nonces. One open voucher per entry is enforced by the `reward_claims_one_open_contest_per_account` unique index.
-- **Impact**: a creator farming their own contest only recycles their own deposit; nothing is minted. Evidence: [ADR-007](docs/decisions/007-contest-escrow-payouts.md).
+- **Impact**: a creator farming their own contest only recycles their own deposit; nothing is minted. Evidence: [ADR-007](decisions/007-contest-escrow-payouts.md).
 - **Residual risks**: the voucher signer key is a single trust root (rotatable with `setAuthorizedSigner`); Sybil accounts can dilute honest winners within `max_participants`; `ContestEscrow.sol` is not externally audited.
 
 ---
 
 ## 5. Architectural Decision Records (ADRs)
 For detailed design decisions and trade-offs, consult:
-- [ADR-001: Sign-In with Ethereum & Session Authorization](docs/decisions/001-siwe-session-authorization.md)
-- [ADR-002: Dual-Key Supabase Architecture & RLS Lockdown](docs/decisions/002-dual-key-supabase-rls-lockdown.md)
-- [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](docs/decisions/003-question-lists-and-contest-voucher-safeguards.md) (decision 2 superseded by ADR-007)
-- [ADR-004: Next.js Server Action Bundling & Module Separation](docs/decisions/004-server-action-module-separation.md)
-- [ADR-005: Component Manager Pattern](docs/decisions/005-component-manager-pattern.md)
-- [ADR-006: Resolving High-Severity NPM Vulnerabilities via PWA Fork and Dependency Overrides](docs/decisions/006-npm-vulnerabilities-and-pwa-fork.md)
-- [ADR-007: Contest Payouts Through ContestEscrow Vouchers](docs/decisions/007-contest-escrow-payouts.md)
-- [ADR-008: Postgres Rate Limiter That Fails Open](docs/decisions/008-postgres-auth-rate-limiter-fails-open.md)
-- [ADR-009: Content-Security-Policy Ships Report-Only First](docs/decisions/009-report-only-content-security-policy.md)
-- [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](docs/decisions/010-polling-leaderboard-with-short-cache.md)
-- [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](docs/decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
-- [ADR-012: Accounts With an Optional Wallet](docs/decisions/012-accounts-with-optional-wallet.md)
+- [ADR-001: Sign-In with Ethereum & Session Authorization](decisions/001-siwe-session-authorization.md)
+- [ADR-002: Dual-Key Supabase Architecture & RLS Lockdown](decisions/002-dual-key-supabase-rls-lockdown.md)
+- [ADR-003: Peer-Reviewed Question Lists & Voucher Safeguards](decisions/003-question-lists-and-contest-voucher-safeguards.md) (decision 2 superseded by ADR-007)
+- [ADR-004: Next.js Server Action Bundling & Module Separation](decisions/004-server-action-module-separation.md)
+- [ADR-005: Component Manager Pattern](decisions/005-component-manager-pattern.md)
+- [ADR-006: Resolving High-Severity NPM Vulnerabilities via PWA Fork and Dependency Overrides](decisions/006-npm-vulnerabilities-and-pwa-fork.md)
+- [ADR-007: Contest Payouts Through ContestEscrow Vouchers](decisions/007-contest-escrow-payouts.md)
+- [ADR-008: Postgres Rate Limiter That Fails Open](decisions/008-postgres-auth-rate-limiter-fails-open.md)
+- [ADR-009: Content-Security-Policy Ships Report-Only First](decisions/009-report-only-content-security-policy.md)
+- [ADR-010: Leaderboard Updates by Polling and a Short Server Cache](decisions/010-polling-leaderboard-with-short-cache.md)
+- [ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days](decisions/011-rewards-belong-to-the-account-no-wallet-payee.md)
+- [ADR-012: Accounts With an Optional Wallet](decisions/012-accounts-with-optional-wallet.md)

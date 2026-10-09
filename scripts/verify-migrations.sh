@@ -9,7 +9,7 @@ REPO=$(cd "$(dirname "$0")/.." && pwd)
 N="verify-migrations-$$"
 trap 'docker rm -f "$N" >/dev/null 2>&1' EXIT
 
-docker run -d --rm --name "$N" -e POSTGRES_PASSWORD=x -v "$REPO/supabase/migrations":/m:ro -v "$REPO/tests/sql":/t:ro postgres:16-alpine >/dev/null
+docker run -d --rm --name "$N" -e POSTGRES_PASSWORD=x -v "$REPO/supabase/migrations":/m:ro -v "$REPO/supabase/tests":/t:ro postgres:16-alpine >/dev/null
 until [ "$(docker logs "$N" 2>&1 | grep -c 'ready to accept connections')" -ge 2 ]; do sleep 0.5; done
 P="docker exec -i $N psql -U postgres -q"
 $P -f /t/00-setup.sql >/dev/null 2>&1
