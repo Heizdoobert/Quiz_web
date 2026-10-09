@@ -220,10 +220,10 @@
 ### Task B1: Confirm and fix the toast re-render loop
 **Description:** S4-02. `ToastProvider` builds a new context value each render (confirmed, `Toast.tsx:44`); whether `ContestPlay` loops on it is not confirmed.
 **Acceptance criteria:**
-- [ ] A test that renders `ContestPlay` with a failing `startListAttempt` shows it is called once; fails before the fix if the loop is real
-- [ ] `ToastProvider` value memoized; effect deps stable
+- [x] A test that renders `ContestPlay` with a failing `startListAttempt` shows it is called once; fails before the fix if the loop is real
+- [x] `ToastProvider` value memoized; effect deps stable
 **Verification:**
-- [ ] `npm run test:coverage`
+- [x] `npm run test:coverage`
 **Dependencies:** None
 **Files:** `components/ui/Toast.tsx`, `components/lists/ContestPlay.tsx`, `tests/`
 **Scope:** S
@@ -241,9 +241,9 @@
 ### Task B3: Modal focus management
 **Description:** S7-01 (confirmed). Move focus in on open, trap Tab, restore focus on close; prefer native `<dialog>`/`inert` over a library.
 **Acceptance criteria:**
-- [ ] Focus lands inside the dialog, Tab cycles within it, focus returns to the trigger on close
+- [x] Focus lands inside the dialog, Tab cycles within it, focus returns to the trigger on close
 **Verification:**
-- [ ] Test for all three behaviours; keyboard pass on the Auth modal
+- [x] Test for all three behaviours; keyboard pass on the Auth modal
 **Dependencies:** None
 **Files:** `components/Modal.tsx`, `tests/`
 **Scope:** M
