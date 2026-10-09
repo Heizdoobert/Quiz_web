@@ -1,36 +1,44 @@
 import 'dart:convert';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
+
+final quizRepositoryProvider = Provider((ref) => QuizRepository());
 
 class QuizRepository {
   final DatabaseHelper _dbHelper = DatabaseHelper();
 
   // --- Questions ---
 
+  /// Makes the cache the server's current set, so a question that was answered or pulled
+  /// does not come back offline.
   Future<void> cacheQuestions(List<Map<String, dynamic>> questions) async {
     final db = await _dbHelper.database;
-    Batch batch = db.batch();
-    for (var q in questions) {
-      batch.insert(
-        'questions',
-        {
-          'id': q['id'],
-          'category': q['category'],
-          'prompt': q['prompt'],
-          'options': jsonEncode(q['options'] ?? []),
-          'created_by': q['created_by'],
-          'status': q['status'],
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
-    }
-    await batch.commit(noResult: true);
+    await db.transaction((txn) async {
+      await txn.delete('questions');
+      final batch = txn.batch();
+      for (var q in questions) {
+        batch.insert(
+          'questions',
+          {
+            'id': q['id'],
+            'category': q['category'],
+            'prompt': q['prompt'],
+            'options': jsonEncode(q['options'] ?? []),
+            'created_by': q['created_by'],
+            'status': q['status'],
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    });
   }
 
   Future<List<Map<String, dynamic>>> getCachedQuestions() async {
     final db = await _dbHelper.database;
     final List<Map<String, dynamic>> maps = await db.query('questions');
-    
+
     return List.generate(maps.length, (i) {
       return {
         'id': maps[i]['id'],
@@ -42,24 +50,23 @@ class QuizRepository {
       };
     });
   }
-  
-  Future<void> clearQuestions() async {
-    final db = await _dbHelper.database;
-    await db.delete('questions');
-  }
 
   // --- Answer Queue ---
 
+  /// Queues the answer and takes the question out of the cache, so it is not offered again.
   Future<void> queueAnswer(String questionId, int answerIndex) async {
     final db = await _dbHelper.database;
-    await db.insert(
-      'answer_queue',
-      {
-        'questionId': questionId,
-        'answerIndex': answerIndex,
-        'timestamp': DateTime.now().toIso8601String(),
-      },
-    );
+    await db.transaction((txn) async {
+      await txn.insert(
+        'answer_queue',
+        {
+          'questionId': questionId,
+          'answerIndex': answerIndex,
+          'timestamp': DateTime.now().toIso8601String(),
+        },
+      );
+      await txn.delete('questions', where: 'id = ?', whereArgs: [questionId]);
+    });
   }
 
   Future<List<Map<String, dynamic>>> getQueuedAnswers() async {
@@ -76,7 +83,7 @@ class QuizRepository {
       whereArgs: ids,
     );
   }
-  
+
   Future<void> clearAllQueuedAnswers() async {
     final db = await _dbHelper.database;
     await db.delete('answer_queue');

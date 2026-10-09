@@ -203,7 +203,7 @@ class _Header extends ConsumerWidget {
             _HeaderButton(
               icon: Icons.logout,
               tooltip: 'Sign out',
-              onTap: () => ref.read(authProvider.notifier).logout(),
+              onTap: () => ref.read(quizProvider.notifier).signOut(),
             )
           else
             Padding(
