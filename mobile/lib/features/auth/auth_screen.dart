@@ -4,6 +4,14 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import 'auth_provider.dart';
 
+/// Opens the sign-in screen unless the player already has an account. Resolves to whether
+/// they now do; backing out leaves them a guest.
+Future<bool> requireSignIn(BuildContext context, WidgetRef ref) async {
+  if (ref.read(authProvider).isAuthenticated) return true;
+  await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AuthScreen()));
+  return context.mounted && ref.read(authProvider).isAuthenticated;
+}
+
 /// Mirrors the web's auth popup: Google, or a username and password. No wallet here;
 /// the quiz asks for one when the player first answers.
 class AuthScreen extends ConsumerStatefulWidget {
@@ -48,8 +56,13 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    // Signed in: hand control back to whatever asked for the account.
+    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
+      if (signedIn) Navigator.of(context).maybePop();
+    });
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.transparent),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(

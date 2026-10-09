@@ -1,24 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { historyForAccount, statsForAccount } from '@/lib/utils/stats';
+import { historyForAccount, statsForAccount, ZERO_STATS } from '@/lib/utils/stats';
 
-// What the web's Live Scoreboard and Global Top panels show: the signed-in player's stats and
-// recent answers, plus the global leaderboard. A wallet is not needed to read them.
+// What the web's Live Scoreboard and Global Top panels show: the global leaderboard for
+// everyone, plus the player's own stats and recent answers when signed in. Guests get zero
+// stats and no history; a wallet is not needed to read any of it.
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const account = verifyMobileAuthToken(authHeader.split(' ')[1]);
-  if (!account) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const account = authHeader?.startsWith('Bearer ') ? verifyMobileAuthToken(authHeader.split(' ')[1]) : null;
 
   const [stats, history, leaderboard] = await Promise.all([
-    statsForAccount(account.id),
-    historyForAccount(account.id),
+    account ? statsForAccount(account.id) : ZERO_STATS,
+    account ? historyForAccount(account.id) : [],
     getGlobalLeaderboard(50),
   ]);
 

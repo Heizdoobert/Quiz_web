@@ -39,12 +39,20 @@ class GlassCard extends StatelessWidget {
 
 /// The web's primary action: gradient pill with deep-space text.
 class GradientButton extends StatelessWidget {
-  const GradientButton({super.key, required this.label, required this.onPressed, this.icon, this.loading = false});
+  const GradientButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    this.icon,
+    this.loading = false,
+    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+  });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
   final bool loading;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +67,7 @@ class GradientButton extends StatelessWidget {
             borderRadius: BorderRadius.circular(14),
             onTap: enabled ? onPressed : null,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+              padding: padding,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,

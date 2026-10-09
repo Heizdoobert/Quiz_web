@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { HistoryItem, UserStats } from '@/lib/types';
 import { logger } from '@/lib/logger';
 
-const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
+export const ZERO_STATS: UserStats = { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
 const HISTORY_LIMIT = 20;
 
 // An account's most recent answers, newest first. Never answer_index or correct_index

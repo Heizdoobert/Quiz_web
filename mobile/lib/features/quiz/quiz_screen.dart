@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/auth_provider.dart';
-import '../auth/auth_screen.dart' show BrandMark;
+import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
 import 'board_panels.dart';
 import 'board_provider.dart';
 import 'quiz_provider.dart';
@@ -11,6 +11,18 @@ import 'quiz_provider.dart';
 typedef Question = Map<String, dynamic>;
 
 const _letters = ['A', 'B', 'C', 'D'];
+
+/// What playing and connecting both need: an account first (sign-in screen), then a linked
+/// wallet. Guests can browse without either. A failure is shown as a snackbar.
+Future<bool> connectAccount(BuildContext context, WidgetRef ref) async {
+  if (!await requireSignIn(context, ref)) return false;
+  if (await ref.read(authProvider.notifier).connectWallet()) return true;
+  if (context.mounted) {
+    final message = ref.read(authProvider).error;
+    if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+  }
+  return false;
+}
 
 /// One question at a time, laid out like the web's QuestionFront / AnswerBack flip card.
 /// Answers are queued offline, so the correct option is not shown here: the server only
@@ -48,15 +60,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
   }
 
   Future<void> _answer(Question q, int index) async {
-    // Signing in doesn't need a wallet, but an answer only counts with one, so the first
-    // pick asks the player to connect it.
-    if (!await ref.read(authProvider.notifier).connectWallet()) {
-      if (!mounted) return;
-      final message = ref.read(authProvider).error;
-      if (message != null) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
-      return;
-    }
-    if (!mounted) return;
+    // Playing needs an account, and an answer only counts with a wallet, so the first
+    // pick asks a guest for both.
+    if (!await connectAccount(context, ref) || !mounted) return;
     ref.read(quizProvider.notifier).submitAnswer(q['id'] as String, index);
     setState(() {
       _pickedId = q['id'] as String;
@@ -109,6 +115,8 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final quiz = ref.watch(quizProvider);
     final boardAsync = ref.watch(boardProvider);
     final board = boardAsync.value ?? const Board();
+    // Signing in or out changes whose stats and history the board shows.
+    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, _) => ref.invalidate(boardProvider));
 
     return Scaffold(
       body: SafeArea(
@@ -177,6 +185,7 @@ class _Header extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: const BoxDecoration(
@@ -203,11 +212,22 @@ class _Header extends ConsumerWidget {
               ref.invalidate(boardProvider);
             },
           ),
-          _HeaderButton(
-            icon: Icons.logout,
-            tooltip: 'Sign out',
-            onTap: () => ref.read(authProvider.notifier).logout(),
-          ),
+          if (!auth.hasWallet)
+            Padding(
+              padding: const EdgeInsets.only(left: 6),
+              child: GradientButton(
+                label: auth.isAuthenticated ? 'Add wallet' : 'Connect',
+                loading: auth.walletBusy,
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                onPressed: () => connectAccount(context, ref),
+              ),
+            ),
+          if (auth.isAuthenticated)
+            _HeaderButton(
+              icon: Icons.logout,
+              tooltip: 'Sign out',
+              onTap: () => ref.read(authProvider.notifier).logout(),
+            ),
         ],
       ),
     );
