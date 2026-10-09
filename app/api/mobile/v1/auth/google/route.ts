@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
 import { signInAccountWithGoogle } from '@/lib/services/credentials';
 
-// Google sign-in with the ID token the app got from the OS. No wallet needed.
+// Google sign-in with the ID token the app got from the OS.
 export async function POST(req: NextRequest) {
   try {
     const { idToken } = await req.json();
@@ -16,7 +16,7 @@ export async function POST(req: NextRequest) {
     const token = issueMobileAuthToken(result.account);
     if (!token) return NextResponse.json({ error: 'Failed to issue token' }, { status: 500 });
 
-    return NextResponse.json({ token, accountId: result.account.id, wallet: result.account.wallet });
+    return NextResponse.json({ token, accountId: result.account.id });
   } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }

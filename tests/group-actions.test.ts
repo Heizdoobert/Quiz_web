@@ -8,9 +8,8 @@ vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
 vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 
-const WALLET = '0x' + 'a'.repeat(40);
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
-const ACCOUNT = { id: ACCOUNT_ID, wallet: WALLET };
+const ACCOUNT = { id: ACCOUNT_ID };
 const GROUP_ID = '00000000-0000-4000-8000-000000000009';
 
 type TableStubs = Record<
@@ -65,11 +64,10 @@ describe('group action guards', () => {
     });
     const res = await createGroup({ name: 'Friends' });
     expect(res).toEqual({ success: true, group: { id: GROUP_ID, name: 'Friends', description: null } });
-    expect(inserts.groups[0]).toMatchObject({ owner_user: ACCOUNT_ID, owner_wallet: WALLET });
+    expect(inserts.groups[0]).toMatchObject({ owner_user: ACCOUNT_ID });
     expect(inserts.group_members[0]).toMatchObject({
       group_id: GROUP_ID,
       user_id: ACCOUNT_ID,
-      wallet_address: WALLET,
     });
   });
 
@@ -94,7 +92,6 @@ describe('group action guards', () => {
     expect(inserts.group_members[0]).toMatchObject({
       group_id: GROUP_ID,
       user_id: ACCOUNT_ID,
-      wallet_address: WALLET,
     });
   });
 

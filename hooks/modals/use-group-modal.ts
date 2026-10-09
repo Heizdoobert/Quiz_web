@@ -5,16 +5,15 @@ import { Group } from '@/lib/types';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '@/lib/actions/group-actions';
 import { useSession } from '@/hooks/shared/use-session';
 
-const SIGN_IN_ERROR = { type: 'error', text: 'Sign the message in your wallet to manage groups.' } as const;
+const SIGN_IN_ERROR = { type: 'error', text: 'Sign in to manage groups.' } as const;
 
 interface UseGroupModalOptions {
   isOpen: boolean;
   onClose: () => void;
-  walletAddress: string | null;
   onSelectGroup?: (groupId: string) => void;
 }
 
-export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }: UseGroupModalOptions) {
+export function useGroupModal({ isOpen, onClose, onSelectGroup }: UseGroupModalOptions) {
   const [tab, setTab] = useState<'my' | 'create' | 'join'>('my');
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(false);
@@ -23,22 +22,23 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
   const [groupName, setGroupName] = useState('');
   const [groupDesc, setGroupDesc] = useState('');
   const [joinId, setJoinId] = useState('');
-  const { requireSignIn: ensureSession } = useSession();
+  const { account, requireSignIn: ensureSession } = useSession();
+  const accountId = account?.id;
 
   const loadGroups = useCallback(async () => {
-    if (!walletAddress) return;
+    if (!accountId) return;
     setLoading(true);
     const list = await getUserGroups();
     setGroups(list);
     setLoading(false);
-  }, [walletAddress]);
+  }, [accountId]);
 
   useEffect(() => {
-    if (isOpen && walletAddress) {
+    if (isOpen && accountId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       loadGroups();
     }
-  }, [isOpen, walletAddress, loadGroups]);
+  }, [isOpen, accountId, loadGroups]);
 
   const selectTab = (t: 'my' | 'create' | 'join') => {
     setTab(t);
@@ -47,10 +47,6 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
 
   const handleCreate = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    if (!walletAddress) {
-      setMessage({ type: 'error', text: 'Please connect your wallet first.' });
-      return;
-    }
     setLoading(true);
     setMessage(null);
     if (!(await ensureSession())) {
@@ -73,10 +69,6 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
 
   const handleJoin = async (e: React.SubmitEvent) => {
     e.preventDefault();
-    if (!walletAddress) {
-      setMessage({ type: 'error', text: 'Please connect your wallet first.' });
-      return;
-    }
     setLoading(true);
     setMessage(null);
     if (!(await ensureSession())) {
@@ -97,7 +89,6 @@ export function useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup }:
   };
 
   const handleLeave = async (groupId: string) => {
-    if (!walletAddress) return;
     if (!(await ensureSession())) {
       setMessage(SIGN_IN_ERROR);
       return;

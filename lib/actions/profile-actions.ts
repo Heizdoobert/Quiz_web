@@ -14,13 +14,6 @@ import {
   UserBackupData,
 } from '../types';
 
-// Validates that input looks like an Ethereum address (0x + 40 hex chars).
-// This is format validation only — it does NOT prove the caller owns this address.
-// See docs/security-trade-offs.md for the full threat model.
-function isValidEthAddress(address: string): boolean {
-  return typeof address === 'string' && /^0x[0-9a-fA-F]{40}$/.test(address);
-}
-
 const DEFAULT_LIMIT = 500;
 const MAX_LIMIT = 500;
 const MAX_EXPORT_QUIZZES = 1000;
@@ -28,19 +21,18 @@ const MAX_EXPORT_STATS = 5000;
 const BACKUP_SCHEMA_VERSION = '1.0';
 
 export async function getUserQuizzes(
-  walletAddress: string,
   options?: GetUserQuizzesFilter
 ): Promise<GetUserQuizzesResult> {
   try {
-    if (!walletAddress || !isValidEthAddress(walletAddress)) {
+    const account = await getSessionAccount();
+    if (!account) {
       return {
         success: false,
-        error: 'A valid wallet address is required.',
-        code: 'INVALID_ADDRESS',
+        error: 'Sign in to see your quizzes.',
+        code: 'UNAUTHORIZED',
       };
     }
 
-    const normalized = walletAddress.toLowerCase();
     const limit = Math.min(Math.max(options?.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
     const offset = Math.max(options?.offset ?? 0, 0);
 
@@ -48,8 +40,8 @@ export async function getUserQuizzes(
     // Exclude correct_index and explanation to prevent answer leakage during quizzes.
     let query = supabase
       .from('questions')
-      .select('id, category, prompt, options, status, created_at, created_by')
-      .eq('created_by', normalized);
+      .select('id, category, prompt, options, status, created_at')
+      .eq('created_by_user', account.id);
 
     if (options?.category) {
       query = query.eq('category', options.category);
@@ -132,7 +124,7 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
     const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
 
     const exportData: UserBackupData = {
-      walletAddress: account.wallet ?? '',
+      accountId: account.id,
       exportedAt: new Date().toISOString(),
       version: BACKUP_SCHEMA_VERSION,
       quizzes,

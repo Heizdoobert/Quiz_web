@@ -56,7 +56,7 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
               autoFocus
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="e.g. crypto_champ"
+              placeholder="e.g. quiz_champ"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
             />
             <User className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
@@ -84,8 +84,7 @@ export function UsernameTab({ mode, onSuccess, refresh }: UsernameTabProps) {
       </div>
 
       <p className="text-xs text-slate-400 leading-relaxed bg-cyber-violet/60 p-2.5 rounded-lg border border-cyber-border/40">
-        Play and earn $QUIZ coins right away without a wallet. You can link your
-        Web3 wallet anytime later to withdraw your rewards!
+        Pick a username and password to save your score and join the leaderboard.
       </p>
 
       {error && (

@@ -13,7 +13,7 @@ export default defineConfig({
       '@': path.resolve(__dirname, './'),
       'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
     },
-    exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**', 'contracts/**'],
+    exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],

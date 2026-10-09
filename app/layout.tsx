@@ -27,29 +27,24 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: 'Quick Quiz — Web3 Crypto Trivia & Learn-to-Earn Rewards',
+    default: 'Quick Quiz — Trivia Game & Leaderboards',
     template: '%s | Quick Quiz',
   },
   description:
-    'Challenge your crypto knowledge across DeFi, Layer 1s, and Smart Contracts. Earn on-chain $QUIZ tokens and NFT achievement badges on Base network.',
+    'Challenge your knowledge with quick trivia questions, build answer streaks and climb the global leaderboard.',
   keywords: [
-    'crypto trivia',
-    'web3 quiz',
-    'learn to earn crypto',
-    'base blockchain quiz',
-    'base sepolia rewards',
-    'blockchain trivia game',
-    'defi quiz',
-    'ethereum trivia',
-    'smart contract quiz',
-    'crypto quiz game',
+    'trivia game',
+    'quiz game',
+    'online quiz',
+    'trivia leaderboard',
+    'daily trivia',
   ],
   authors: [{ name: 'Quick Quiz Team', url: baseUrl }],
   creator: 'Quick Quiz Team',
-  publisher: 'Quick Quiz Web3 Platform',
+  publisher: 'Quick Quiz',
   applicationName: 'Quick Quiz',
   category: 'game',
-  classification: 'Educational Web3 Game',
+  classification: 'Educational Game',
   robots: isPreview
     ? {
         index: false,
@@ -83,9 +78,9 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: baseUrl,
     siteName: 'Quick Quiz',
-    title: 'Quick Quiz — Web3 Crypto Trivia & Learn-to-Earn Rewards',
+    title: 'Quick Quiz — Trivia Game & Leaderboards',
     description:
-      'Test your knowledge on DeFi, NFTs, and Layer 1 blockchains to earn on-chain $QUIZ token vouchers and achievement NFT badges on Base.',
+      'Test your knowledge, build answer streaks and climb the global trivia leaderboard.',
     images: [
       {
         url: '/icon.svg',
@@ -97,9 +92,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary',
-    title: 'Quick Quiz — Web3 Crypto Trivia & Learn-to-Earn Rewards',
+    title: 'Quick Quiz — Trivia Game & Leaderboards',
     description:
-      'Test your knowledge on DeFi, NFTs, and Layer 1 blockchains to earn on-chain $QUIZ token vouchers and achievement NFT badges on Base.',
+      'Test your knowledge, build answer streaks and climb the global trivia leaderboard.',
     images: ['/icon.svg'],
   },
 };
@@ -114,14 +109,14 @@ export default function RootLayout({
     '@type': 'WebSite',
     name: 'Quick Quiz',
     url: baseUrl,
-    description: 'Interactive Web3 crypto trivia game with on-chain rewards on Base network.',
+    description: 'Interactive trivia game with answer streaks and a global leaderboard.',
     inLanguage: 'en-US',
   };
 
   const webAppSchema = {
     '@context': 'https://schema.org',
     '@type': 'WebApplication',
-    name: 'Quick Quiz Web3 Platform',
+    name: 'Quick Quiz',
     url: baseUrl,
     applicationCategory: 'EducationalGame',
     operatingSystem: 'All',

@@ -1,5 +1,7 @@
 # ADR-007: Contest Payouts Through ContestEscrow Vouchers
 
+> **Superseded by [ADR-013](013-web2-only.md)**: the wallet, token and contract code this record describes was removed. Kept for history.
+
 ## Status
 Accepted. Supersedes decision 2 of [ADR-003](003-question-lists-and-contest-voucher-safeguards.md) ("pause contest payouts").
 

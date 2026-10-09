@@ -5,7 +5,7 @@ import { historyForAccount, statsForAccount, ZERO_STATS } from '@/lib/utils/stat
 
 // What the web's Live Scoreboard and Global Top panels show: the global leaderboard for
 // everyone, plus the player's own stats and recent answers when signed in. Guests get zero
-// stats and no history; a wallet is not needed to read any of it.
+// stats and no history.
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('Authorization');
   const account = authHeader?.startsWith('Bearer ') ? verifyMobileAuthToken(authHeader.split(' ')[1]) : null;

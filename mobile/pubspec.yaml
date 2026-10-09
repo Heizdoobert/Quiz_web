@@ -36,7 +36,6 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_riverpod: ^3.4.3
   flutter_secure_storage: ^11.2.0
-  walletconnect_flutter_v2: ^2.1.5
   http: ^1.1.0
   sqflite: ^2.4.4+1
   google_sign_in: ^7.0.0

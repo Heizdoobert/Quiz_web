@@ -44,7 +44,6 @@ export async function submitAnswer(params: {
       return failed('error');
     }
     if (!(await allowAttemptFromIp('submit-answer-ip', ANSWERS_PER_IP_PER_HOUR, HOUR))) return failed('rate-limited');
-    // '*' so this keeps working before lib/sql/question-lists.sql adds list_id.
     const { data: qData, error: qError } = await supabaseAdmin
       .from('questions')
       .select('*')
@@ -56,20 +55,8 @@ export async function submitAnswer(params: {
       return failed('error');
     }
     const account = mobileAccount ?? await getSessionAccount();
-    // Contest questions stay 'pending' (out of the global pool) and are only answerable
-    // by an account playing that contest, so their answers can't be looked up beforehand;
-    // owners and reviewers never get an entry. Other non-verified questions reveal nothing.
-    if (!qData.list_id && qData.status !== 'verified') return failed('error');
-    if (qData.list_id) {
-      if (!account?.wallet) return failed('signed-out');
-      const { data: entry } = await supabaseAdmin
-        .from('list_entries')
-        .select('status')
-        .eq('list_id', qData.list_id)
-        .eq('wallet_address', account.wallet)
-        .maybeSingle();
-      if (entry?.status !== 'in_progress') return failed('error');
-    }
+    // Only verified questions are answerable; anything else reveals nothing.
+    if (qData.status !== 'verified') return failed('error');
 
     const isCorrect = params.answerIndex === qData.correct_index;
     const revealed = { isCorrect, correctIndex: qData.correct_index, explanation: qData.explanation };
@@ -82,11 +69,8 @@ export async function submitAnswer(params: {
     }
 
     // The first answer to a question is the one that counts (unique per account and question).
-    // wallet_address is written directly too (the bridge trigger would fill it in anyway) so
-    // readers of the old column stay correct until it's dropped in Task 25.
     const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
       user_id: account.id,
-      wallet_address: account.wallet,
       question_id: params.questionId,
       answer_index: params.answerIndex,
       is_correct: isCorrect,

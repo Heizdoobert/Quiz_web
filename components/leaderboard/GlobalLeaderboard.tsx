@@ -112,9 +112,7 @@ export default function GlobalLeaderboard({
                   <span
                     className={`font-bold ${isTop1 ? "text-crypto-gold" : "text-slate-200"}`}
                   >
-                    {entry.display_name ||
-                      entry.wallet_address?.slice(0, 10) ||
-                      "Player"}
+                    {entry.display_name || "Player"}
                   </span>
                 </div>
               </div>

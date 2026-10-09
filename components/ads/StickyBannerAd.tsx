@@ -16,8 +16,8 @@ interface StickyBannerAdProps {
 export default function StickyBannerAd({
   position = "bottom",
   onDismiss,
-  title = "Web3 Cloud & High-Speed Dev RPCs • Claim 20% Extra Credits",
-  sponsor = "RPC NodeX",
+  title = "Cloud & Developer Tools • Claim 20% Extra Credits",
+  sponsor = "Dev Tools",
   ctaText = "Claim Deal",
   // gitleaks:allow
   href = "https://www.profitableratecpmnetwork.com/pvr8jzwqk?key=7672ccaa0ae9cd3ce4f5fd168d596fde",

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- **Web3**: wallet sign-in (SIWE), wallet linking, RainbowKit/wagmi/viem, the `contracts/` Hardhat project and its CI job, reward vouchers and claims, NFT badges, contest escrow and question-list contests (`/contest`, `/my-lists`, `/review`). The app is web2 only (ADR-013). Existing wallet-only accounts can no longer sign in; the database schema is untouched.
+- **Mobile**: WalletConnect and the `auth/nonce`, `auth/verify`, `auth/wallet` routes. Mobile and web session tokens no longer carry a wallet, so everyone signs in once more.
+
 ### Added
 - **Auth rate limits**: Email-code, username and answer submissions are limited per identifier and per IP through a Postgres counter (`supabase/migrations/17-auth-rate-limit.sql`, ADR-008). Apply the migration; until then the limiter fails open.
 - **CSP report-only policy** and `/api/csp-report` (ADR-009).

@@ -27,11 +27,11 @@ describe('security headers', () => {
     expect(h['Strict-Transport-Security']).toContain('max-age=63072000');
   });
 
-  it('adds a report-only policy that allows Supabase and the wallet relays, and nothing open-ended', async () => {
+  it('adds a report-only policy that allows Supabase, and nothing open-ended', async () => {
     const csp = (await loadHeaders({}))['Content-Security-Policy-Report-Only'];
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain('https://abc.supabase.co wss://abc.supabase.co');
-    expect(csp).toContain('wss://*.walletconnect.org');
+    expect(csp).not.toContain('walletconnect');
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain('report-uri /api/csp-report');
     expect(csp).not.toMatch(/connect-src[^;]*\s\*(\s|;|$)/);

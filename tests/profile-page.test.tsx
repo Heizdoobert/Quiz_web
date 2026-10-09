@@ -30,9 +30,9 @@ vi.mock('../lib/actions/community-actions', () => ({
 
 import { getSuggestionsForAuthor, resolveSuggestion } from '../lib/actions/community-actions';
 
-function mockSignedInAs(wallet: string | null) {
+function mockSignedInAs(id = 'acct-1') {
   (useSession as import("vitest").Mock).mockReturnValue({
-    account: { id: 'acct-1', wallet },
+    account: { id },
     refresh: vi.fn(),
     requireSignIn: async () => true,
   });
@@ -55,8 +55,8 @@ describe('ProfilePage', () => {
     expect(screen.getByText('Access Denied')).toBeDefined();
   });
 
-  it('renders empty state for a wallet account with no quizzes', async () => {
-    mockSignedInAs('0x123');
+  it('renders empty state for a signed-in account with no quizzes', async () => {
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [] });
 
     render(<ProfilePage />);
@@ -65,18 +65,8 @@ describe('ProfilePage', () => {
     expect(emptyState).toBeDefined();
   });
 
-  it('renders empty state for a signed-in email account with no wallet, without spinning forever', async () => {
-    mockSignedInAs(null);
-
-    render(<ProfilePage />);
-
-    const emptyState = await screen.findByText('No Quizzes Created');
-    expect(emptyState).toBeDefined();
-    expect(getUserQuizzes as import("vitest").Mock).not.toHaveBeenCalled();
-  });
-
   it('renders quizzes and backup button when quizzes are present', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [{ id: '1', prompt: 'First Quiz' }] });
 
     render(<ProfilePage />);
@@ -88,7 +78,7 @@ describe('ProfilePage', () => {
   });
 
   it('renders error recovery state with retry button when fetching quizzes fails', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: false,
       error: 'Network timeout loading quizzes',
@@ -105,7 +95,7 @@ describe('ProfilePage', () => {
   });
 
   it('recovers and displays quizzes when user clicks retry button', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
 
     mockGetUserQuizzes
@@ -133,7 +123,7 @@ describe('ProfilePage', () => {
   });
 
   it('triggers backup data download on export button click', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: true,
       quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
@@ -144,7 +134,7 @@ describe('ProfilePage', () => {
     (exportUserData as import("vitest").Mock).mockResolvedValueOnce({
       success: true,
       data: {
-        walletAddress: '0x123',
+        accountId: 'acct-1',
         exportedAt: new Date().toISOString(),
         version: '1.0',
         quizzes: [],
@@ -169,7 +159,7 @@ describe('ProfilePage', () => {
   });
 
   it('displays error banner when export fails and allows user to dismiss it', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({
       success: true,
       quizzes: [{ id: '1', prompt: 'Sample Quiz' }],
@@ -201,7 +191,7 @@ describe('ProfilePage', () => {
   it('fetches new quizzes and resets state when the signed-in account changes', async () => {
     const mockGetUserQuizzes = getUserQuizzes as import("vitest").Mock;
 
-    mockSignedInAs('0x1111111111111111111111111111111111111111');
+    mockSignedInAs('acct-1');
     mockGetUserQuizzes.mockResolvedValueOnce({
       success: true,
       quizzes: [{ id: 'q1', prompt: 'First Account Quiz' }],
@@ -217,7 +207,7 @@ describe('ProfilePage', () => {
       count: 1,
     });
 
-    mockSignedInAs('0x2222222222222222222222222222222222222222');
+    mockSignedInAs('acct-2');
     rerender(<ProfilePage />);
 
     expect(await screen.findByText('Second Account Quiz')).toBeDefined();
@@ -225,7 +215,7 @@ describe('ProfilePage', () => {
   });
 
   it('renders suggestions for author questions and allows marking them done', async () => {
-    mockSignedInAs('0x123');
+    mockSignedInAs();
     (getUserQuizzes as import("vitest").Mock).mockResolvedValue({ success: true, quizzes: [] });
     (getSuggestionsForAuthor as import("vitest").Mock).mockResolvedValue([
       {

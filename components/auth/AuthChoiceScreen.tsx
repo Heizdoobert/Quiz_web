@@ -25,7 +25,7 @@ export default function AuthChoiceScreen({
           Ready to play?
         </h3>
         <p className="text-sm text-slate-400">
-          Sign in to save your progress and earn rewards.
+          Sign in to save your score and climb the leaderboard.
         </p>
       </div>
 

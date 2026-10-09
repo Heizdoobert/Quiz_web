@@ -9,7 +9,7 @@ class AppColors {
   static const elevation2 = Color(0xFF14163A);
   static const neoMint = Color(0xFF00FFCC);
   static const electricIndigo = Color(0xFF6C5CE7);
-  static const cryptoGold = Color(0xFFFFD166);
+  static const gold = Color(0xFFFFD166);
   static const popCoral = Color(0xFFFF4757);
   static const catDefi = Color(0xFF8A2BE2);
   static const catNft = Color(0xFFFF007F);

@@ -58,10 +58,10 @@ export default function QuestionFront({
           {question.created_by ? (
             <span
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-crypto-gold/10 border border-crypto-gold/30 text-[10px] font-mono text-crypto-gold"
-              title={`Submitted by community member ${question.created_by}`}
+              title="Submitted by a community member"
             >
               <Users className="w-3 h-3" />
-              <span>{question.created_by.slice(0, 6)}...</span>
+              <span>Community</span>
             </span>
           ) : (
             <span
@@ -133,11 +133,11 @@ export default function QuestionFront({
         <div className="flex flex-col items-center justify-center p-6 sm:p-8 bg-deep-space/85 border border-neo-mint/40 rounded-2xl text-center backdrop-blur-md my-auto">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-crypto-gold/15 border border-crypto-gold/40 text-crypto-gold text-xs font-bold font-heading uppercase tracking-wider mb-3">
             <Sparkles className="w-3.5 h-3.5" />
-            <span>Unlock Question • Earn $QUIZ</span>
+            <span>Unlock Question</span>
           </div>
 
           <h3 className="text-base sm:text-lg font-bold text-white mb-2">
-            Ready for the Web3 Challenge?
+            Ready for the challenge?
           </h3>
           <p className="text-xs sm:text-sm text-slate-300 max-w-md mb-6 leading-relaxed">
             Click the button below to <span className="text-neo-mint font-bold">open our sponsor tab</span> and activate the countdown timer!

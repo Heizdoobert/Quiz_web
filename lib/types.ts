@@ -24,14 +24,13 @@ export interface ClientQuestion {
 export interface QuestionDispute {
   id: string;
   question_id: string;
-  reporter_wallet: string;
   reason: string;
   created_at: string;
 }
 
 export interface QuizResult {
   id: string;
-  wallet_address: string;
+  user_id: string;
   question_id: string;
   answer_index: number;
   is_correct: boolean;
@@ -42,46 +41,7 @@ export interface Group {
   id: string;
   name: string;
   description: string | null;
-  owner_wallet: string;
   created_at: string;
-}
-
-export type QuestionListStatus = 'draft' | 'submitted' | 'approved' | 'live' | 'completed' | 'expired' | 'refunded' | 'rejected';
-
-export interface QuestionList {
-  id: string;
-  owner_wallet: string;
-  title: string;
-  description: string | null;
-  status: QuestionListStatus;
-  reward_pool_tokens: string;
-  max_participants?: number;
-  submitted_at: string | null;
-  started_at: string | null;
-  created_at: string;
-  onchain_contest_id?: string | null;
-  expires_at?: string | null;
-  funding_tx_hash?: string | null;
-  refunded_at?: string | null;
-  refund_tx_hash?: string | null;
-}
-
-export interface QuestionListWithMeta extends QuestionList {
-  questionCount: number;
-  confirmationCount: number;
-  participantCount?: number;
-  hasConfirmed?: boolean;
-  perQuestionReward?: string;
-}
-
-export interface ListEntry {
-  list_id: string;
-  wallet_address: string;
-  status: 'in_progress' | 'completed' | 'claimed' | 'reviewer';
-  correct_count: number;
-  reward_amount: string;
-  completed_at: string | null;
-  claim_tx_hash?: string | null;
 }
 
 export interface UserStats {
@@ -94,7 +54,6 @@ export interface UserStats {
 
 export interface LeaderboardEntry {
   user_id: string;
-  wallet_address: string | null;
   display_name: string | null;
   score: number;
   accuracy: number;
@@ -125,41 +84,6 @@ export interface HistoryItem {
   prompt: string;
   isCorrect: boolean;
 }
-
-export interface ClaimableRewards {
-  claimableTokens: string;
-  eligibleBadges: number[];
-  alreadyClaimedBadges: number[];
-  totalEarned: string;
-  totalClaimed: string;
-  heldTokens?: string;
-  sweepsAt?: string | null;
-}
-
-export interface RewardVoucher {
-  recipient: string;
-  amount: string;
-  badgeType?: number;
-  nonce: string;
-  deadline: string;
-  signature: string;
-  contractAddress: string;
-  contestId?: `0x${string}`;
-}
-
-export const BADGE_NAMES: Record<number, string> = {
-  0: 'Leaderboard Champion',
-  1: 'Streak Fire',
-  2: 'Century Quizzer',
-  3: 'Perfect Round',
-};
-
-export const BADGE_ICONS: Record<number, string> = {
-  0: '🏆',
-  1: '🔥',
-  2: '💯',
-  3: '⭐',
-};
 
 // --- Standard API Error Contract ---
 export type ActionErrorCode = 
@@ -195,7 +119,7 @@ export interface GetUserQuizzesFilter extends PaginationParams {
 }
 
 export interface UserBackupData {
-  walletAddress: string;
+  accountId: string;
   exportedAt: string;
   version: string;
   quizzes: Question[];
@@ -204,7 +128,6 @@ export interface UserBackupData {
 }
 
 export type ProfileErrorCode =
-  | 'INVALID_ADDRESS'
   | 'FETCH_FAILED'
   | 'EXPORT_FAILED'
   | 'UNAUTHORIZED'

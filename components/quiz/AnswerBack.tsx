@@ -32,7 +32,7 @@ export default function AnswerBack({
   }, []);
 
   const notSavedMessage: Record<NonNullable<AnswerSubmissionResult['notSavedReason']>, string> = {
-    'signed-out': 'Sign in with your wallet so this counts.',
+    'signed-out': 'Sign in so this counts.',
     'already-answered': 'Already answered — this one only counts once.',
     'own-question': "You wrote this question, so it doesn't count for you.",
     'rate-limited': 'Too many answers from this connection. Try again in a while.',
@@ -77,7 +77,7 @@ export default function AnswerBack({
           <p className="text-xs font-semibold opacity-90">
             {result.recorded
               ? result.isCorrect
-                ? '+1 Score point & tokens earned'
+                ? '+1 Score point'
                 : 'Streak reset to 0'
               : notSavedMessage[result.notSavedReason ?? 'error']}
           </p>

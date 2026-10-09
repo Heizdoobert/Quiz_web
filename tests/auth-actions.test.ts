@@ -1,17 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/services/session';
 import {
-  getAuthNonce,
-  requestSignIn,
-  signInWithWallet,
-  signOutWallet,
+  signOut,
   getSessionInfo,
   signUpWithUsername,
   signInWithUsername,
 } from '../lib/actions/auth-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { publicClientFor } from '../lib/services/chain';
 
 // In-memory cookie store
 const cookieStore = new Map<string, { value: string; [key: string]: unknown }>();
@@ -52,7 +48,6 @@ vi.mock('../lib/supabase/supabase-admin', () => ({
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
-      maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: null }, error: null }),
     })),
     auth: {
       admin: {
@@ -62,12 +57,7 @@ vi.mock('../lib/supabase/supabase-admin', () => ({
   },
 }));
 
-vi.mock('../lib/services/chain', () => ({
-  publicClientFor: vi.fn(),
-}));
-
 const TEST_SECRET = 'test-secret-key-12345678901234567890';
-const TEST_WALLET = '0x1234567890123456789012345678901234567890';
 
 describe('Auth & Session Foundations', () => {
   beforeEach(() => {
@@ -80,8 +70,7 @@ describe('Auth & Session Foundations', () => {
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
-          maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: null }, error: null }),
-        }),
+            }),
       }),
     });
     (supabaseAdmin!.auth.admin.createUser as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -100,15 +89,15 @@ describe('Auth & Session Foundations', () => {
 
   describe('session', () => {
     it('sets and retrieves the session account correctly', async () => {
-      const ok = await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      const ok = await setSessionAccount({ id: 'test-account-id' });
       expect(ok).toBe(true);
 
       const account = await getSessionAccount();
-      expect(account).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
+      expect(account).toEqual({ id: 'test-account-id' });
     });
 
     it('clearSessionAccount deletes the session cookie', async () => {
-      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      await setSessionAccount({ id: 'test-account-id' });
       expect(cookieStore.has('quiz_session')).toBe(true);
 
       await clearSessionAccount();
@@ -119,65 +108,19 @@ describe('Auth & Session Foundations', () => {
     });
 
     it('getSessionInfo returns the same account as getSessionAccount', async () => {
-      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+      await setSessionAccount({ id: 'test-account-id' });
       const info = await getSessionInfo();
-      expect(info).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
+      expect(info).toEqual({ id: 'test-account-id' });
     });
   });
 
   describe('auth-actions', () => {
-    it('getAuthNonce sets challenge cookie and returns nonce', async () => {
-      const nonce = await getAuthNonce();
-      expect(typeof nonce).toBe('string');
-      expect(nonce.length).toBeGreaterThan(8);
-      expect(cookieStore.get('wallet_challenge')?.value).toBe(nonce);
-    });
-
-    it('requestSignIn returns valid SIWE message with nonce', async () => {
-      const message = await requestSignIn(TEST_WALLET, 1);
-      expect(message).toContain('Sign in to Quick Quiz');
-      expect(message).toContain(TEST_WALLET);
-      expect(cookieStore.has('wallet_challenge')).toBe(true);
-    });
-
-    it('signOutWallet calls clearSessionAccount', async () => {
-      await setSessionAccount({ id: 'test-account-id', wallet: TEST_WALLET });
+    it('signOut clears the session cookie', async () => {
+      await setSessionAccount({ id: 'test-account-id' });
       expect(cookieStore.has('quiz_session')).toBe(true);
 
-      await signOutWallet();
+      await signOut();
       expect(cookieStore.has('quiz_session')).toBe(false);
-    });
-
-    it('signInWithWallet returns false if challenge cookie is missing', async () => {
-      const ok = await signInWithWallet('test-message', '0x123' as `0x${string}`);
-      expect(ok).toBe(false);
-    });
-
-    it('signInWithWallet verifies signature, sets session cookie, and calls ensureAccountForWallet', async () => {
-      const message = await requestSignIn(TEST_WALLET, 1);
-
-      const mockClient = {
-        verifySiweMessage: vi.fn().mockResolvedValue(true),
-      };
-      (publicClientFor as ReturnType<typeof vi.fn>).mockReturnValue(mockClient);
-
-      const upsertMock = vi.fn().mockResolvedValue({ error: null });
-      const selectMock = vi.fn().mockReturnValue({
-        eq: vi.fn().mockReturnValue({
-          single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
-        }),
-      });
-
-      (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue({
-        upsert: upsertMock,
-        select: selectMock,
-      });
-
-      const ok = await signInWithWallet(message, '0xdeadbeef' as `0x${string}`);
-      expect(ok).toBe(true);
-      expect(cookieStore.has('quiz_session')).toBe(true);
-      expect(supabaseAdmin!.from).toHaveBeenCalledWith('users');
-      expect(upsertMock).toHaveBeenCalled();
     });
 
     describe('signUpWithUsername', () => {
@@ -203,7 +146,7 @@ describe('Auth & Session Foundations', () => {
         expect(res.error).toBeUndefined();
         expect(cookieStore.has('quiz_session')).toBe(true);
         const account = await getSessionAccount();
-        expect(account).toEqual({ id: 'test-account-id', wallet: null });
+        expect(account).toEqual({ id: 'test-account-id' });
       });
 
       it('handles duplicate username error', async () => {
@@ -236,30 +179,12 @@ describe('Auth & Session Foundations', () => {
         expect(res.error).toBe('Invalid username or password.');
       });
 
-      it('successfully signs in user without wallet and establishes session', async () => {
+      it('successfully signs in and establishes session', async () => {
         const res = await signInWithUsername('test_player', 'correct_password');
         expect(res.ok).toBe(true);
         expect(cookieStore.has('quiz_session')).toBe(true);
         const account = await getSessionAccount();
-        expect(account).toEqual({ id: 'test-account-id', wallet: null });
-      });
-
-      it('successfully signs in user with linked wallet and establishes session with wallet', async () => {
-        (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockReturnValue({
-          upsert: vi.fn().mockResolvedValue({ error: null }),
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: { id: 'test-account-id' }, error: null }),
-              maybeSingle: vi.fn().mockResolvedValue({ data: { wallet_address: TEST_WALLET }, error: null }),
-            }),
-          }),
-        });
-
-        const res = await signInWithUsername('test_player', 'correct_password');
-        expect(res.ok).toBe(true);
-        expect(cookieStore.has('quiz_session')).toBe(true);
-        const account = await getSessionAccount();
-        expect(account).toEqual({ id: 'test-account-id', wallet: TEST_WALLET.toLowerCase() });
+        expect(account).toEqual({ id: 'test-account-id' });
       });
     });
   });
