@@ -1,10 +1,11 @@
 # hooks/quiz/use-quiz-logic.ts
-lines:379 exports:ActiveModal,useQuizLogic
+lines:384 exports:ActiveModal,useQuizLogic
 ---
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAccount } from 'wagmi';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AnswerSubmissionResult,
   ClientQuestion,
@@ -40,4 +41,3 @@ export function useQuizLogic({
   initialQuestion = null,
   initialLeaderboard = [],
   initialCategory = 'All',
-}: UseQuizLogicOptions = {}) {

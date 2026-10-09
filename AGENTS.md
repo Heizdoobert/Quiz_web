@@ -7,7 +7,9 @@
    - Check GitHub Actions CI/CD on `preview` first; all checks must be green before deploying to production.
    - Only after all CI/CD checks pass on `preview`, merge `preview` into `main` (production).
 3. **Web3 Knowledge Requirement**:
-   - All agents MUST load and read the `web3-fundamentals` skill (`.agents/skills/web3-fundamentals/SKILL.md` in a checkout that has the local, untracked `.agents/` folder; elsewhere use the `web3-fundamentals` skill from your skill source) when handling Web3-related tasks, including smart contracts, frontend dApps (React/Viem/Ethers), data analysis (Dune), tokenomics, or community/marketing features.
+   - All agents MUST load and read the `web3-fundamentals` skill (`.agents/skills/web3-fundamentals/SKILL.md`) when handling Web3-related tasks, including smart contracts, frontend dApps (React/Viem/Ethers), data analysis (Dune), tokenomics, or community/marketing features.
+4. **Codebase Exploration & Searching**:
+   - All agents MUST use the static codebase index located in `coco/out/` when searching, exploring, reading, or analyzing the project codebase for coding tasks. Use this index to quickly locate files, exports, and code snippets before navigating the raw source files directly.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
