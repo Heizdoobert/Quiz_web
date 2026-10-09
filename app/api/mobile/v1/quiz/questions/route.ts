@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 
+// No request argument, so Next would prerender this at build time and freeze one question set.
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   // Open to guests like the web's home page: questions carry no answer key. Only answering
   // needs an account (quiz/sync).
