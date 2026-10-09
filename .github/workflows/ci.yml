@@ -3,8 +3,12 @@ name: CI
 on:
   push:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
   pull_request:
     branches: [main, preview]
+    paths-ignore:
+      - 'mobile/**'
   # cd.yml calls this so nothing is published unless these jobs pass on the same commit.
   workflow_call:
 
@@ -105,29 +109,6 @@ jobs:
       - name: Run Tests with Coverage
         run: npm run test:coverage
 
-  contracts:
-    name: Smart Contract Tests (Hardhat)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: contracts
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v7
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v7
-        with:
-          node-version: '22'
-          cache: 'npm'
-          cache-dependency-path: contracts/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Hardhat tests
-        run: npx hardhat test
-
   build:
     name: Next.js Production Build
     needs: [secrets, typecheck, lint, architecture, test]
@@ -156,12 +137,6 @@ jobs:
           SUPABASE_SECRET_KEY: test_secret_key
           NEXT_PUBLIC_SUPABASE_URL: https://test.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: test_pub_key
-          NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID: test_wallet_connect_id
-          NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS: '0x1111111111111111111111111111111111111111'
-          NEXT_PUBLIC_QUIZ_BADGE_ADDRESS: '0x2222222222222222222222222222222222222222'
-          NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS: '0x3333333333333333333333333333333333333333'
-          NEXT_PUBLIC_CHAIN_ID: '84532'
-          REWARD_SIGNER_PRIVATE_KEY: '0x9999999999999999999999999999999999999999999999999999999999999999'
 
       - name: Bundle size per route
         run: npm run check:bundle
@@ -190,7 +165,7 @@ jobs:
   ci-gate:
     name: CI gate
     if: always()
-    needs: [secrets, typecheck, lint, architecture, test, contracts, build, security]
+    needs: [secrets, typecheck, lint, architecture, test, build, security]
     runs-on: ubuntu-latest
     steps:
       - name: Fail unless every job succeeded

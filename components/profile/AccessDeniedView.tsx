@@ -19,7 +19,7 @@ export default function AccessDeniedView() {
       </h2>
 
       <p className="text-slate-300 text-sm leading-relaxed max-w-sm mb-6">
-        Please connect your Web3 wallet using the button in the header to view your creator dashboard and manage your quizzes.
+        Please sign in using the button in the header to view your creator dashboard and manage your quizzes.
       </p>
 
       <Link

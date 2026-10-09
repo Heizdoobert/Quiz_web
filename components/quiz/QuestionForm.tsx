@@ -9,11 +9,10 @@ import { QuestionOptionsInput } from './QuestionOptionsInput';
 import { AiQuestionGenerator } from './AiQuestionGenerator';
 
 interface QuestionFormProps {
-  walletAddress: string | null;
   onQuestionAdded?: () => void;
 }
 
-export default function QuestionForm({ walletAddress, onQuestionAdded }: QuestionFormProps) {
+export default function QuestionForm({ onQuestionAdded }: QuestionFormProps) {
   const toast = useToast();
   const {
     isOpen,
@@ -31,7 +30,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
     setOptions,
     handleOptionChange,
     handleSubmit,
-  } = useQuestionForm({ walletAddress, onQuestionAdded });
+  } = useQuestionForm({ onQuestionAdded });
 
   const handleAiSuccess = (data: { prompt: string; options: string[]; correctIndex: number; explanation: string }) => {
     setPrompt(data.prompt);
@@ -126,15 +125,12 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                     list="topics-list"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    placeholder="Web Dev, Crypto, General..."
+                    placeholder="Web Dev, Science, General..."
                     className="w-full px-3.5 py-2 bg-deep-space border border-cyber-border rounded-xl text-white text-xs focus:outline-none focus:ring-2 focus:ring-neo-mint focus:border-neo-mint transition-all"
                   />
                   <datalist id="topics-list">
                     <option value="Web Dev" />
                     <option value="JavaScript" />
-                    <option value="Crypto & Web3" />
-                    <option value="DeFi" />
-                    <option value="NFT & Gaming" />
                     <option value="General" />
                   </datalist>
                 </div>

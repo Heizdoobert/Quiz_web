@@ -1,7 +1,7 @@
 {
   "name": "Quick Quiz",
   "short_name": "QuickQuiz",
-  "description": "Challenge your crypto knowledge across DeFi, Layer 1s, and Smart Contracts.",
+  "description": "Challenge your knowledge with quick trivia and climb the leaderboard.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0F172A",

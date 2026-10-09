@@ -20,7 +20,7 @@ export default function CreatorEmptyState() {
       </h2>
 
       <p className="text-slate-400 text-sm max-w-sm mb-6 leading-relaxed">
-        You haven&apos;t created any quiz questions yet. Create questions to earn community rewards, challenge other Web3 players, and grow the quiz pool!
+        You haven&apos;t created any quiz questions yet. Create questions to challenge other players and grow the quiz pool!
       </p>
 
       <Link

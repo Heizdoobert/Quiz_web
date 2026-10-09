@@ -18,11 +18,6 @@ vi.mock('framer-motion', async () => {
   };
 });
 
-// Mock rainbowkit ConnectButton
-vi.mock('@rainbow-me/rainbowkit', () => ({
-  ConnectButton: () => <button data-testid="connect-button">Connect Wallet</button>,
-}));
-
 // Mock auth actions
 vi.mock('@/lib/actions/auth-actions', () => ({
   signInWithUsername: vi.fn(),
@@ -105,7 +100,7 @@ describe('AuthPopup', () => {
     fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
     
     // Fill form
-    const usernameInput = await screen.findByPlaceholderText(/e\.g\. crypto_champ/i);
+    const usernameInput = await screen.findByPlaceholderText(/e\.g\. quiz_champ/i);
     const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
@@ -129,7 +124,7 @@ describe('AuthPopup', () => {
     fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
     
     // Fill form
-    const usernameInput = await screen.findByPlaceholderText(/e\.g\. crypto_champ/i);
+    const usernameInput = await screen.findByPlaceholderText(/e\.g\. quiz_champ/i);
     const passwordInput = screen.getByPlaceholderText(/••••••••/i);
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'password123' } });
@@ -142,17 +137,13 @@ describe('AuthPopup', () => {
     });
   });
 
-  it('navigates to Wallet tab and displays ConnectButton', async () => {
+  it('offers username and email sign-in only, with no wallet option', async () => {
     render(<AuthPopup isOpen={true} onClose={mockOnClose} refresh={mockRefresh} />);
     fireEvent.click(screen.getByText(/Sign In/i, { selector: 'span.text-base' }).closest('button')!);
-    
-    const walletTab = await screen.findByRole('button', { name: /Wallet/i });
-    fireEvent.click(walletTab);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('connect-button')).toBeTruthy();
-      expect(screen.getByText(/Supports MetaMask/i)).toBeTruthy();
-    });
+    expect(await screen.findByRole('button', { name: /Email/i })).toBeTruthy();
+    expect(screen.getByRole('button', { name: /Username/i })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /Wallet/i })).toBeNull();
   });
 
   it('navigates to Email tab and sends code, then verifies code', async () => {

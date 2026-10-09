@@ -1,5 +1,7 @@
 # ADR-003: Peer-Reviewed Question Lists & Contest Token Voucher Safeguards
 
+> **Superseded by [ADR-013](013-web2-only.md)**: the wallet, token and contract code this record describes was removed. Kept for history.
+
 ## Status
 Accepted. Decision 2 (pause contest payouts) is superseded by [ADR-007](007-contest-escrow-payouts.md); payouts are live through `ContestEscrow`.
 

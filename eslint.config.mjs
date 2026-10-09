@@ -14,9 +14,9 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     ".worktrees/**",
     ".claude/**",
-    "contracts/**",
     ".agents/**",
     "coverage/**",
+    "mobile/**",
   ]),
   {
     // An empty catch hides failures; say why ignoring is safe in a comment instead.

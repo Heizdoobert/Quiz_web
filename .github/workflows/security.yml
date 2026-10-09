@@ -1,0 +1,26 @@
+name: Security Audit
+
+on:
+  push:
+    branches:
+      - main
+      - preview
+  pull_request:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run dependency audit
+        run: npm audit --omit=dev --audit-level=high

@@ -10,14 +10,12 @@ import { GroupList } from './group/GroupList';
 interface GroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletAddress: string | null;
   onSelectGroup?: (groupId: string) => void;
 }
 
 export default function GroupModal({
   isOpen,
   onClose,
-  walletAddress,
   onSelectGroup,
 }: GroupModalProps) {
   const {
@@ -36,7 +34,7 @@ export default function GroupModal({
     handleJoin,
     handleLeave,
     handleSelectGroup: selectGroupHandler,
-  } = useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup });
+  } = useGroupModal({ isOpen, onClose, onSelectGroup });
 
   return (
     <Modal
@@ -120,7 +118,7 @@ export default function GroupModal({
                 maxLength={40}
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                placeholder="e.g. Web3 Titans"
+                placeholder="e.g. Trivia Titans"
                 className="w-full px-4 py-2.5 bg-deep-space border border-cyber-border rounded-xl text-white text-sm focus:outline-none focus:border-neo-mint focus:ring-1 focus:ring-neo-mint"
               />
             </div>

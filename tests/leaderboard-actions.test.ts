@@ -4,7 +4,6 @@ import { supabase } from '../lib/supabase/supabase';
 
 const ACCOUNT_A = '00000000-0000-4000-8000-0000000000a1';
 const ACCOUNT_B = '00000000-0000-4000-8000-0000000000b1';
-const WALLET_A = '0x' + 'a'.repeat(40);
 const GROUP_ID = '00000000-0000-4000-8000-0000000000c1';
 
 vi.mock('../lib/supabase/supabase', () => ({ supabase: { rpc: vi.fn() } }));
@@ -20,11 +19,11 @@ vi.mock('next/cache', () => ({
 describe('getGlobalLeaderboard', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('ranks rows by position and passes through the account id, wallet and display name', async () => {
+  it('ranks rows by position and passes through the account id and display name', async () => {
     (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
       data: [
-        { user_id: ACCOUNT_A, display_name: 'Alice', wallet_address: WALLET_A, score: 5, accuracy: 90 },
-        { user_id: ACCOUNT_B, display_name: 'Player-x', wallet_address: null, score: 3, accuracy: 60 },
+        { user_id: ACCOUNT_A, display_name: 'Alice', score: 5, accuracy: 90 },
+        { user_id: ACCOUNT_B, display_name: 'Player-x', score: 3, accuracy: 60 },
       ],
       error: null,
     });
@@ -33,8 +32,8 @@ describe('getGlobalLeaderboard', () => {
 
     expect(supabase.rpc).toHaveBeenCalledWith('get_global_leaderboard', { p_limit: 50, p_offset: 0 });
     expect(entries).toEqual([
-      { user_id: ACCOUNT_A, wallet_address: WALLET_A, display_name: 'Alice', score: 5, accuracy: 90, rank: 1 },
-      { user_id: ACCOUNT_B, wallet_address: null, display_name: 'Player-x', score: 3, accuracy: 60, rank: 2 },
+      { user_id: ACCOUNT_A, display_name: 'Alice', score: 5, accuracy: 90, rank: 1 },
+      { user_id: ACCOUNT_B, display_name: 'Player-x', score: 3, accuracy: 60, rank: 2 },
     ]);
   });
 
@@ -64,7 +63,7 @@ describe('getGroupLeaderboard', () => {
 
   it('passes the group id through and ranks the result', async () => {
     (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
-      data: [{ user_id: ACCOUNT_A, display_name: 'Alice', wallet_address: WALLET_A, score: 1, accuracy: 100 }],
+      data: [{ user_id: ACCOUNT_A, display_name: 'Alice', score: 1, accuracy: 100 }],
       error: null,
     });
 

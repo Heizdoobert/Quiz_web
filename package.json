@@ -25,13 +25,9 @@
   "dependencies": {
     "@ducanh2912/next-pwa": "^6.1.0",
     "@google/genai": "^2.27.0",
-    "@rainbow-me/rainbowkit": "^2.2.11",
     "@sentry/nextjs": "^11.5.0",
     "@supabase/supabase-js": "^2.117.2",
     "@tanstack/react-query": "^5.104.1",
-    "@x402/core": "^2.28.0",
-    "@x402/evm": "^2.28.0",
-    "@x402/svm": "^2.28.0",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.52.0",
@@ -40,8 +36,6 @@
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "use-sound": "^5.0.0",
-    "viem": "^2.56.9",
-    "wagmi": "^2.19.5",
     "webpack": "^5.111.1"
   },
   "devDependencies": {
@@ -69,12 +63,6 @@
     "braces": "3.0.3",
     "serialize-javascript": "7.1.2",
     "micromatch": "4.0.8",
-    "@walletconnect/sign-client": "^2.22.4",
-    "@walletconnect/ethereum-provider": "^2.22.4",
-    "@walletconnect/universal-provider": "^2.22.4",
-    "@walletconnect/utils": "^2.22.4",
-    "@walletconnect/core": "^2.22.4",
-    "viem": "^2.56.9",
     "uuid": "^11.1.1",
     "ws": "^8.20.1"
   }

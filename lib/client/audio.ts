@@ -161,7 +161,7 @@ class SoundEngine {
   }
 
   /**
-   * 4-note victory arpeggio (C5 -> E5 -> G5 -> C6) for claiming tokens or big rewards
+   * 4-note victory arpeggio (C5 -> E5 -> G5 -> C6) for a big win
    */
   public playReward(): void {
     if (this.muted) return;
