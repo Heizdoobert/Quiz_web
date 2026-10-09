@@ -33,6 +33,10 @@ class QuizNotifier extends Notifier<QuizState> {
     // Answers given offline go up as soon as a request gets through.
     final timer = Timer.periodic(const Duration(seconds: 30), (_) => _sync());
     ref.onDispose(timer.cancel);
+    // Signing in (again, after an expired session) sends what queued up meanwhile right away.
+    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
+      if (signedIn) _sync();
+    });
     Future.microtask(loadData);
     return QuizState(questions: const AsyncValue.loading());
   }
