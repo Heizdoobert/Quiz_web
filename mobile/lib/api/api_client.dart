@@ -14,7 +14,12 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
-  static const String baseUrl = 'http://10.0.2.2:3000/api/mobile/v1'; // Android Emulator alias to localhost
+  // Pass --dart-define=API_BASE_URL=https://<host>/api/mobile/v1 for a real device or a release
+  // build. The default is the Android emulator's alias for the host's localhost.
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://10.0.2.2:3000/api/mobile/v1',
+  );
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   Future<String?> getToken() async {
