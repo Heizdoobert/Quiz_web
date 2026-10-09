@@ -1,13 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../api/api_client.dart';
-import '../services/wallet_service.dart';
+import '../../api/api_client.dart';
+import '../../services/wallet_service.dart';
 
 final apiClientProvider = Provider((ref) => ApiClient());
 final walletServiceProvider = Provider((ref) => WalletService());
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
-  return AuthNotifier(ref.watch(apiClientProvider), ref.watch(walletServiceProvider));
-});
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
 
 class AuthState {
   final bool isAuthenticated;
@@ -17,16 +15,15 @@ class AuthState {
   AuthState({this.isAuthenticated = false, this.isLoading = false, this.walletAddress});
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  final ApiClient _apiClient;
-  final WalletService _walletService;
-
-  AuthNotifier(this._apiClient, this._walletService) : super(AuthState(isLoading: true)) {
-    _checkExistingSession();
+class AuthNotifier extends Notifier<AuthState> {
+  @override
+  AuthState build() {
+    Future.microtask(_checkExistingSession);
+    return AuthState(isLoading: true);
   }
 
   Future<void> _checkExistingSession() async {
-    final token = await _apiClient.getToken();
+    final token = await ref.read(apiClientProvider).getToken();
     if (token != null) {
       state = AuthState(isAuthenticated: true, isLoading: false);
     } else {
@@ -37,35 +34,46 @@ class AuthNotifier extends StateNotifier<AuthState> {
   Future<void> login() async {
     try {
       state = AuthState(isLoading: true);
+      final api = ref.read(apiClientProvider);
+      final wallet = ref.read(walletServiceProvider);
       
-      // 1. Get Nonce from Server
-      final nonceRes = await _apiClient.post('/auth/nonce', {});
+      final nonceRes = await api.post('/auth/nonce', {});
       final String nonce = nonceRes['nonce'];
       final String nonceToken = nonceRes['nonceToken'];
 
-      // 2. Init WalletConnect (in reality this should be passed in via env vars)
-      await _walletService.init('WALLET_CONNECT_PROJECT_ID');
-      
-      // 3. Connect and sign (mocking the sign response for now since we can't trigger real wallet popups easily in unit tests)
-      final address = await _walletService.connect();
+      await wallet.init('7e33dc97e5831df0d9f0ab0c5a019d36'); // Dummy Project ID or environment variable
+      final address = await wallet.connect();
       
       if (address == null) throw Exception("Failed to connect wallet");
 
-      // Note: In a real flow, you'd call personal_sign via _walletService here.
-      // We are stubbing the signature verification step in this class for the architectural skeleton.
-      final String mockSignature = "0xMockSignature";
-      final String mockMessage = "Mock SIWE Message with nonce: $nonce";
+      final String domain = 'quiz.player.quiz';
+      final String uri = 'https://quiz.player.quiz';
+      final String version = '1';
+      final String chainId = '1';
+      final String issuedAt = DateTime.now().toUtc().toIso8601String();
+      
+      final String siweMessage = '''$domain wants you to sign in with your Ethereum account:
+$address
 
-      // 4. Send to server for verification
-      final verifyRes = await _apiClient.post('/auth/verify', {
-        'message': mockMessage,
-        'signature': mockSignature,
+Sign in to Quick Quiz Mobile
+
+URI: $uri
+Version: $version
+Chain ID: $chainId
+Nonce: $nonce
+Issued At: $issuedAt''';
+
+      final signature = await wallet.personalSign(siweMessage, address);
+      if (signature == null) throw Exception("Failed to sign message");
+
+      final verifyRes = await api.post('/auth/verify', {
+        'message': siweMessage,
+        'signature': signature,
         'nonceToken': nonceToken,
       });
 
-      // 5. Save Token
       final token = verifyRes['token'];
-      await _apiClient.saveToken(token);
+      await api.saveToken(token);
       
       state = AuthState(isAuthenticated: true, isLoading: false, walletAddress: address);
     } catch (e) {
@@ -75,7 +83,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
-    await _apiClient.clearToken();
+    await ref.read(apiClientProvider).clearToken();
     state = AuthState(isAuthenticated: false, isLoading: false);
   }
 }

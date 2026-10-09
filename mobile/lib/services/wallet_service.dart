@@ -1,11 +1,12 @@
-import 'package:walletconnect_flutter_v2/walletconnect_flutter_v2.dart';
+import 'package:reown_walletkit/reown_walletkit.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class WalletService {
-  late Web3App _web3App;
+  late ReownSignClient _reownSignClient;
   SessionData? sessionData;
 
   Future<void> init(String projectId) async {
-    _web3App = await Web3App.createInstance(
+    _reownSignClient = await ReownSignClient.createInstance(
       projectId: projectId,
       metadata: const PairingMetadata(
         name: 'Quick Quiz Mobile',
@@ -21,8 +22,8 @@ class WalletService {
   }
 
   Future<String?> connect() async {
-    final ConnectResponse response = await _web3App.connect(
-      requiredNamespaces: {
+    final ConnectResponse response = await _reownSignClient.connect(
+      optionalNamespaces: {
         'eip155': const RequiredNamespace(
           chains: ['eip155:1'], // Ethereum Mainnet
           methods: ['personal_sign', 'eth_signTypedData_v4'],
@@ -31,10 +32,44 @@ class WalletService {
       },
     );
     
-    // In a real app, this is where we would trigger the deep link to the wallet
-    // using url_launcher: launchUrl(Uri.parse(response.uri.toString()));
+    // Trigger the deep link to the wallet
+    if (response.uri != null) {
+      final uri = response.uri!;
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
 
     sessionData = await response.session.future;
     return sessionData?.namespaces['eip155']?.accounts.first.split(':').last;
+  }
+
+  Future<String?> personalSign(String message, String address) async {
+    if (sessionData == null) throw Exception("No active session");
+    
+    final topic = sessionData!.topic;
+    const chainId = 'eip155:1';
+    
+    // Send the request
+    final futureResponse = _reownSignClient.request(
+      topic: topic,
+      chainId: chainId,
+      request: SessionRequestParams(
+        method: 'personal_sign',
+        params: [message, address],
+      ),
+    );
+
+    // Launch wallet app to sign
+    if (sessionData!.peer.metadata.redirect?.native != null) {
+      final nativeUrl = sessionData!.peer.metadata.redirect!.native!;
+      final uri = Uri.parse(nativeUrl);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+    }
+
+    final dynamic response = await futureResponse;
+    return response as String?;
   }
 }
