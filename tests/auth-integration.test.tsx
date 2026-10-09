@@ -107,4 +107,59 @@ describe('SessionProvider / useSession', () => {
     await waitFor(() => expect(onResult).toHaveBeenCalledWith(false));
     expect(screen.queryByTestId('sign-in-modal')).toBeNull();
   });
+
+  it('opens the modal at once, without waiting on the server, when the last check found no account', async () => {
+    // First call is the check on mount; later calls never answer, as on a slow server.
+    getSessionInfoMock.mockResolvedValueOnce(null).mockReturnValue(new Promise(() => {}));
+
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={vi.fn()} />
+      </SessionProvider>
+    );
+
+    await waitFor(() => expect(screen.getByTestId('account').textContent).toBe('none'));
+    fireEvent.click(screen.getByText('Require sign in'));
+
+    expect(screen.getByTestId('sign-in-modal')).toBeDefined();
+  });
+
+  it('closes the quickly opened modal and resolves true when the background check finds a session', async () => {
+    getSessionInfoMock.mockResolvedValueOnce(null).mockResolvedValue(ACCOUNT);
+    const onResult = vi.fn();
+
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={onResult} />
+      </SessionProvider>
+    );
+
+    await waitFor(() => expect(screen.getByTestId('account').textContent).toBe('none'));
+    fireEvent.click(screen.getByText('Require sign in'));
+    expect(screen.getByTestId('sign-in-modal')).toBeDefined();
+
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
+  });
+
+  it('does not flash the modal for a signed-in player while the first check is still running', async () => {
+    let finishFirstCheck!: (account: typeof ACCOUNT) => void;
+    getSessionInfoMock
+      .mockReturnValueOnce(new Promise((resolve) => (finishFirstCheck = resolve)))
+      .mockResolvedValue(ACCOUNT);
+    const onResult = vi.fn();
+
+    render(
+      <SessionProvider>
+        <TestConsumer onResult={onResult} />
+      </SessionProvider>
+    );
+
+    fireEvent.click(screen.getByText('Require sign in'));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
+
+    finishFirstCheck(ACCOUNT);
+    await waitFor(() => expect(onResult).toHaveBeenCalledWith(true));
+    expect(screen.queryByTestId('sign-in-modal')).toBeNull();
+  });
 });

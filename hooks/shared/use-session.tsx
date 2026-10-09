@@ -35,9 +35,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [modalOpen, setModalOpen] = useState(false);
   const resolversRef = useRef<Array<(ok: boolean) => void>>([]);
   const reqIdRef = useRef(0);
+  // True once a check has found no session, so the popup can open before the next check answers.
+  const signedOutRef = useRef(false);
 
   const clearSession = useCallback(() => {
     reqIdRef.current += 1;
+    signedOutRef.current = true;
     setAccount(null);
     setModalOpen(false);
     if (resolversRef.current.length > 0) {
@@ -57,6 +60,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (currentReqId !== reqIdRef.current) {
         return null;
       }
+      signedOutRef.current = info === null;
       setAccount(info);
       if (info && resolversRef.current.length > 0) {
         setModalOpen(false);
@@ -77,12 +81,19 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   const requireSignIn = useCallback(async () => {
-    const info = await refresh();
-    if (info) return true;
-    return new Promise<boolean>((resolve) => {
-      resolversRef.current.push(resolve);
-      setModalOpen(true);
-    });
+    const openPopup = () =>
+      new Promise<boolean>((resolve) => {
+        resolversRef.current.push(resolve);
+        setModalOpen(true);
+      });
+    if (signedOutRef.current) {
+      // The popup opens now instead of after a server round trip; if a session shows up
+      // meanwhile (another tab), refresh() closes the popup and settles this call.
+      const signedIn = openPopup();
+      void refresh();
+      return signedIn;
+    }
+    return (await refresh()) ? true : openPopup();
   }, [refresh]);
 
   const cancelSignIn = useCallback(() => {
