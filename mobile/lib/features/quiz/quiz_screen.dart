@@ -4,6 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/auth_provider.dart';
 import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
+import '../profile/profile_screen.dart';
 import 'board_panels.dart';
 import 'board_provider.dart';
 import 'quiz_provider.dart';
@@ -209,6 +210,13 @@ class _Header extends ConsumerWidget {
               ref.invalidate(boardProvider);
             },
           ),
+          if (auth.isAuthenticated)
+            _HeaderButton(
+              icon: Icons.person_outline,
+              tooltip: 'Profile',
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute<void>(builder: (_) => const ProfileScreen())),
+            ),
           if (auth.isAuthenticated)
             _HeaderButton(
               icon: Icons.logout,
