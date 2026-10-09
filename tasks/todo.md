@@ -429,9 +429,9 @@
 ### Task E4: Fix the promotion list and AI-file maps
 **Description:** S9-17, S9-18, S9-25. `tasks/production-exclusions.md` says `main` tracks files it no longer tracks; `AGENT_MAP.md` and `CAPABILITY-MAP.md` name moved paths; `AGENTS.md` names a skill path missing in this worktree. Dev-only files only; none of this lands on `main`.
 **Acceptance criteria:**
-- [ ] The three files match the tree; the promotion procedure notes it was done once in `5221f49`
+- [x] The three files match the tree; the promotion procedure notes it was done once in `5221f49`
 **Verification:**
-- [ ] grep every path
+- [x] grep every path
 **Dependencies:** None
 **Files:** `tasks/production-exclusions.md`, `AGENT_MAP.md`, `CAPABILITY-MAP.md`
 **Scope:** S

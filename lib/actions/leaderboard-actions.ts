@@ -6,7 +6,7 @@ import { LeaderboardEntry } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
 
-// Rows come pre-aggregated and pre-sorted from Postgres (lib/sql/stats-functions.sql);
+// Rows come pre-aggregated and pre-sorted from Postgres (supabase/migrations/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
 // wallet_address is null for an email account with no wallet.
 type LeaderboardRow = {

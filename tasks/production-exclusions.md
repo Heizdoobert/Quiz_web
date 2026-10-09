@@ -1,23 +1,23 @@
 # Files that stay in `preview` and local only
 
-Checked 2026-10-08 against `origin/main` and `company/update-code`. Nothing here is removed from `preview` or from anyone's checkout. This list is for the `preview` to `main` promotion: these paths should not be part of what production tracks.
+Checked 2026-10-08, and again 2026-10-09, against `origin/main` and `company/update-code`. Nothing here is removed from `preview` or from anyone's checkout. This list is for the `preview` to `main` promotion: these paths should not be part of what production tracks.
 
 The production **image** already excludes them: the runtime stage of the `Dockerfile` copies only `.next/standalone`, `public` and `.next/static`, and `.dockerignore` drops `tasks`, `docs`, `tests`, `scripts`, `contracts`, `.github` and every `*.md` except `README.md`. The question below is only about what `main` tracks in git.
 
 ## Leave out of `main`
 
-| Path | What it is | Tracked on `main` |
-|---|---|---|
-| `tasks/` | Agent task plans and todo lists | 4 files |
-| `coco/` | CocoIndex code-index project and its generated `out/` markdown | 261 files |
-| `AGENTS.md`, `AGENT_MAP.md`, `CAPABILITY-MAP.md` | Instructions and maps for AI agents | 3 files |
-| `skills-lock.json` | Lock file for agent skills | 1 file |
-| `docs/superpowers/` | Agent plans and specs | 17 files |
-| `docs/specs/`, `docs/intent/` | Feature specs and intent notes written for agent-driven work | 18 files |
-| `project-improvements.md`, `SPEC-realtime-leaderboard.md` | Planning notes | 2 files |
-| `design-system/` | Design reference output; nothing in `app/`, `components/`, `lib/` or `hooks/` imports it | 1 file |
-| `e2e/`, `playwright.config.ts` | Playwright specs; not run by CI (`ci.yml` has no e2e job) | 2 entries |
-| `.claude/`, `.agents/`, `.superpowers/`, `CLAUDE.md` | Agent tool folders and notes; already ignored or untracked, listed so they stay that way | none tracked |
+| Path | What it is | Tracked on `main` (2026-10-09) | Tracked on `company/update-code` |
+|---|---|---|---|
+| `tasks/` | Agent task plans and todo lists | none | 20 files |
+| `coco/` | CocoIndex code-index project and its generated `out/` markdown | none | 261 files |
+| `AGENTS.md`, `AGENT_MAP.md`, `CAPABILITY-MAP.md` | Instructions and maps for AI agents | none | 3 files |
+| `skills-lock.json` | Lock file for agent skills | none | 1 file |
+| `docs/superpowers/` | Agent plans and specs | none | 17 files |
+| `docs/specs/`, `docs/intent/` | Feature specs and intent notes written for agent-driven work | none | 20 files |
+| `project-improvements.md`, `SPEC-realtime-leaderboard.md` | Planning notes | none | 2 files |
+| `design-system/` | Design reference output; nothing in `app/`, `components/`, `lib/` or `hooks/` imports it | none | 1 file |
+| `e2e/`, `playwright.config.ts` | Playwright specs; not run by CI (`ci.yml` has no e2e job) | none | 2 files |
+| `.claude/`, `.agents/`, `.superpowers/`, `CLAUDE.md` | Agent tool folders and notes; already ignored or untracked, listed so they stay that way | none | none |
 
 ## Decide before excluding
 
@@ -32,7 +32,11 @@ The production **image** already excludes them: the runtime stage of the `Docker
 
 `.github/` except `opencode.yml`, `app/`, `components/`, `hooks/`, `lib/`, `public/`, `supabase/` (migrations), `contracts/` (CI builds and tests it), `tests/` (CI runs them), `Dockerfile`, `docker-compose.yml`, package and config files, `.dependency-cruiser.cjs`, `.gitleaksignore`.
 
-## Promotion procedure (not run; for review)
+## State of `main`
+
+The one-time removal was done in commit `5221f49` ("keep dev-only and AI-use files out of production") and promoted, so `origin/main` tracks none of the paths in the first table. The procedure below is what to repeat on each promotion: a `preview` that still tracks these files will bring them back on the next merge unless step 2 runs.
+
+## Promotion procedure (for the next promotion)
 
 Removing the files with a one-time commit on `main` is not enough: the next `preview` to `main` merge hits a modify/delete conflict whenever `preview` edits one of them. Do it as part of every promotion instead, on a throwaway branch or in a PR from `preview`, never by pushing to `main`:
 
