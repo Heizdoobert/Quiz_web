@@ -14,7 +14,7 @@
 Build order: identity → trivia → discovery, community, lists, rankings → profile → rewards
 
 Contracts at boundaries (provider owns contract):
-- `identity` provides `getSessionAccount(): Promise<{ id: string; wallet: string | null } | null>` to every other module (replaces `getSessionWallet()`); `accounts.id` (UUID) is the key other tables reference. See `docs/specs/identity-accounts.md`.
+- `identity` provides `getSessionAccount(): Promise<{ id: string; wallet: string | null } | null>` to every other module (replaces `getSessionWallet()`); `users.id` (UUID) is the key other tables reference. See `docs/specs/identity-accounts.md`.
 - `trivia` provides `quiz_results` rows (`user_id`, `question_id`, `is_correct`, `answered_at`) to `rankings`, `profile`, `community`, `rewards`, and the rule "a question is public when `status = 'verified'` and `list_id IS NULL`" to `discovery` and `community`; `getTopics()` and `getPublicQuestion(id)` to `discovery`. See `docs/specs/trivia-guest-access.md`.
 - `community` provides `getSuggestionsForAuthor(accountId)` to `profile`.
 - `lists` provides `question_lists(id)` UUID → `bytes32 contestId = keccak256(bytes(listId))` to `rewards`.
