@@ -23,7 +23,7 @@ let mockOnChainContest: {
 vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('../lib/utils/chain', () => ({
+vi.mock('../lib/services/chain', () => ({
   REWARD_CHAIN_ID: 84532,
   CONTEST_ESCROW_ADDRESS: '0x' + 'c'.repeat(40),
   getContestId: (listId: string, creator?: string) =>

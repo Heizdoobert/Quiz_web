@@ -4,7 +4,7 @@ import { privateKeyToAccount } from 'viem/accounts';
 import { claimListReward } from '../lib/actions/question-list-actions';
 import { getContestId } from '../lib/services/contest';
 import { CONTEST_ESCROW_ADDRESS } from '../lib/contracts/addresses';
-import { REWARD_CHAIN_ID } from '../lib/utils/chain';
+import { REWARD_CHAIN_ID } from '../lib/services/chain';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
 import { getSessionAccount } from '../lib/services/session';
 
@@ -22,8 +22,8 @@ vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn(
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 // Real REWARD_CHAIN_ID, CONTEST_ESCROW_ADDRESS and getContestId; only the on-chain reads and the
 // nonce are stubbed. The signer is a real viem account so the signature can be verified.
-vi.mock('../lib/utils/chain', async (importOriginal) => ({
-  ...(await importOriginal<typeof import('../lib/utils/chain')>()),
+vi.mock('../lib/services/chain', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../lib/services/chain')>()),
   getSignerAccount: () => SIGNER,
   newNonce: () => NONCE,
   getContestOnChain: async () => chain.onChain,
