@@ -10,7 +10,7 @@ import {
 } from '../lib/actions/auth-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { publicClientFor } from '../lib/utils/chain';
+import { publicClientFor } from '../lib/services/chain';
 import { getSessionAccount } from '../lib/services/session';
 
 let forwardedFor: string | null = null;
@@ -31,7 +31,7 @@ vi.mock('../lib/supabase/supabase', () => ({
 vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: { rpc: vi.fn(), auth: { admin: { createUser: vi.fn() } } },
 }));
-vi.mock('../lib/utils/chain', () => ({ publicClientFor: vi.fn() }));
+vi.mock('../lib/services/chain', () => ({ publicClientFor: vi.fn() }));
 vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
   setSessionAccount: vi.fn(),

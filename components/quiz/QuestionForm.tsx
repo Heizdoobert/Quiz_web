@@ -1,5 +1,5 @@
 'use client';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/shared/use-toast";
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -93,10 +93,11 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
               <AiQuestionGenerator onSuccess={handleAiSuccess} onError={handleAiError} />
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1.5">
-                  Question Prompt <span className="text-pop-coral">*</span>
+                <label htmlFor="question-prompt" className="block text-xs font-bold text-slate-300 mb-1.5">
+                  Question Prompt <span className="text-pop-coral" aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="question-prompt"
                   type="text"
                   required
                   maxLength={250}
@@ -116,10 +117,11 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label htmlFor="question-category" className="block text-xs font-bold text-slate-300 mb-1">
                     Category / Topic
                   </label>
                   <input
+                    id="question-category"
                     type="text"
                     list="topics-list"
                     value={category}
@@ -137,10 +139,11 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
                   </datalist>
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">
+                  <label htmlFor="question-explanation" className="block text-xs font-bold text-slate-300 mb-1">
                     Explanation (Optional)
                   </label>
                   <input
+                    id="question-explanation"
                     type="text"
                     maxLength={300}
                     value={explanation}

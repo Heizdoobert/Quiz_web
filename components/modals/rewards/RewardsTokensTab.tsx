@@ -71,7 +71,7 @@ export function RewardsTokensTab({
         </div>
       ) : claimStep === 'error' ? (
         <div className="p-4 bg-pop-coral/15 border border-pop-coral/40 rounded-xl text-center">
-          <p className="text-pop-coral text-sm font-medium">{claimError}</p>
+          <p role="alert" className="text-pop-coral text-sm font-medium">{claimError}</p>
         </div>
       ) : null}
 

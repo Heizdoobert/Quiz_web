@@ -61,14 +61,15 @@ export default function ListQuestionEditor({
   return (
     <form onSubmit={handleSubmit} className="space-y-3 p-4 bg-deep-space/70 border border-cyber-border rounded-2xl">
       {error && (
-        <div className="p-2.5 rounded-xl text-xs font-bold bg-pop-coral/15 text-pop-coral border border-pop-coral/40">
+        <div role="alert" className="p-2.5 rounded-xl text-xs font-bold bg-pop-coral/15 text-pop-coral border border-pop-coral/40">
           {error}
         </div>
       )}
 
       <div>
-        <label className="block text-xs font-bold text-slate-300 mb-1">Question Prompt *</label>
+        <label htmlFor="list-question-prompt" className="block text-xs font-bold text-slate-300 mb-1">Question Prompt *</label>
         <input
+          id="list-question-prompt"
           type="text"
           required
           maxLength={250}
@@ -92,6 +93,7 @@ export default function ListQuestionEditor({
             <label className="flex items-center gap-1.5 cursor-pointer">
               <input
                 type="radio"
+                aria-label={`Mark option ${letter} as correct`}
                 checked={values.correctIndex === idx}
                 onChange={() => setValues({ ...values, correctIndex: idx })}
                 className="w-4 h-4 accent-neo-mint cursor-pointer"
@@ -104,6 +106,7 @@ export default function ListQuestionEditor({
               maxLength={120}
               value={values.options[idx]}
               onChange={(e) => setOption(idx, e.target.value)}
+              aria-label={`Option ${letter} text`}
               placeholder={`Option ${letter}`}
               className="flex-1 bg-transparent border-none text-white text-xs focus:outline-none placeholder:text-slate-500"
             />
@@ -113,8 +116,9 @@ export default function ListQuestionEditor({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1">Category</label>
+          <label htmlFor="list-question-category" className="block text-xs font-bold text-slate-300 mb-1">Category</label>
           <input
+            id="list-question-category"
             type="text"
             value={values.category}
             onChange={(e) => setValues({ ...values, category: e.target.value })}
@@ -122,8 +126,9 @@ export default function ListQuestionEditor({
           />
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-300 mb-1">Explanation * (min 20 chars)</label>
+          <label htmlFor="list-question-explanation" className="block text-xs font-bold text-slate-300 mb-1">Explanation * (min 20 chars)</label>
           <input
+            id="list-question-explanation"
             type="text"
             required
             value={values.explanation}

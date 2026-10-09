@@ -101,7 +101,7 @@ export function RewardsBadgesTab({
 
       {claimStep === 'error' && mintingBadge !== null && (
         <div className="col-span-2 p-4 bg-pop-coral/15 border border-pop-coral/40 rounded-xl text-center">
-          <p className="text-pop-coral text-sm font-medium">{claimError}</p>
+          <p role="alert" className="text-pop-coral text-sm font-medium">{claimError}</p>
         </div>
       )}
     </div>

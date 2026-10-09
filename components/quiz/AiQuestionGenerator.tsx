@@ -67,6 +67,7 @@ export function AiQuestionGenerator({ onSuccess, onError }: AiQuestionGeneratorP
                 type="text"
                 value={aiTopic}
                 onChange={(e) => setAiTopic(e.target.value)}
+                aria-label="Topic or URL for the AI question"
                 placeholder="Enter a topic or URL..."
                 className="flex-1 px-3 py-2 bg-black border border-cyber-border rounded-lg text-white text-xs focus:outline-none focus:ring-1 focus:ring-neo-mint transition-all"
               />

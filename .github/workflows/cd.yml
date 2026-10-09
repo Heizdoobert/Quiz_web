@@ -27,8 +27,18 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # A manual rollback redeploys a commit that already passed CI, so it skips the gate to stay fast.
+  ci:
+    name: CI
+    if: ${{ inputs.rollback_sha == '' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+
   deploy-container:
     name: Build & Publish Container Image (GHCR)
+    needs: ci
+    if: ${{ !cancelled() && (needs.ci.result == 'success' || needs.ci.result == 'skipped') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
