@@ -55,7 +55,7 @@ Two first attempts failed because of how they were run, not because of the repos
 | ID | State | What was confirmed |
 |---|---|---|
 | S3-01, S4-03 | Verified | `lib/utils/chain.ts:65-67` returns `false` on any RPC error. `claimListReward` (`question-list-actions.ts:927-931`) then marks a past-deadline pending voucher `expired` and signs a new one, so an entry whose first voucher was already redeemed on-chain can be paid twice. Likelihood is low because the call at line 903 already refuses on RPC failure, but the window exists. |
-| S3-02, S8-03 | Partly verified | `Dockerfile:21-31` bakes `NEXT_PUBLIC_CHAIN_ID=84532` and the `0x1111`, `0x2222`, `0x3333` addresses; `cd.yml:92-101` passes no build args. Not confirmed: whether production runs the GHCR image (decision D1 is still open). |
+| S3-02, S8-03 | Partly verified | `Dockerfile:21-31` bakes `NEXT_PUBLIC_CHAIN_ID=84532` and the `0x1111`, `0x2222`, `0x3333` addresses; `cd.yml:92-101` passes no build args. Update 2026-10-09: production runs on Vercel, so the image placeholders do not reach users; the Vercel Production env vars are still to be checked by the owner. |
 | S2-01 | Verified | `get5050EliminatedIndices` (`question-actions.ts:301-328`) has no session, status or contest check. Any caller with a question id learns two wrong options, so the answer is one of the other two, including for contest questions. |
 | S2-02, S4-01 | Verified | `submitAnswer` (`quiz-actions.ts:89-93`) returns `correctIndex` and `explanation` to guests for any verified question, with no rate limit. The comment at line 92 shows this is intended. The consequence is that a script can read the whole answer key as a guest and a signed-in account can then answer perfectly. |
 | S6-01 | Verified (size) | Summing gzip of every `<script>` in the prerendered HTML gives 447 to 460 kB for `/contest`, `/profile` and `/_not-found` (the lane measured 423 kB). Either way it is about three times the 150 kB budget. An earlier note in `tasks/todo.md` (459 kB) agrees. |
@@ -134,7 +134,7 @@ From L8, with the main-thread results folded in. "Unknown" means the repository 
 | Required status checks and branch protection | missing |
 | Secrets scan, dependency audit, security headers | done |
 | Semgrep, a11y, perf and bundle budget in CI | missing, although `CONSTRAINTS.md` lists them |
-| Real `NEXT_PUBLIC_*` in the production image | missing |
+| Real `NEXT_PUBLIC_*` in production | not applicable to the GHCR image (production is Vercel); Vercel env vars unchecked |
 | Environment variables documented | missing |
 | Migrations applied and tracked, with rollback | missing; production state unknown |
 | Backups and point-in-time recovery | unknown |

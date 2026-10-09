@@ -80,7 +80,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 - [x] Task A2: Gate `get5050EliminatedIndices` (the guest part moves to A3)
 - [x] Task A3: Limit guest answer harvesting (default policy taken: keep guest reveal, 120 per IP per hour)
 - [x] Task A4: Gate CD on CI (code done, red-commit check not run; you add the required "CI gate" check in the ruleset)
-- [ ] Task A5: Real `NEXT_PUBLIC_*` in the production image (needs D1)
+- [x] Task A5: Dropped, production runs on Vercel so the image placeholders never reach users (you check the Vercel Production env vars, see todo.md)
 - [ ] Task A6 (yours): Apply migrations 17 and 19 in Supabase; confirm backups
 
 ### Checkpoint: Phase A
@@ -139,7 +139,7 @@ A nine-lane read of the whole repository (`tasks/audit-report.md`, evidence in `
 | Merging `preview` (D1) conflicts with uncommitted `coco/out` edits | Low | Commit or set aside those edits first, or merge in a throwaway worktree |
 
 ## Open questions
-- D1: where does production run (Vercel or the GHCR image)?
+- D1: answered 2026-10-09, production runs on Vercel.
 - D4: is there a multisig and an external contract auditor?
 - A3: keep the guest answer reveal with a rate limit, or require sign-in?
 - Contest integrity (S2-03, S2-04): reviewer model and token-farming limits.

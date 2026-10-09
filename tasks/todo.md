@@ -189,7 +189,8 @@
 **Scope:** M
 
 ### Task A5: Real `NEXT_PUBLIC_*` in the production image
-**Description:** S3-02, S8-03. Placeholder addresses and chain 84532 are baked into the client bundle. **Only matters if production runs the GHCR image** (open question D1).
+**Dropped 2026-10-09:** production runs on Vercel (answer to D1), not the GHCR image, so the placeholders in `Dockerfile` never reach users. Vercel builds with the values set in its own Production environment. What is left is a check that only you can make: see "A5 replacement" below. The GHCR image still ships placeholders and `cd.yml` tags it `latest` on `main`; that is for you to decide (keep, relabel or remove the container job).
+**Description (original):** S3-02, S8-03. Placeholder addresses and chain 84532 are baked into the client bundle. **Only matters if production runs the GHCR image** (open question D1).
 **Acceptance criteria:**
 - [ ] `ARG NEXT_PUBLIC_*` in the builder stage, passed as `build-args` from the GitHub Environment in `cd.yml`
 - [ ] A check that `.next/static` contains none of `0x1111`, `0x2222`, `0x3333`, `84532` unless the target is a testnet
@@ -198,6 +199,10 @@
 **Dependencies:** your answer to D1
 **Files:** `Dockerfile`, `.github/workflows/cd.yml`
 **Scope:** M
+
+### Task A5 replacement (yours): Vercel Production environment
+- [ ] In Vercel, Production scope has real `NEXT_PUBLIC_CHAIN_ID`, `NEXT_PUBLIC_QUIZ_TOKEN_ADDRESS`, `NEXT_PUBLIC_QUIZ_BADGE_ADDRESS`, `NEXT_PUBLIC_CONTEST_ESCROW_ADDRESS`, `NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `REWARD_SIGNER_PRIVATE_KEY` is not a `NEXT_PUBLIC_` variable
+- [ ] The deployed site's JS has none of `0x1111`, `0x2222`, `0x3333`, `placeholder` (view source or `curl` a chunk and grep)
 
 ### Task A6 (yours): Apply migrations in Supabase
 - [ ] `supabase/migrations/17-auth-rate-limit.sql` (until then the limiter fails open)
@@ -454,7 +459,7 @@
 ## Needs your decision (not tasks yet)
 - **Contest integrity (S2-03, S2-04):** a second account can read contest answers as a reviewer, and self-dealing accounts can farm tokens. Fixes change contest rules, so design first.
 - **Splitting `question-list-actions.ts`** (S1-03, 1070 lines): worth its own plan after Phase A, because it holds the money path.
-- **D1:** where production runs (Vercel or the GHCR image). It decides whether A5 matters.
+- **D1:** answered 2026-10-09: production runs on Vercel. A5 is dropped; the GHCR image is not production.
 - **D4:** whether a multisig and an external contract auditor exist (decides prod-health T10).
 - **PWA / service worker (S6-12):** no `sw.js` is emitted under Turbopack; keep, replace or drop (prod-health T6).
 
