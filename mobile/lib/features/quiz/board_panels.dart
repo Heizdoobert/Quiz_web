@@ -25,7 +25,7 @@ class ScoreboardPanel extends StatelessWidget {
             children: [
               _StatTile(
                 icon: Icons.emoji_events_outlined,
-                iconColor: AppColors.cryptoGold,
+                iconColor: AppColors.gold,
                 label: 'SCORE',
                 value: '${board.score}',
                 valueColor: Colors.white,
@@ -37,7 +37,7 @@ class ScoreboardPanel extends StatelessWidget {
                 iconColor: AppColors.popCoral,
                 label: 'STREAK',
                 value: '${board.streak}',
-                valueColor: AppColors.cryptoGold,
+                valueColor: AppColors.gold,
                 caption: 'Best: ${board.bestStreak}',
                 hot: board.streak >= 3,
               ),
@@ -234,15 +234,15 @@ class _LeaderboardPanelState extends State<LeaderboardPanel> {
             decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.cyberBorder))),
             child: Container(
               padding: const EdgeInsets.only(bottom: 6),
-              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.cryptoGold, width: 2))),
+              decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.gold, width: 2))),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.emoji_events_outlined, size: 14, color: AppColors.cryptoGold),
+                  Icon(Icons.emoji_events_outlined, size: 14, color: AppColors.gold),
                   SizedBox(width: 6),
                   Text(
                     'Global Top',
-                    style: TextStyle(fontFamily: headingFont, fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.cryptoGold),
+                    style: TextStyle(fontFamily: headingFont, fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.gold),
                   ),
                 ],
               ),
@@ -320,7 +320,7 @@ class _LeaderboardRow extends StatelessWidget {
   }
 
   Widget _rank(int rank) {
-    if (rank == 1) return const Icon(Icons.emoji_events, size: 16, color: AppColors.cryptoGold);
+    if (rank == 1) return const Icon(Icons.emoji_events, size: 16, color: AppColors.gold);
     if (rank == 2) return const Icon(Icons.workspace_premium, size: 16, color: AppColors.slate300);
     if (rank == 3) return const Icon(Icons.workspace_premium, size: 16, color: Color(0xFFFF8A65));
     return Text('#$rank', style: const TextStyle(fontFamily: headingFont, fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.slate400));
@@ -340,7 +340,7 @@ class _LeaderboardRow extends StatelessWidget {
             ? LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [AppColors.cryptoGold.withValues(alpha: 0.2), AppColors.popCoral.withValues(alpha: 0.2)],
+                colors: [AppColors.gold.withValues(alpha: 0.2), AppColors.popCoral.withValues(alpha: 0.2)],
               )
             : null,
       ),
@@ -356,7 +356,7 @@ class _LeaderboardRow extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.bold,
-                color: rank == 1 ? AppColors.cryptoGold : AppColors.slate200,
+                color: rank == 1 ? AppColors.gold : AppColors.slate200,
               ),
             ),
           ),

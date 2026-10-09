@@ -188,7 +188,7 @@ class _Header extends ConsumerWidget {
               child: _Pill(
                 icon: Icons.cloud_upload_outlined,
                 label: '$pending',
-                color: AppColors.cryptoGold,
+                color: AppColors.gold,
               ),
             ),
           _HeaderButton(
@@ -370,7 +370,7 @@ class _CategoryBadge extends StatelessWidget {
           _Pill(
             icon: Icons.groups_outlined,
             label: '${createdBy.substring(0, createdBy.length < 6 ? createdBy.length : 6)}...',
-            color: AppColors.cryptoGold,
+            color: AppColors.gold,
           )
         else
           const _Pill(icon: Icons.verified_user_outlined, label: 'Verified', color: AppColors.neoMint),
