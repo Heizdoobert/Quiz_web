@@ -9,11 +9,11 @@ import { QuestionOptionsInput } from './QuestionOptionsInput';
 import { AiQuestionGenerator } from './AiQuestionGenerator';
 
 interface QuestionFormProps {
-  walletAddress: string | null;
+  
   onQuestionAdded?: () => void;
 }
 
-export default function QuestionForm({ walletAddress, onQuestionAdded }: QuestionFormProps) {
+export default function QuestionForm({  onQuestionAdded }: QuestionFormProps) {
   const toast = useToast();
   const {
     isOpen,
@@ -31,7 +31,7 @@ export default function QuestionForm({ walletAddress, onQuestionAdded }: Questio
     setOptions,
     handleOptionChange,
     handleSubmit,
-  } = useQuestionForm({ walletAddress, onQuestionAdded });
+  } = useQuestionForm({  onQuestionAdded });
 
   const handleAiSuccess = (data: { prompt: string; options: string[]; correctIndex: number; explanation: string }) => {
     setPrompt(data.prompt);

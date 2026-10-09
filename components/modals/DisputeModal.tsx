@@ -10,14 +10,14 @@ interface DisputeModalProps {
   isOpen: boolean;
   onClose: () => void;
   questionId?: string | null;
-  walletAddress?: string | null;
+  
 }
 
 export default function DisputeModal({
   isOpen,
   onClose,
   questionId,
-  walletAddress,
+  
 }: DisputeModalProps) {
   const {
     selectedReason,
@@ -30,7 +30,7 @@ export default function DisputeModal({
     isQuarantined,
     handleSubmit,
     handleResetAndClose,
-  } = useDisputeModal({ onClose, questionId, walletAddress });
+  } = useDisputeModal({ onClose, questionId,  });
 
   return (
     <Modal
@@ -131,9 +131,9 @@ export default function DisputeModal({
             </button>
             <motion.button
               type="submit"
-              disabled={loading || !walletAddress}
-              whileHover={loading || !walletAddress ? {} : { filter: 'brightness(1.1)' }}
-              whileTap={loading || !walletAddress ? {} : { scale: 0.95 }}
+              disabled={loading}
+              whileHover={loading ? {} : { filter: 'brightness(1.1)' }}
+              whileTap={loading ? {} : { scale: 0.95 }}
               transition={{ type: 'spring', stiffness: 450, damping: 25 }}
               className="flex-1 py-2.5 rounded-xl bg-pop-coral disabled:opacity-50 disabled:pointer-events-none text-white font-black font-heading text-xs cursor-pointer flex items-center justify-center gap-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-pop-coral focus-visible:ring-offset-2 focus-visible:ring-offset-cyber-violet"
             >

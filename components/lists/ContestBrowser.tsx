@@ -5,7 +5,6 @@ import { getLiveLists, getMyContestEntries, getClaimableContests } from '@/lib/a
 import { QuestionListWithMeta, ListEntry } from '@/lib/types';
 import { useSession } from '@/hooks/shared/use-session';
 import ContestPlay from '@/components/lists/ContestPlay';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Coins, ListChecks, Play, Users } from 'lucide-react';
 
 export default function ContestBrowser() {
@@ -118,7 +117,7 @@ export default function ContestBrowser() {
                   </button>
                 ) : (
                   <div className="shrink-0">
-                    <ConnectButton label="Add a wallet to join contests" showBalance={false} />
+                    
                   </div>
                 )}
               </div>

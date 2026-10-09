@@ -83,7 +83,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Web3 Quiz',
+      title: 'Quick Quiz',
       theme: AppTheme.theme,
       home: authState.isLoading
           ? const Scaffold(body: Center(child: CircularProgressIndicator(color: AppTheme.neoMint)))

@@ -11,8 +11,6 @@ import { logger } from '@/lib/logger';
 // wallet_address is null for an email account with no wallet.
 type LeaderboardRow = {
   user_id: string;
-  display_name: string | null;
-  wallet_address: string | null;
   score: number;
   accuracy: number;
 };
@@ -23,7 +21,6 @@ const clampLimit = (limit: number) => Math.min(Math.max(Math.trunc(limit) || 1, 
 function toEntries(rows: LeaderboardRow[], offset: number = 0): LeaderboardEntry[] {
   return rows.map((row, idx) => ({
     user_id: row.user_id,
-    wallet_address: row.wallet_address,
     display_name: row.display_name,
     score: row.score,
     accuracy: row.accuracy,

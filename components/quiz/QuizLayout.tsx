@@ -127,7 +127,7 @@ export default function QuizLayout({
               <div id="custom-form" className="w-full mt-4">
                 {account ? (
                   <QuestionForm
-                    walletAddress={address || null}
+                    
                     onQuestionAdded={loadNextQuestion}
                   />
                 ) : (

@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Zap, ArrowLeft } from 'lucide-react';
 import { useSession } from '@/hooks/shared/use-session';
 
@@ -44,7 +43,7 @@ export default function ListsNav() {
           ))}
         </nav>
       </div>
-      <ConnectButton showBalance={false} chainStatus="icon" />
+      
     </header>
   );
 }

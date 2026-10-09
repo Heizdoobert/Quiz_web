@@ -1,41 +1,21 @@
 "use client";
 
-import React, { useContext, useState } from "react";
+import React from "react";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import { Gift, Zap, Volume2, VolumeX, User, Trophy, Info } from "lucide-react";
+import { Zap, Volume2, VolumeX, User, Trophy } from "lucide-react";
 import { useSoundToggle } from "@/hooks/shared/use-sound-toggle";
 import { useSession } from "@/hooks/shared/use-session";
 import SearchBox from "@/components/discovery/SearchBox";
-import NoWalletNotice from "@/components/rewards/NoWalletNotice";
-import { WalletHostContext } from "@/components/wallet/host-context";
-
-// Pulls in wagmi and RainbowKit, so it loads only where the wallet stack is already
-// mounted or after the player clicks Connect on a route without it.
-const WalletConnect = dynamic(() => import("@/components/wallet/WalletConnect"), {
-  ssr: false,
-});
 
 interface HeaderProps {
-  onOpenRewards?: () => void;
   onOpenProfile?: () => void;
-  hasClaimable?: boolean;
-  heldTokens?: string;
-  sweepsAt?: string | null;
 }
 
 export default function Header({
-  onOpenRewards,
   onOpenProfile,
-  hasClaimable,
-  heldTokens,
-  sweepsAt,
 }: HeaderProps) {
   const { isMuted, handleToggleSound } = useSoundToggle();
   const { account } = useSession();
-  const inWallet = useContext(WalletHostContext);
-  const [connectRequested, setConnectRequested] = useState(false);
-  const connectLabel = account && !account.wallet ? "Add wallet" : "Connect";
 
   return (
     <header className="glass flex justify-between items-center px-4 sm:px-8 py-3.5 border-b border-cyber-border sticky top-0 z-30 shadow-lg">
@@ -93,48 +73,6 @@ export default function Header({
           >
             <User className="w-4 h-4 text-electric-indigo" />
             <span className="hidden sm:inline">Profile</span>
-          </button>
-        )}
-
-        {/* Rewards Button */}
-        {account && onOpenRewards && (
-          <button
-            type="button"
-            onClick={onOpenRewards}
-            className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyber-violet-light hover:bg-[#2E3260] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint border border-[#3A3E70] text-crypto-gold font-bold font-heading text-xs transition-all hover:scale-105 cursor-pointer"
-            aria-label="Rewards"
-          >
-            <Gift className="w-4 h-4 text-crypto-gold" />
-            <span className="hidden sm:inline">Rewards</span>
-            {hasClaimable && (
-              <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-neo-mint rounded-full animate-ping" />
-            )}
-          </button>
-        )}
-
-        {/* Native <details>: the disclosure next to "Add wallet", no popover JS */}
-        {account && !account.wallet && (
-          <details className="relative">
-            <summary
-              className="list-none p-2 rounded-xl border border-[#3A3E70] bg-cyber-violet-light text-crypto-gold cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint"
-              aria-label="Why add a wallet?"
-            >
-              <Info className="w-4 h-4" />
-            </summary>
-            <div className="absolute right-0 mt-2 w-72 p-4 rounded-xl border border-cyber-border bg-elevation-2 shadow-lg z-40">
-              <NoWalletNotice heldTokens={heldTokens} sweepsAt={sweepsAt} />
-            </div>
-          </details>
-        )}
-        {inWallet || connectRequested ? (
-          <WalletConnect label={connectLabel} />
-        ) : (
-          <button
-            type="button"
-            onClick={() => setConnectRequested(true)}
-            className="px-4 py-2 rounded-xl bg-linear-to-r from-neo-mint to-electric-indigo text-deep-space font-black font-heading text-sm cursor-pointer active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-          >
-            {connectLabel}
           </button>
         )}
       </div>

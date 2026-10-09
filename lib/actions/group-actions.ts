@@ -41,7 +41,6 @@ export async function createGroup(params: {
         name,
         description: description || null,
         owner_user: auth.account.id,
-        owner_wallet: auth.account.wallet,
       })
       .select()
       .single();
@@ -54,7 +53,7 @@ export async function createGroup(params: {
     // Automatically add owner as a member
     const { error: memberErr } = await auth.db
       .from('group_members')
-      .insert({ group_id: group.id, user_id: auth.account.id, wallet_address: auth.account.wallet });
+      .insert({ group_id: group.id, user_id: auth.account.id });
     if (memberErr) logger.error('createGroup owner membership error:', memberErr);
 
     return { success: true, group: group as Group };
@@ -72,7 +71,7 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
 
     const { error } = await auth.db
       .from('group_members')
-      .insert({ group_id: groupId, user_id: auth.account.id, wallet_address: auth.account.wallet });
+      .insert({ group_id: groupId, user_id: auth.account.id });
     if (error) {
       if (error.code === '23505') return { success: false, error: 'You are already in this group.' };
       if (error.code === '23503') return { success: false, error: 'Group not found.' };

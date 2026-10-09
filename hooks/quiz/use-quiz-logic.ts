@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAccount } from 'wagmi';
+
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AnswerSubmissionResult,
@@ -14,7 +14,6 @@ import {
 import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/question-actions';
 import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { soundEngine } from '@/lib/client/audio';
 import { useSession } from '@/hooks/shared/use-session';
 
@@ -39,7 +38,6 @@ export function useQuizLogic({
   initialLeaderboard = [],
   initialCategory = 'All',
 }: UseQuizLogicOptions = {}) {
-  const { address, isConnected } = useAccount();
   const { account, requireSignIn: ensureSession } = useSession();
   const accountRef = useRef(account);
 
@@ -141,7 +139,6 @@ export function useQuizLogic({
       setClaimableRewards(null);
       return;
     }
-    const data = await getClaimableRewards();
     if (accountRef.current?.id !== targetId) return;
     setClaimableRewards(data);
   }, [account]);
@@ -202,7 +199,7 @@ export function useQuizLogic({
       setIsSubmitting(true);
       // Answers only count for a signed-in wallet. If the signature is declined the
       // answer is still shown, just not recorded (blocking would re-prompt on every timer tick).
-      if (isConnected) await ensureSession();
+      await ensureSession();
       const res = await submitAnswer({
         questionId: currentQuestion.id,
         answerIndex,
@@ -250,7 +247,7 @@ export function useQuizLogic({
       loadLeaderboards();
       refreshRewards();
     },
-    [currentQuestion, isSubmitting, isFlipped, isConnected, ensureSession, loadLeaderboards, refreshRewards]
+    [currentQuestion, isSubmitting, isFlipped,  ensureSession, loadLeaderboards, refreshRewards]
   );
 
   // Initial stats and history fetch (the account itself is created at sign-in)
@@ -339,8 +336,8 @@ export function useQuizLogic({
     (claimableRewards?.eligibleBadges?.length ?? 0) > 0;
 
   return {
-    address,
-    isConnected,
+    address: account?.id,
+    
     selectedCategory,
     currentQuestion,
     isFlipped,

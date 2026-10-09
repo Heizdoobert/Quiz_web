@@ -10,14 +10,14 @@ import { GroupList } from './group/GroupList';
 interface GroupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  walletAddress: string | null;
+  
   onSelectGroup?: (groupId: string) => void;
 }
 
 export default function GroupModal({
   isOpen,
   onClose,
-  walletAddress,
+  
   onSelectGroup,
 }: GroupModalProps) {
   const {
@@ -36,7 +36,7 @@ export default function GroupModal({
     handleJoin,
     handleLeave,
     handleSelectGroup: selectGroupHandler,
-  } = useGroupModal({ isOpen, onClose, walletAddress, onSelectGroup });
+  } = useGroupModal({ isOpen, onClose,  onSelectGroup });
 
   return (
     <Modal

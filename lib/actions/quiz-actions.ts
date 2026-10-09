@@ -109,7 +109,6 @@ export async function submitAnswer(params: {
     // readers of the old column stay correct until it's dropped in Task 25.
     const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
       user_id: account.id,
-      wallet_address: account.wallet,
       question_id: params.questionId,
       answer_index: params.answerIndex,
       is_correct: isCorrect,

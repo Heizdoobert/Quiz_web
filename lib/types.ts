@@ -4,8 +4,6 @@ export interface Question {
   prompt: string;
   options: string[];
   correct_index: number;
-  explanation: string | null;
-  created_by: string | null;
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
   dispute_count?: number;
   created_at: string;
@@ -17,7 +15,6 @@ export interface ClientQuestion {
   prompt: string;
   options: string[];
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
-  created_by?: string | null;
   created_at?: string;
 }
 
@@ -31,7 +28,6 @@ export interface QuestionDispute {
 
 export interface QuizResult {
   id: string;
-  wallet_address: string;
   question_id: string;
   answer_index: number;
   is_correct: boolean;
@@ -41,7 +37,6 @@ export interface QuizResult {
 export interface Group {
   id: string;
   name: string;
-  description: string | null;
   owner_wallet: string;
   created_at: string;
 }
@@ -52,18 +47,9 @@ export interface QuestionList {
   id: string;
   owner_wallet: string;
   title: string;
-  description: string | null;
   status: QuestionListStatus;
-  reward_pool_tokens: string;
   max_participants?: number;
-  submitted_at: string | null;
-  started_at: string | null;
   created_at: string;
-  onchain_contest_id?: string | null;
-  expires_at?: string | null;
-  funding_tx_hash?: string | null;
-  refunded_at?: string | null;
-  refund_tx_hash?: string | null;
 }
 
 export interface QuestionListWithMeta extends QuestionList {
@@ -71,17 +57,12 @@ export interface QuestionListWithMeta extends QuestionList {
   confirmationCount: number;
   participantCount?: number;
   hasConfirmed?: boolean;
-  perQuestionReward?: string;
 }
 
 export interface ListEntry {
   list_id: string;
-  wallet_address: string;
   status: 'in_progress' | 'completed' | 'claimed' | 'reviewer';
   correct_count: number;
-  reward_amount: string;
-  completed_at: string | null;
-  claim_tx_hash?: string | null;
 }
 
 export interface UserStats {
@@ -94,8 +75,6 @@ export interface UserStats {
 
 export interface LeaderboardEntry {
   user_id: string;
-  wallet_address: string | null;
-  display_name: string | null;
   score: number;
   accuracy: number;
   rank: number;
@@ -104,7 +83,6 @@ export interface LeaderboardEntry {
 export interface AnswerSubmissionResult {
   isCorrect: boolean;
   correctIndex: number;
-  explanation: string | null;
   // False when the answer didn't count: not signed in, or the question was already answered.
   recorded: boolean;
   // Set only when recorded is false, so the UI can say why instead of claiming a point was earned.
@@ -126,26 +104,7 @@ export interface HistoryItem {
   isCorrect: boolean;
 }
 
-export interface ClaimableRewards {
-  claimableTokens: string;
-  eligibleBadges: number[];
-  alreadyClaimedBadges: number[];
-  totalEarned: string;
-  totalClaimed: string;
-  heldTokens?: string;
-  sweepsAt?: string | null;
-}
 
-export interface RewardVoucher {
-  recipient: string;
-  amount: string;
-  badgeType?: number;
-  nonce: string;
-  deadline: string;
-  signature: string;
-  contractAddress: string;
-  contestId?: `0x${string}`;
-}
 
 export const BADGE_NAMES: Record<number, string> = {
   0: 'Leaderboard Champion',
@@ -249,5 +208,4 @@ export interface SuggestionView {
   body: string;
   senderName: string;
   createdAt: string;
-  resolvedAt: string | null;
 }

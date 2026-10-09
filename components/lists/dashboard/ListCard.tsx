@@ -1,15 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { usePublicClient } from 'wagmi';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { QuestionListWithMeta, Question } from '@/lib/types';
 import { MIN_LIST_QUESTIONS, REQUIRED_CONFIRMATIONS } from '@/lib/constants/list-constants';
 import { deleteList, submitListForReview, getListDetail, addListQuestion } from '@/lib/actions/question-list-actions';
-import { ContestEscrowABI } from '@/lib/contracts/ContestEscrowABI';
-import { CONTEST_ESCROW_ADDRESS, TARGET_CHAIN_ID } from '@/lib/contracts/addresses';
 import { useSession } from '@/hooks/shared/use-session';
 import ListQuestionEditor from '@/components/lists/ListQuestionEditor';
-import { ContestActionPanel } from './ContestActionPanel';
-import { OnChainRefundPanel } from './OnChainRefundPanel';
 import { ListQuestionManager } from './ListQuestionManager';
 import { ListCardDraftPanel } from './ListCardDraftPanel';
 import { ListCardEditDetailsPanel } from './ListCardEditDetailsPanel';
@@ -23,7 +18,7 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: 'bg-pop-coral/15 text-pop-coral border-pop-coral/40',
 };
 
-const SIGN_IN_ERROR = 'Sign the message in your wallet to manage your lists.';
+const SIGN_IN_ERROR = 'Sign in to manage your lists.';
 
 export function ListCard({
   list,
@@ -45,44 +40,19 @@ export function ListCard({
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingList, setEditingList] = useState(false);
-  const [onChainState, setOnChainState] = useState<{ active: boolean; remainingPool: string; expiresAt: number } | null>(null);
-  const [now, setNow] = useState(() => Date.now());
 
-  const publicClient = usePublicClient({ chainId: TARGET_CHAIN_ID });
   const isDraft = list.status === 'draft';
 
-  useEffect(() => {
-    const interval = setInterval(() => setNow(Date.now()), 60000);
-    return () => clearInterval(interval);
-  }, []);
-
+  
   const loadDetail = useCallback(async () => {
     setLoadingDetail(true);
     await ensureSession();
     const detail = await getListDetail(list.id);
     setQuestions(detail?.questions || []);
     
-    if (list.onchain_contest_id && publicClient) {
-      try {
-        const contestData = await publicClient.readContract({
-          address: CONTEST_ESCROW_ADDRESS,
-          abi: ContestEscrowABI,
-          functionName: 'contests',
-          args: [list.onchain_contest_id as `0x${string}`],
-        });
-        if (contestData) {
-          setOnChainState({
-            active: contestData[5] as boolean,
-            remainingPool: (contestData[2] as bigint).toString(),
-            expiresAt: Number(contestData[4] as bigint),
-          });
-        }
-      } catch (e) {
-        logger.error('Failed to fetch on-chain contest', e);
-      }
-    }
+    
     setLoadingDetail(false);
-  }, [list.id, ensureSession, list.onchain_contest_id, publicClient]);
+  }, [list.id, ensureSession, ]);
 
   useEffect(() => {
     if (expanded) {
@@ -125,7 +95,7 @@ export function ListCard({
           <p className="text-xs text-slate-400 mt-1">
             {list.questionCount}/{MIN_LIST_QUESTIONS} questions
             {list.status === 'submitted' && ` · ${list.confirmationCount}/${REQUIRED_CONFIRMATIONS} confirmations`}
-            {list.status === 'live' && ` · pool ${(Number(list.reward_pool_tokens) / 1e18).toString()} QUIZ`}
+            
           </p>
         </div>
         {expanded ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
@@ -162,22 +132,9 @@ export function ListCard({
             />
           )}
 
-          <ContestActionPanel 
-            listId={list.id} 
-            listStatus={list.status} 
-            onChanged={onChanged} 
-            setError={setError} 
-          />
+          
 
-          <OnChainRefundPanel 
-            listId={list.id} 
-            listStatus={list.status}
-            onChainContestId={list.onchain_contest_id || null}
-            onChainState={onChainState}
-            now={now}
-            onChanged={onChanged}
-            setError={setError}
-          />
+          
 
           {adding && (
             <ListQuestionEditor

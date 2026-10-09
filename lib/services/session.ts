@@ -2,7 +2,7 @@ import 'server-only';
 import { createHmac, timingSafeEqual } from 'crypto';
 import { cookies, headers } from 'next/headers';
 
-// Proof of who is signed in, set after a verified Sign-In with Ethereum signature
+// Proof of who is signed in, set after verified authentication
 // (lib/actions/auth-actions.ts). Server actions take the account from here,
 // never from their arguments.
 const SESSION_COOKIE = 'quiz_session';

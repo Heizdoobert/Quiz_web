@@ -5,7 +5,6 @@ import { startListAttempt, completeListAttempt } from '@/lib/actions/question-li
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { useSession } from '@/hooks/shared/use-session';
 import { ClientQuestion, QuestionListWithMeta } from '@/lib/types';
-import { ContestPlayResult } from './play/ContestPlayResult';
 import { ContestPlayQuestion } from './play/ContestPlayQuestion';
 import { useToast } from '@/hooks/shared/use-toast';
 
@@ -102,13 +101,18 @@ export default function ContestPlay({
 
   if (result) {
     return (
-      <ContestPlayResult
-        listId={list.id}
-        result={result}
-        totalQuestions={questions?.length ?? 0}
-        onExit={onExit}
-        walletAddress={account?.wallet}
-      />
+      <div className="max-w-xl mx-auto p-6 bg-cyber-violet rounded-xl border border-cyber-border text-center space-y-4">
+        <h2 className="text-2xl font-bold font-heading text-white">Contest Complete</h2>
+        <p className="text-slate-300">
+          You scored <span className="font-bold text-neo-mint">{result.correctCount}</span> out of {questions?.length ?? 0}.
+        </p>
+        <button
+          onClick={onExit}
+          className="px-6 py-2 bg-neo-mint/15 text-neo-mint border border-neo-mint/40 rounded-xl font-bold font-heading text-sm hover:bg-neo-mint/30 transition-colors"
+        >
+          Back to Contests
+        </button>
+      </div>
     );
   }
 
