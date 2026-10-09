@@ -1,48 +1,37 @@
-# Implementation Plan: Flutter Mobile Companion App
+# Implementation Plan: Web2 Pivot
 
 ## Overview
-Building a native iOS/Android Flutter companion app for the Web3 quiz platform. It will feature offline-capable quiz gameplay and native WalletConnect v2 integration. All communication with the database will be routed through a new Bearer-token authenticated REST API in the existing Next.js application to preserve security.
+We are ripping out all Web3, crypto, and coin/reward elements from Quick Quiz to pivot to a pure Web2 architecture. This involves changes across the Supabase database, the Next.js web frontend, and the Flutter mobile app.
 
 ## Architecture Decisions
-- **Monorepo Isolation:** We are placing the app in `mobile/` but heavily ignoring it in Next.js/Vercel configs to prevent CI bloat.
-- **REST API:** Bypassing direct Supabase connections in favor of a versioned Next.js API (`/api/mobile/v1`) to maintain business logic and anti-cheat consistency.
-- **Offline Security:** Only quiz questions (without correct answers) are cached offline. Answers are queued locally and graded securely on the server upon syncing.
-- **Token Auth:** Next.js will issue JWT Bearer tokens to the mobile app, stored in `flutter_secure_storage`.
+- **Auth Reversion:** Supabase standard email/password authentication will be the sole login method.
+- **Database Simplification:** Reward, coin, and wallet tables will be dropped via a new migration.
+- **Dependency Cleanup:** All Web3 libraries will be aggressively pruned to reduce bundle size and security surface area.
 
 ## Task List
 
-### Phase 1: Foundation & Tooling
-- [x] Task 1: Isolate `mobile/` from Next.js CI
-- [x] Task 2: Initialize Flutter Project & Dependencies
+### Phase 1: Database & Backend Cleanup
+- [ ] Task 1: Create Supabase migration to drop coin, reward, and wallet-related tables/columns.
+- [ ] Task 2: Remove SIWE and Next.js Web3 API routes (`/api/mobile/v1/auth/nonce`, etc.).
+- [ ] Task 3: Remove Web3 and wallet dependencies from Next.js `package.json`.
 
-### Checkpoint: Foundation
-- [x] Next.js Vercel builds succeed without trying to parse Dart.
-- [x] Flutter app builds to simulator successfully.
+### Checkpoint: Backend Clean
+- [ ] Database migrations apply cleanly.
+- [ ] Next.js app builds successfully without Web3 packages.
 
-### Phase 2: Web3 Authentication
-- [x] Task 3: Build Next.js Mobile SIWE API endpoints
-- [x] Task 4: Configure WalletConnect v2 & Deep Linking in Flutter
-- [x] Task 5: Implement Flutter Auth State & JWT Storage
+### Phase 2: Next.js Frontend Cleanup
+- [ ] Task 4: Remove WalletConnect/Web3Modal providers from `app/layout.tsx` and UI.
+- [ ] Task 5: Remove all coin/reward displays and pages from the Web dashboard.
 
-### Checkpoint: Authentication
-- [x] User can tap "Connect Wallet" on simulator, sign via wallet app, and receive a JWT Bearer token from the Next.js API.
+### Checkpoint: Web App Clean
+- [ ] Web app runs and allows standard email login without throwing missing dependency errors.
 
-### Phase 3: Offline Quiz & Syncing
-- [x] Task 6: Build Next.js Mobile Quiz API (GET questions, POST sync)
-- [x] Task 7: Flutter local caching & offline queue database schema
-- [x] Task 8: Flutter Quiz UI (fetch -> play -> queue answers)
-- [x] Task 9: Flutter Background Sync Engine
+### Phase 3: Flutter Mobile Cleanup
+- [ ] Task 6: Remove `reown_walletkit` from `mobile/pubspec.yaml`.
+- [ ] Task 7: Delete `wallet_service.dart` and remove SIWE logic from `auth_provider.dart`.
+- [ ] Task 8: Refactor `auth_provider.dart` to use `supabase_flutter` for standard email/password auth.
+- [ ] Task 9: Remove all coin/reward UI references in the Flutter app.
 
 ### Checkpoint: Complete
-- [x] User can download questions, go offline, submit answers, reconnect, and see their rewards synced successfully without leaking answers offline.
-- [x] Ready for App Store / Play Store review.
-
-## Risks and Mitigations
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Vercel attempts to build Dart | High | Strict `.vercelignore` and Next.js config exclusions |
-| WalletConnect deep-link drops | High | Careful OS-level intents setup (Android AppLinks, iOS Universal Links) |
-| App Store rejects Crypto rewards | Med | Design the app to function primarily as an educational quiz game, deferring reward claims to the web app if blocked by reviewers. |
-
-## Open Questions
-- None at this time.
+- [ ] All Web3 logic is completely excised.
+- [ ] Both Web and Mobile apps allow standard login and playing quizzes.
