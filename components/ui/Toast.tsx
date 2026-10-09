@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ToastContext, ToastMessage, ToastType } from '@/hooks/use-toast';
 import { CheckCircle, Info, AlertTriangle, XCircle, X } from 'lucide-react';
@@ -40,8 +40,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   const warning = useCallback((msg: string) => addToast('warning', msg), [addToast]);
   const error = useCallback((msg: string) => addToast('error', msg), [addToast]);
 
+  // Only the stable callbacks go in the context: consumers put `toast` in effect deps, so a value
+  // that changed with every toast would re-run those effects (and re-fire their requests).
+  const value = useMemo(
+    () => ({ success, info, warning, error, removeToast }),
+    [success, info, warning, error, removeToast],
+  );
+
   return (
-    <ToastContext.Provider value={{ toasts, success, info, warning, error, removeToast }}>
+    <ToastContext.Provider value={value}>
       {children}
       <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2 w-full max-w-sm pointer-events-none">
         <AnimatePresence>
