@@ -12,6 +12,7 @@
     "type-check": "tsc --noEmit",
     "check:fast": "npm run type-check && npm run lint && gitleaks git --pre-commit --redact --no-banner",
     "check:architecture": "depcruise --validate app lib components hooks",
+    "check:bundle": "node scripts/check-bundle.mjs",
     "check:security": "uvx semgrep scan --config p/default --error app/ lib/ components/ hooks/",
     "check:a11y": "npx --yes @axe-core/cli@4.13.0 http://localhost:3000 --tags wcag2a,wcag2aa,wcag21aa",
     "check:perf": "lighthouse http://localhost:3000 --output=json --quiet",
