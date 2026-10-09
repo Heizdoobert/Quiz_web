@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '../Modal';
+import Modal from '@/components/ui/Modal';
 import { useProfileModal } from '@/hooks/modals/use-profile-modal';
 import Link from 'next/link';
 import { UserStats, ClaimableRewards } from '@/lib/types';

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import Modal from '@/components/Modal';
+import Modal from '@/components/ui/Modal';
 import { useGroupModal } from '@/hooks/modals/use-group-modal';
 import { Shield, Users, UserPlus, Plus, Loader2 } from 'lucide-react';
 import { GroupList } from './group/GroupList';
