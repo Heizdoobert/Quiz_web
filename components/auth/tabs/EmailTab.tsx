@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { requestEmailCode, verifyEmailCode } from "@/lib/actions/auth-actions";
-import { NO_WALLET_DISCLOSURE } from "@/lib/constants/rewards-copy";
 
 type EmailStep = "input" | "code";
 
@@ -51,7 +50,7 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
   if (emailStep === "input") {
     return (
       <form onSubmit={handleSendCode} className="space-y-4">
-        <p className="text-xs text-slate-400">{NO_WALLET_DISCLOSURE}</p>
+        <p className="text-xs text-slate-400">We email you a 6-digit code. New here? That creates your account.</p>
         <input
           type="email"
           required

@@ -53,7 +53,7 @@ export default function AdZone({
           <div className="flex flex-col items-center justify-center min-h-125 border border-dashed border-cyber-border rounded-xl p-2 bg-deep-space/40 text-slate-500 text-xs">
             <IconComponent className="w-6 h-6 text-crypto-gold mb-2" />
             <span className="font-bold font-heading text-white">
-              {sponsor ? sponsor.name : "Hot Web3 Deals"}
+              {sponsor ? sponsor.name : "Hot Deals"}
             </span>
             <span className="text-[11px] text-slate-400 mt-1">
               {sponsor ? sponsor.category : "Tools & Cloud Offers"}
@@ -99,7 +99,7 @@ export default function AdZone({
               <p className="text-sm font-bold text-white group-hover:text-neo-mint transition-colors">
                 {sponsor
                   ? sponsor.name
-                  : "Recommended Web3 Dev Tools & Cloud Infrastructure"}
+                  : "Recommended Tools & Cloud Infrastructure"}
               </p>
               <p className="text-xs text-slate-400">
                 {sponsor

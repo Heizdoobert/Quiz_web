@@ -14,7 +14,6 @@ import { logger } from '@/lib/logger';
 
 export interface SessionAccount {
   id: string;
-  wallet: string | null;
 }
 
 interface SessionContextValue {
@@ -22,8 +21,7 @@ interface SessionContextValue {
   refresh: () => Promise<SessionAccount | null>;
   // Resolves true once signed in. If already signed in, resolves immediately;
   // otherwise opens the sign-in popup and resolves when it closes (true on success,
-  // false if the player cancels). The popup lives in WalletProviders, so only
-  // routes under it may call this.
+  // false if the player cancels).
   requireSignIn: () => Promise<boolean>;
   clearSession: () => void;
   modalOpen: boolean;
@@ -49,9 +47,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Sign-in happens elsewhere (today: RainbowKit's auto SIWE flow calling refresh()
-  // after Providers.tsx sees the auth status change); when that refresh finds an
-  // account while a requireSignIn() call is waiting on the modal, settle it here.
+  // Sign-in happens in the popup, which calls refresh() when it succeeds; when that
+  // refresh finds an account while a requireSignIn() call is waiting on the modal,
+  // settle it here.
   const refresh = useCallback(async () => {
     const currentReqId = ++reqIdRef.current;
     try {

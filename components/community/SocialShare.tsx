@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Share2 } from 'lucide-react';
-import { useSession } from '@/hooks/shared/use-session';
 
 interface SocialShareProps {
   score: number;
@@ -10,14 +9,8 @@ interface SocialShareProps {
 }
 
 export function SocialShare({ score, streak }: SocialShareProps) {
-  const { account } = useSession();
-  
   const getShareUrl = () => {
-    let url = `${window.location.origin}/`;
-    if (account?.wallet) {
-      url += `?ref=${account.wallet}`;
-    }
-    return url;
+    return `${window.location.origin}/`;
   };
 
   const handleShare2Share = () => {

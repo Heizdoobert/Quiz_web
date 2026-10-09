@@ -15,26 +15,6 @@ updates:
       # typescript-eslint does not support TypeScript 7 yet.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
-      # RainbowKit 2 requires wagmi ^2.0.0; hold wagmi v3 until RainbowKit supports it (see ADR-006).
-      - dependency-name: "wagmi"
-        update-types: ["version-update:semver-major"]
-
-  - package-ecosystem: "npm"
-    directory: "/contracts"
-    schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 3
-    labels:
-      - "dependencies"
-      - "contracts"
-    ignore:
-      # Hardhat 3 deprecates hardhat-toolbox and requires new runner architecture.
-      - dependency-name: "hardhat"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "@nomicfoundation/hardhat-toolbox"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "typescript"
-        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"

@@ -29,22 +29,20 @@ export default function ProfilePage() {
   useEffect(() => {
     let isCancelled = false;
 
-    // Created-quiz lookup is still wallet-keyed (out of Task 11's scope); an email-only
-    // account has nothing to look up, so show the dashboard empty instead of spinning forever.
-    if (!account?.wallet) {
+    // A guest has nothing to look up, so show the dashboard empty instead of spinning forever.
+    if (!account) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
       setQuizzes([]);
       setFetchError(null);
       return;
     }
-    const wallet = account.wallet;
     setLoading(true);
     setFetchError(null);
 
     async function load() {
       try {
-        const res = await getUserQuizzes(wallet);
+        const res = await getUserQuizzes();
         if (!isCancelled) {
           if (res.success) {
             setQuizzes(res.quizzes);
@@ -85,12 +83,12 @@ export default function ProfilePage() {
 
     try {
       if (!(await ensureSession())) {
-        setActionError('Sign the message in your wallet to export your data.');
+        setActionError('Sign in to export your data.');
         return;
       }
       const res = await exportUserData();
       if (res.success) {
-        const label = account.wallet ? account.wallet.slice(0, 8) : account.id.slice(0, 8);
+        const label = account.id.slice(0, 8);
         downloadJson(`quick-quiz-backup-${label}.json`, res.data);
         setExportSuccess(true);
         setTimeout(() => setExportSuccess(false), 4000);

@@ -27,7 +27,6 @@ export default function QuizLayout({
   initialCategory,
 }: QuizLayoutProps = {}) {
   const {
-    address,
     selectedCategory,
     currentQuestion,
     isFlipped,
@@ -49,8 +48,6 @@ export default function QuizLayout({
     activeModal,
     openModal,
     closeModal,
-    claimableRewards,
-    hasClaimableRewards,
     setLeaderboardVisible,
     loadNextQuestion,
     handleSelectCategory,
@@ -59,7 +56,6 @@ export default function QuizLayout({
     handleSkip,
     handleSelectGroup,
     handleSaveTimerSettings,
-    handleCloseRewards,
     isUnlocked,
     handleUnlock,
   } = useQuizLogic({ initialQuestion, initialLeaderboard, initialCategory });
@@ -67,13 +63,7 @@ export default function QuizLayout({
 
   return (
     <>
-      <Header
-        onOpenRewards={() => openModal('rewards')}
-        onOpenProfile={() => openModal('profile')}
-        hasClaimable={hasClaimableRewards}
-        heldTokens={claimableRewards?.heldTokens}
-        sweepsAt={claimableRewards?.sweepsAt}
-      />
+      <Header onOpenProfile={() => openModal('profile')} />
       <div className={`w-full flex justify-center pt-6 px-4 transition-[padding] duration-300 ${showStickyAd ? 'pb-[calc(70px+env(safe-area-inset-bottom))] sm:pb-21' : 'pb-6'}`}>
       <div className="w-full max-w-385 flex gap-6 justify-center items-start">
         {/* Center Main Content Area */}
@@ -89,8 +79,6 @@ export default function QuizLayout({
                 stats={stats}
                 history={history}
                 onOpenReview={() => openModal('review')}
-                claimableTokens={claimableRewards?.claimableTokens}
-                onOpenRewards={() => openModal('rewards')}
               />
             </div>
 
@@ -126,10 +114,7 @@ export default function QuizLayout({
 
               <div id="custom-form" className="w-full mt-4">
                 {account ? (
-                  <QuestionForm
-                    walletAddress={address || null}
-                    onQuestionAdded={loadNextQuestion}
-                  />
+                  <QuestionForm onQuestionAdded={loadNextQuestion} />
                 ) : (
                   <div className="w-full glass glass-border glass-edge rounded-3xl shadow-xl p-6 text-center space-y-3">
                     <p className="text-sm text-slate-400">
@@ -170,16 +155,12 @@ export default function QuizLayout({
       <QuizModals
         activeModal={activeModal}
         closeModal={closeModal}
-        openModal={openModal}
         timerMode={timerMode}
         timerDuration={timerDuration}
         handleSaveTimerSettings={handleSaveTimerSettings}
-        address={address}
         handleSelectGroup={handleSelectGroup}
         history={history}
-        handleCloseRewards={handleCloseRewards}
         stats={stats}
-        claimableRewards={claimableRewards}
         currentQuestionId={currentQuestion?.id}
       />
     </div>

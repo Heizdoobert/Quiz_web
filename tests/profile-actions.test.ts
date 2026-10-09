@@ -11,7 +11,7 @@ vi.mock('../lib/supabase/supabase', () => ({
   },
 }));
 
-// Export reads with the secret key, for the signed-in wallet only.
+// Export reads with the secret key, for the signed-in account only.
 vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
@@ -21,11 +21,8 @@ vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 
-// Valid Ethereum address for testing (40 hex chars after 0x)
-const VALID_ADDRESS = '0x1234567890abcdef1234567890abcdef12345678';
-const VALID_ADDRESS_CHECKSUMMED = '0x1234567890ABCDEF1234567890abcdef12345678';
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';
-const ACCOUNT = { id: ACCOUNT_ID, wallet: VALID_ADDRESS };
+const ACCOUNT = { id: ACCOUNT_ID };
 
 describe('profile-actions', () => {
   beforeEach(() => {
@@ -33,47 +30,19 @@ describe('profile-actions', () => {
   });
 
   describe('getUserQuizzes', () => {
-    it('returns an error with code INVALID_ADDRESS if walletAddress is empty', async () => {
-      const result = await getUserQuizzes('');
+    it('refuses without a session, without querying', async () => {
+      (getSessionAccount as import("vitest").Mock).mockResolvedValue(null);
+      const result = await getUserQuizzes();
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error).toBe('A valid wallet address is required.');
-        expect(result.code).toBe('INVALID_ADDRESS');
+        expect(result.error).toBe('Sign in to see your quizzes.');
+        expect(result.code).toBe('UNAUTHORIZED');
       }
       expect(supabase.from).not.toHaveBeenCalled();
-    });
-
-    it('returns an error if walletAddress is not a valid Ethereum address', async () => {
-      const result = await getUserQuizzes('not-an-address');
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        expect(result.error).toBe('A valid wallet address is required.');
-        expect(result.code).toBe('INVALID_ADDRESS');
-      }
-      expect(supabase.from).not.toHaveBeenCalled();
-    });
-
-    it('normalizes address to lowercase before querying', async () => {
-      const mockData = [{ id: '1', prompt: 'Test Question' }];
-      const mockSelect = vi.fn().mockReturnThis();
-      const mockEq = vi.fn().mockReturnThis();
-      const mockOrder = vi.fn().mockReturnThis();
-      const mockRange = vi.fn().mockResolvedValue({ data: mockData, error: null });
-
-      (supabase.from as import("vitest").Mock).mockReturnValue({
-        select: mockSelect,
-        eq: mockEq,
-        order: mockOrder,
-        range: mockRange,
-      });
-
-      await getUserQuizzes(VALID_ADDRESS_CHECKSUMMED);
-
-      // Verify the address was lowercased
-      expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS_CHECKSUMMED.toLowerCase());
     });
 
     it('returns user quizzes with public fields only (no correct_index leak)', async () => {
+      (getSessionAccount as import("vitest").Mock).mockResolvedValue(ACCOUNT);
       const mockData = [{ id: '1', prompt: 'Test Question', options: ['A', 'B'], category: 'General' }];
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
@@ -87,12 +56,12 @@ describe('profile-actions', () => {
         range: mockRange,
       });
 
-      const result = await getUserQuizzes(VALID_ADDRESS);
+      const result = await getUserQuizzes();
 
       expect(supabase.from).toHaveBeenCalledWith('questions');
       // Verify anti-cheat: ONLY public fields projected, correct_index and explanation omitted
-      expect(mockSelect).toHaveBeenCalledWith('id, category, prompt, options, status, created_at, created_by');
-      expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS);
+      expect(mockSelect).toHaveBeenCalledWith('id, category, prompt, options, status, created_at');
+      expect(mockEq).toHaveBeenCalledWith('created_by_user', ACCOUNT_ID);
       expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
       expect(mockRange).toHaveBeenCalledWith(0, 499);
 
@@ -104,7 +73,8 @@ describe('profile-actions', () => {
     });
 
     it('honors pagination offset, limit, and category filter', async () => {
-      const mockData = [{ id: '2', prompt: 'DeFi Question', category: 'DeFi' }];
+      (getSessionAccount as import("vitest").Mock).mockResolvedValue(ACCOUNT);
+      const mockData = [{ id: '2', prompt: 'Science Question', category: 'Science' }];
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
@@ -117,10 +87,10 @@ describe('profile-actions', () => {
         range: mockRange,
       });
 
-      const result = await getUserQuizzes(VALID_ADDRESS, { limit: 10, offset: 20, category: 'DeFi' });
+      const result = await getUserQuizzes({ limit: 10, offset: 20, category: 'Science' });
 
-      expect(mockEq).toHaveBeenCalledWith('created_by', VALID_ADDRESS);
-      expect(mockEq).toHaveBeenCalledWith('category', 'DeFi');
+      expect(mockEq).toHaveBeenCalledWith('created_by_user', ACCOUNT_ID);
+      expect(mockEq).toHaveBeenCalledWith('category', 'Science');
       expect(mockRange).toHaveBeenCalledWith(20, 29);
       expect(result.success).toBe(true);
     });
@@ -169,7 +139,7 @@ describe('profile-actions', () => {
       }
     });
 
-    it('exports data keyed by account id, with schema version and wallet from the session', async () => {
+    it('exports data keyed by account id, with schema version and the account id from the session', async () => {
       const mockQuizzes = [{ id: '1', prompt: 'Q1' }];
       const mockStats = [{ id: 's1', score: 100 }];
       const eqCalls: Array<[string, string]> = [];
@@ -204,7 +174,7 @@ describe('profile-actions', () => {
         expect(result.data.version).toBe('1.0');
         expect(result.data.quizzes).toEqual(mockQuizzes);
         expect(result.data.stats).toEqual(mockStats);
-        expect(result.data.walletAddress).toBe(VALID_ADDRESS);
+        expect(result.data.accountId).toBe(ACCOUNT_ID);
         expect(result.data.isTruncated).toBe(false);
       }
     });

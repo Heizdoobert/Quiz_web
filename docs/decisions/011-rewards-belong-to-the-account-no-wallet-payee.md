@@ -1,5 +1,7 @@
 # ADR-011: $QUIZ Belongs to the Account; Unclaimed Rewards Sweep to the Treasury After 180 Days
 
+> **Superseded by [ADR-013](013-web2-only.md)**: the wallet, token and contract code this record describes was removed. Kept for history.
+
 ## Status
 Accepted (approved 2026-09-28). Full design in `docs/specs/rewards-no-wallet-payee.md`.
 

@@ -1,5 +1,7 @@
 # Security Posture & Threat Model: Quick Quiz
 
+> **Out of date**: the wallet, token and contract parts of this document describe code removed in [ADR-013](../docs/decisions/013-web2-only.md).
+
 As of 2026-10-08. Every claim below names the file or command that confirms it. Items marked **pending** are not yet true in production.
 
 ## 1. Threat Model & STRIDE Analysis

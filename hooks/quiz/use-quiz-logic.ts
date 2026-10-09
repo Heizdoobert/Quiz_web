@@ -1,20 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { useAccount } from 'wagmi';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AnswerSubmissionResult,
   ClientQuestion,
   LeaderboardEntry,
   UserStats,
-  ClaimableRewards,
   HistoryItem,
 } from '@/lib/types';
 import { fetchRandomQuestion, get5050EliminatedIndices } from '@/lib/actions/question-actions';
 import { getAnswerHistory, getUserStats, submitAnswer } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { getClaimableRewards } from '@/lib/actions/reward-actions';
 import { soundEngine } from '@/lib/client/audio';
 import { useSession } from '@/hooks/shared/use-session';
 
@@ -23,7 +20,6 @@ export type ActiveModal =
   | 'timer'
   | 'group'
   | 'review'
-  | 'rewards'
   | 'profile'
   | 'dispute'
   | null;
@@ -39,8 +35,7 @@ export function useQuizLogic({
   initialLeaderboard = [],
   initialCategory = 'All',
 }: UseQuizLogicOptions = {}) {
-  const { address, isConnected } = useAccount();
-  const { account, requireSignIn: ensureSession } = useSession();
+  const { account } = useSession();
   const accountRef = useRef(account);
 
   // Quiz state
@@ -115,9 +110,6 @@ export function useQuizLogic({
   const openModal = (modal: Exclude<ActiveModal, null>) => setActiveModal(modal);
   const closeModal = () => setActiveModal(null);
 
-  // Rewards
-  const [claimableRewards, setClaimableRewards] = useState<ClaimableRewards | null>(null);
-
   const refreshStats = useCallback(async () => {
     const targetId = account?.id;
     if (!targetId) {
@@ -133,17 +125,6 @@ export function useQuizLogic({
     const userStats = await getUserStats();
     if (accountRef.current?.id !== targetId) return;
     setStats(userStats);
-  }, [account]);
-
-  const refreshRewards = useCallback(async () => {
-    const targetId = account?.id;
-    if (!targetId) {
-      setClaimableRewards(null);
-      return;
-    }
-    const data = await getClaimableRewards();
-    if (accountRef.current?.id !== targetId) return;
-    setClaimableRewards(data);
   }, [account]);
 
   // Loads the signed-in account's saved answers so history and the "already answered"
@@ -200,9 +181,8 @@ export function useQuizLogic({
       if (!currentQuestion || isSubmitting || isFlipped) return;
 
       setIsSubmitting(true);
-      // Answers only count for a signed-in wallet. If the signature is declined the
-      // answer is still shown, just not recorded (blocking would re-prompt on every timer tick).
-      if (isConnected) await ensureSession();
+      // Answers only count for a signed-in account. A guest still sees the result, it is
+      // just not recorded (prompting on every answer would nag, and on every timer tick).
       const res = await submitAnswer({
         questionId: currentQuestion.id,
         answerIndex,
@@ -248,9 +228,8 @@ export function useQuizLogic({
 
       // Refresh leaderboards
       loadLeaderboards();
-      refreshRewards();
     },
-    [currentQuestion, isSubmitting, isFlipped, isConnected, ensureSession, loadLeaderboards, refreshRewards]
+    [currentQuestion, isSubmitting, isFlipped, loadLeaderboards]
   );
 
   // Initial stats and history fetch (the account itself is created at sign-in)
@@ -258,9 +237,8 @@ export function useQuizLogic({
     accountRef.current = account;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     void refreshStats();
-    void refreshRewards();
     void refreshHistory();
-  }, [account, refreshStats, refreshRewards, refreshHistory]);
+  }, [account, refreshStats, refreshHistory]);
 
   // Only fetch initial question if not supplied via SSR
   useEffect(() => {
@@ -329,18 +307,7 @@ export function useQuizLogic({
     setTimeLeft(duration);
   };
 
-  const handleCloseRewards = () => {
-    closeModal();
-    refreshRewards();
-  };
-
-  const hasClaimableRewards =
-    BigInt(claimableRewards?.claimableTokens || '0') > BigInt(0) ||
-    (claimableRewards?.eligibleBadges?.length ?? 0) > 0;
-
   return {
-    address,
-    isConnected,
     selectedCategory,
     currentQuestion,
     isFlipped,
@@ -362,9 +329,6 @@ export function useQuizLogic({
     activeModal,
     openModal,
     closeModal,
-    claimableRewards,
-    hasClaimableRewards,
-    refreshRewards,
     setLeaderboardVisible,
     loadLeaderboards,
     loadNextQuestion,
@@ -374,7 +338,6 @@ export function useQuizLogic({
     handleSkip,
     handleSelectGroup,
     handleSaveTimerSettings,
-    handleCloseRewards,
     isUnlocked,
     handleUnlock,
   };

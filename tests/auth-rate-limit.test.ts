@@ -5,13 +5,9 @@ import {
   verifyEmailCode,
   signInWithUsername,
   signUpWithUsername,
-  signInWithWallet,
-  linkWallet,
 } from '../lib/actions/auth-actions';
 import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
-import { publicClientFor } from '../lib/services/chain';
-import { getSessionAccount } from '../lib/services/session';
 
 let forwardedFor: string | null = null;
 
@@ -31,18 +27,13 @@ vi.mock('../lib/supabase/supabase', () => ({
 vi.mock('../lib/supabase/supabase-admin', () => ({
   supabaseAdmin: { rpc: vi.fn(), auth: { admin: { createUser: vi.fn() } } },
 }));
-vi.mock('../lib/services/chain', () => ({ publicClientFor: vi.fn() }));
 vi.mock('../lib/services/session', () => ({
   getSessionAccount: vi.fn(),
   setSessionAccount: vi.fn(),
   clearSessionAccount: vi.fn(),
   shouldUseSecureCookies: vi.fn(),
 }));
-vi.mock('../lib/services/users', () => ({
-  ensureAccountForWallet: vi.fn(),
-  ensureAccountForAuthUser: vi.fn(),
-  linkWalletToAccount: vi.fn(),
-}));
+vi.mock('../lib/services/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
 
 const rpc = () => supabaseAdmin!.rpc as unknown as ReturnType<typeof vi.fn>;
 const allow = () => rpc().mockResolvedValue({ data: true, error: null });
@@ -89,14 +80,14 @@ describe('clientIp / allowAttemptFromIp', () => {
   });
 
   it('skips the limit entirely when there is no IP', async () => {
-    expect(await allowAttemptFromIp('wallet-ip', 30, 600)).toBe(true);
+    expect(await allowAttemptFromIp('signup-ip', 30, 600)).toBe(true);
     expect(rpc()).not.toHaveBeenCalled();
   });
 
   it('counts when an IP is present', async () => {
     forwardedFor = '203.0.113.9';
     block();
-    expect(await allowAttemptFromIp('wallet-ip', 30, 600)).toBe(false);
+    expect(await allowAttemptFromIp('signup-ip', 30, 600)).toBe(false);
   });
 });
 
@@ -144,20 +135,5 @@ describe('auth actions behind the limiter', () => {
     expect(res.ok).toBe(false);
     expect(supabaseAdmin!.auth.admin.createUser).not.toHaveBeenCalled();
     expect(supabase.auth.signUp).not.toHaveBeenCalled();
-  });
-
-  it('signInWithWallet refuses over the per-IP limit before any chain call', async () => {
-    forwardedFor = '203.0.113.9';
-    block();
-    expect(await signInWithWallet('msg', '0x00')).toBe(false);
-    expect(publicClientFor).not.toHaveBeenCalled();
-  });
-
-  it('linkWallet refuses over the per-IP limit before any chain call', async () => {
-    forwardedFor = '203.0.113.9';
-    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue({ id: 'u1', wallet: null });
-    block();
-    expect(await linkWallet('msg', '0x00')).toEqual({ ok: false });
-    expect(publicClientFor).not.toHaveBeenCalled();
   });
 });

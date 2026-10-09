@@ -94,9 +94,7 @@ export default function GroupLeaderboard({
                 <span
                   className={`font-bold ${isTop1 ? "text-crypto-gold" : "text-slate-200"}`}
                 >
-                  {entry.display_name ||
-                    entry.wallet_address?.slice(0, 10) ||
-                    "Player"}
+                  {entry.display_name || "Player"}
                 </span>
               </div>
               <div className="flex items-center gap-3">

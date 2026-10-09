@@ -11,7 +11,7 @@ export default function Loading() {
         <h2 className="text-2xl font-black bg-linear-to-r from-neo-mint to-electric-indigo bg-clip-text text-transparent tracking-wide font-heading">
           Quick Quiz
         </h2>
-        <p className="text-xs text-slate-400">Loading crypto trivia & web3 leaderboards...</p>
+        <p className="text-xs text-slate-400">Loading trivia & leaderboards...</p>
 
         {/* Skeleton Progress Bar */}
         <div className="w-full h-1.5 bg-cyber-violet rounded-full overflow-hidden mt-2 border border-cyber-border">
