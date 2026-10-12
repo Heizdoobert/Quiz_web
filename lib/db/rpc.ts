@@ -32,3 +32,7 @@ export async function incrementAiGeneration(accountId: string): Promise<number> 
 export async function searchQuestionsRpc(query: string, limit: number, offset: number): Promise<unknown[]> {
   return unwrap('rpc.search_questions', await pub.rpc('search_questions', { p_query: query, p_limit: limit, p_offset: offset })) ?? [];
 }
+
+export async function ratingSummary(questionId: string): Promise<Array<{ average: unknown; count: unknown }>> {
+  return unwrap('rpc.get_rating_summary', await pub.rpc('get_rating_summary', { p_question_id: questionId })) ?? [];
+}
