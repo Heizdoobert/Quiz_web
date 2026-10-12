@@ -15,9 +15,9 @@ const ANSWERS_PER_IP_PER_HOUR = 120;
 
 // The session account's most recent answers, newest first, so history and answeredIds
 // survive a reload. Never anyone else's.
-export async function getAnswerHistory(): Promise<HistoryItem[]> {
+export async function getAnswerHistory(authAccount?: SessionAccount): Promise<HistoryItem[]> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     return account ? await historyForAccount(account.id) : [];
   } catch (err) {
     logger.error('getAnswerHistory exception:', err);
@@ -85,8 +85,8 @@ export async function submitAnswer(params: {
   }
 }
 
-export async function getUserStats(): Promise<UserStats> {
-  const account = await getSessionAccount();
+export async function getUserStats(authAccount?: SessionAccount): Promise<UserStats> {
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { score: 0, streak: 0, bestStreak: 0, accuracy: 0, totalAnswered: 0 };
   return statsForAccount(account.id);
 }

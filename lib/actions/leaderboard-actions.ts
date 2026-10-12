@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase/supabase';
 import { LeaderboardEntry } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
+import type { SessionAccount } from '@/lib/services/session';
 
 // Rows come pre-aggregated and pre-sorted from Postgres (supabase/migrations/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
@@ -57,7 +58,8 @@ export async function getGlobalLeaderboard(limit: number = 50, offset: number = 
 export async function getGroupLeaderboard(
   groupId: string,
   limit: number = 50,
-  offset: number = 0
+  offset: number = 0,
+  _authAccount?: SessionAccount
 ): Promise<LeaderboardEntry[]> {
   try {
     if (!isUuid(groupId)) return [];

@@ -72,4 +72,14 @@ describe('getGroupLeaderboard', () => {
     expect(supabase.rpc).toHaveBeenCalledWith('get_group_leaderboard', { p_group_id: GROUP_ID, p_limit: 50, p_offset: 0 });
     expect(entries[0].rank).toBe(1);
   });
+
+  it('accepts an optional authAccount parameter', async () => {
+    (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({
+      data: [{ user_id: ACCOUNT_A, display_name: 'Alice', score: 1, accuracy: 100 }],
+      error: null,
+    });
+
+    const entries = await getGroupLeaderboard(GROUP_ID, 50, 0, { id: ACCOUNT_A });
+    expect(entries[0].rank).toBe(1);
+  });
 });
