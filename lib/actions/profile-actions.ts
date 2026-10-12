@@ -1,8 +1,9 @@
 'use server';
 import { logger } from "@/lib/logger";
 
-import { supabase } from '../supabase/supabase';
-import { supabaseAdmin } from '../supabase/supabase-admin';
+import { questionsForExport } from '../db/questions';
+import { resultsForExport } from '../db/results';
+import { questionAnalytics } from '../db/rpc';
 import { getSessionAccount } from '../services/session';
 import { quizzesForAccount } from '../services/user-quizzes';
 import {
@@ -44,36 +45,25 @@ export async function exportUserData(): Promise<ExportUserDataResult> {
         code: 'UNAUTHORIZED',
       };
     }
-    if (!supabaseAdmin) {
-      logger.error('[exportUserData] SUPABASE_SECRET_KEY is not set', new Error('[exportUserData] SUPABASE_SECRET_KEY is not set'));
-      return { success: false, error: 'Failed to generate secure backup.', code: 'EXPORT_FAILED' };
-    }
-
-    const [quizzesResponse, statsResponse] = await Promise.all([
-      supabaseAdmin.from('questions').select('*').eq('created_by_user', account.id).limit(MAX_EXPORT_QUIZZES),
-      supabaseAdmin.from('quiz_results').select('*').eq('user_id', account.id).limit(MAX_EXPORT_STATS),
+    // Each read keeps its own message; a failure is logged here and reported as EXPORT_FAILED.
+    const read = (label: string, p: Promise<unknown[]>) =>
+      p.catch((err) => {
+        logger.error(`[exportUserData:${label}]`, err);
+        return null;
+      });
+    const [quizRows, statRows] = await Promise.all([
+      read('quizzes', questionsForExport(account.id, MAX_EXPORT_QUIZZES)),
+      read('stats', resultsForExport(account.id, MAX_EXPORT_STATS)),
     ]);
-
-    if (quizzesResponse.error) {
-      logger.error('[exportUserData:quizzes]', quizzesResponse.error);
-      return {
-        success: false,
-        error: 'Failed to fetch quizzes for export.',
-        code: 'EXPORT_FAILED',
-      };
+    if (!quizRows) {
+      return { success: false, error: 'Failed to fetch quizzes for export.', code: 'EXPORT_FAILED' };
+    }
+    if (!statRows) {
+      return { success: false, error: 'Failed to fetch stats for export.', code: 'EXPORT_FAILED' };
     }
 
-    if (statsResponse.error) {
-      logger.error('[exportUserData:stats]', statsResponse.error);
-      return {
-        success: false,
-        error: 'Failed to fetch stats for export.',
-        code: 'EXPORT_FAILED',
-      };
-    }
-
-    const quizzes = (quizzesResponse.data as Question[]) || [];
-    const stats = (statsResponse.data as QuizResult[]) || [];
+    const quizzes = quizRows as Question[];
+    const stats = statRows as QuizResult[];
     const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
 
     const exportData: UserBackupData = {
@@ -113,13 +103,13 @@ export async function getQuestionAnalytics(): Promise<{ success: boolean; data?:
       return { success: false, error: 'Sign in to view analytics.' };
     }
 
-    const { data, error } = await supabase.rpc('get_question_analytics', { p_user_id: account.id });
-
-    if (error) {
-      logger.error('[getQuestionAnalytics:rpc]', error);
+    let data: unknown[];
+    try {
+      data = await questionAnalytics(account.id);
+    } catch (err) {
+      logger.error('[getQuestionAnalytics:rpc]', err);
       return { success: false, error: 'Failed to fetch analytics.' };
     }
-
     return { success: true, data: data as QuestionAnalytics[] };
   } catch (error) {
     logger.error('[getQuestionAnalytics]', error);

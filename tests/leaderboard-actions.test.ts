@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '../lib/actions/leaderboard-actions';
 import { supabase } from '../lib/supabase/supabase';
+import { logger } from '../lib/logger';
 
 const ACCOUNT_A = '00000000-0000-4000-8000-0000000000a1';
 const ACCOUNT_B = '00000000-0000-4000-8000-0000000000b1';
@@ -40,6 +41,14 @@ describe('getGlobalLeaderboard', () => {
   it('returns empty on an rpc error', async () => {
     (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: null, error: { message: 'boom' } });
     expect(await getGlobalLeaderboard(50)).toEqual([]);
+  });
+
+  it('returns empty when the rpc resolves with no data and no error', async () => {
+    (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: null, error: null });
+    const logged = vi.spyOn(logger, 'error').mockImplementation(() => {});
+    expect(await getGlobalLeaderboard(50)).toEqual([]);
+    // The db layer throws "no data" (so unstable_cache never stores an empty board); the action logs it.
+    expect(logged).toHaveBeenCalledWith('getGlobalLeaderboard error:', expect.objectContaining({ name: 'DbError', message: expect.stringContaining('returned no data') }));
   });
 
   it('caches the aggregate for 15 seconds under its own key', () => {

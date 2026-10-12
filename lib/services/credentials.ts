@@ -1,8 +1,7 @@
 import 'server-only';
 import { ensureAccountForAuthUser } from '@/lib/services/users';
 import type { SessionAccount } from '@/lib/services/session';
-import { supabase } from '@/lib/supabase/supabase';
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { auth, createConfirmedUser } from '@/lib/db/auth';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -42,13 +41,9 @@ export async function signUpAccount(username: string, password: string): Promise
     const email = usernameToEmail(trimmed);
     let authUserId: string | null = null;
 
-    if (supabaseAdmin?.auth?.admin?.createUser) {
-      const { data, error } = await supabaseAdmin.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-        user_metadata: { username: trimmed },
-      });
+    const created = await createConfirmedUser(email, password, trimmed);
+    if (created) {
+      const { data, error } = created;
       if (error) {
         const msg = error.message.toLowerCase();
         if (msg.includes('already registered') || msg.includes('already exists') || msg.includes('unique')) {
@@ -60,7 +55,7 @@ export async function signUpAccount(username: string, password: string): Promise
     }
 
     if (!authUserId) {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await auth().signUp({
         email,
         password,
         options: { data: { username: trimmed } },
@@ -96,7 +91,7 @@ export async function signInAccount(username: string, password: string): Promise
     // Counts every attempt, not just failures: one counter, and a legitimate user never nears 10.
     if (!(await allowAttempt('signin', trimmed, 10, 900))) return { ok: false, error: RATE_LIMITED_MESSAGE };
 
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await auth().signInWithPassword({
       email: usernameToEmail(trimmed),
       password,
     });
@@ -117,7 +112,7 @@ export async function signInAccount(username: string, password: string): Promise
 export async function signInAccountWithGoogle(idToken: string): Promise<CredentialResult> {
   try {
     if (!(await allowAttemptFromIp('google-ip', 30, 600))) return { ok: false, error: RATE_LIMITED_MESSAGE };
-    const { data, error } = await supabase.auth.signInWithIdToken({ provider: 'google', token: idToken });
+    const { data, error } = await auth().signInWithIdToken({ provider: 'google', token: idToken });
     if (error || !data?.user) return { ok: false, error: 'Google sign-in failed.' };
 
     const accountId = await ensureAccountForAuthUser(data.user.id, data.user.user_metadata?.name);
