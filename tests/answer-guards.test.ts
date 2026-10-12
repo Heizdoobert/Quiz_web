@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { submitAnswer, getAnswerHistory } from '../lib/actions/quiz-actions';
 import { createQuestion, disputeQuestion, get5050EliminatedIndices } from '../lib/actions/question-actions';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { getSessionAccount } from '../lib/services/session';
 import { validateQuestionInput } from '../lib/utils/validation';
 
 let mockAnswerLimitHit = false;
 const answerLimitCalls: unknown[][] = [];
 
-vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/services/rate-limit', () => ({
   allowAttemptFromIp: async (...args: unknown[]) => {

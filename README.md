@@ -22,7 +22,7 @@ cp .env.example .env.local   # then fill it in, see below
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/supabase/supabase.ts`).
+Visit [http://localhost:3000](http://localhost:3000). The app refuses to start when a required variable is missing (see `lib/sdk/supabase.ts`).
 
 ### Environment Variables
 

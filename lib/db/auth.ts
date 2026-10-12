@@ -1,6 +1,6 @@
 import 'server-only';
-import { supabase } from '@/lib/supabase/supabase';
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { supabase } from '@/lib/sdk/supabase';
+import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
 
 // Supabase Auth, not Postgres: results keep Supabase's { data, error } shape because
 // callers turn auth errors (taken username, wrong password, bad code) into messages.

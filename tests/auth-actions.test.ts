@@ -6,8 +6,8 @@ import {
   signUpWithUsername,
   signInWithUsername,
 } from '../lib/actions/auth-actions';
-import { supabase } from '../lib/supabase/supabase';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/sdk/supabase';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 
 // In-memory cookie store
 const cookieStore = new Map<string, { value: string; [key: string]: unknown }>();
@@ -25,7 +25,7 @@ vi.mock('next/headers', () => ({
   headers: vi.fn(async () => new Headers({ host: 'localhost:3000', 'x-forwarded-proto': 'http' })),
 }));
 
-vi.mock('../lib/supabase/supabase', () => ({
+vi.mock('../lib/sdk/supabase', () => ({
   supabase: {
     from: vi.fn(() => ({
       select: vi.fn().mockReturnThis(),
@@ -41,7 +41,7 @@ vi.mock('../lib/supabase/supabase', () => ({
   },
 }));
 
-vi.mock('../lib/supabase/supabase-admin', () => ({
+vi.mock('../lib/sdk/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(() => ({
       upsert: vi.fn().mockResolvedValue({ error: null }),
