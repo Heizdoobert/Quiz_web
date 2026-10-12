@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
-// Import from the built SDK distribution bundle
+// Import the SDK from source so type-check does not depend on a prior build
 import {
   QuickQuizClient,
   QuickQuizError,
@@ -17,14 +17,14 @@ import {
   type AnswerSubmissionResult,
   type AuthResult,
   type AuthSession,
-} from '../packages/sdk/dist';
+} from '../packages/sdk/src';
 
 import {
   createTokenVerifier,
   getBearerToken,
   withQuickQuizAuth,
   quickQuizAuth,
-} from '../packages/sdk/dist/server';
+} from '../packages/sdk/src/server';
 
 // Route handlers under test
 import { POST as signupRoute } from '@/app/api/v1/auth/signup/route';
@@ -74,7 +74,7 @@ vi.mock('@/lib/actions/auth-actions', () => ({
   signOut: vi.fn(),
 }));
 
-describe('SDK End-to-End Integration Tests (against built dist)', () => {
+describe('SDK End-to-End Integration Tests', () => {
   const BASE_URL = 'https://api.quickquiz.app';
 
   const mockUser = {
