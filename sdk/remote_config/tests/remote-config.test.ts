@@ -34,6 +34,17 @@ describe('getRemoteConfig', () => {
     expect(config).not.toHaveProperty('service_secret');
   });
 
+  it('ignores inherited object keys without throwing', async () => {
+    select.mockResolvedValue({
+      data: [
+        { key: 'constructor', value: 1 },
+        { key: '__proto__', value: 1 },
+      ],
+      error: null,
+    });
+    expect(await getRemoteConfig()).toEqual({ maintenance_mode: false });
+  });
+
   it('throws a DbError when the read fails', async () => {
     select.mockResolvedValue({ data: null, error: { message: 'boom' } });
     await expect(getRemoteConfig()).rejects.toBeInstanceOf(DbError);
