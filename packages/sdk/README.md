@@ -208,14 +208,13 @@ const groupBoard = await client.leaderboard.group('group-uuid', { limit: 25 });
 
 ### 5. Study Groups (`client.groups`)
 
-Form learning groups, join existing communities, and view member rosters.
+Form learning groups, join existing communities, and manage memberships.
+
+> Note: Group leaderboards are accessed via [`client.leaderboard.group(groupId)`](#4-leaderboards-clientleaderboard).
 
 ```typescript
-// List joined groups
+// List groups the authenticated user belongs to (requires auth)
 const myGroups = await client.groups.list();
-
-// Get group by ID
-const group = await client.groups.get('group-uuid');
 
 // Create a new group (requires auth)
 const newGroup = await client.groups.create({
@@ -223,96 +222,97 @@ const newGroup = await client.groups.create({
   description: 'Weekly biology quizzes and study sessions',
 });
 
-// Join & leave groups
+// Join an existing group by ID (requires auth)
 await client.groups.join('group-uuid');
+
+// Leave a group by ID (requires auth)
 await client.groups.leave('group-uuid');
-
-// Group members roster
-const members = await client.groups.members('group-uuid');
-
-// Group leaderboard
-const groupLeaderboard = await client.groups.leaderboard('group-uuid');
 ```
 
 ---
 
 ### 6. Community & Discussions (`client.community`)
 
-Participate in question ratings, comment discussions, and community moderation.
+Rate questions, participate in question discussions and suggestions, and manage user feedback.
 
 ```typescript
-// View question discussions (ratings and comments)
-const discussion = await client.community.discussions('question-uuid');
+// View question discussions (ratings summary and paginated comments)
+const discussion = await client.community.discussion('question-uuid', { page: 1 });
 console.log('Average rating:', discussion.rating.average);
+console.log('Total comments:', discussion.comments.length);
 
-// Rate a question (1 to 5 stars)
-await client.community.rateQuestion('question-uuid', 5);
+// Submit a 1-5 star rating for a question (requires auth & prior answer)
+await client.community.rate('question-uuid', 5);
 
-// Add discussion comment
-const comment = await client.community.addComment('question-uuid', 'Great question on orbital mechanics!');
-
-// Submit violation report
-await client.community.submitReport({
-  targetId: 'comment-uuid',
-  targetType: 'comment',
-  reason: 'Spam or offensive language',
+// Post a comment or suggestion on a question (requires auth & prior answer)
+await client.community.comment('question-uuid', {
+  body: 'Great question on orbital mechanics!',
+  kind: 'comment', // or 'suggestion'
 });
 
-// View my reports status
-const reports = await client.community.myReports();
+// Delete a comment authored by the current user (requires auth)
+await client.community.deleteComment('comment-uuid');
 
-// Community guidelines
-const guidelines = await client.community.guidelines();
+// Mark a question improvement suggestion as resolved (requires auth & question authorship)
+await client.community.resolveSuggestion('suggestion-uuid');
+
+// Get pending suggestions on questions authored by current user (requires auth)
+const pendingSuggestions = await client.community.suggestions();
 ```
 
 ---
 
 ### 7. Profile & Account Management (`client.profile`)
 
-View and update user profiles, browse created quizzes, and export user data.
+Access author quiz management, question performance analytics, and account data exports.
+
+> Note: Current user identity and account session are accessed via [`client.auth.session()`](#1-authentication-clientauth).
 
 ```typescript
-// Get current user profile
-const profile = await client.profile.get();
-
-// Get profile by user ID
-const otherProfile = await client.profile.get('other-user-uuid');
-
-// Update profile display name
-await client.profile.update({ username: 'SuperQuizzer' });
-
-// Get personal quiz contribution history
-const myQuizzes = await client.profile.myQuizzes({
+// Get questions authored by current user with optional filters and pagination (requires auth)
+const authoredQuizzes = await client.profile.quizzes({
   category: 'Science',
   status: 'verified',
   limit: 20,
+  offset: 0,
 });
+console.log('Total authored quizzes:', authoredQuizzes.count);
 
-// Export account data (GDPR / backup)
-const backupData = await client.profile.exportData();
+// Get analytics on questions authored by current user (requires auth)
+const analytics = await client.profile.analytics();
+for (const stat of analytics) {
+  console.log(`${stat.prompt}: ${stat.play_count} plays, ${stat.accuracy_rate}% accuracy`);
+}
+
+// Export complete user account data (created quizzes and quiz history) (requires auth)
+const backupData = await client.profile.export();
+console.log('Exported quizzes count:', backupData.quizzes.length);
 ```
 
 ---
 
 ### 8. Discovery & Search (`client.discovery`)
 
-Search across questions, discover topics, and explore trending categories.
+Search across questions and explore question topics and categories.
 
 ```typescript
-// Search questions by keywords
+// Search questions by keyword with pagination
 const searchResults = await client.discovery.search('quantum computing', {
-  category: 'Technology',
   limit: 10,
+  offset: 0,
 });
+for (const match of searchResults.results) {
+  console.log(`[${match.category}] ${match.prompt}`);
+}
 
-// List all available topics
+// List all question topics with count and recent activity
 const topics = await client.discovery.topics();
 
-// List questions in a specific topic
-const topicQuestions = await client.discovery.topicQuestions('astronomy', { limit: 20 });
-
-// Trending topics and questions
-const trending = await client.discovery.trending();
+// Get questions filed under a specific topic/category with pagination
+const topicQuestions = await client.discovery.topicQuestions('physics', {
+  limit: 20,
+  offset: 0,
+});
 ```
 
 ---

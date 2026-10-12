@@ -30,6 +30,7 @@ import {
 import { POST as signupRoute } from '@/app/api/v1/auth/signup/route';
 import { POST as signinRoute } from '@/app/api/v1/auth/signin/route';
 import { GET as sessionRoute } from '@/app/api/v1/auth/session/route';
+import { POST as signoutRoute } from '@/app/api/v1/auth/signout/route';
 import { GET as getRandomQuestionRoute } from '@/app/api/v1/questions/random/route';
 import { GET as getQuestionCountRoute } from '@/app/api/v1/questions/count/route';
 import { GET as getQuestionByIdRoute } from '@/app/api/v1/questions/[id]/route';
@@ -108,6 +109,9 @@ describe('SDK End-to-End Integration Tests (against built dist)', () => {
     }
     if (pathname === '/v1/auth/session' && method === 'GET') {
       return sessionRoute(nextReq);
+    }
+    if (pathname === '/v1/auth/signout' && method === 'POST') {
+      return signoutRoute(nextReq);
     }
     if (pathname === '/v1/questions/random' && method === 'GET') {
       return getRandomQuestionRoute(nextReq);
@@ -230,12 +234,14 @@ describe('SDK End-to-End Integration Tests (against built dist)', () => {
       }
     });
 
-    it('clears token on client after calling signOut', async () => {
+    it('signs out user via POST /v1/auth/signout, returns { ok: true }, and clears token on client', async () => {
       client.setToken(validJwt);
+      vi.mocked(verifyMobileAuthToken).mockReturnValue(mockUser);
       expect(client.getToken()).toBe(validJwt);
 
-      // signOut calls /v1/auth/signout (which is mocked as 404 in this router, but client.signOut clears token in finally)
-      await client.auth.signOut().catch(() => {});
+      const res = await client.auth.signOut();
+      expect(verifyMobileAuthToken).toHaveBeenCalledWith(validJwt);
+      expect(res).toEqual({ ok: true });
       expect(client.getToken()).toBeNull();
     });
   });
