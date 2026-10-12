@@ -39,3 +39,8 @@ export async function hasRecordedAnswer(accountId: string, questionId: string): 
   );
   return row !== null;
 }
+
+// Every column, for the account's own backup; secret key only.
+export async function resultsForExport(accountId: string, limit: number): Promise<unknown[]> {
+  return unwrap('results.export', await admin().from('quiz_results').select('*').eq('user_id', accountId).limit(limit)) ?? [];
+}

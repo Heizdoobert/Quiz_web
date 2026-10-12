@@ -155,3 +155,8 @@ export async function setDisputeState(questionId: string, disputeCount: number, 
       .eq('id', questionId)
   );
 }
+
+// Every column, for the account's own backup; secret key only.
+export async function questionsForExport(accountId: string, limit: number): Promise<unknown[]> {
+  return unwrap('questions.export', await admin().from('questions').select('*').eq('created_by_user', accountId).limit(limit)) ?? [];
+}

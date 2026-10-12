@@ -36,3 +36,21 @@ export async function searchQuestionsRpc(query: string, limit: number, offset: n
 export async function ratingSummary(questionId: string): Promise<Array<{ average: unknown; count: unknown }>> {
   return unwrap('rpc.get_rating_summary', await pub.rpc('get_rating_summary', { p_question_id: questionId })) ?? [];
 }
+
+// Pre-aggregated and pre-sorted in Postgres (supabase/migrations/stats-functions.sql).
+export async function globalLeaderboard(limit: number, offset: number): Promise<unknown[]> {
+  return unwrap('rpc.get_global_leaderboard', await pub.rpc('get_global_leaderboard', { p_limit: limit, p_offset: offset })) ?? [];
+}
+
+export async function groupLeaderboard(groupId: string, limit: number, offset: number): Promise<unknown[]> {
+  return (
+    unwrap(
+      'rpc.get_group_leaderboard',
+      await pub.rpc('get_group_leaderboard', { p_group_id: groupId, p_limit: limit, p_offset: offset })
+    ) ?? []
+  );
+}
+
+export async function questionAnalytics(accountId: string): Promise<unknown[]> {
+  return unwrap('rpc.get_question_analytics', await pub.rpc('get_question_analytics', { p_user_id: accountId })) ?? [];
+}
