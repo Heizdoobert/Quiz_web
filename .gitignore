@@ -66,3 +66,5 @@ skills-lock.json
 /sdk/dist
 sdk/dist/
 sdk/node_modules/
+sdk/shared_modules/dist/
+sdk/shared_modules/node_modules/
