@@ -3,7 +3,7 @@ import { GET } from '../app/api/health/route';
 
 const { query } = vi.hoisted(() => ({ query: vi.fn() }));
 
-vi.mock('../lib/supabase/supabase', () => ({
+vi.mock('../lib/sdk/supabase', () => ({
   supabase: {
     from: () => ({
       select: () => ({

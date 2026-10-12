@@ -1,22 +1,19 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import React from 'react';
+import { PostHogProvider } from '@/components/providers/PostHogProvider';
 
-const init = vi.fn();
-vi.mock('posthog-js', () => ({ default: { init } }));
-vi.mock('posthog-js/react', () => ({
-  PostHogProvider: ({ children }: { children: React.ReactNode }) => <div data-testid="ph">{children}</div>,
-}));
+// Without sdk/tracking-analytics the seam must not touch posthog-js at all.
+vi.mock('posthog-js', () => {
+  throw new Error('posthog-js must not load without sdk/tracking-analytics');
+});
 
-describe('PostHogProvider', () => {
-  it('initialises the client once and renders its children', async () => {
-    const { PostHogProvider } = await import('../components/providers/PostHogProvider');
+describe('PostHogProvider (no package)', () => {
+  it('renders its children', () => {
     render(
       <PostHogProvider>
         <p>child</p>
       </PostHogProvider>
     );
-    expect(init).toHaveBeenCalledTimes(1);
-    expect(screen.getByTestId('ph').textContent).toBe('child');
+    expect(screen.getByText('child')).toBeTruthy();
   });
 });

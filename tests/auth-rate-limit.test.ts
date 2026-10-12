@@ -6,8 +6,8 @@ import {
   signInWithUsername,
   signUpWithUsername,
 } from '../lib/actions/auth-actions';
-import { supabase } from '../lib/supabase/supabase';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/sdk/supabase';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 
 let forwardedFor: string | null = null;
 
@@ -19,12 +19,12 @@ vi.mock('next/headers', () => ({
     return h;
   }),
 }));
-vi.mock('../lib/supabase/supabase', () => ({
+vi.mock('../lib/sdk/supabase', () => ({
   supabase: {
     auth: { signInWithOtp: vi.fn(), verifyOtp: vi.fn(), signInWithPassword: vi.fn(), signUp: vi.fn() },
   },
 }));
-vi.mock('../lib/supabase/supabase-admin', () => ({
+vi.mock('../lib/sdk/supabase-admin', () => ({
   supabaseAdmin: { rpc: vi.fn(), auth: { admin: { createUser: vi.fn() } } },
 }));
 vi.mock('../lib/services/session', () => ({

@@ -1,12 +1,12 @@
 import 'server-only';
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
 import { DbError } from './errors';
 
 // Only lib/db/* may import this file (eslint.config.mjs); everything else calls the
 // domain functions next to it.
 
 // Public key: RLS applies.
-export { supabase as pub } from '@/lib/supabase/supabase';
+export { supabase as pub } from '@/lib/sdk/supabase';
 
 // Secret key: bypasses RLS.
 export function admin() {

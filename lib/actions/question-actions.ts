@@ -9,7 +9,7 @@ import { incrementAiGeneration, topics } from '@/lib/db/rpc';
 import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { ClientQuestion } from '@/lib/types';
 import { isUuid, validateQuestionInput } from '@/lib/utils/validation';
-import { GoogleGenAI } from '@google/genai';
+import { gemini } from '@/lib/sdk/gemini';
 
 const MAX_DISPUTE_REASON = 500;
 const QUESTIONS_PER_DAY = 5;
@@ -302,7 +302,7 @@ export async function generateQuestion(
       return { success: false, error: { code: 'RATE_LIMITED', message: 'You have reached the limit of 3 AI generations per day.' } };
     }
 
-    const ai = new GoogleGenAI({});
+    const ai = gemini();
     const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: `Generate a trivia question about "${topic}". Respond in strict JSON format matching this schema exactly without markdown formatting:

@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createGroup, joinGroup, leaveGroup, getUserGroups } from '../lib/actions/group-actions';
-import { supabase } from '../lib/supabase/supabase';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/sdk/supabase';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { getSessionAccount } from '../lib/services/session';
 
-vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
-vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 
 const ACCOUNT_ID = '00000000-0000-4000-8000-0000000000f1';

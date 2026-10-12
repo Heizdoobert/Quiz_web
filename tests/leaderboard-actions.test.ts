@@ -1,13 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '../lib/actions/leaderboard-actions';
-import { supabase } from '../lib/supabase/supabase';
+import { supabase } from '../lib/sdk/supabase';
 import { logger } from '../lib/logger';
 
 const ACCOUNT_A = '00000000-0000-4000-8000-0000000000a1';
 const ACCOUNT_B = '00000000-0000-4000-8000-0000000000b1';
 const GROUP_ID = '00000000-0000-4000-8000-0000000000c1';
 
-vi.mock('../lib/supabase/supabase', () => ({ supabase: { rpc: vi.fn() } }));
+vi.mock('../lib/sdk/supabase', () => ({ supabase: { rpc: vi.fn() } }));
 const { cacheCalls } = vi.hoisted(() => ({ cacheCalls: [] as Array<{ keyParts: string[]; options: { revalidate?: number } }> }));
 // unstable_cache needs Next's runtime; here it passes the function through and records how it was set up.
 vi.mock('next/cache', () => ({
