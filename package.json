@@ -3,12 +3,14 @@
   "version": "0.6.0",
   "private": true,
   "workspaces": [
-    "sdk"
+    "sdk",
+    "packages/*"
   ],
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
     "build:sdk": "npm run --prefix sdk build",
+    "build:ui": "npm run --prefix packages/ui build",
     "pretest": "npm run build:sdk",
     "pretest:coverage": "npm run build:sdk",
     "start": "next start",
