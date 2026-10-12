@@ -1,14 +1,19 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GET } from '../app/api/config/route';
 
 const { select } = vi.hoisted(() => ({ select: vi.fn() }));
 
 vi.mock('../lib/sdk/supabase', () => ({
-  supabase: { from: () => ({ select }) },
+  supabase: { from: () => ({ select: () => ({ abortSignal: () => select() }) }) },
 }));
 
 describe('GET /api/config', () => {
-  beforeEach(() => vi.resetAllMocks());
+  let errorLog: ReturnType<typeof vi.spyOn>;
+  beforeEach(() => {
+    vi.resetAllMocks();
+    errorLog = vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+  afterEach(() => errorLog.mockRestore());
 
   it('answers the config, cacheable for 60 seconds, without unregistered rows', async () => {
     select.mockResolvedValue({
@@ -30,11 +35,17 @@ describe('GET /api/config', () => {
     expect(res.status).toBe(503);
     expect(res.headers.get('Cache-Control')).toBe('no-store');
     expect(JSON.stringify(await res.json())).toBe('{"error":"unavailable"}');
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(String(errorLog.mock.calls[0][0])).toContain('remote_config_failed');
   });
 
   it('answers 503 when the read throws', async () => {
     select.mockRejectedValue(new Error('timeout'));
     const res = await GET();
     expect(res.status).toBe(503);
+    expect(res.headers.get('Cache-Control')).toBe('no-store');
+    expect(JSON.stringify(await res.json())).toBe('{"error":"unavailable"}');
+    expect(errorLog).toHaveBeenCalledTimes(1);
+    expect(String(errorLog.mock.calls[0][0])).toContain('remote_config_failed');
   });
 });

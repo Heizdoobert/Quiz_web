@@ -16,6 +16,10 @@ CREATE POLICY "Allow public read on remote_config"
   ON remote_config FOR SELECT
   USING (true);
 
+-- TRUNCATE is not governed by RLS; revoking writes keeps a write policy added later by
+-- mistake from opening writes on its own.
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON remote_config FROM anon, authenticated;
+
 INSERT INTO remote_config (key, value)
 VALUES ('maintenance_mode', 'false'::jsonb)
 ON CONFLICT (key) DO NOTHING;

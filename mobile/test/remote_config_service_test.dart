@@ -21,8 +21,8 @@ void main() {
     expect(asked.toString(), 'https://quiz.example/api/config');
   });
 
-  test('a 503 leaves the defaults', () async {
-    final config = await serviceFor((_) async => http.Response('{"error":"unavailable"}', 503)).fetch();
+  test('a non-200 is ignored even when it carries a body', () async {
+    final config = await serviceFor((_) async => http.Response('{"config":{"maintenance_mode":true}}', 503)).fetch();
     expect(config.maintenanceMode, false);
   });
 

@@ -3,6 +3,9 @@ import { pub } from '@/lib/db/client';
 import { unwrap } from '@/lib/db/errors';
 import { KEYS } from './keys';
 
+// A hung database must still let the route answer its quick 503.
+const TIMEOUT_MS = 3000;
+
 export type RemoteConfig = { [K in keyof typeof KEYS]: (typeof KEYS)[K]['default'] };
 
 export const REMOTE_CONFIG_DEFAULTS = Object.fromEntries(
@@ -15,7 +18,7 @@ export async function getRemoteConfig(): Promise<RemoteConfig> {
   const rows =
     unwrap<{ key: string; value: unknown }[]>(
       'remote_config.list',
-      await pub.from('remote_config').select('key, value'),
+      await pub.from('remote_config').select('key, value').abortSignal(AbortSignal.timeout(TIMEOUT_MS)),
     ) ?? [];
   const config: Record<string, unknown> = { ...REMOTE_CONFIG_DEFAULTS };
   for (const { key, value } of rows) {
