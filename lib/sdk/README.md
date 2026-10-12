@@ -8,8 +8,8 @@ swapping or mocking a vendor touches one file.
 | `supabase.ts` | `@supabase/supabase-js`, public key (RLS applies) | `lib/db` only |
 | `supabase-admin.ts` | same, secret key (bypasses RLS) | `lib/db` only |
 | `gemini.ts` | `@google/genai` | server actions and services |
-| `sentry.ts` | `@sentry/nextjs` | error boundaries |
-| `posthog.ts` | `posthog-js` | `components/providers/PostHogProvider.tsx` |
+| `sentry.ts` | none: no-op default, replaced by `sdk/tracking-analytics` at build time when that folder exists | error boundaries, `instrumentation*.ts` |
+| `posthog.ts` | none: no-op default, replaced by `sdk/tracking-analytics` at build time when that folder exists | `components/providers/PostHogProvider.tsx` |
 
 ## Add an SDK
 
@@ -19,4 +19,4 @@ swapping or mocking a vendor touches one file.
 4. Add a row to the table above.
 5. In tests, mock `@/lib/sdk/<name>` or the package itself.
 
-Root `sentry.*.config.ts` files and `next.config.mjs` stay where Next.js looks for them and may import `@sentry/nextjs` directly.
+Sentry and PostHog are optional. See `sdk/tracking-analytics/README.md`.

@@ -24,11 +24,11 @@ const eslintConfig = defineConfig([
   },
   {
     // lib/sdk is the only place that imports a vendor SDK (see lib/sdk/README.md); add new
-    // packages to the first group. The root sentry.*.config.ts files and next.config.mjs must stay where Next.js
-    // looks for them.
+    // packages to the first group. Sentry and PostHog live in sdk/tracking-analytics, which is
+    // optional (see sdk/tracking-analytics/README.md).
     // lib/db owns database access: everything else calls its domain functions, never a
     // Supabase client. The secret-key client bypasses RLS, so this is a security boundary.
-    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "sentry.*.config.ts", "next.config.mjs", "tests/**"],
+    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "tests/**"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [
