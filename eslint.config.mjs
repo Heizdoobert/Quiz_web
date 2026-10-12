@@ -28,7 +28,7 @@ const eslintConfig = defineConfig([
     // looks for them.
     // lib/db owns database access: everything else calls its domain functions, never a
     // Supabase client. The secret-key client bypasses RLS, so this is a security boundary.
-    ignores: ["lib/sdk/**", "sentry.*.config.ts", "next.config.mjs", "tests/**"],
+    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "sentry.*.config.ts", "next.config.mjs", "tests/**"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [
