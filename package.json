@@ -23,7 +23,7 @@
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
   "dependencies": {
-    "@ducanh2912/next-pwa": "^6.1.0",
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@google/genai": "^2.27.0",
     "@sentry/nextjs": "^11.5.0",
     "@supabase/supabase-js": "^2.117.2",
