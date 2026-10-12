@@ -8,7 +8,7 @@
 PRODUCT_NAME = mobile
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.web3quiz.mobile
+PRODUCT_BUNDLE_IDENTIFIER = com.quiz3web.mobile
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.web3quiz. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.quiz3web. All rights reserved.
