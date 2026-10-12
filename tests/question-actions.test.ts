@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateQuestion } from '../lib/actions/question-actions';
+import { generateQuestion, fetchRandomQuestion, getPublicQuestion } from '../lib/actions/question-actions';
 import { getSessionAccount } from '../lib/services/session';
+import { supabase } from '../lib/supabase/supabase';
 import { supabaseAdmin } from '../lib/supabase/supabase-admin';
 
 // Hoist mock setup for GoogleGenAI
@@ -35,6 +36,24 @@ vi.mock('../lib/supabase/supabase-admin', () => ({
     rpc: vi.fn(),
   },
 }));
+
+vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
+
+// Chainable stub for supabase.from('questions'). Like PostgREST, it returns only the
+// columns named in select(), so a test fails if the query stops asking for a column.
+function stubQuestionsTable(row: Record<string, unknown>) {
+  let columns: string[] = [];
+  const pick = () => Object.fromEntries(columns.map((c) => [c, row[c]]));
+  const chain: Record<string, unknown> = {};
+  for (const m of ['eq', 'is', 'not', 'ilike', 'limit']) chain[m] = () => chain;
+  chain.select = (list: string) => {
+    columns = list.split(',').map((c) => c.trim());
+    return chain;
+  };
+  chain.single = () => Promise.resolve({ data: pick(), error: null });
+  chain.then = (resolve: (val: unknown) => unknown) => resolve({ data: [pick()], error: null });
+  vi.mocked(supabase.from).mockReturnValue(chain as never);
+}
 
 describe('generateQuestion', () => {
   beforeEach(() => {
@@ -129,5 +148,40 @@ describe('generateQuestion', () => {
       success: false,
       error: { code: 'SERVER_ERROR', message: 'Failed to generate question.' },
     });
+  });
+});
+
+// Since the Web2 pivot, accounts have no wallet: the bridge trigger leaves the wallet
+// column questions.created_by NULL and only created_by_user names the author.
+describe('question author marker', () => {
+  const id = '11111111-1111-4111-8111-111111111111';
+  const base = { id, category: 'Science', prompt: 'Q?', options: ['a', 'b'], status: 'verified' };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('fetchRandomQuestion marks a question added by an email account as community', async () => {
+    stubQuestionsTable({ ...base, created_by: null, created_by_user: 'account-1' });
+
+    const question = await fetchRandomQuestion();
+
+    expect(question?.created_by).toBe('account-1');
+  });
+
+  it('getPublicQuestion marks a question added by an email account as community', async () => {
+    stubQuestionsTable({ ...base, created_by: null, created_by_user: 'account-1' });
+
+    const question = await getPublicQuestion(id);
+
+    expect(question?.created_by).toBe('account-1');
+  });
+
+  it('leaves a core question without an author', async () => {
+    stubQuestionsTable({ ...base, created_by: null, created_by_user: null });
+
+    const question = await getPublicQuestion(id);
+
+    expect(question?.created_by).toBeNull();
   });
 });
