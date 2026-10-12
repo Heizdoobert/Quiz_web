@@ -1,10 +1,9 @@
 import { HttpClient } from '../http';
 import { QuickQuizError } from '../errors';
+import type { AuthSession } from '../types';
 
-export interface QuickQuizAccount {
-  id: string;
-  username: string;
-}
+/** The account behind a token, exactly what `GET /v1/auth/session` returns. */
+export type QuickQuizAccount = AuthSession;
 
 export interface TokenVerifier {
   /** Resolves the account for a Bearer token, or `null` if Quick Quiz rejects it. Throws if Quick Quiz cannot answer. */
