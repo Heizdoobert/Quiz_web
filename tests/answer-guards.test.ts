@@ -35,7 +35,7 @@ function stubFrom(fromMock: ReturnType<typeof vi.fn>, tables: TableStubs) {
   fromMock.mockImplementation((table: string) => {
     const t = tables[table] ?? {};
     const chain: Record<string, unknown> = {};
-    for (const m of ['select', 'eq', 'neq', 'in', 'order', 'limit', 'gte']) chain[m] = () => chain;
+    for (const m of ['select', 'eq', 'neq', 'in', 'is', 'order', 'limit', 'gte']) chain[m] = () => chain;
     chain.single = async () => ({ data: t.row ?? null, error: t.row ? null : { code: 'PGRST116' } });
     chain.maybeSingle = async () => ({ data: t.row ?? null, error: null });
     chain.insert = async (row: unknown) => {
