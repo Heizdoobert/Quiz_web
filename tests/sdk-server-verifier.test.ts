@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createTokenVerifier, getBearerToken } from '../packages/sdk/src/server';
-import { QuickQuizError } from '../packages/sdk/src/errors';
+import { createTokenVerifier, getBearerToken } from '../sdk/src/server';
+import { QuickQuizError } from '../sdk/src/errors';
 
 const baseUrl = 'https://quickquiz.app/api';
 const alice = { id: 'acc-1', username: 'alice' };

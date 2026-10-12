@@ -18,20 +18,42 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "mobile/**",
     "packages/**/dist/**",
+    "sdk/dist/**",
   ]),
   {
     // An empty catch hides failures; say why ignoring is safe in a comment instead.
     rules: { "no-empty": ["error", { allowEmptyCatch: false }] },
   },
   {
+    // lib/sdk is the only place that imports a vendor SDK (see lib/sdk/README.md); add new
+    // packages to the first group. Sentry and PostHog live in sdk/tracking-analytics, which is
+    // optional (see sdk/tracking-analytics/README.md).
     // lib/db owns database access: everything else calls its domain functions, never a
     // Supabase client. The secret-key client bypasses RLS, so this is a security boundary.
-    ignores: ["lib/db/**", "lib/supabase/**", "tests/**"],
+    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "tests/**"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [
+          {
+            group: ["@supabase/*", "@google/genai", "@sentry/*", "posthog-js", "posthog-js/*"],
+            message: "Import vendor SDKs through lib/sdk, not directly.",
+          },
+          {
+            group: ["**/sdk/supabase", "**/sdk/supabase-admin", "**/db/client*"],
+            message: "Use the domain functions in lib/db instead of a Supabase client.",
+          },
+        ],
+      }],
+    },
+  },
+  {
+    // lib/db is the one caller of the Supabase wrappers; vendor packages stay banned there.
+    files: ["lib/db/**"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [{
-          group: ["@supabase/*", "**/supabase/supabase", "**/supabase/supabase-admin", "**/db/client*"],
-          message: "Use the domain functions in lib/db instead of a Supabase client.",
+          group: ["@supabase/*", "@google/genai", "@sentry/*", "posthog-js", "posthog-js/*"],
+          message: "Import vendor SDKs through lib/sdk, not directly.",
         }],
       }],
     },

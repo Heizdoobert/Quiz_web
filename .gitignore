@@ -63,6 +63,6 @@ skills-lock.json
 .env.deploy
 
 # sdk build output
-/packages/sdk/dist
-packages/sdk/dist/
-packages/sdk/node_modules/
+/sdk/dist
+sdk/dist/
+sdk/node_modules/

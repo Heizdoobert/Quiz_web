@@ -1,9 +1,9 @@
-import { GoogleGenAI } from '@google/genai';
+import { gemini } from '@/lib/sdk/gemini';
 import { logger } from '@/lib/logger';
 
 // Initialize the Gemini client
 // Note: Requires GEMINI_API_KEY in environment variables
-const ai = new GoogleGenAI({});
+const ai = gemini();
 
 export interface ModerationResult {
   isSafe: boolean;
