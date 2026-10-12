@@ -10,6 +10,8 @@ A trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4** and **S
 - **Groups & Community**: Create or join groups, add questions, and rate, comment on and report questions.
 - **Hardened Security**: Signed session cookies, dual-key Supabase RLS lockdown, anti-cheat answer masking, rate limits and OWASP HTTP security headers.
 - **TypeScript SDK & API Gateway (`@heizdoobert/quickquiz-sdk`)**: Zero-dependency client with timeout, cancellation (`AbortSignal`), and automatic retries for idempotent requests; integrated via [`lib/sdk.ts`](lib/sdk.ts).
+- **REST API v1 (`/api/v1`)**: the public JSON API behind the SDK, with auth, questions, quiz, leaderboard, groups, community and profile endpoints.
+- **Remote Config**: flags such as `maintenance_mode` live in a Supabase table and reach web and mobile through `GET /api/config`, with no deploy (see [`sdk/remote_config`](sdk/remote_config/README.md)).
 - **SEO Ready**: Dynamic metadata, sitemap, robots.txt, JSON-LD structured data, and web manifest.
 
 ## Getting Started
@@ -69,7 +71,8 @@ All files are in [`supabase/migrations/`](supabase/migrations/):
 19. [`18-ai-usage.sql`](supabase/migrations/18-ai-usage.sql) — daily AI generation usage.
 20. [`19-secure-ai-usage.sql`](supabase/migrations/19-secure-ai-usage.sql) — closes `user_ai_usage` to the public key (RLS on, no policies).
 21. [`20-drop-web3-schema.sql`](supabase/migrations/20-drop-web3-schema.sql) — drops the wallet, reward and escrow schema (ADR-013). Destructive: take a backup first, and on an existing database apply it only once production runs code that reads `questions.created_by_user`.
-22. [`21-rbac.sql`](supabase/migrations/21-rbac.sql) — one role per account (`users.role`), the columns a moderator's dispute resolution is recorded in, and closes `question_disputes` to the public key. Creates no admin; the first admin is granted by the one-off statement in [`docs/migrations.md`](docs/migrations.md).
+22. [`remote-config.sql`](supabase/migrations/remote-config.sql) — `remote_config` table with a public read policy and the `maintenance_mode` seed row. No write policy: edit values in the dashboard.
+23. [`21-rbac.sql`](supabase/migrations/21-rbac.sql) — one role per account (`users.role`), the columns a moderator's dispute resolution is recorded in, and closes `question_disputes` to the public key. Creates no admin; the first admin is granted by the one-off statement in [`docs/migrations.md`](docs/migrations.md).
 
 [`ecosystem-v1-migration.sql`](supabase/migrations/ecosystem-v1-migration.sql) is only for databases created before `schema.sql` held the contest columns; skip it on a fresh database.
 
@@ -79,7 +82,7 @@ Email sign-in also needs the Supabase Auth email provider on, with an OTP templa
 
 ### Deploying
 
-Production runs on Vercel. Set every required variable above in the Vercel project's Production scope before the build, because `NEXT_PUBLIC_*` values are baked into the bundle. Promote by merging `preview` into `main` only after CI is green on `preview` (`AGENTS.md`). `/api/health` answers 200 when the database is reachable, for uptime checks. The `Dockerfile` and the CD workflow publish a container image to GHCR, but that image is built with placeholder public values and is not what production serves.
+Production runs on Vercel. Set every required variable above in the Vercel project's Production scope before the build, because `NEXT_PUBLIC_*` values are baked into the bundle. Promote by merging `preview` into `main` only after CI is green on `preview` (`CONSTRAINTS.md`). `/api/health` answers 200 when the database is reachable, for uptime checks. The `Dockerfile` and the CD workflow publish a container image to GHCR, but that image is built with placeholder public values and is not what production serves.
 
 ### Testing & Quality Gates
 
@@ -89,6 +92,7 @@ Production runs on Vercel. Set every required variable above in the Vercel proje
 | `npm run test:coverage` | Tests with the coverage ratchet from `CONSTRAINTS.md` |
 | `npm run type-check` | Verify TypeScript compilation (`tsc --noEmit`) |
 | `npm run lint` | Run ESLint check |
+| `npm run check:architecture` | Module boundaries and circular imports (dependency-cruiser) |
 | `npm run check:task` | Types, lint, secrets, architecture and coverage in one go |
 | `npm run build` | Generate production build with static prerendering |
 
@@ -119,15 +123,12 @@ const userSdk = getSdk({
 
 See [`sdk/README.md`](sdk/README.md) for full SDK usage, error codes, and configuration options.
 
-## Codebase Indexing (CocoIndex)
-
-Incremental codebase indexing for fast search and agent context is managed by [CocoIndex](coco/):
-
-```bash
-coco/.venv/bin/cocoindex update coco/main.py
-```
-
 ## Architecture & Decisions
+
+Code boundaries, enforced by `eslint.config.mjs` and `npm run check:architecture`:
+- [`lib/db/`](lib/db/) is the only caller of a Supabase client; everything else uses its domain functions.
+- [`lib/sdk/`](lib/sdk/README.md) is the only importer of a vendor SDK (Supabase, Gemini, Sentry, PostHog).
+- [`sdk/tracking-analytics/`](sdk/tracking-analytics/README.md) is optional; [`sdk/remote_config/`](sdk/remote_config/README.md) is required.
 
 For technical architecture decisions and design trade-offs, consult:
 - [Architecture Decision Records (ADRs)](docs/decisions/):
