@@ -1,12 +1,12 @@
 import { HttpClient, type HttpClientOptions, type RequestOptions } from './http';
-import { AuthResource } from './resources/auth';
-import { QuestionsResource } from './resources/questions';
-import { QuizResource } from './resources/quiz';
-import { LeaderboardResource } from './resources/leaderboard';
-import { CommunityResource } from './resources/community';
-import { GroupsResource } from './resources/groups';
-import { DiscoveryResource } from './resources/discovery';
-import { ProfileResource } from './resources/profile';
+import { AuthResource } from './auth';
+import { QuestionsResource } from './questions';
+import { QuizResource } from './quiz';
+import { LeaderboardResource } from './leaderboard';
+import { CommunityResource } from './community';
+import { GroupsResource } from './groups';
+import { DiscoveryResource } from './discovery';
+import { ProfileResource } from './profile';
 
 export type QuickQuizClientOptions = HttpClientOptions;
 
@@ -53,4 +53,11 @@ export class QuickQuizClient {
   request<T>(path: string, options?: RequestOptions): Promise<T> {
     return this.http.request<T>(path, options);
   }
+}
+
+/**
+ * Convenience factory to instantiate a new QuickQuizClient
+ */
+export function createClient(options: QuickQuizClientOptions): QuickQuizClient {
+  return new QuickQuizClient(options);
 }
