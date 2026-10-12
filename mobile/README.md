@@ -11,6 +11,8 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:3000/api/mobile/v1
 
 `10.0.2.2` is the Android emulator's alias for your machine; start the web app with `npm run dev` from the repository root. For a real device, use your machine's LAN address or the deployed API.
 
+On start the app reads `GET /api/config` on the same origin as `API_BASE_URL` (without `/mobile/v1`) and falls back to built-in defaults when the request fails.
+
 Optional defines:
 
 - `GOOGLE_SERVER_CLIENT_ID`: the Web OAuth client id Supabase's Google provider uses. Without it, Google sign-in returns no ID token; username sign-in still works.

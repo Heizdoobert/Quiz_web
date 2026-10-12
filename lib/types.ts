@@ -89,6 +89,7 @@ export interface HistoryItem {
 export type ActionErrorCode = 
   | 'VALIDATION_ERROR'
   | 'UNAUTHORIZED'
+  | 'NOT_ALLOWED'
   | 'NOT_FOUND'
   | 'CONFLICT'
   | 'RATE_LIMITED'
