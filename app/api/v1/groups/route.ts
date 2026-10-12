@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
-    let body: any;
+    let body: Record<string, unknown> | null;
     try {
       body = await req.json();
     } catch {

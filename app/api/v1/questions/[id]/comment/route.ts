@@ -18,7 +18,7 @@ export async function POST(
       return apiError('VALIDATION_ERROR', 'Question ID is required');
     }
 
-    let body: any;
+    let body: Record<string, unknown> | null;
     try {
       body = await req.json();
     } catch {

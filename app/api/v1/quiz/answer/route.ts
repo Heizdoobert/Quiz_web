@@ -10,14 +10,14 @@ export async function POST(req: NextRequest) {
   if (!auth.ok) return auth.response;
 
   try {
-    let body: any;
+    let body: Record<string, unknown> | null;
     try {
       body = await req.json();
     } catch {
       return apiError('VALIDATION_ERROR', 'Invalid JSON body');
     }
 
-    const { questionId, answerIndex } = body ?? {};
+    const { questionId, answerIndex }: Record<string, unknown> = body ?? {};
     if (
       typeof questionId !== 'string' ||
       !questionId.trim() ||
