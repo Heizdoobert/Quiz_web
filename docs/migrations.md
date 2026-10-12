@@ -50,7 +50,7 @@ Fill in the date each script was applied to production. "Unknown" means no recor
 | 20 | `19-secure-ai-usage.sql` | closes `user_ai_usage` to the public key | not applied |
 | 21 | `20-drop-web3-schema.sql` | drop the wallet, reward and escrow schema (ADR-013); destructive, so back up first and apply only once production reads `questions.created_by_user`; test with `bash supabase/tests/run-drop-web3-schema.sh` | not applied |
 | 22 | `remote-config.sql` | `remote_config` table read by `GET /api/config` | applied by the owner, 2026-10-12 |
-| 23 | `21-rbac.sql` | roles (`users.role`), dispute resolution columns and `resolve_quarantined_question`, closes `question_disputes` to the public key (ADR-014); idempotent; test with `bash scripts/verify-migrations.sh`; then run the first-admin statement below | not applied |
+| 23 | `21-rbac.sql` | roles (`users.role`), dispute resolution columns and `resolve_quarantined_question`, closes `question_disputes` to the public key (ADR-014); needs `accounts.sql` (order 8) applied first and stops with a message if not; idempotent; test with `bash scripts/verify-migrations.sh`; then run the first-admin statement below | not applied |
 
 ## First admin (run once, never commit the real address)
 

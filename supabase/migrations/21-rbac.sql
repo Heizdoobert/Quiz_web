@@ -6,6 +6,21 @@
 -- by the one-off statement in docs/migrations.md, run with the owner's own email.
 BEGIN;
 
+-- Needs the account schema: users.id (accounts.sql) for the resolved_by key and
+-- question_disputes (schema.sql). A database still keyed by wallet_address would otherwise
+-- stop at the foreign key with 42703 "column id referenced in foreign key constraint does
+-- not exist".
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns
+                  WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'id') THEN
+    RAISE EXCEPTION '21-rbac.sql: public.users has no id column; apply accounts.sql first (docs/migrations.md)';
+  END IF;
+  IF to_regclass('public.question_disputes') IS NULL THEN
+    RAISE EXCEPTION '21-rbac.sql: public.question_disputes does not exist; apply schema.sql and accounts.sql first (docs/migrations.md)';
+  END IF;
+END $$;
+
 -- Roles are data, permissions are code (lib/services/rbac.ts). Reads go through the
 -- secret key only: the public-key column grant on users (accounts.sql) does not name role.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user';
