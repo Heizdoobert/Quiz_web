@@ -139,10 +139,16 @@ export async function insertDispute(row: {
   return 'created';
 }
 
+// Unresolved disputes only: a moderator's resolution closes them, so a restored question
+// starts again from zero instead of re-quarantining on its next report.
 export async function countDisputes(questionId: string): Promise<number> {
   return countOf(
     'disputes.count',
-    await admin().from('question_disputes').select('id', { count: 'exact', head: true }).eq('question_id', questionId)
+    await admin()
+      .from('question_disputes')
+      .select('id', { count: 'exact', head: true })
+      .eq('question_id', questionId)
+      .is('resolved_at', null)
   );
 }
 
@@ -154,6 +160,56 @@ export async function setDisputeState(questionId: string, disputeCount: number, 
       .update({ dispute_count: disputeCount, ...(quarantine ? { status: 'quarantined' } : {}) })
       .eq('id', questionId)
   );
+}
+
+// A quarantined question as a moderator sees it: the answer key and the open disputes'
+// reasons, never who reported. Secret key only.
+export type QuarantinedQuestion = {
+  id: string;
+  category: string | null;
+  prompt: string;
+  options: unknown;
+  correct_index: number;
+  explanation: string | null;
+  dispute_count: number;
+  created_at: string;
+  disputes: { id: string; reason: string; created_at: string }[];
+};
+
+export async function quarantinedQuestions(limit: number, offset: number): Promise<QuarantinedQuestion[]> {
+  const rows: (Omit<QuarantinedQuestion, 'disputes'> & { question_disputes: QuarantinedQuestion['disputes'] | null })[] | null = unwrap(
+    'questions.quarantined',
+    await admin()
+      .from('questions')
+      .select('id, category, prompt, options, correct_index, explanation, dispute_count, created_at, question_disputes(id, reason, created_at)')
+      .eq('status', 'quarantined')
+      .is('question_disputes.resolved_at', null)
+      .order('dispute_count', { ascending: false })
+      .order('created_at', { ascending: true })
+      .range(offset, offset + limit - 1)
+  );
+  return (rows ?? []).map(({ question_disputes, ...question }) => ({ ...question, disputes: question_disputes ?? [] }));
+}
+
+// Restores (back to verified, count reset) or retires (rejected) a quarantined question and
+// stamps its open disputes, in one database transaction. False when the question is not
+// quarantined any more, so two moderators cannot both resolve it.
+export async function resolveQuarantined(
+  questionId: string,
+  outcome: 'restored' | 'retired',
+  moderatorId: string,
+  note: string | null
+): Promise<boolean> {
+  const won = unwrap(
+    'questions.resolve',
+    await admin().rpc('resolve_quarantined_question', {
+      p_question_id: questionId,
+      p_outcome: outcome,
+      p_moderator: moderatorId,
+      p_note: note,
+    })
+  );
+  return won === true;
 }
 
 // Every column, for the account's own backup; secret key only.

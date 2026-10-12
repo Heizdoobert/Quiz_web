@@ -30,6 +30,39 @@ ALTER TABLE question_disputes ADD CONSTRAINT question_disputes_resolved_together
 -- server reads this table, through the secret key, so close it: RLS on, no policies.
 DROP POLICY IF EXISTS "Allow public read for question_disputes" ON question_disputes;
 
+-- Resolving a quarantined question touches two tables and must not half-happen, or race a
+-- second moderator, so it is one function: the question moves only while it is still
+-- quarantined, and only then are its open disputes stamped. restored = live again with a
+-- clean count; retired = rejected. Returns false when nothing was quarantined.
+CREATE OR REPLACE FUNCTION resolve_quarantined_question(
+  p_question_id UUID, p_outcome TEXT, p_moderator UUID, p_note TEXT
+) RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF p_outcome NOT IN ('restored', 'retired') THEN
+    RAISE EXCEPTION 'resolve_quarantined_question: outcome must be restored or retired';
+  END IF;
+
+  UPDATE questions
+     SET status = CASE p_outcome WHEN 'restored' THEN 'verified' ELSE 'rejected' END,
+         dispute_count = CASE p_outcome WHEN 'restored' THEN 0 ELSE dispute_count END
+   WHERE id = p_question_id AND status = 'quarantined';
+  IF NOT FOUND THEN
+    RETURN FALSE;
+  END IF;
+
+  UPDATE question_disputes
+     SET resolved_at = now(), resolved_by = p_moderator, resolution = p_outcome, resolution_note = p_note
+   WHERE question_id = p_question_id AND resolved_at IS NULL;
+  RETURN TRUE;
+END;
+$$;
+REVOKE ALL ON FUNCTION resolve_quarantined_question(UUID, TEXT, UUID, TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION resolve_quarantined_question(UUID, TEXT, UUID, TEXT) TO service_role;
+
 -- Refuse to finish if the role column is readable with a public key (a table-level grant
 -- would make it so). Rolls the whole script back.
 DO $$

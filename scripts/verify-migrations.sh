@@ -49,4 +49,61 @@ check "question_disputes has both resolution constraints" "2" \
   "select count(*) from pg_constraint where conname in ('question_disputes_resolution_check', 'question_disputes_resolved_together')"
 check "question_disputes has no public read policy" "0" \
   "select count(*) from pg_policies where tablename = 'question_disputes'"
+# resolve_quarantined_question: behaviour on real rows, all rolled back at the end.
+RESOLVE_SQL=$(cat <<'SQL'
+DO $$
+DECLARE m UUID; r1 UUID; r2 UUID; r3 UUID; q1 UUID; q2 UUID; n INT;
+BEGIN
+  BEGIN
+    INSERT INTO users (display_name) VALUES ('rbac-mod') RETURNING id INTO m;
+    INSERT INTO users (display_name) VALUES ('rbac-r1') RETURNING id INTO r1;
+    INSERT INTO users (display_name) VALUES ('rbac-r2') RETURNING id INTO r2;
+    INSERT INTO users (display_name) VALUES ('rbac-r3') RETURNING id INTO r3;
+    INSERT INTO questions (prompt, options, correct_index, status, dispute_count)
+      VALUES ('rbac q1', '["a","b"]', 0, 'quarantined', 2) RETURNING id INTO q1;
+    INSERT INTO question_disputes (question_id, reporter_user, reason) VALUES (q1, r1, 'x'), (q1, r2, 'y');
+
+    -- restore: question live again with a clean count, both disputes stamped
+    IF NOT resolve_quarantined_question(q1, 'restored', m, 'looks fine') THEN RAISE EXCEPTION 'restore returned false'; END IF;
+    IF (SELECT status || dispute_count FROM questions WHERE id = q1) <> 'verified0' THEN RAISE EXCEPTION 'restore left the question wrong'; END IF;
+    SELECT count(*) INTO n FROM question_disputes
+      WHERE question_id = q1 AND resolution = 'restored' AND resolved_by = m AND resolution_note = 'looks fine' AND resolved_at IS NOT NULL;
+    IF n <> 2 THEN RAISE EXCEPTION 'restore stamped % disputes, expected 2', n; END IF;
+
+    -- a second resolve finds nothing quarantined and changes nothing
+    IF resolve_quarantined_question(q1, 'retired', m, NULL) THEN RAISE EXCEPTION 'resolved a question that was not quarantined'; END IF;
+    IF (SELECT status FROM questions WHERE id = q1) <> 'verified' THEN RAISE EXCEPTION 'second resolve changed the question'; END IF;
+
+    -- quarantined again by a new report: retire stamps only the new dispute
+    UPDATE questions SET status = 'quarantined', dispute_count = 1 WHERE id = q1;
+    INSERT INTO question_disputes (question_id, reporter_user, reason) VALUES (q1, r3, 'z');
+    IF NOT resolve_quarantined_question(q1, 'retired', m, NULL) THEN RAISE EXCEPTION 'retire returned false'; END IF;
+    IF (SELECT status FROM questions WHERE id = q1) <> 'rejected' THEN RAISE EXCEPTION 'retire left the question wrong'; END IF;
+    SELECT count(*) INTO n FROM question_disputes WHERE question_id = q1 AND resolution = 'restored';
+    IF n <> 2 THEN RAISE EXCEPTION 'retire re-stamped the old disputes'; END IF;
+    SELECT count(*) INTO n FROM question_disputes WHERE question_id = q1 AND resolution = 'retired' AND resolution_note IS NULL;
+    IF n <> 1 THEN RAISE EXCEPTION 'retire did not stamp the new dispute'; END IF;
+
+    -- a live question is not resolvable, and a bad outcome is refused
+    INSERT INTO questions (prompt, options, correct_index) VALUES ('rbac q2', '["a","b"]', 0) RETURNING id INTO q2;
+    IF resolve_quarantined_question(q2, 'restored', m, NULL) THEN RAISE EXCEPTION 'resolved a verified question'; END IF;
+    BEGIN
+      PERFORM resolve_quarantined_question(q2, 'deleted', m, NULL);
+      RAISE EXCEPTION 'accepted a bad outcome';
+    EXCEPTION WHEN OTHERS THEN
+      IF SQLERRM = 'accepted a bad outcome' THEN RAISE; END IF;
+    END;
+
+    RAISE EXCEPTION 'rbac-checks-done';
+  EXCEPTION WHEN raise_exception THEN
+    IF SQLERRM <> 'rbac-checks-done' THEN RAISE; END IF;
+  END;
+END $$
+SQL
+)
+check "resolve_quarantined_question restores, retires and refuses as designed" "" "$RESOLVE_SQL"
+check "public keys cannot execute resolve_quarantined_question" "f" \
+  "select has_function_privilege('anon', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute') or has_function_privilege('authenticated', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute')"
+check "service_role can execute resolve_quarantined_question" "t" \
+  "select has_function_privilege('service_role', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute')"
 exit $FAILED
