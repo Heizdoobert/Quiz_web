@@ -10,10 +10,10 @@ export {
 export type { HttpClientOptions, RequestOptions, ClientLike } from './http';
 
 // Errors
-export { QuickQuizError } from './errors';
+export { QuickQuizError } from '../errors';
 
 // Data contracts & types
-export * from './types';
+export * from '../types';
 
 // Auth
 export {

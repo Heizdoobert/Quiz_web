@@ -3,12 +3,12 @@
   "version": "0.5.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "sdk"
   ],
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
-    "build:sdk": "npm run --prefix packages/sdk build",
+    "build:sdk": "npm run --prefix sdk build",
     "pretest": "npm run build:sdk",
     "pretest:coverage": "npm run build:sdk",
     "start": "next start",

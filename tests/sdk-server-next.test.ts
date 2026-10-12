@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
-import { withQuickQuizAuth, createTokenVerifier, type TokenVerifier } from '../packages/sdk/src/server';
+import { withQuickQuizAuth, createTokenVerifier, type TokenVerifier } from '../sdk/src/server';
 
 const alice = { id: 'acc-1', username: 'alice' };
 const missing = { success: false, error: { code: 'UNAUTHORIZED', message: 'Authentication token required' } };

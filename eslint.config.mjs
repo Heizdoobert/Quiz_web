@@ -18,6 +18,7 @@ const eslintConfig = defineConfig([
     "coverage/**",
     "mobile/**",
     "packages/**/dist/**",
+    "sdk/dist/**",
   ]),
   {
     // An empty catch hides failures; say why ignoring is safe in a comment instead.
