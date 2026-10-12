@@ -1,18 +1,18 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
-import { supabase } from '../lib/supabase/supabase';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/sdk/supabase';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { getSessionAccount } from '../lib/services/session';
 
 // Mock the supabase module
-vi.mock('../lib/supabase/supabase', () => ({
+vi.mock('../lib/sdk/supabase', () => ({
   supabase: {
     from: vi.fn(),
   },
 }));
 
 // Export reads with the secret key, for the signed-in account only.
-vi.mock('../lib/supabase/supabase-admin', () => ({
+vi.mock('../lib/sdk/supabase-admin', () => ({
   supabaseAdmin: {
     from: vi.fn(),
   },

@@ -3,7 +3,7 @@ import { ensureAccountForAuthUser } from '../lib/services/users';
 
 // Isolated from identity-accounts.test.ts because it needs supabaseAdmin to be
 // null for the whole file, not toggled mid-test.
-vi.mock('../lib/supabase/supabase-admin', () => ({ supabaseAdmin: null }));
+vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: null }));
 
 describe('ensureAccountForAuthUser with no secret key configured', () => {
   it('logs and returns no account without throwing', async () => {

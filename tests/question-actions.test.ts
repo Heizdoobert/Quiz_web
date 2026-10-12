@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateQuestion, fetchRandomQuestion, getPublicQuestion } from '../lib/actions/question-actions';
 import { getSessionAccount } from '../lib/services/session';
-import { supabase } from '../lib/supabase/supabase';
-import { supabaseAdmin } from '../lib/supabase/supabase-admin';
+import { supabase } from '../lib/sdk/supabase';
+import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 
 // Hoist mock setup for GoogleGenAI
 const { mockGenerateContent } = vi.hoisted(() => ({
@@ -31,13 +31,13 @@ vi.mock('../lib/logger', () => ({
   },
 }));
 
-vi.mock('../lib/supabase/supabase-admin', () => ({
+vi.mock('../lib/sdk/supabase-admin', () => ({
   supabaseAdmin: {
     rpc: vi.fn(),
   },
 }));
 
-vi.mock('../lib/supabase/supabase', () => ({ supabase: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase', () => ({ supabase: { from: vi.fn() } }));
 
 // Chainable stub for supabase.from('questions'). Like PostgREST, it returns only the
 // columns named in select(), so a test fails if the query stops asking for a column.

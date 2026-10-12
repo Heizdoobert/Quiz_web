@@ -16,11 +16,11 @@ This architecture exposed critical vulnerabilities:
 
 ## Decision
 We adopted a **Dual-Key Architecture** where:
-1. **Public Anon Client (`lib/supabase.ts`)**:
+1. **Public Anon Client (`lib/sdk/supabase.ts`)**:
    - Strictly restricted by PostgreSQL RLS to safe public reads only.
    - All public write permissions (`INSERT`, `UPDATE`, `DELETE`) on core tables (`questions`, `quiz_results`, `reward_claims`, `question_disputes`, `question_lists`, `list_entries`) were permanently revoked (`lib/sql/lock-down-public-writes.sql`).
    - Sensitive columns (`correct_index`, `explanation`) are blocked from public read or projected via a safe view (`client_questions`).
-2. **Privileged Server Admin Client (`lib/supabase-admin.ts`)**:
+2. **Privileged Server Admin Client (`lib/sdk/supabase-admin.ts`)**:
    - Initialized exclusively in server-only modules using `SUPABASE_SECRET_KEY`.
    - Never exposed or bundled to client code (guaranteed by Next.js Server Actions and build checks).
    - Responsible for verifying answers, recording gameplay results, and checking dispute thresholds.
