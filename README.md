@@ -9,6 +9,7 @@ A trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4** and **S
 - **Score & Rankings**: One point per correct answer, streaks, and global and group leaderboards computed with PostgreSQL aggregation functions.
 - **Groups & Community**: Create or join groups, add questions, and rate, comment on and report questions.
 - **Hardened Security**: Signed session cookies, dual-key Supabase RLS lockdown, anti-cheat answer masking, rate limits and OWASP HTTP security headers.
+- **TypeScript SDK & API Gateway (`@heizdoobert/quickquiz-sdk`)**: Zero-dependency client with timeout, cancellation (`AbortSignal`), and automatic retries for idempotent requests; integrated via [`lib/sdk.ts`](lib/sdk.ts).
 - **SEO Ready**: Dynamic metadata, sitemap, robots.txt, JSON-LD structured data, and web manifest.
 
 ## Getting Started
@@ -91,6 +92,39 @@ Production runs on Vercel. Set every required variable above in the Vercel proje
 | `npm run build` | Generate production build with static prerendering |
 
 CI (`.github/workflows/ci.yml`) runs lint, types, architecture, tests with coverage, the production build and the dependency audit on every push and PR to `main` and `preview`.
+
+## SDK & API Gateway
+
+Quick Quiz includes an official TypeScript SDK (`@heizdoobert/quickquiz-sdk`) in [`sdk/`](sdk/) with full typings and zero external dependencies.
+
+### App Gateway (`lib/sdk.ts`)
+
+Inside the web application, use `getSdk` to obtain a pre-configured client pointed at the local API:
+
+```ts
+import { getSdk } from '@/lib/sdk';
+
+// Default instance pointed to ${getSiteUrl()}/api
+const sdk = getSdk();
+const stats = await sdk.leaderboard.getStats();
+
+// Authenticated instance with custom timeout and retries
+const userSdk = getSdk({
+  token: 'user-session-token',
+  timeout: 5000,
+  retries: 2,
+});
+```
+
+See [`sdk/README.md`](sdk/README.md) for full SDK usage, error codes, and configuration options.
+
+## Codebase Indexing (CocoIndex)
+
+Incremental codebase indexing for fast search and agent context is managed by [CocoIndex](coco/):
+
+```bash
+coco/.venv/bin/cocoindex update coco/main.py
+```
 
 ## Architecture & Decisions
 
