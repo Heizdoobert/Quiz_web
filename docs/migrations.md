@@ -56,13 +56,15 @@ On 2026-10-12 the owner's Supabase database was wiped and rebuilt by applying sc
 
 ## First admin (run once, never commit the real address)
 
-`21-rbac.sql` creates no admin: this repository is public and the owner's email must not be in it. After applying the migration, sign in once with your email code so your account exists, then run this in the Supabase SQL editor, replacing the placeholder with your own address:
+`21-rbac.sql` creates no admin: this repository is public and the owner's email must not be in it. After applying the migration, request an email code in the app once so your sign-in exists, then run this in the Supabase SQL editor, replacing the placeholder with your own address. It creates your account row if the first sign-in did not (the row only appears once the code is verified), and sets the role either way:
 
 ```sql
-UPDATE users
-   SET role = 'admin'
- WHERE auth_user_id = (SELECT id FROM auth.users WHERE email = 'YOUR-EMAIL@example.com')
+INSERT INTO users (auth_user_id, display_name, role)
+SELECT id, 'Player-' || left(id::text, 4), 'admin'
+  FROM auth.users
+ WHERE email = 'YOUR-EMAIL@example.com'
+ON CONFLICT (auth_user_id) DO UPDATE SET role = 'admin'
 RETURNING id, role;
 ```
 
-It must return one row. No rows means the address does not match an account yet (sign in by email code first, or check the spelling); running it again is harmless. After that, an admin grants and revokes every other role through `PUT /api/v1/admin/roles`. Do the same on the Supabase branch first if you test there.
+It must return one row. No rows means no sign-in exists for that address (request a code first, or check the spelling); running it again is harmless. After that, an admin grants and revokes every other role through `PUT /api/v1/admin/roles`. Do the same on the Supabase branch first if you test there.
