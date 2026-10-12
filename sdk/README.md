@@ -454,8 +454,8 @@ To build the SDK bundle from source:
 # In the workspace root
 npm run build:sdk
 
-# Or inside packages/sdk
-cd packages/sdk
+# Or inside sdk
+cd sdk
 npx tsup
 ```
 

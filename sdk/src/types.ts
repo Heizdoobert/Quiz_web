@@ -22,7 +22,7 @@ export type {
   RatingSummary,
   CommentView,
   SuggestionView,
-} from '../../../lib/types';
+} from '../../lib/types';
 
 export interface AuthSession {
   id: string;

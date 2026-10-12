@@ -17,14 +17,14 @@ import {
   type AnswerSubmissionResult,
   type AuthResult,
   type AuthSession,
-} from '../packages/sdk/dist';
+} from '../sdk/dist';
 
 import {
   createTokenVerifier,
   getBearerToken,
   withQuickQuizAuth,
   quickQuizAuth,
-} from '../packages/sdk/dist/server';
+} from '../sdk/dist/server';
 
 // Route handlers under test
 import { POST as signupRoute } from '@/app/api/v1/auth/signup/route';
