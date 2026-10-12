@@ -26,7 +26,7 @@
     "@ducanh2912/next-pwa": "6.1.0",
     "@google/genai": "^2.27.0",
     "@sentry/nextjs": "^11.5.0",
-    "@supabase/supabase-js": "^2.117.2",
+    "@supabase/supabase-js": "^2.117.3",
     "@tanstack/react-query": "^5.104.1",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^14.0.0",
