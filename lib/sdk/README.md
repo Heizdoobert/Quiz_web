@@ -11,6 +11,8 @@ swapping or mocking a vendor touches one file.
 | `sentry.ts` | none: no-op default, replaced by `sdk/tracking-analytics` at build time when that folder exists | error boundaries, `instrumentation*.ts` |
 | `posthog.ts` | none: no-op default, replaced by `sdk/tracking-analytics` at build time when that folder exists | `components/providers/PostHogProvider.tsx` |
 
+`lib/sdk.ts` is separate: it builds the client for Quick Quiz's own `@heizdoobert/quickquiz-sdk` (`getSdk`) and is not a vendor wrapper.
+
 ## Add an SDK
 
 1. `npm install <package>`.
