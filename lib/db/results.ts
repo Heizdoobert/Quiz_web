@@ -30,3 +30,12 @@ export async function recentResults(accountId: string, limit: number): Promise<u
   );
   return rows ?? [];
 }
+
+// quiz_results is unique per account and question, so maybeSingle is exact.
+export async function hasRecordedAnswer(accountId: string, questionId: string): Promise<boolean> {
+  const row = unwrap(
+    'results.hasRecorded',
+    await admin().from('quiz_results').select('id').eq('user_id', accountId).eq('question_id', questionId).maybeSingle()
+  );
+  return row !== null;
+}
