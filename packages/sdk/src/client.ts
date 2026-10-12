@@ -1,6 +1,6 @@
 import { HttpClient, type HttpClientOptions, type RequestOptions } from './http';
 
-export interface QuickQuizClientOptions extends HttpClientOptions {}
+export type QuickQuizClientOptions = HttpClientOptions;
 
 export class QuickQuizClient {
   readonly http: HttpClient;

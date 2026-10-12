@@ -72,7 +72,7 @@ export class HttpClient {
       }
     }
 
-    if (this.token) {
+    if (this.token && !headers['Authorization'] && !headers['authorization']) {
       headers['Authorization'] = `Bearer ${this.token}`;
     }
 

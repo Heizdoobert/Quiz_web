@@ -84,6 +84,31 @@ describe('SDK HTTP Client & Error Handling', () => {
       await client.request('/v1/third');
       expect(mockFetch.mock.calls[2][1]?.headers?.['Authorization']).toBeUndefined();
     });
+
+    it('preserves caller-provided Authorization or authorization header', async () => {
+      const mockFetch = vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        text: async () => JSON.stringify({ success: true, data: 'ok' }),
+      });
+
+      const client = new QuickQuizClient({
+        baseUrl,
+        token: 'client-token',
+        fetch: mockFetch as unknown as typeof fetch,
+      });
+
+      await client.request('/v1/custom-auth', {
+        headers: { Authorization: 'Bearer custom-token' },
+      });
+      expect(mockFetch.mock.calls[0][1]?.headers?.['Authorization']).toBe('Bearer custom-token');
+
+      await client.request('/v1/lowercase-auth', {
+        headers: { authorization: 'Bearer lowercase-token' },
+      });
+      expect(mockFetch.mock.calls[1][1]?.headers?.['authorization']).toBe('Bearer lowercase-token');
+      expect(mockFetch.mock.calls[1][1]?.headers?.['Authorization']).toBeUndefined();
+    });
   });
 
   describe('Envelope unwrapping', () => {
