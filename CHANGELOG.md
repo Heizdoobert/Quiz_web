@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PWA plugin**: `@ducanh2912/next-pwa` and the `webpack` dependency it needed. The plugin only runs under webpack and `next build` uses Turbopack, so it never produced a service worker: production `/sw.js` returned 404 and the offline support listed under 0.5.0 never shipped. The web manifest stays.
 
 ### Added
+- **Roles (RBAC)**: one role per account (`user`, `moderator`, `admin`) in `users.role`, permissions mapped in `lib/services/rbac.ts`, and one `authorize()` check that reads the role from the database on every gated call (ADR-014). `PUT /api/v1/admin/roles` lets an admin grant or revoke a role. `GET /api/v1/moderation/questions` and `POST /api/v1/moderation/questions/[id]/resolve` let a moderator or admin list quarantined questions and restore or retire them. API only, no UI. Migration `supabase/migrations/21-rbac.sql` (not applied yet); the first admin is a one-off statement in `docs/migrations.md`.
 - **Auth rate limits**: Email-code, username and answer submissions are limited per identifier and per IP through a Postgres counter (`supabase/migrations/17-auth-rate-limit.sql`, ADR-008). Apply the migration; until then the limiter fails open.
 - **CSP report-only policy** and `/api/csp-report` (ADR-009).
 - **`/api/health`**: answers 200 only when the database does, 503 otherwise.
@@ -28,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Next.js 16.4.0** (fixes the image optimizer SSRF and ISR cache-poisoning advisory in 16.3.6).
 
 ### Security
+- `question_disputes` is no longer readable with the public key (`21-rbac.sql` drops its read policy); it exposed who reported a question and why.
 - `isContestVoucherUsed` fails closed when the nonce cannot be read, so a voucher is not re-signed after an RPC failure.
 - `get5050EliminatedIndices` returns nothing for pending, quarantined or contest questions.
 - `submitAnswer` validates the question id and is limited to 120 answers per IP per hour.
