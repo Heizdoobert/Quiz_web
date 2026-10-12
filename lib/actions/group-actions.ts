@@ -11,8 +11,8 @@ const MAX_DESCRIPTION = 200;
 
 // Group writes act for the signed-in account only and go through the secret key;
 // the public key can no longer write groups or memberships.
-async function signedIn(): Promise<{ error: string } | { account: SessionAccount; db: NonNullable<typeof supabaseAdmin> }> {
-  const account = await getSessionAccount();
+async function signedIn(authAccount?: SessionAccount): Promise<{ error: string } | { account: SessionAccount; db: NonNullable<typeof supabaseAdmin> }> {
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { error: 'Sign in to manage groups.' };
   if (!supabaseAdmin) return { error: 'Groups are unavailable right now.' };
   return { account, db: supabaseAdmin };
@@ -21,7 +21,7 @@ async function signedIn(): Promise<{ error: string } | { account: SessionAccount
 export async function createGroup(params: {
   name: string;
   description?: string;
-}): Promise<{ success: boolean; group?: Group; error?: string }> {
+}, authAccount?: SessionAccount): Promise<{ success: boolean; group?: Group; error?: string }> {
   try {
     const name = params?.name?.trim() || '';
     const description = params?.description?.trim() || '';
@@ -32,7 +32,7 @@ export async function createGroup(params: {
     if (description.length > MAX_DESCRIPTION) {
       return { success: false, error: `Description must be at most ${MAX_DESCRIPTION} characters.` };
     }
-    const auth = await signedIn();
+    const auth = await signedIn(authAccount);
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { data: group, error } = await auth.db
@@ -63,10 +63,10 @@ export async function createGroup(params: {
   }
 }
 
-export async function joinGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
+export async function joinGroup(groupId: string, authAccount?: SessionAccount): Promise<{ success: boolean; error?: string }> {
   try {
     if (!isUuid(groupId)) return { success: false, error: 'Group not found.' };
-    const auth = await signedIn();
+    const auth = await signedIn(authAccount);
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { error } = await auth.db
@@ -85,10 +85,10 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
   }
 }
 
-export async function leaveGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
+export async function leaveGroup(groupId: string, authAccount?: SessionAccount): Promise<{ success: boolean; error?: string }> {
   try {
     if (!isUuid(groupId)) return { success: false, error: 'Group not found.' };
-    const auth = await signedIn();
+    const auth = await signedIn(authAccount);
     if ('error' in auth) return { success: false, error: auth.error };
 
     const { error } = await auth.db
@@ -107,9 +107,9 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
   }
 }
 
-export async function getUserGroups(): Promise<Group[]> {
+export async function getUserGroups(authAccount?: SessionAccount): Promise<Group[]> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return [];
     const { data, error } = await supabase
       .from('group_members')

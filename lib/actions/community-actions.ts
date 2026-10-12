@@ -2,7 +2,7 @@
 
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
 import { supabase } from '@/lib/supabase/supabase';
-import { getSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
 
@@ -24,12 +24,14 @@ export interface CommentView {
   body: string;
   createdAt: string;
   isOwn: boolean;
+  mine?: boolean;
 }
 
 export interface SuggestionView {
   id: string;
   questionId: string;
   prompt: string;
+  questionPrompt?: string;
   body: string;
   senderName: string;
   createdAt: string;
@@ -77,8 +79,12 @@ async function checkCanDiscuss(
   return { ok: true };
 }
 
-export async function rateQuestion(questionId: string, rating: number): Promise<CommunityResult> {
-  const account = await getSessionAccount();
+export async function rateQuestion(
+  questionId: string,
+  rating: number,
+  authAccount?: SessionAccount
+): Promise<CommunityResult> {
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(questionId) || !Number.isInteger(rating) || rating < 1 || rating > 5) {
     return { ok: false, code: 'INVALID' };
@@ -105,9 +111,10 @@ export async function rateQuestion(questionId: string, rating: number): Promise<
 export async function addComment(
   questionId: string,
   body: string,
-  kind: 'comment' | 'suggestion'
+  kind: 'comment' | 'suggestion',
+  authAccount?: SessionAccount
 ): Promise<CommunityResult> {
-  const account = await getSessionAccount();
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(questionId) || !['comment', 'suggestion'].includes(kind)) {
     return { ok: false, code: 'INVALID' };
@@ -154,8 +161,11 @@ export async function addComment(
   return { ok: true };
 }
 
-export async function deleteComment(commentId: string): Promise<CommunityResult> {
-  const account = await getSessionAccount();
+export async function deleteComment(
+  commentId: string,
+  authAccount?: SessionAccount
+): Promise<CommunityResult> {
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(commentId)) return { ok: false, code: 'INVALID' };
   if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
@@ -178,8 +188,11 @@ export async function deleteComment(commentId: string): Promise<CommunityResult>
   return { ok: true };
 }
 
-export async function resolveSuggestion(commentId: string): Promise<CommunityResult> {
-  const account = await getSessionAccount();
+export async function resolveSuggestion(
+  commentId: string,
+  authAccount?: SessionAccount
+): Promise<CommunityResult> {
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(commentId)) return { ok: false, code: 'INVALID' };
   if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
@@ -212,7 +225,8 @@ export async function resolveSuggestion(commentId: string): Promise<CommunityRes
 
 export async function getQuestionDiscussion(
   questionId: string,
-  page = 1
+  page = 1,
+  authAccount?: SessionAccount
 ): Promise<{
   rating: RatingSummary;
   myRating: number | null;
@@ -227,7 +241,7 @@ export async function getQuestionDiscussion(
   };
   if (!isUuid(questionId)) return empty;
 
-  const account = await getSessionAccount();
+  const account = authAccount ?? (await getSessionAccount());
   const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
 
   // 1. Fetch rating summary via RPC
@@ -282,12 +296,14 @@ export async function getQuestionDiscussion(
 
   const comments: CommentView[] = rows.slice(0, PAGE_SIZE).map((r) => {
     const user = Array.isArray(r.users) ? r.users[0] : r.users;
+    const isOwn = account?.id === r.user_id;
     return {
       id: r.id,
       authorName: user?.display_name || 'Player',
       body: r.body,
       createdAt: r.created_at,
-      isOwn: account?.id === r.user_id,
+      isOwn,
+      mine: isOwn,
     };
   });
 
@@ -299,10 +315,15 @@ export async function getQuestionDiscussion(
   };
 }
 
-export async function getSuggestionsForAuthor(accountId: string): Promise<SuggestionView[]> {
-  const account = await getSessionAccount();
-  if (!account || account.id !== accountId) return [];
-  if (!isUuid(accountId) || !supabaseAdmin) return [];
+export async function getSuggestionsForAuthor(
+  accountId?: string,
+  authAccount?: SessionAccount
+): Promise<SuggestionView[]> {
+  const account = authAccount ?? (await getSessionAccount());
+  if (!account) return [];
+  const targetId = accountId ?? account.id;
+  if (account.id !== targetId) return [];
+  if (!isUuid(targetId) || !supabaseAdmin) return [];
 
   const { data, error } = await supabaseAdmin
     .from('question_comments')
@@ -337,10 +358,12 @@ export async function getSuggestionsForAuthor(accountId: string): Promise<Sugges
   return rows.map((r) => {
     const q = Array.isArray(r.questions) ? r.questions[0] : r.questions;
     const u = Array.isArray(r.users) ? r.users[0] : r.users;
+    const promptText = q?.prompt || '';
     return {
       id: r.id,
       questionId: r.question_id,
-      prompt: q?.prompt || '',
+      prompt: promptText,
+      questionPrompt: promptText,
       body: r.body,
       senderName: u?.display_name || 'Player',
       createdAt: r.created_at,

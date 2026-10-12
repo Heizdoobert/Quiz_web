@@ -3,7 +3,7 @@ import { logger } from "@/lib/logger";
 
 import { supabase } from '../supabase/supabase';
 import { supabaseAdmin } from '../supabase/supabase-admin';
-import { getSessionAccount } from '../services/session';
+import { getSessionAccount, type SessionAccount } from '../services/session';
 import {
   Question,
   ClientQuestion,
@@ -21,10 +21,11 @@ const MAX_EXPORT_STATS = 5000;
 const BACKUP_SCHEMA_VERSION = '1.0';
 
 export async function getUserQuizzes(
-  options?: GetUserQuizzesFilter
+  options?: GetUserQuizzesFilter,
+  authAccount?: SessionAccount
 ): Promise<GetUserQuizzesResult> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return {
         success: false,
@@ -79,11 +80,11 @@ export async function getUserQuizzes(
   }
 }
 
-export async function exportUserData(): Promise<ExportUserDataResult> {
+export async function exportUserData(authAccount?: SessionAccount): Promise<ExportUserDataResult> {
   try {
     // The backup holds correct answers and every recorded answer, which the public key
     // can't read, so it's read with the secret key and only for the signed-in account.
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return {
         success: false,
@@ -153,9 +154,9 @@ export interface QuestionAnalytics {
   accuracy_rate: number;
 }
 
-export async function getQuestionAnalytics(): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
+export async function getQuestionAnalytics(authAccount?: SessionAccount): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return { success: false, error: 'Sign in to view analytics.' };
     }
