@@ -35,7 +35,7 @@ module.exports = {
   ],
   options: {
     doNotFollow: {
-      path: 'node_modules|sdk',
+      path: 'node_modules|sdk|packages',
     },
     tsPreCompilationDeps: true,
     tsConfig: {

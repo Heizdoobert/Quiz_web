@@ -1,0 +1,93 @@
+/* QuickQuiz Input Styles */
+
+.qq-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  width: 100%;
+  font-family: var(--font-sans, inherit);
+}
+
+.qq-input-label {
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--color-text, #f8fafc);
+}
+
+.qq-input-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+}
+
+.qq-input {
+  width: 100%;
+  background-color: var(--color-surface, #1e293b);
+  color: var(--color-text, #f8fafc);
+  font-family: inherit;
+  font-size: var(--font-size-sm, 0.875rem);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: var(--radius-md, 0.375rem);
+  padding: 0.5rem 0.75rem;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+}
+
+.qq-input:focus {
+  border-color: var(--color-border-focus, #6366f1);
+  box-shadow: 0 0 0 1px var(--color-border-focus, #6366f1);
+}
+
+.qq-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-surface-subtle, #334155);
+}
+
+.qq-input--error {
+  border-color: var(--color-destructive, #ef4444) !important;
+}
+.qq-input--error:focus {
+  box-shadow: 0 0 0 1px var(--color-destructive, #ef4444) !important;
+}
+
+.qq-input--has-prefix {
+  padding-left: 2.25rem;
+}
+
+.qq-input--has-suffix {
+  padding-right: 2.25rem;
+}
+
+.qq-input__prefix,
+.qq-input__suffix {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted, #94a3b8);
+  pointer-events: none;
+}
+
+.qq-input__prefix {
+  left: 0.75rem;
+}
+
+.qq-input__suffix {
+  right: 0.75rem;
+}
+
+.qq-input-helper,
+.qq-input-error {
+  font-size: var(--font-size-xs, 0.75rem);
+  margin: 0;
+}
+
+.qq-input-helper {
+  color: var(--color-text-muted, #94a3b8);
+}
+
+.qq-input-error {
+  color: var(--color-destructive, #ef4444);
+}
