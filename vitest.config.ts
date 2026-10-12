@@ -4,15 +4,20 @@ import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './'),
+      '@heizdoobert/quickquiz-sdk/client': path.resolve(__dirname, './sdk/src/client/index.ts'),
+      '@heizdoobert/quickquiz-sdk/server': path.resolve(__dirname, './sdk/src/server/index.ts'),
+      '@heizdoobert/quickquiz-sdk': path.resolve(__dirname, './sdk/src/index.ts'),
+      'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
+    },
+  },
   test: {
     environment: 'jsdom',
     globals: true,
     maxWorkers: 2,
     setupFiles: ['./tests/setup-env.ts'],
-    alias: {
-      '@': path.resolve(__dirname, './'),
-      'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
-    },
     exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**'],
     coverage: {
       provider: 'v8',
