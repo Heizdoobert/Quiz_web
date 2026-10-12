@@ -18,6 +18,10 @@ export async function POST(req: NextRequest) {
       return apiError('UNAUTHORIZED', 'Invalid or expired code');
     }
 
+    if (!result.token) {
+      return apiError('SERVER_ERROR', 'Failed to issue token');
+    }
+
     return apiOk({
       ok: true,
       token: result.token,

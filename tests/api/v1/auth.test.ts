@@ -117,6 +117,16 @@ describe('POST /api/v1/auth/signup', () => {
     expect(json.success).toBe(false);
     expect(json.error.code).toBe('SERVER_ERROR');
   });
+
+  it('returns 500 SERVER_ERROR when registration encounters an unexpected error', async () => {
+    vi.mocked(signUpAccount).mockResolvedValue({ ok: false, error: 'An unexpected error occurred during registration.' });
+
+    const res = await signup(post('http://localhost/api/v1/auth/signup', { username: 'ada', password: 'secretpassword' }));
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+  });
 });
 
 describe('POST /api/v1/auth/signin', () => {
@@ -277,6 +287,20 @@ describe('POST /api/v1/auth/email/verify', () => {
     const json = await res.json();
     expect(json.success).toBe(false);
     expect(json.error.code).toBe('RATE_LIMITED');
+  });
+
+  it('returns 500 SERVER_ERROR when token issuance fails after verification', async () => {
+    vi.mocked(verifyEmailCode).mockResolvedValue({
+      ok: true,
+      accountId: 'acc-email-1',
+    });
+
+    const res = await verifyEmail(post('http://localhost/api/v1/auth/email/verify', { email: 'player@example.com', code: '123456' }));
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+    expect(json.error.message).toBe('Failed to issue token');
   });
 });
 

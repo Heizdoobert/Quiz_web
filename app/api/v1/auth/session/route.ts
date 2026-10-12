@@ -3,6 +3,8 @@ import { requireAuth } from '@/lib/services/api-auth';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
 import { apiOk, apiError } from '@/lib/services/api-response';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: NextRequest) {
   const auth = requireAuth(req);
   if (!auth.ok) return auth.response;

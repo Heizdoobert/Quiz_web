@@ -20,6 +20,9 @@ export async function POST(req: NextRequest) {
       if (msg.includes('already taken') || msg.includes('already exists') || msg.includes('already registered')) {
         return apiError('CONFLICT', result.error);
       }
+      if (msg.includes('unexpected') || msg.includes('could not create') || msg.includes('server error')) {
+        return apiError('SERVER_ERROR', result.error);
+      }
       return apiError('VALIDATION_ERROR', result.error);
     }
 
