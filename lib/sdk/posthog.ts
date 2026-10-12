@@ -1,15 +1,9 @@
-'use client';
+import type { ReactNode } from 'react';
 
-import posthog from 'posthog-js';
+// No-op default. When sdk/tracking-analytics exists, next.config.mjs aliases this module to
+// sdk/tracking-analytics/src/posthog.ts at build time (see sdk/tracking-analytics/README.md).
+export const posthog = undefined;
 
-export { PostHogProvider as PHProvider } from 'posthog-js/react';
-
-if (typeof window !== 'undefined') {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY || '', {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST || 'https://app.posthog.com',
-    person_profiles: 'identified_only',
-    capture_pageview: false, // App Router needs custom pageviews if we want them
-  });
+export function PHProvider({ children }: { client?: unknown; children: ReactNode }): ReactNode {
+  return children;
 }
-
-export { posthog };
