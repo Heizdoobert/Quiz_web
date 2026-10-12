@@ -2,9 +2,13 @@
   "name": "quick-quiz",
   "version": "0.5.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev --turbo",
     "build": "next build",
+    "build:sdk": "npm run --prefix packages/sdk build",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run tests/ components/",
