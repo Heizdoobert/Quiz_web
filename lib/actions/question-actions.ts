@@ -2,7 +2,7 @@
 
 import { supabase } from '@/lib/supabase/supabase';
 import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
-import { getSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, SessionAccount } from '@/lib/services/session';
 import { ClientQuestion } from '@/lib/types';
 import { escapeLikePattern, isUuid, validateQuestionInput } from '@/lib/utils/validation';
 import { GoogleGenAI } from '@google/genai';
@@ -15,15 +15,18 @@ import { ActionResult } from '@/lib/types';
 
 import { logger } from '@/lib/logger';
 
-export async function createQuestion(params: {
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-  category?: string;
-  explanation?: string;
-}): Promise<ActionResult> {
+export async function createQuestion(
+  params: {
+    prompt: string;
+    options: string[];
+    correctIndex: number;
+    category?: string;
+    explanation?: string;
+  },
+  authAccount?: SessionAccount
+): Promise<ActionResult> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to add questions.' } };
     }
@@ -207,10 +210,13 @@ export async function getPublicQuestion(id: string): Promise<ClientQuestion | nu
   }
 }
 
-export async function disputeQuestion(params: {
-  questionId: string;
-  reason: string;
-}): Promise<ActionResult<{ quarantined: boolean }>> {
+export async function disputeQuestion(
+  params: {
+    questionId: string;
+    reason: string;
+  },
+  authAccount?: SessionAccount
+): Promise<ActionResult<{ quarantined: boolean }>> {
   try {
     const reason = params.reason?.trim() || '';
     if (!isUuid(params.questionId) || !reason) {
@@ -219,7 +225,7 @@ export async function disputeQuestion(params: {
     if (reason.length > MAX_DISPUTE_REASON) {
       return { success: false, error: { code: 'VALIDATION_ERROR', message: `Dispute reason must be at most ${MAX_DISPUTE_REASON} characters.` } };
     }
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to report questions.' } };
     if (!supabaseAdmin) return { success: false, error: { code: 'SERVER_ERROR', message: 'Reporting is unavailable right now.' } };
 
@@ -329,14 +335,17 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
   }
 }
 
-export async function generateQuestion(topic: string): Promise<ActionResult<{
+export async function generateQuestion(
+  topic: string,
+  authAccount?: SessionAccount
+): Promise<ActionResult<{
   prompt: string;
   options: string[];
   correctIndex: number;
   explanation: string;
 }>> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return { success: false, error: { code: 'UNAUTHORIZED', message: 'Sign in to generate questions.' } };
     }
