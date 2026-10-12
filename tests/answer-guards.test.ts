@@ -200,6 +200,19 @@ describe('getAnswerHistory', () => {
     const history = await getAnswerHistory();
     expect(history).toEqual([]);
   });
+
+  it('uses provided authAccount directly without calling getSessionAccount', async () => {
+    mockTables({
+      quiz_results: {
+        rows: [
+          { question_id: Q_ID, is_correct: true, questions: { prompt: 'What is Base?' } },
+        ],
+      },
+    });
+    const history = await getAnswerHistory(ACCOUNT);
+    expect(getSessionAccount).not.toHaveBeenCalled();
+    expect(history).toEqual([{ questionId: Q_ID, prompt: 'What is Base?', isCorrect: true }]);
+  });
 });
 
 describe('createQuestion guards', () => {

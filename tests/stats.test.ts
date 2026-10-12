@@ -57,4 +57,11 @@ describe('getUserStats', () => {
     expect(await getUserStats()).toEqual({ score: 1, streak: 1, bestStreak: 1, accuracy: 100, totalAnswered: 1 });
     expect(supabase.rpc).toHaveBeenCalledWith('get_user_stats', { p_user: ACCOUNT_ID });
   });
+
+  it('uses provided authAccount directly without calling getSessionAccount', async () => {
+    mockRpc({ data: { total_answered: 1, correct_count: 1, streak: 1, best_streak: 1 }, error: null });
+    expect(await getUserStats({ id: ACCOUNT_ID })).toEqual({ score: 1, streak: 1, bestStreak: 1, accuracy: 100, totalAnswered: 1 });
+    expect(getSessionAccount).not.toHaveBeenCalled();
+    expect(supabase.rpc).toHaveBeenCalledWith('get_user_stats', { p_user: ACCOUNT_ID });
+  });
 });

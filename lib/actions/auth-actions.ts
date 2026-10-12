@@ -1,6 +1,7 @@
 'use server';
 
-import { getSessionAccount, setSessionAccount, clearSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, type SessionAccount } from '@/lib/services/session';
+import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
 import { ensureAccountForAuthUser } from '@/lib/services/users';
 import { auth } from '@/lib/db/auth';
 import { signInAccount, signUpAccount } from '@/lib/services/credentials';
@@ -29,14 +30,25 @@ export async function requestEmailCode(email: string): Promise<{ sent: boolean; 
   return { sent: true };
 }
 
-export async function verifyEmailCode(email: string, code: string): Promise<{ ok: boolean; error?: 'RATE_LIMITED' }> {
+export async function verifyEmailCode(
+  email: string,
+  code: string,
+  options?: { issueToken?: boolean } | boolean
+): Promise<{ ok: boolean; error?: 'RATE_LIMITED'; token?: string; accountId?: string }> {
   try {
     // A 6-digit code lives about an hour; 10 tries per hour makes guessing it hopeless.
     if (!(await allowAttempt('email-verify', email, 10, HOUR))) return { ok: false, error: 'RATE_LIMITED' };
     const { data, error } = await auth().verifyOtp({ email: email.trim(), token: code, type: 'email' });
     if (error || !data.user) return { ok: false };
     const accountId = await ensureAccountForAuthUser(data.user.id);
-    return { ok: accountId !== null && (await setSessionAccount({ id: accountId })) };
+    if (!accountId) return { ok: false };
+    const ok = await setSessionAccount({ id: accountId });
+    const shouldIssue = typeof options === 'boolean' ? options : options?.issueToken;
+    if (shouldIssue) {
+      const token = issueMobileAuthToken({ id: accountId }) ?? undefined;
+      return { ok, token, accountId };
+    }
+    return { ok };
   } catch (err) {
     logger.error('verifyEmailCode error:', err);
     return { ok: false };
@@ -64,7 +76,8 @@ export async function signInWithUsername(
   return { ok, error: ok ? undefined : 'Failed to establish session.' };
 }
 
-export async function getSessionInfo(): Promise<{ id: string } | null> {
+export async function getSessionInfo(authAccount?: SessionAccount): Promise<{ id: string; username?: string } | null> {
+  if (authAccount) return authAccount;
   return getSessionAccount();
 }
 
