@@ -2,6 +2,8 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
+    # Dependency bumps follow the release flow: into preview, then promoted to main.
+    target-branch: "preview"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -15,9 +17,14 @@ updates:
       # typescript-eslint does not support TypeScript 7 yet.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # next-pwa 6.1.1 and later depend on fast-glob, which pulls braces (GHSA-vfj7-8cjw-p6xm) into
+      # production dependencies and fails `npm audit --omit=dev`. Stay on 6.1.0 until that is fixed.
+      - dependency-name: "@ducanh2912/next-pwa"
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    # Dependency bumps follow the release flow: into preview, then promoted to main.
+    target-branch: "preview"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
