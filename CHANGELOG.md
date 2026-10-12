@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **SDK**: `StorageManager` in `@heizdoobert/quickquiz-sdk/client` keeps JSON values in `sessionStorage`, gzip-compressed then AES-GCM encrypted. The key is a non-extractable `CryptoKey` in IndexedDB, and each entry is bound to its name.
+- **Mobile**: `StorageManager` (`mobile/lib/services/storage_manager.dart`) keeps small JSON values gzip-compressed in `flutter_secure_storage`, so the OS keystore encrypts them.
+
 ## [0.6.0] - 2026-10-12
 
 ### Removed
