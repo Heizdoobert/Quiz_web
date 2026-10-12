@@ -61,3 +61,6 @@ skills-lock.json
 *.agent.md
 *.local.md
 .env.deploy
+
+# sdk build output
+/packages/sdk/dist
