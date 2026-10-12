@@ -1,0 +1,83 @@
+/* QuickQuiz Alert Styles */
+
+.qq-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg, 0.5rem);
+  border: 1px solid transparent;
+  font-family: var(--font-sans, inherit);
+  line-height: 1.5;
+  transition: opacity 0.2s ease;
+}
+
+/* Alert types */
+.qq-alert--info {
+  background-color: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.25);
+  color: #60a5fa;
+}
+
+.qq-alert--success {
+  background-color: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #34d399;
+}
+
+.qq-alert--warning {
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+}
+
+.qq-alert--error {
+  background-color: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+
+/* Content layout */
+.qq-alert__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 0.125rem;
+}
+
+.qq-alert__content {
+  flex: 1 1 0%;
+}
+
+.qq-alert__title {
+  font-weight: 600;
+  font-size: var(--font-size-sm, 0.875rem);
+  margin-bottom: 0.25rem;
+  color: var(--color-text, #f8fafc);
+}
+
+.qq-alert__description {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #94a3b8);
+}
+
+/* Close action */
+.qq-alert__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  opacity: 0.7;
+  padding: 0.125rem;
+  border-radius: var(--radius-sm, 0.25rem);
+  flex-shrink: 0;
+  transition: opacity 0.15s ease;
+}
+
+.qq-alert__close:hover {
+  opacity: 1;
+}

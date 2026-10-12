@@ -25,3 +25,7 @@ import '@heizdoobert/quickquiz-ui/styles.css';
 - **Badge**: Status indicators with `default`, `success`, `warning`, `danger`, and `outline` styles.
 - **Input**: Accessible form inputs with label association, error messages, helper text, and icon slots.
 - **Modal**: Accessible modal dialog with backdrop blur, focus handling, Escape key dismissal, and custom action footers.
+- **Alert**: Feedback notice with `info`, `success`, `warning`, `error` types, optional title, description, custom icon, and dismissible close button.
+- **Switch**: Accessible toggle switch with `checked`, `defaultChecked`, `onChange`, `sm`/`md` sizing, and full keyboard interaction (`Space`/`Enter`).
+- **Tabs**: Tabbed navigation with `items`, active tab selection, arrow key navigation, panel rendering, and disabled tab handling.
+- **Tooltip**: Hover and focus popup hints with `top`, `bottom`, `left`, `right` placements for accessible helper text.

@@ -1,0 +1,72 @@
+/* QuickQuiz Switch Styles */
+
+.qq-switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  background-color: var(--color-surface-subtle, #334155);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full, 9999px);
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2px;
+  box-sizing: border-box;
+}
+
+.qq-switch:focus-visible {
+  outline: 2px solid var(--color-primary, #6366f1);
+  outline-offset: 2px;
+}
+
+/* Handle knob */
+.qq-switch__handle {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  background-color: #ffffff;
+  border-radius: var(--radius-full, 9999px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sizes */
+.qq-switch--md {
+  width: 44px;
+  height: 24px;
+}
+
+.qq-switch--md .qq-switch__handle {
+  width: 18px;
+  height: 18px;
+}
+
+.qq-switch--md.qq-switch--checked .qq-switch__handle {
+  transform: translateX(20px);
+}
+
+.qq-switch--sm {
+  width: 32px;
+  height: 18px;
+}
+
+.qq-switch--sm .qq-switch__handle {
+  width: 12px;
+  height: 12px;
+}
+
+.qq-switch--sm.qq-switch--checked .qq-switch__handle {
+  transform: translateX(14px);
+}
+
+/* Checked State */
+.qq-switch--checked {
+  background-color: var(--color-primary, #6366f1);
+}
+
+/* Disabled State */
+.qq-switch--disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

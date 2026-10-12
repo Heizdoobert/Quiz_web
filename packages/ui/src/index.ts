@@ -4,3 +4,7 @@ export * from './components/Card';
 export * from './components/Badge';
 export * from './components/Input';
 export * from './components/Modal';
+export * from './components/Alert';
+export * from './components/Switch';
+export * from './components/Tabs';
+export * from './components/Tooltip';
