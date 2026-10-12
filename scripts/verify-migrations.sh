@@ -18,10 +18,11 @@ apply() { echo "$1: $($P -f "/m/$1" 2>&1 >/dev/null | grep ERROR | sort -u | hea
 for f in schema.sql schema.sql lock-down-public-writes.sql question-lists.sql secure-rewards-and-answers.sql \
          restrict-quiz-results-insert.sql contest-escrow.sql widen-reward-claims-amount.sql accounts.sql \
          stats-functions.sql topics.sql search.sql community.sql reward-payee.sql 15-sponsors.sql \
-         16-leaderboard-pagination.sql 17-analytics.sql 17-auth-rate-limit.sql 18-ai-usage.sql; do
+         16-leaderboard-pagination.sql 17-analytics.sql 17-auth-rate-limit.sql 18-ai-usage.sql 19-secure-ai-usage.sql \
+         20-drop-web3-schema.sql; do
   apply "$f"
 done
 echo "--- functions the app calls"
-$P -At -c "select proname from pg_proc where proname in ('rate_limit_hit','get_global_leaderboard','get_topics','sweep_to_treasury','get_question_analytics') group by 1 order by 1"
+$P -At -c "select proname from pg_proc where proname in ('rate_limit_hit','get_global_leaderboard','get_topics','get_group_leaderboard','get_question_analytics') group by 1 order by 1"
 echo "--- get_global_leaderboard overloads (exactly one expected)"
 $P -At -c "select oid::regprocedure from pg_proc where proname = 'get_global_leaderboard'"

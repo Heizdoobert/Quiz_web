@@ -5,7 +5,7 @@ export interface Question {
   options: string[];
   correct_index: number;
   explanation: string | null;
-  created_by: string | null;
+  created_by_user: string | null;
   status?: 'verified' | 'pending' | 'quarantined' | 'rejected';
   dispute_count?: number;
   created_at: string;
