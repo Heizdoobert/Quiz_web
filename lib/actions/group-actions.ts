@@ -1,7 +1,7 @@
 'use server';
 
 import { addMember, groupsForAccount, insertGroup, removeMember } from '@/lib/db/groups';
-import { getSessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { Group } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
@@ -11,7 +11,7 @@ const MAX_DESCRIPTION = 200;
 export async function createGroup(params: {
   name: string;
   description?: string;
-}): Promise<{ success: boolean; group?: Group; error?: string }> {
+}, authAccount?: SessionAccount): Promise<{ success: boolean; group?: Group; error?: string }> {
   try {
     const name = params?.name?.trim() || '';
     const description = params?.description?.trim() || '';
@@ -22,7 +22,7 @@ export async function createGroup(params: {
     if (description.length > MAX_DESCRIPTION) {
       return { success: false, error: `Description must be at most ${MAX_DESCRIPTION} characters.` };
     }
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return { success: false, error: 'Sign in to manage groups.' };
 
     let group: unknown;
@@ -48,10 +48,10 @@ export async function createGroup(params: {
   }
 }
 
-export async function joinGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
+export async function joinGroup(groupId: string, authAccount?: SessionAccount): Promise<{ success: boolean; error?: string }> {
   try {
     if (!isUuid(groupId)) return { success: false, error: 'Group not found.' };
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return { success: false, error: 'Sign in to manage groups.' };
 
     let outcome: Awaited<ReturnType<typeof addMember>>;
@@ -70,10 +70,10 @@ export async function joinGroup(groupId: string): Promise<{ success: boolean; er
   }
 }
 
-export async function leaveGroup(groupId: string): Promise<{ success: boolean; error?: string }> {
+export async function leaveGroup(groupId: string, authAccount?: SessionAccount): Promise<{ success: boolean; error?: string }> {
   try {
     if (!isUuid(groupId)) return { success: false, error: 'Group not found.' };
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return { success: false, error: 'Sign in to manage groups.' };
 
     try {
@@ -89,9 +89,9 @@ export async function leaveGroup(groupId: string): Promise<{ success: boolean; e
   }
 }
 
-export async function getUserGroups(): Promise<Group[]> {
+export async function getUserGroups(authAccount?: SessionAccount): Promise<Group[]> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) return [];
     return (await groupsForAccount(account.id)) as Group[];
   } catch (err) {

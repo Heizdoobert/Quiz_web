@@ -4,7 +4,7 @@ import { logger } from "@/lib/logger";
 import { questionsForExport } from '../db/questions';
 import { resultsForExport } from '../db/results';
 import { questionAnalytics } from '../db/rpc';
-import { getSessionAccount } from '../services/session';
+import { getSessionAccount, type SessionAccount } from '../services/session';
 import { quizzesForAccount } from '../services/user-quizzes';
 import {
   Question,
@@ -20,9 +20,10 @@ const MAX_EXPORT_STATS = 5000;
 const BACKUP_SCHEMA_VERSION = '1.0';
 
 export async function getUserQuizzes(
-  options?: GetUserQuizzesFilter
+  options?: GetUserQuizzesFilter,
+  authAccount?: SessionAccount
 ): Promise<GetUserQuizzesResult> {
-  const account = await getSessionAccount();
+  const account = authAccount ?? (await getSessionAccount());
   if (!account) {
     return {
       success: false,
@@ -33,11 +34,11 @@ export async function getUserQuizzes(
   return quizzesForAccount(account.id, options);
 }
 
-export async function exportUserData(): Promise<ExportUserDataResult> {
+export async function exportUserData(authAccount?: SessionAccount): Promise<ExportUserDataResult> {
   try {
     // The backup holds correct answers and every recorded answer, which the public key
     // can't read, so it's read with the secret key and only for the signed-in account.
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return {
         success: false,
@@ -96,9 +97,9 @@ export interface QuestionAnalytics {
   accuracy_rate: number;
 }
 
-export async function getQuestionAnalytics(): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
+export async function getQuestionAnalytics(authAccount?: SessionAccount): Promise<{ success: boolean; data?: QuestionAnalytics[]; error?: string }> {
   try {
-    const account = await getSessionAccount();
+    const account = authAccount ?? (await getSessionAccount());
     if (!account) {
       return { success: false, error: 'Sign in to view analytics.' };
     }
