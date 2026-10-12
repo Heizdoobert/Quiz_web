@@ -26,7 +26,7 @@
 - **Core is a verifier, adapters are thin.** `createTokenVerifier` owns fetching and caching. The Next and Express adapters only extract the token, call `verify`, and shape the response.
 - **Cache key is the SHA-256 hex of the token** (`crypto.subtle`, async), so raw tokens never sit in the Map. Both verdicts are cached for `ttlMs` (default 30000): an account on success, `null` on 401. Errors (network, 5xx, 429) are not cached. The Map is capped at `maxEntries` (default 1000) and evicts the oldest entry first.
 - **Failure shapes.** Missing token: 401 `UNAUTHORIZED` "Authentication token required". Invalid token: 401 `UNAUTHORIZED` "Invalid or expired token". These match `lib/services/api-auth.ts`. Upstream error: 503 `UPSTREAM_UNAVAILABLE` "Authentication service unavailable".
-- **Optional mode.** No token gives `account: null`. An invalid token also gives `null`. Only an upstream error rejects (503), because the account is unknown.
+- **Optional mode.** No token gives `account: null`. An invalid token also gives `null`. An upstream error also gives `null` (decided after the first build, which returned 503): optional means anonymous is acceptable, and `onError` still reports the outage. Required mode answers 503.
 - **`onError` hook (added during build).** Both adapters take `{ optional?, onError? }`. A wrong `baseUrl` (for example one missing `/api`) makes every verification fail with a 404, which would otherwise show up only as silent 503s. `onError` receives the upstream error, and a throwing `onError` is swallowed so it cannot cause an unhandled rejection.
 - **A new `HttpClient` per verification**, not a shared one, because `setToken` is mutable state and concurrent verifications would race.
 - **Runtime floor:** Node 20 or later (global `crypto.subtle`, `fetch`, `Request`, `Response`). Declared in `engines`.
@@ -85,7 +85,7 @@
 **Acceptance criteria:**
 - [ ] Required mode: a missing or bad token returns 401 with the envelope, a good token calls the handler with the account.
 - [ ] Optional mode: no token or a bad token calls the handler with `null`.
-- [ ] A verifier error returns 503 `UPSTREAM_UNAVAILABLE` in both modes, and the handler is not called.
+- [ ] A verifier error returns 503 `UPSTREAM_UNAVAILABLE` in required mode and the handler is not called. In optional mode the handler is called with `null`.
 
 **Verification:**
 - [ ] `npx vitest run tests/sdk-server-next.test.ts` passes, using the Web `Request` and `Response` globals.
@@ -158,5 +158,5 @@
 
 ## Open questions
 
-- Upstream outage in optional mode with a token present returns 503. Confirm that is wanted rather than `null`.
+- Resolved: upstream outage in optional mode with a token present continues as `null`, not 503.
 - Where does the finished SDK (Tasks 8-9) live, if not on `feat/sdk-and-api-v1`?

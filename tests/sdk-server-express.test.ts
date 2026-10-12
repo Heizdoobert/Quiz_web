@@ -85,30 +85,41 @@ describe('quickQuizAuth (optional)', () => {
 });
 
 describe('quickQuizAuth (Quick Quiz unreachable)', () => {
-  it.each([[false], [true]])(
-    'answers 503, never calls next, and does not reject (optional: %s)',
-    async (optional) => {
-      const { verifier, req, res, status, json, next } = setup('throw', 'Bearer good');
-      const onError = vi.fn();
+  it('required: answers 503, never calls next, and does not reject', async () => {
+    const { verifier, req, res, status, json, next } = setup('throw', 'Bearer good');
+    const onError = vi.fn();
 
-      await expect(quickQuizAuth(verifier, { optional, onError })(req, res, next)).resolves.toBeUndefined();
+    await expect(quickQuizAuth(verifier, { onError })(req, res, next)).resolves.toBeUndefined();
 
-      expect(status).toHaveBeenCalledWith(503);
-      expect(json).toHaveBeenCalledWith(upstream);
-      expect(next).not.toHaveBeenCalled();
-      expect(req.quickQuizAccount).toBeUndefined();
-      expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'quick quiz down' }));
-    },
-  );
+    expect(status).toHaveBeenCalledWith(503);
+    expect(json).toHaveBeenCalledWith(upstream);
+    expect(next).not.toHaveBeenCalled();
+    expect(req.quickQuizAccount).toBeUndefined();
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'quick quiz down' }));
+  });
 
-  it('still answers 503 when onError itself throws', async () => {
+  it('optional: continues as anonymous and still reports the error', async () => {
+    const { verifier, req, res, status, next } = setup('throw', 'Bearer good');
+    const onError = vi.fn();
+
+    await quickQuizAuth(verifier, { optional: true, onError })(req, res, next);
+
+    expect(req.quickQuizAccount).toBeNull();
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(next).toHaveBeenCalledWith();
+    expect(status).not.toHaveBeenCalled();
+    expect(onError).toHaveBeenCalledWith(expect.objectContaining({ message: 'quick quiz down' }));
+  });
+
+  it.each([[false], [true]])('survives a throwing onError (optional: %s)', async (optional) => {
     const { verifier, req, res, status, next } = setup('throw', 'Bearer good');
     const onError = () => {
       throw new Error('logger broke');
     };
 
-    await expect(quickQuizAuth(verifier, { onError })(req, res, next)).resolves.toBeUndefined();
+    await expect(quickQuizAuth(verifier, { optional, onError })(req, res, next)).resolves.toBeUndefined();
 
-    expect(status).toHaveBeenCalledWith(503);
+    if (optional) expect(next).toHaveBeenCalledTimes(1);
+    else expect(status).toHaveBeenCalledWith(503);
   });
 });

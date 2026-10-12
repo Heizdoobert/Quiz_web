@@ -1,9 +1,12 @@
 import { getBearerToken, type QuickQuizAccount, type TokenVerifier } from './verifier';
 
 export interface AuthOptions {
-  /** Let requests without a valid token through with `account: null` instead of answering 401. */
+  /**
+   * Let requests without a valid token through with `account: null` instead of answering 401.
+   * Also applies when Quick Quiz cannot be reached: the request continues as anonymous.
+   */
   optional?: boolean;
-  /** Called when Quick Quiz cannot be reached or answers unexpectedly (the request gets a 503). */
+  /** Called when Quick Quiz cannot be reached or answers unexpectedly (required mode then answers 503). */
   onError?: (error: unknown) => void;
 }
 
@@ -40,7 +43,7 @@ export async function authenticate(
     } catch {
       // A broken logger must not turn an upstream outage into an unhandled rejection.
     }
-    return { failure: UPSTREAM };
+    return optional ? { account: null } : { failure: UPSTREAM };
   }
 
   if (account || optional) return { account };
