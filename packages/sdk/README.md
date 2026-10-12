@@ -46,6 +46,38 @@ yarn add @quickquiz/sdk
 
 ## Quickstart
 
+### Option A: Standalone Named Functions (Modular & Tree-shakeable)
+
+```typescript
+import {
+  createClient,
+  setDefaultClient,
+  getRandomQuestion,
+  signIn,
+  submitQuizAnswer,
+} from '@quickquiz/sdk';
+
+// Initialize and set default client (or pass client explicitly as the first argument)
+const client = createClient({ baseUrl: 'https://api.quickquiz.app' });
+setDefaultClient(client);
+
+// 1. Fetch a random question
+const question = await getRandomQuestion({ category: 'Science' });
+// or: await getRandomQuestion(client, { category: 'Science' });
+
+// 2. Sign in
+await signIn('alice', 'password123');
+
+// 3. Submit an answer
+if (question) {
+  const result = await submitQuizAnswer(question.id, 0);
+  console.log(result.isCorrect ? 'Correct!' : 'Incorrect!');
+  console.log('Explanation:', result.explanation);
+}
+```
+
+### Option B: Object-Oriented Client Instance
+
 ```typescript
 import { QuickQuizClient } from '@quickquiz/sdk';
 
@@ -57,7 +89,6 @@ const client = new QuickQuizClient({
 // 1. Fetch a random question
 const question = await client.questions.random({ category: 'Science' });
 console.log('Question:', question?.prompt);
-console.log('Options:', question?.options);
 
 // 2. Sign in
 await client.auth.signIn('alice', 'password123');

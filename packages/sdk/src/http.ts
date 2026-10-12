@@ -14,6 +14,37 @@ export interface RequestOptions {
   query?: Record<string, string | number | boolean | undefined | null | Array<string | number>>;
 }
 
+export interface ClientLike {
+  request<T>(path: string, options?: RequestOptions): Promise<T>;
+  setToken?(token: string | null): void;
+  getToken?(): string | null;
+}
+
+let defaultClient: ClientLike | null = null;
+
+export function setDefaultClient(client: ClientLike | null): void {
+  defaultClient = client;
+}
+
+export function getDefaultClient(): ClientLike {
+  if (!defaultClient) {
+    throw new QuickQuizError(
+      'CLIENT_ERROR',
+      'No QuickQuiz client provided and no default client configured. Pass a client or call setDefaultClient().',
+      0
+    );
+  }
+  return defaultClient;
+}
+
+export function isClient(value: unknown): value is ClientLike {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    typeof (value as { request?: unknown }).request === 'function'
+  );
+}
+
 export class HttpClient {
   private baseUrl: string;
   private token: string | null;
