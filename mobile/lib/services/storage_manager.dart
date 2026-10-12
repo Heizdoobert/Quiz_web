@@ -37,7 +37,7 @@ class StorageManager {
   /// Removes this namespace's entries only.
   Future<void> clear() async {
     final all = await _storage.readAll();
-    for (final key in all.keys.where((k) => k.startsWith('$namespace.'))) {
+    for (final key in all.keys.where((k) => k.startsWith('$namespace.')).toList()) {
       await _storage.delete(key: key);
     }
   }
