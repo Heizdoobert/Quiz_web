@@ -9,7 +9,7 @@ A trivia app built with **Next.js 16 (App Router)**, **Tailwind CSS v4** and **S
 - **Score & Rankings**: One point per correct answer, streaks, and global and group leaderboards computed with PostgreSQL aggregation functions.
 - **Groups & Community**: Create or join groups, add questions, and rate, comment on and report questions.
 - **Hardened Security**: Signed session cookies, dual-key Supabase RLS lockdown, anti-cheat answer masking, rate limits and OWASP HTTP security headers.
-- **SEO & PWA Ready**: Dynamic metadata, sitemap, robots.txt, JSON-LD structured data, and web manifest.
+- **SEO Ready**: Dynamic metadata, sitemap, robots.txt, JSON-LD structured data, and web manifest.
 
 ## Getting Started
 
