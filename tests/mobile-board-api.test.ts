@@ -32,15 +32,16 @@ describe('Mobile board API', () => {
     expect(stats.statsForAccount).not.toHaveBeenCalled();
   });
 
-  it('treats a bad token as a guest instead of failing the screen', async () => {
+  it('rejects a bad or expired token so the app can ask the player to sign in again', async () => {
     vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue(null);
 
     const res = await GET(
       new NextRequest('http://localhost/api/mobile/v1/quiz/board', { headers: { Authorization: 'Bearer stale' } }),
     );
 
-    expect(res.status).toBe(200);
-    expect((await res.json()).history).toEqual([]);
+    expect(res.status).toBe(401);
+    expect(await res.json()).toEqual({ error: 'Unauthorized' });
+    expect(stats.statsForAccount).not.toHaveBeenCalled();
   });
 
   it("adds a signed-in player's own stats and history", async () => {

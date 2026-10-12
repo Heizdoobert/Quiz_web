@@ -1,4 +1,4 @@
-package com.web3quiz.mobile
+package com.quiz3web.mobile
 
 import io.flutter.embedding.android.FlutterActivity
 
