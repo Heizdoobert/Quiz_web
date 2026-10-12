@@ -9,7 +9,7 @@
 Two deliverables in one monorepo:
 
 1. **REST API** — 33 Next.js route handlers under `app/api/v1/` that wrap the existing server actions with a consistent JSON envelope, HTTP status codes, and Bearer token auth.
-2. **TypeScript SDK** — `packages/sdk/` published as `@quickquiz/sdk` on GitHub Packages. Zero-dependency typed client that works anywhere with global `fetch`.
+2. **TypeScript SDK** — `packages/sdk/` published as `@heizdoobert/sdk` on GitHub Packages. Zero-dependency typed client that works anywhere with global `fetch`.
 
 ### Goals
 
@@ -220,13 +220,13 @@ packages/sdk/
 │       ├── discovery.ts      # client.discovery.*
 │       └── profile.ts        # client.profile.*
 ├── tests/
-├── package.json              # @quickquiz/sdk
+├── package.json              # @heizdoobert/sdk
 ├── tsconfig.json
 ├── tsup.config.ts            # ESM + CJS dual build
 └── README.md
 ```
 
-Published to GitHub Packages as `@quickquiz/sdk`. `publishConfig.registry` points to `https://npm.pkg.github.com`.
+Published to GitHub Packages as `@heizdoobert/sdk`. `publishConfig.registry` points to `https://npm.pkg.github.com`.
 
 ### 3.2 Client Class
 
@@ -352,7 +352,7 @@ Unit tests in `packages/sdk/tests/`. Each resource file gets a test that:
 
 ## 7. Publishing & Build
 
-- Package name: `@quickquiz/sdk`
+- Package name: `@heizdoobert/sdk`
 - Registry: GitHub Packages (`https://npm.pkg.github.com`)
 - Initial version: `0.1.0`
 - Build: `tsup` producing ESM + CJS + bundled standalone `.d.ts` (resolving external types cleanly)

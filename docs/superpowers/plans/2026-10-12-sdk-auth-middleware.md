@@ -1,6 +1,6 @@
 # Quick Quiz SDK Auth Middleware Implementation Plan
 
-**Goal:** Add `@quickquiz/sdk/server`, a subpath export of the existing SDK package that lets another app's server (Next.js route handlers, Express) authenticate requests with Quick Quiz Bearer tokens.
+**Goal:** Add `@heizdoobert/sdk/server`, a subpath export of the existing SDK package that lets another app's server (Next.js route handlers, Express) authenticate requests with Quick Quiz Bearer tokens.
 
 **Builds on:** `packages/sdk/` and `GET /api/v1/auth/session` on branch `feat/sdk-and-api-v1`. Design context: `docs/superpowers/specs/2026-10-12-quickquiz-sdk-design.md`.
 
@@ -120,7 +120,7 @@
 
 ### Task 4: Subpath export and build
 
-**Description:** Ship the code as `@quickquiz/sdk/server` in ESM, CJS and `.d.ts`.
+**Description:** Ship the code as `@heizdoobert/sdk/server` in ESM, CJS and `.d.ts`.
 
 **Files:**
 - Create: `packages/sdk/src/server/index.ts`
@@ -131,7 +131,7 @@
 **Acceptance criteria:**
 - [ ] `cd packages/sdk && npx tsup` emits `dist/server.mjs`, `dist/server.cjs` and `dist/server.d.ts`.
 - [ ] `dist/server.d.ts` has no path into `lib/`.
-- [ ] Both `import('@quickquiz/sdk/server')` and `require('@quickquiz/sdk/server')` resolve from the built `dist`.
+- [ ] Both `import('@heizdoobert/sdk/server')` and `require('@heizdoobert/sdk/server')` resolve from the built `dist`.
 
 **Verification:**
 - [ ] The smoke commands run in the scratch copy: `node --input-type=module -e "import('./packages/sdk/dist/server.mjs').then(m => console.log(Object.keys(m)))"` and the same with `require` on the `.cjs`.

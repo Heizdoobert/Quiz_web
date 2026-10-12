@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Build the complete v1 REST API (`/api/v1/*`) and zero-dependency TypeScript SDK (`@quickquiz/sdk` in `packages/sdk/`) for Quick Quiz.
+**Goal:** Build the complete v1 REST API (`/api/v1/*`) and zero-dependency TypeScript SDK (`@heizdoobert/sdk` in `packages/sdk/`) for Quick Quiz.
 
 **Architecture:** Next.js Route Handlers wrap existing server actions with a unified response envelope (`{ success, data }` or `{ success: false, error }`) and Bearer token JWT authentication. The TypeScript SDK wraps this REST API into modular resource clients with automatic token management and build-time types derived from the core backend.
 
@@ -480,7 +480,7 @@ Expected: FAIL
 
 - [ ] **Step 3: Implement package configuration and core SDK files**
 
-Setup `packages/sdk/package.json` with `@quickquiz/sdk`, `tsup.config.ts` targeting `esm` and `cjs` with `dts: true`.
+Setup `packages/sdk/package.json` with `@heizdoobert/sdk`, `tsup.config.ts` targeting `esm` and `cjs` with `dts: true`.
 Implement `errors.ts`, `http.ts`, `client.ts`, and re-export `types.ts`.
 
 - [ ] **Step 4: Run test to verify it passes**
@@ -559,7 +559,7 @@ git commit -m "feat(sdk): implement all resource modules and public entry point"
 - Test: `tests/sdk-integration.test.ts`
 
 **Interfaces:**
-- Consumes: Built `@quickquiz/sdk` dist bundle
+- Consumes: Built `@heizdoobert/sdk` dist bundle
 - Produces: Working build artifacts (`packages/sdk/dist`), documentation, end-to-end integration test
 
 - [ ] **Step 1: Write integration test that imports and exercises built SDK against API handlers**

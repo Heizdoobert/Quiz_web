@@ -1,8 +1,13 @@
 {
-  "name": "@quickquiz/sdk",
+  "name": "@heizdoobert/sdk",
   "version": "0.1.0",
   "description": "Official TypeScript SDK for Quick Quiz",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Heizdoobert/Quiz_web.git",
+    "directory": "packages/sdk"
+  },
   "main": "./dist/index.cjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
