@@ -28,29 +28,31 @@ Fill in the date each script was applied to production. "Unknown" means no recor
 
 | Order | Script | Needed for | Applied to production |
 |---|---|---|---|
-| 1 | `schema.sql` (twice) | base tables | unknown |
-| 2 | `lock-down-public-writes.sql` | server-only writes | unknown |
-| 3 | `question-lists.sql` | lists and contests | unknown |
-| 4 | `secure-rewards-and-answers.sql` | one open voucher per account | unknown |
-| 5 | `restrict-quiz-results-insert.sql` | server-only answer recording | unknown |
-| 6 | `contest-escrow.sql` | contest claims | unknown |
-| 7 | `widen-reward-claims-amount.sql` | wei amounts | unknown |
-| 8 | `accounts.sql` | account identity | unknown |
-| 9 | `stats-functions.sql` | stats and leaderboards | unknown |
-| 10 | `retire-sample-questions.sql` | retire old seed questions (existing databases only) | unknown |
-| 11 | `topics.sql` | `get_topics()` | unknown |
-| 12 | `search.sql` | search | unknown |
-| 13 | `community.sql` | ratings, comments, suggestions | unknown |
-| 14 | `reward-payee.sql` | treasury sweep | unknown |
-| 15 | `15-sponsors.sql` | ads | unknown |
-| 16 | `16-leaderboard-pagination.sql` | paginated leaderboard | unknown |
-| 17 | `17-analytics.sql` | analytics functions | unknown |
-| 18 | `17-auth-rate-limit.sql` | auth and answer rate limits (fails open until applied, ADR-008) | **not applied as of 2026-10-09 (owner task A6)** |
-| 19 | `18-ai-usage.sql` | daily AI usage | unknown |
-| 20 | `19-secure-ai-usage.sql` | closes `user_ai_usage` to the public key | not applied |
-| 21 | `20-drop-web3-schema.sql` | drop the wallet, reward and escrow schema (ADR-013); destructive, so back up first and apply only once production reads `questions.created_by_user`; test with `bash supabase/tests/run-drop-web3-schema.sh` | not applied |
-| 22 | `remote-config.sql` | `remote_config` table read by `GET /api/config` | applied by the owner, 2026-10-12 |
-| 23 | `21-rbac.sql` | roles (`users.role`), dispute resolution columns and `resolve_quarantined_question`, closes `question_disputes` to the public key (ADR-014); needs `accounts.sql` (order 8) applied first and stops with a message if not; idempotent; test with `bash scripts/verify-migrations.sh`; then run the first-admin statement below | not applied |
+| 1 | `schema.sql` (twice) | base tables | 2026-10-12 (rebuilt) |
+| 2 | `lock-down-public-writes.sql` | server-only writes | 2026-10-12 (rebuilt) |
+| 3 | `question-lists.sql` | lists and contests | 2026-10-12 (rebuilt) |
+| 4 | `secure-rewards-and-answers.sql` | one open voucher per account | 2026-10-12 (rebuilt) |
+| 5 | `restrict-quiz-results-insert.sql` | server-only answer recording | 2026-10-12 (rebuilt) |
+| 6 | `contest-escrow.sql` | contest claims | 2026-10-12 (rebuilt) |
+| 7 | `widen-reward-claims-amount.sql` | wei amounts | 2026-10-12 (rebuilt) |
+| 8 | `accounts.sql` | account identity | 2026-10-12 (rebuilt) |
+| 9 | `stats-functions.sql` | stats and leaderboards | 2026-10-12 (rebuilt) |
+| 10 | `retire-sample-questions.sql` | retire old seed questions (existing databases only) | skipped on the rebuild: the old seed questions were gone with the database |
+| 11 | `topics.sql` | `get_topics()` | 2026-10-12 (rebuilt) |
+| 12 | `search.sql` | search | 2026-10-12 (rebuilt) |
+| 13 | `community.sql` | ratings, comments, suggestions | 2026-10-12 (rebuilt) |
+| 14 | `reward-payee.sql` | treasury sweep | 2026-10-12 (rebuilt) |
+| 15 | `15-sponsors.sql` | ads | 2026-10-12 (rebuilt) |
+| 16 | `16-leaderboard-pagination.sql` | paginated leaderboard | 2026-10-12 (rebuilt) |
+| 17 | `17-analytics.sql` | analytics functions | 2026-10-12 (rebuilt) |
+| 18 | `17-auth-rate-limit.sql` | auth and answer rate limits (fails open until applied, ADR-008) | 2026-10-12 (rebuilt); closes owner task A6 |
+| 19 | `18-ai-usage.sql` | daily AI usage | 2026-10-12 (rebuilt) |
+| 20 | `19-secure-ai-usage.sql` | closes `user_ai_usage` to the public key | 2026-10-12 (rebuilt) |
+| 21 | `20-drop-web3-schema.sql` | drop the wallet, reward and escrow schema (ADR-013); destructive, so back up first and apply only once production reads `questions.created_by_user`; test with `bash supabase/tests/run-drop-web3-schema.sh` | 2026-10-12 (rebuilt) |
+| 22 | `remote-config.sql` | `remote_config` table read by `GET /api/config` | applied by the owner, 2026-10-12; applied again in the rebuild |
+| 23 | `21-rbac.sql` | roles (`users.role`), dispute resolution columns and `resolve_quarantined_question`, closes `question_disputes` to the public key (ADR-014); needs `accounts.sql` (order 8) applied first and stops with a message if not; idempotent; test with `bash scripts/verify-migrations.sh`; then run the first-admin statement below | 2026-10-12 (rebuilt); first admin: see below |
+
+On 2026-10-12 the owner's Supabase database was wiped and rebuilt by applying scripts 1 to 23 in this order (`retire-sample-questions.sql` skipped). It held no users, results or groups, only seed rows, and its tables came from a schema older than `schema.sql` (`users` had only `wallet_address`), so no earlier "unknown" or "not applied" entry for it still holds. Rebuilding needs the database to be empty of data; do not repeat it on one that has players.
 
 ## First admin (run once, never commit the real address)
 
