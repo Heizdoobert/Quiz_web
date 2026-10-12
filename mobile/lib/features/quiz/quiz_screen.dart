@@ -4,6 +4,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../auth/auth_provider.dart';
 import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
+import '../profile/profile_screen.dart';
 import 'board_panels.dart';
 import 'board_provider.dart';
 import 'quiz_provider.dart';
@@ -104,6 +105,16 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     final board = boardAsync.value ?? const Board();
     // Signing in or out changes whose stats and history the board shows.
     ref.listen(authProvider.select((a) => a.isAuthenticated), (_, _) => ref.invalidate(boardProvider));
+    ref.listen(authProvider.select((a) => a.sessionExpired), (_, expired) {
+      if (!expired) return;
+      final pending = ref.read(quizProvider).pendingSyncCount;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(pending == 0
+            ? 'Your session expired. Sign in again.'
+            : 'Your session expired. Sign in again to sync $pending answer${pending == 1 ? '' : 's'}.'),
+        action: SnackBarAction(label: 'Sign in', onPressed: () => requireSignIn(context, ref)),
+      ));
+    });
 
     return Scaffold(
       body: SafeArea(
@@ -199,6 +210,13 @@ class _Header extends ConsumerWidget {
               ref.invalidate(boardProvider);
             },
           ),
+          if (auth.isAuthenticated)
+            _HeaderButton(
+              icon: Icons.person_outline,
+              tooltip: 'Profile',
+              onTap: () => Navigator.of(context)
+                  .push(MaterialPageRoute<void>(builder: (_) => const ProfileScreen())),
+            ),
           if (auth.isAuthenticated)
             _HeaderButton(
               icon: Icons.logout,
@@ -298,7 +316,7 @@ class _CategoryBar extends StatelessWidget {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: topics.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
           final topic = topics[i];
           final isSelected = topic == selected;
@@ -367,11 +385,7 @@ class _CategoryBadge extends StatelessWidget {
           ),
         ),
         if (createdBy != null && createdBy.isNotEmpty)
-          _Pill(
-            icon: Icons.groups_outlined,
-            label: '${createdBy.substring(0, createdBy.length < 6 ? createdBy.length : 6)}...',
-            color: AppColors.gold,
-          )
+          const _Pill(icon: Icons.groups_outlined, label: 'Community', color: AppColors.gold)
         else
           const _Pill(icon: Icons.verified_user_outlined, label: 'Verified', color: AppColors.neoMint),
       ],

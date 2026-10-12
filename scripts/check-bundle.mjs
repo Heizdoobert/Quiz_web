@@ -5,7 +5,7 @@ import { gzipSync } from 'node:zlib';
 import { join } from 'node:path';
 
 const BUDGET_KB = 150; // CONSTRAINTS.md target for first-load JS
-const RATCHET_KB = 570; // measured ceiling today (Sentry and PostHog added about 108 kB on 2026-10-09); lower it as weight leaves the routes
+const RATCHET_KB = 360; // measured ceiling today (353.2 kB on 2026-10-09, after the wallet stack was removed); lower it as weight leaves the routes
 const APP_DIR = '.next/server/app';
 
 const kb = (bytes) => (bytes / 1024).toFixed(1);

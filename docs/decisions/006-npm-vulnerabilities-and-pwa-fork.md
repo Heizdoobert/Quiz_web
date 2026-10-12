@@ -1,7 +1,7 @@
 # ADR-006: Resolving High-Severity NPM Vulnerabilities via PWA Fork and Dependency Overrides
 
 ## Status
-Accepted
+Accepted. Decision 1 was reversed on 2026-10-12: the PWA plugin is removed. It only runs under webpack and `next build` uses Turbopack, so it never produced a service worker. Decisions 2 and 3 are unchanged.
 
 ## Date
 2026-10-07

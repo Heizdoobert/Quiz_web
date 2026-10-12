@@ -1,12 +1,13 @@
 'use server';
 import { logger } from "@/lib/logger";
 
-import { supabase } from '../supabase/supabase';
-import { supabaseAdmin } from '../supabase/supabase-admin';
+import { questionsForExport } from '../db/questions';
+import { resultsForExport } from '../db/results';
+import { questionAnalytics } from '../db/rpc';
 import { getSessionAccount, type SessionAccount } from '../services/session';
+import { quizzesForAccount } from '../services/user-quizzes';
 import {
   Question,
-  ClientQuestion,
   QuizResult,
   GetUserQuizzesFilter,
   GetUserQuizzesResult,
@@ -14,8 +15,6 @@ import {
   UserBackupData,
 } from '../types';
 
-const DEFAULT_LIMIT = 500;
-const MAX_LIMIT = 500;
 const MAX_EXPORT_QUIZZES = 1000;
 const MAX_EXPORT_STATS = 5000;
 const BACKUP_SCHEMA_VERSION = '1.0';
@@ -24,60 +23,15 @@ export async function getUserQuizzes(
   options?: GetUserQuizzesFilter,
   authAccount?: SessionAccount
 ): Promise<GetUserQuizzesResult> {
-  try {
-    const account = authAccount ?? (await getSessionAccount());
-    if (!account) {
-      return {
-        success: false,
-        error: 'Sign in to see your quizzes.',
-        code: 'UNAUTHORIZED',
-      };
-    }
-
-    const limit = Math.min(Math.max(options?.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
-    const offset = Math.max(options?.offset ?? 0, 0);
-
-    // SECURITY: Select public display fields only.
-    // Exclude correct_index and explanation to prevent answer leakage during quizzes.
-    let query = supabase
-      .from('questions')
-      .select('id, category, prompt, options, status, created_at')
-      .eq('created_by_user', account.id);
-
-    if (options?.category) {
-      query = query.eq('category', options.category);
-    }
-
-    if (options?.status) {
-      query = query.eq('status', options.status);
-    }
-
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (error) {
-      return {
-        success: false,
-        error: 'Failed to fetch your quizzes.',
-        code: 'FETCH_FAILED',
-      };
-    }
-
-    const quizzes = (data as ClientQuestion[]) || [];
-    return {
-      success: true,
-      quizzes,
-      count: quizzes.length,
-    };
-  } catch (error: unknown) {
-    logger.error('[getUserQuizzes]', error);
+  const account = authAccount ?? (await getSessionAccount());
+  if (!account) {
     return {
       success: false,
-      error: 'An unexpected error occurred.',
-      code: 'UNKNOWN_ERROR',
+      error: 'Sign in to see your quizzes.',
+      code: 'UNAUTHORIZED',
     };
   }
+  return quizzesForAccount(account.id, options);
 }
 
 export async function exportUserData(authAccount?: SessionAccount): Promise<ExportUserDataResult> {
@@ -92,36 +46,25 @@ export async function exportUserData(authAccount?: SessionAccount): Promise<Expo
         code: 'UNAUTHORIZED',
       };
     }
-    if (!supabaseAdmin) {
-      logger.error('[exportUserData] SUPABASE_SECRET_KEY is not set', new Error('[exportUserData] SUPABASE_SECRET_KEY is not set'));
-      return { success: false, error: 'Failed to generate secure backup.', code: 'EXPORT_FAILED' };
-    }
-
-    const [quizzesResponse, statsResponse] = await Promise.all([
-      supabaseAdmin.from('questions').select('*').eq('created_by_user', account.id).limit(MAX_EXPORT_QUIZZES),
-      supabaseAdmin.from('quiz_results').select('*').eq('user_id', account.id).limit(MAX_EXPORT_STATS),
+    // Each read keeps its own message; a failure is logged here and reported as EXPORT_FAILED.
+    const read = (label: string, p: Promise<unknown[]>) =>
+      p.catch((err) => {
+        logger.error(`[exportUserData:${label}]`, err);
+        return null;
+      });
+    const [quizRows, statRows] = await Promise.all([
+      read('quizzes', questionsForExport(account.id, MAX_EXPORT_QUIZZES)),
+      read('stats', resultsForExport(account.id, MAX_EXPORT_STATS)),
     ]);
-
-    if (quizzesResponse.error) {
-      logger.error('[exportUserData:quizzes]', quizzesResponse.error);
-      return {
-        success: false,
-        error: 'Failed to fetch quizzes for export.',
-        code: 'EXPORT_FAILED',
-      };
+    if (!quizRows) {
+      return { success: false, error: 'Failed to fetch quizzes for export.', code: 'EXPORT_FAILED' };
+    }
+    if (!statRows) {
+      return { success: false, error: 'Failed to fetch stats for export.', code: 'EXPORT_FAILED' };
     }
 
-    if (statsResponse.error) {
-      logger.error('[exportUserData:stats]', statsResponse.error);
-      return {
-        success: false,
-        error: 'Failed to fetch stats for export.',
-        code: 'EXPORT_FAILED',
-      };
-    }
-
-    const quizzes = (quizzesResponse.data as Question[]) || [];
-    const stats = (statsResponse.data as QuizResult[]) || [];
+    const quizzes = quizRows as Question[];
+    const stats = statRows as QuizResult[];
     const isTruncated = quizzes.length >= MAX_EXPORT_QUIZZES || stats.length >= MAX_EXPORT_STATS;
 
     const exportData: UserBackupData = {
@@ -161,13 +104,13 @@ export async function getQuestionAnalytics(authAccount?: SessionAccount): Promis
       return { success: false, error: 'Sign in to view analytics.' };
     }
 
-    const { data, error } = await supabase.rpc('get_question_analytics', { p_user_id: account.id });
-
-    if (error) {
-      logger.error('[getQuestionAnalytics:rpc]', error);
+    let data: unknown[];
+    try {
+      data = await questionAnalytics(account.id);
+    } catch (err) {
+      logger.error('[getQuestionAnalytics:rpc]', err);
       return { success: false, error: 'Failed to fetch analytics.' };
     }
-
     return { success: true, data: data as QuestionAnalytics[] };
   } catch (error) {
     logger.error('[getQuestionAnalytics]', error);

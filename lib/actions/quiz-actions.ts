@@ -1,6 +1,7 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { questionForAnswer } from '@/lib/db/questions';
+import { insertResult } from '@/lib/db/results';
 import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { isUuid } from '@/lib/utils/validation';
@@ -38,22 +39,10 @@ export async function submitAnswer(params: {
   });
   try {
     if (!isUuid(params.questionId)) return failed('error');
-    // correct_index and explanation are not readable with the public key.
-    if (!supabaseAdmin) {
-      logger.error('submitAnswer: SUPABASE_SECRET_KEY is not set', new Error('submitAnswer: SUPABASE_SECRET_KEY is not set'));
-      return failed('error');
-    }
     if (!(await allowAttemptFromIp('submit-answer-ip', ANSWERS_PER_IP_PER_HOUR, HOUR))) return failed('rate-limited');
-    const { data: qData, error: qError } = await supabaseAdmin
-      .from('questions')
-      .select('*')
-      .eq('id', params.questionId)
-      .single();
-
-    if (qError || !qData) {
-      logger.error('Question not found for answer submission:', qError);
-      return failed('error');
-    }
+    // correct_index and explanation are only readable with the secret key.
+    const qData = await questionForAnswer(params.questionId);
+    if (!qData) return failed('error');
     const account = mobileAccount ?? await getSessionAccount();
     // Only verified questions are answerable; anything else reveals nothing.
     if (qData.status !== 'verified') return failed('error');
@@ -68,17 +57,21 @@ export async function submitAnswer(params: {
       return { ...revealed, recorded: false, notSavedReason: 'own-question' };
     }
 
-    // The first answer to a question is the one that counts (unique per account and question).
-    const { error: insertError } = await supabaseAdmin.from('quiz_results').insert({
-      user_id: account.id,
-      question_id: params.questionId,
-      answer_index: params.answerIndex,
-      is_correct: isCorrect,
-    });
-    if (!insertError) return { ...revealed, recorded: true };
-    if (insertError.code === '23505') return { ...revealed, recorded: false, notSavedReason: 'already-answered' };
-    logger.error('submitAnswer insert error:', insertError);
-    return { ...revealed, recorded: false, notSavedReason: 'error' };
+    // A failed write still shows the answer; only the score is lost.
+    try {
+      const outcome = await insertResult({
+        user_id: account.id,
+        question_id: params.questionId,
+        answer_index: params.answerIndex,
+        is_correct: isCorrect,
+      });
+      return outcome === 'recorded'
+        ? { ...revealed, recorded: true }
+        : { ...revealed, recorded: false, notSavedReason: 'already-answered' };
+    } catch (err) {
+      logger.error('submitAnswer insert error:', err);
+      return { ...revealed, recorded: false, notSavedReason: 'error' };
+    }
   } catch (err) {
     logger.error('submitAnswer error:', err);
     return failed('error');

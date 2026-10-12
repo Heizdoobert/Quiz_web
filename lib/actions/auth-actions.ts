@@ -3,7 +3,7 @@
 import { getSessionAccount, setSessionAccount, clearSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
 import { ensureAccountForAuthUser } from '@/lib/services/users';
-import { supabase } from '@/lib/supabase/supabase';
+import { auth } from '@/lib/db/auth';
 import { signInAccount, signUpAccount } from '@/lib/services/credentials';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
@@ -25,7 +25,7 @@ export async function requestEmailCode(email: string): Promise<{ sent: boolean; 
     ) {
       return { sent: false, error: 'RATE_LIMITED' };
     }
-    await supabase.auth.signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
+    await auth().signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
   }
   return { sent: true };
 }
@@ -38,7 +38,7 @@ export async function verifyEmailCode(
   try {
     // A 6-digit code lives about an hour; 10 tries per hour makes guessing it hopeless.
     if (!(await allowAttempt('email-verify', email, 10, HOUR))) return { ok: false, error: 'RATE_LIMITED' };
-    const { data, error } = await supabase.auth.verifyOtp({ email: email.trim(), token: code, type: 'email' });
+    const { data, error } = await auth().verifyOtp({ email: email.trim(), token: code, type: 'email' });
     if (error || !data.user) return { ok: false };
     const accountId = await ensureAccountForAuthUser(data.user.id);
     if (!accountId) return { ok: false };

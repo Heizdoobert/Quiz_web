@@ -26,7 +26,7 @@ Last reviewed: 2026-10-08 by @alexheiz
 | Security: deps | No high+ findings outside Exceptions table | `npm run check:deps` (`npm audit --omit=dev`) | CI, `check:full` |
 | Accessibility | Zero critical or serious axe violations | `npm run check:a11y` (`axe $PREVIEW_URL --tags wcag2a,wcag2aa,wcag21aa`) | preview deploy (warns locally) |
 | Performance (runtime) | LCP ≤ 2500ms, CLS ≤ 0.1 | `npm run check:perf` (`lighthouse $PREVIEW_URL --output=json`) | preview deploy (warns locally) |
-| Performance (bundle) | First-load JS ≤ 150 kB gzip per route target; today's ratchet is 570 kB (measured 553 to 561 kB on 2026-10-09, after Sentry and PostHog) — must not grow, see Exceptions | `npm run build && npm run check:bundle` (sums the gzip size of every script in each prerendered page's HTML) | CI, after the build job |
+| Performance (bundle) | First-load JS ≤ 150 kB gzip per route target; today's ratchet is 360 kB (measured 353.2 kB on 2026-10-09, after the wallet stack was removed) — must not grow, see Exceptions | `npm run build && npm run check:bundle` (sums the gzip size of every script in each prerendered page's HTML) | CI, after the build job |
 
 ### Why these numbers
 
@@ -37,20 +37,20 @@ Last reviewed: 2026-10-08 by @alexheiz
 - **Security scanning**: Semgrep scans source code for OWASP Top Ten and framework vulnerabilities without slowing down the edit loop.
 - **Security dependencies**: `npm audit --omit=dev` targets production runtime risk; transitive exceptions require specific deprecation plans.
 - **Accessibility & Lighthouse**: Core Web Vitals (LCP ≤ 2.5s, CLS ≤ 0.1) and WCAG 2.1 AA zero critical/serious issues prevent UX and accessibility degradation on deployed preview routes.
-- **Bundle size budget (150 kB gzip)**: The target for first-load JS. The earlier 127 kB figure could not be reproduced (Turbopack prints no size table). `scripts/check-bundle.mjs` now measures it: it reads only the `<script>` tags in prerendered HTML, so it misses chunks loaded later by `next/dynamic`. The figures in this section were measured before the wallet stack (wagmi, viem, RainbowKit) was removed in the web2-only change; re-measure before lowering the ratchet. The script fails above the 570 kB ratchet; 150 kB is still out of reach.
+- **Bundle size budget (150 kB gzip)**: The target for first-load JS. The earlier 127 kB figure could not be reproduced (Turbopack prints no size table). `scripts/check-bundle.mjs` now measures it: it reads only the `<script>` tags in prerendered HTML, so it misses chunks loaded later by `next/dynamic`. Removing the wallet stack (wagmi, viem, RainbowKit) in the web2-only change took the heaviest prerendered route from 553 to 561 kB down to 353.2 kB (`profile`; `_not-found` is 341.8 kB), and the ratchet was lowered from 570 kB to 360 kB to match. The script fails above the 360 kB ratchet; 150 kB is still out of reach.
 
 ## Measured, not yet enforced
 
 | Metric | Today | Direction |
 |--------|-------|-----------|
 | Statements | 52.3% (2026-10-09, all of `app`, `lib`, `hooks`, `components`) | must not fall |
-| First-load JS (gzip, per prerendered route, `check-bundle`) | 553 to 561 kB (2026-10-09, after Sentry and PostHog, before the wallet stack was removed; excludes `next/dynamic` chunks and dynamic routes) | must not grow past 570 kB, target 150 kB |
+| First-load JS (gzip, per prerendered route, `check-bundle`) | 353.2 kB on `profile`, 341.8 kB on `_not-found` (2026-10-09, after the wallet stack was removed; only these two routes are prerendered, and `next/dynamic` chunks and dynamic routes are not counted) | must not grow past 360 kB, target 150 kB |
 
 ## Exceptions
 
 | ID | Rule | Path | Reason | Owner | Expires |
 |----|------|------|--------|-------|---------|
-| X-1 | Performance (bundle): 150 kB per route | all prerendered routes | Routes weighed about 560 kB with Sentry and PostHog before the wallet stack was removed; re-measure. The ratchet at 570 kB stops growth meanwhile | alexheiz | 2026-12-31 |
+| X-1 | Performance (bundle): 150 kB per route | all prerendered routes | The heaviest prerendered route weighs 353.2 kB with Sentry and PostHog, after the wallet stack was removed. The ratchet at 360 kB stops growth meanwhile | alexheiz | 2026-12-31 |
 
 
 ## Lifecycle mapping

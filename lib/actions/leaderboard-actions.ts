@@ -1,7 +1,7 @@
 'use server';
 
 import { unstable_cache } from 'next/cache';
-import { supabase } from '@/lib/supabase/supabase';
+import { globalLeaderboard, groupLeaderboard } from '@/lib/db/rpc';
 import { LeaderboardEntry } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
@@ -37,9 +37,7 @@ const GLOBAL_LEADERBOARD_TTL_SECONDS = 15;
 
 const readGlobalLeaderboard = unstable_cache(
   async (limit: number, offset: number): Promise<LeaderboardRow[]> => {
-    const { data, error } = await supabase.rpc('get_global_leaderboard', { p_limit: limit, p_offset: offset });
-    if (error || !data) throw new Error(error?.message ?? 'get_global_leaderboard returned no data');
-    return data as LeaderboardRow[];
+    return (await globalLeaderboard(limit, offset)) as LeaderboardRow[];
   },
   ['global-leaderboard'],
   { revalidate: GLOBAL_LEADERBOARD_TTL_SECONDS },
@@ -63,14 +61,8 @@ export async function getGroupLeaderboard(
 ): Promise<LeaderboardEntry[]> {
   try {
     if (!isUuid(groupId)) return [];
-    const { data, error } = await supabase.rpc('get_group_leaderboard', {
-      p_group_id: groupId,
-      p_limit: clampLimit(limit),
-      p_offset: Math.max(0, offset)
-    });
-    if (error) logger.error('getGroupLeaderboard rpc error:', error);
-    if (error || !data) return [];
-    return toEntries(data as LeaderboardRow[], offset);
+    const rows = (await groupLeaderboard(groupId, clampLimit(limit), Math.max(0, offset))) as LeaderboardRow[];
+    return toEntries(rows, offset);
   } catch (err) {
     logger.error('getGroupLeaderboard error:', err);
     return [];

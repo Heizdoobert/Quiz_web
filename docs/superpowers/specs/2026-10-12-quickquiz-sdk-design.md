@@ -56,12 +56,21 @@ A shared `apiResponse` helper in `lib/services/api-response.ts` creates these `N
 | Error Code | HTTP Status |
 |------------|-------------|
 | `VALIDATION_ERROR` | 400 |
+| `INVALID` | 400 |
 | `UNAUTHORIZED` | 401 |
+| `NOT_ALLOWED` | 403 |
 | `NOT_FOUND` | 404 |
 | `CONFLICT` | 409 |
 | `RATE_LIMITED` | 429 |
 | `SERVER_ERROR` | 500 |
 | `UNKNOWN_ERROR` | 500 |
+
+#### Domain Error Translation
+Route handlers must not return HTTP 200 with embedded failure indicators. Handlers explicitly translate domain failure shapes (`CommunityErrorCode`, `AnswerSubmissionResult.notSavedReason`, `GetUserQuizzesResult`) into `apiError`:
+- `NOT_ANSWERED`, `NOT_ALLOWED` → 403 `NOT_ALLOWED`
+- `rate-limited`, `RATE_LIMITED` → 429 `RATE_LIMITED`
+- `signed-out` → 401 `UNAUTHORIZED`
+- `INVALID`, `VALIDATION_ERROR` → 400 `VALIDATION_ERROR`
 
 ### 2.4 Endpoint Map
 
@@ -73,11 +82,13 @@ A shared `apiResponse` helper in `lib/services/api-response.ts` creates these `N
 | `POST` | `/v1/auth/signin` | — | `signInWithUsername` |
 | `POST` | `/v1/auth/signin/google` | — | `signInAccountWithGoogle` |
 | `POST` | `/v1/auth/email/request` | — | `requestEmailCode` |
-| `POST` | `/v1/auth/email/verify` | — | `verifyEmailCode` |
+| `POST` | `/v1/auth/email/verify` | — | `verifyEmailCode` (with token issuance) |
 | `GET` | `/v1/auth/session` | ✓ | `getSessionInfo` |
-| `POST` | `/v1/auth/signout` | ✓ | `signOut` |
+| `POST` | `/v1/auth/signout` | ✓ | `signOut` (advisory client-side token discard in v1) |
 
-Auth endpoints that create sessions return `{ token, accountId }`.
+Auth endpoints that create sessions (`signup`, `signin`, `signin/google`, `email/verify`) return `{ token, accountId }`.
+`GET /v1/auth/session` returns `{ id, username }` (falling back to user display name / id).
+Bearer tokens are stateless HMACs with a 30-day TTL; `POST /v1/auth/signout` clears cookie state and provides an endpoint for clients to signal signout, while the client discards the token.
 
 #### Questions
 
@@ -292,11 +303,14 @@ At build time, `tsup` resolves these imports and bundles the type declarations i
 - The consumer is responsible for persisting the token between sessions (localStorage, keychain, file, etc.).
 - `client.auth.signOut()` calls the endpoint and clears the stored token.
 
-## 4. Auth Bridging
+## 4. Auth Bridging & Security Architecture
 
-The existing server actions (e.g. `submitAnswer`, `createQuestion`) use `getSessionAccount()` to read the session from cookies. API route handlers authenticate via Bearer token instead. The bridge follows the pattern already established by `app/api/mobile/v1/quiz/sync/route.ts`: the route handler verifies the token, resolves the `SessionAccount`, and passes it to the server action via an optional `mobileAccount` parameter.
+The existing server actions (e.g. `submitAnswer`, `createQuestion`) traditionally read the web session from cookies via `getSessionAccount()`. API route handlers authenticate via Bearer token instead using `requireAuth(req)`.
 
-Server actions that don't already accept a `mobileAccount` parameter will be extended with one. This is a minor, backward-compatible change — the existing cookie-based flow continues to work when the parameter is omitted.
+### Security Constraints:
+- **Never expose public account overrides:** Server actions marked with `'use server'` are publicly callable RPC endpoints. To prevent account impersonation, server actions must NEVER accept client-supplied account IDs over the wire.
+- **Shared Service Architecture:** Business logic lives in service functions (or internal actions with authenticated context passed only from trusted server-side callers like Route Handlers).
+- **Bearer Token Verification:** Route handlers parse `Authorization: Bearer <token>`, verify the token via `verifyMobileAuthToken(token)`, and only invoke backend operations once the account identity is cryptographically validated.
 
 ## 5. Shared Helpers (New Files)
 
@@ -332,16 +346,16 @@ Unit tests in `packages/sdk/tests/`. Each resource file gets a test that:
 
 ### 6.3 Test Commands
 
-- `npm test` in the root continues to run existing tests.
-- `npm test` in `packages/sdk/` runs SDK-specific tests.
-- CI runs both.
+- `npm test` runs repo test suites.
+- `packages/sdk` tests run via vitest (`npx vitest run packages/sdk/tests/`).
+- Root `package.json` configures `"workspaces": ["packages/*"]` so dependencies and commands resolve cleanly across monorepo packages.
 
-## 7. Publishing
+## 7. Publishing & Build
 
 - Package name: `@quickquiz/sdk`
 - Registry: GitHub Packages (`https://npm.pkg.github.com`)
 - Initial version: `0.1.0`
-- Build: `tsup` producing ESM + CJS + `.d.ts`
+- Build: `tsup` producing ESM + CJS + bundled standalone `.d.ts` (resolving external types cleanly)
 - Publish command: `cd packages/sdk && npm run build && npm publish`
 - CI publishing can be added later as a GitHub Actions workflow.
 

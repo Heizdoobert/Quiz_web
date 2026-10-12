@@ -14,6 +14,8 @@ class ApiException implements Exception {
 }
 
 class ApiClient {
+  ApiClient({http.Client? client, this.onUnauthorized}) : _client = client ?? http.Client();
+
   // Pass --dart-define=API_BASE_URL=https://<host>/api/mobile/v1 for a real device or a release
   // build. The default is the Android emulator's alias for the host's localhost.
   static const String baseUrl = String.fromEnvironment(
@@ -21,6 +23,11 @@ class ApiClient {
     defaultValue: 'http://10.0.2.2:3000/api/mobile/v1',
   );
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
+  final http.Client _client;
+
+  /// Called when the server rejects the stored token (expired or revoked). Not called for a
+  /// 401 on a request sent without a token, such as a wrong password at sign-in.
+  final void Function()? onUnauthorized;
 
   Future<String?> getToken() async {
     return await _storage.read(key: 'jwt_token');
@@ -34,43 +41,40 @@ class ApiClient {
     await _storage.delete(key: 'jwt_token');
   }
 
-  Future<Map<String, dynamic>> post(String endpoint, Object body) async {
-    final token = await getToken();
-    final headers = {
-      'Content-Type': 'application/json',
-      if (token != null) 'Authorization': 'Bearer $token',
-    };
+  /// The account that last signed in on this device. Kept after the token expires, so the
+  /// queued answers can be matched to whoever signs in next.
+  Future<String?> getAccountId() => _storage.read(key: 'account_id');
 
-    final response = await http.post(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-      body: jsonEncode(body),
-    );
+  Future<void> saveAccountId(String id) => _storage.write(key: 'account_id', value: id);
 
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body);
-    } else {
-      throw _failure(response);
-    }
+  Future<void> clearAccountId() => _storage.delete(key: 'account_id');
+
+  Future<Map<String, dynamic>> post(String endpoint, Object body) {
+    return _send((headers) => _client.post(
+          Uri.parse('$baseUrl$endpoint'),
+          headers: headers,
+          body: jsonEncode(body),
+        ));
   }
 
-  Future<Map<String, dynamic>> get(String endpoint) async {
+  Future<Map<String, dynamic>> get(String endpoint) {
+    return _send((headers) => _client.get(Uri.parse('$baseUrl$endpoint'), headers: headers));
+  }
+
+  Future<Map<String, dynamic>> _send(
+    Future<http.Response> Function(Map<String, String> headers) request,
+  ) async {
     final token = await getToken();
-    final headers = {
+    final response = await request({
       'Content-Type': 'application/json',
       if (token != null) 'Authorization': 'Bearer $token',
-    };
-
-    final response = await http.get(
-      Uri.parse('$baseUrl$endpoint'),
-      headers: headers,
-    );
+    });
 
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return jsonDecode(response.body);
-    } else {
-      throw _failure(response);
     }
+    if (response.statusCode == 401 && token != null) onUnauthorized?.call();
+    throw _failure(response);
   }
 
   ApiException _failure(http.Response response) {

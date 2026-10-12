@@ -1,7 +1,12 @@
 'use server';
 
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
-import { supabase } from '@/lib/supabase/supabase';
+import {
+  commentAuthor, countCommentsSince, deleteCommentRow, insertComment, listComments,
+  listSuggestionsForAuthor, markSuggestionResolved, myRating as readMyRating,
+  questionForDiscussion, suggestionForResolve, upsertRating,
+} from '@/lib/db/community';
+import { hasRecordedAnswer } from '@/lib/db/results';
+import { ratingSummary } from '@/lib/db/rpc';
 import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
@@ -45,34 +50,28 @@ async function checkCanDiscuss(
   questionId: string,
   options: { allowAuthor: boolean }
 ): Promise<CommunityResult> {
-  if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
-
-  // 1. Verify question is public (status = 'verified' AND list_id IS NULL)
-  const { data: question, error: qErr } = await supabaseAdmin
-    .from('questions')
-    .select('id, status, list_id, created_by_user')
-    .eq('id', questionId)
-    .maybeSingle();
-
-  if (qErr || !question) return { ok: false, code: 'NOT_ALLOWED' };
-  if (question.status !== 'verified' || question.list_id !== null) {
+  // 1. The question must be public (status = 'verified' AND list_id IS NULL)
+  let question: Awaited<ReturnType<typeof questionForDiscussion>>;
+  try {
+    question = await questionForDiscussion(questionId);
+  } catch (err) {
+    logger.error('checkCanDiscuss question error:', err);
+    return { ok: false, code: 'NOT_ALLOWED' };
+  }
+  if (!question || question.status !== 'verified' || question.list_id !== null) {
     return { ok: false, code: 'NOT_ALLOWED' };
   }
 
-  // 2. Check author gate
+  // 2. Author gate
   if (!options.allowAuthor && question.created_by_user === accountId) {
     return { ok: false, code: 'NOT_ALLOWED' };
   }
 
-  // 3. Check recorded answer in quiz_results
-  const { data: answered, error: aErr } = await supabaseAdmin
-    .from('quiz_results')
-    .select('id')
-    .eq('user_id', accountId)
-    .eq('question_id', questionId)
-    .maybeSingle();
-
-  if (aErr || !answered) {
+  // 3. A recorded answer in quiz_results
+  try {
+    if (!(await hasRecordedAnswer(accountId, questionId))) return { ok: false, code: 'NOT_ANSWERED' };
+  } catch (err) {
+    logger.error('checkCanDiscuss answer error:', err);
     return { ok: false, code: 'NOT_ANSWERED' };
   }
 
@@ -93,16 +92,10 @@ export async function rateQuestion(
   const gate = await checkCanDiscuss(account.id, questionId, { allowAuthor: false });
   if (!gate.ok) return gate;
 
-  if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
-  const { error } = await supabaseAdmin.from('question_ratings').upsert({
-    question_id: questionId,
-    user_id: account.id,
-    rating,
-    updated_at: new Date().toISOString(),
-  });
-
-  if (error) {
-    logger.error('rateQuestion error:', error);
+  try {
+    await upsertRating(questionId, account.id, rating);
+  } catch (err) {
+    logger.error('rateQuestion error:', err);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -129,33 +122,13 @@ export async function addComment(
   });
   if (!gate.ok) return gate;
 
-  if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
-
   // Rate limit: at most 20 comments plus suggestions per account in 24 hours
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const { count, error: countErr } = await supabaseAdmin
-    .from('question_comments')
-    .select('*', { count: 'exact', head: true })
-    .eq('user_id', account.id)
-    .gte('created_at', since);
-
-  if (countErr) {
-    logger.error('addComment rate limit check error:', countErr);
-    return { ok: false, code: 'FAILED' };
-  }
-  if (count !== null && count >= 20) {
-    return { ok: false, code: 'RATE_LIMITED' };
-  }
-
-  const { error } = await supabaseAdmin.from('question_comments').insert({
-    question_id: questionId,
-    user_id: account.id,
-    kind,
-    body: trimmed,
-  });
-
-  if (error) {
-    logger.error('addComment error:', error);
+  try {
+    if ((await countCommentsSince(account.id, since)) >= 20) return { ok: false, code: 'RATE_LIMITED' };
+    await insertComment({ question_id: questionId, user_id: account.id, kind, body: trimmed });
+  } catch (err) {
+    logger.error('addComment error:', err);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -168,21 +141,19 @@ export async function deleteComment(
   const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(commentId)) return { ok: false, code: 'INVALID' };
-  if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
+  let authorId: string | null;
+  try {
+    authorId = await commentAuthor(commentId);
+  } catch (err) {
+    logger.error('deleteComment lookup error:', err);
+    return { ok: false, code: 'NOT_ALLOWED' };
+  }
+  if (authorId !== account.id) return { ok: false, code: 'NOT_ALLOWED' };
 
-  const { data: existing, error: fetchErr } = await supabaseAdmin
-    .from('question_comments')
-    .select('id, user_id')
-    .eq('id', commentId)
-    .maybeSingle();
-
-  if (fetchErr || !existing) return { ok: false, code: 'NOT_ALLOWED' };
-  if (existing.user_id !== account.id) return { ok: false, code: 'NOT_ALLOWED' };
-
-  const { error } = await supabaseAdmin.from('question_comments').delete().eq('id', commentId);
-
-  if (error) {
-    logger.error('deleteComment error:', error);
+  try {
+    await deleteCommentRow(commentId);
+  } catch (err) {
+    logger.error('deleteComment error:', err);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -195,29 +166,26 @@ export async function resolveSuggestion(
   const account = authAccount ?? (await getSessionAccount());
   if (!account) return { ok: false, code: 'UNAUTHORIZED' };
   if (!isUuid(commentId)) return { ok: false, code: 'INVALID' };
-  if (!supabaseAdmin) return { ok: false, code: 'FAILED' };
+  let existing: { kind?: string; questions?: unknown } | null;
+  try {
+    existing = (await suggestionForResolve(commentId)) as { kind?: string; questions?: unknown } | null;
+  } catch (err) {
+    logger.error('resolveSuggestion lookup error:', err);
+    return { ok: false, code: 'NOT_ALLOWED' };
+  }
+  if (!existing || existing.kind !== 'suggestion') return { ok: false, code: 'NOT_ALLOWED' };
 
-  const { data: existing, error: fetchErr } = await supabaseAdmin
-    .from('question_comments')
-    .select('id, kind, questions!inner(created_by_user)')
-    .eq('id', commentId)
-    .maybeSingle();
-
-  if (fetchErr || !existing) return { ok: false, code: 'NOT_ALLOWED' };
-  if (existing.kind !== 'suggestion') return { ok: false, code: 'NOT_ALLOWED' };
-
-  const question = Array.isArray(existing.questions) ? existing.questions[0] : existing.questions;
+  const question = (Array.isArray(existing.questions) ? existing.questions[0] : existing.questions) as
+    | { created_by_user?: string }
+    | undefined;
   if (!question || question.created_by_user !== account.id) {
     return { ok: false, code: 'NOT_ALLOWED' };
   }
 
-  const { error } = await supabaseAdmin
-    .from('question_comments')
-    .update({ resolved_at: new Date().toISOString() })
-    .eq('id', commentId);
-
-  if (error) {
-    logger.error('resolveSuggestion error:', error);
+  try {
+    await markSuggestionResolved(commentId);
+  } catch (err) {
+    logger.error('resolveSuggestion error:', err);
     return { ok: false, code: 'FAILED' };
   }
   return { ok: true };
@@ -244,49 +212,35 @@ export async function getQuestionDiscussion(
   const account = authAccount ?? (await getSessionAccount());
   const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
 
-  // 1. Fetch rating summary via RPC
+  // 1. Rating summary; the discussion still loads without it
   let rating: RatingSummary = { average: 0, count: 0 };
-  const { data: rpcData, error: rpcErr } = await supabase.rpc('get_rating_summary', {
-    p_question_id: questionId,
-  });
-  if (!rpcErr && rpcData && rpcData.length > 0) {
-    rating = {
-      average: Number(rpcData[0].average) || 0,
-      count: Number(rpcData[0].count) || 0,
-    };
+  try {
+    const [summary] = await ratingSummary(questionId);
+    if (summary) rating = { average: Number(summary.average) || 0, count: Number(summary.count) || 0 };
+  } catch (err) {
+    logger.error('getQuestionDiscussion rating error:', err);
   }
 
-  // 2. Fetch myRating if signed in
+  // 2. The signed-in account's own rating
   let myRating: number | null = null;
-  if (account && supabaseAdmin) {
-    const { data: userRating } = await supabaseAdmin
-      .from('question_ratings')
-      .select('rating')
-      .eq('question_id', questionId)
-      .eq('user_id', account.id)
-      .maybeSingle();
-    if (userRating?.rating) {
-      myRating = Number(userRating.rating);
+  if (account) {
+    try {
+      myRating = await readMyRating(questionId, account.id);
+    } catch (err) {
+      logger.error('getQuestionDiscussion myRating error:', err);
     }
   }
 
-  // 3. Fetch comments (kind = 'comment' only, newest first)
-  if (!supabaseAdmin) return { rating, myRating, comments: [], hasMore: false };
-
-  const { data: commentRows, error: cErr } = await supabaseAdmin
-    .from('question_comments')
-    .select('id, body, created_at, user_id, users(display_name)')
-    .eq('question_id', questionId)
-    .eq('kind', 'comment')
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE);
-
-  if (cErr || !commentRows) {
-    logger.error('getQuestionDiscussion comments error:', cErr);
+  // 3. Comments (kind = 'comment' only, newest first)
+  let commentRows: unknown[];
+  try {
+    commentRows = await listComments(questionId, offset, PAGE_SIZE);
+  } catch (err) {
+    logger.error('getQuestionDiscussion comments error:', err);
     return { rating, myRating, comments: [], hasMore: false };
   }
 
-  const rows = commentRows as unknown as Array<{
+  const rows = commentRows as Array<{
     id: string;
     body: string;
     created_at: string;
@@ -323,29 +277,17 @@ export async function getSuggestionsForAuthor(
   if (!account) return [];
   const targetId = accountId ?? account.id;
   if (account.id !== targetId) return [];
-  if (!isUuid(targetId) || !supabaseAdmin) return [];
+  if (!isUuid(targetId)) return [];
 
-  const { data, error } = await supabaseAdmin
-    .from('question_comments')
-    .select(`
-      id,
-      question_id,
-      body,
-      created_at,
-      resolved_at,
-      questions!inner(prompt, created_by_user),
-      users(display_name)
-    `)
-    .eq('kind', 'suggestion')
-    .eq('questions.created_by_user', account.id)
-    .order('created_at', { ascending: false });
-
-  if (error || !data) {
-    logger.error('getSuggestionsForAuthor error:', error);
+  let data: unknown[];
+  try {
+    data = await listSuggestionsForAuthor(account.id);
+  } catch (err) {
+    logger.error('getSuggestionsForAuthor error:', err);
     return [];
   }
 
-  const rows = data as unknown as Array<{
+  const rows = data as Array<{
     id: string;
     question_id: string;
     body: string;

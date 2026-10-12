@@ -2,6 +2,8 @@ version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/"
+    # Dependency bumps follow the release flow: into preview, then promoted to main.
+    target-branch: "preview"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
@@ -18,6 +20,8 @@ updates:
 
   - package-ecosystem: "github-actions"
     directory: "/"
+    # Dependency bumps follow the release flow: into preview, then promoted to main.
+    target-branch: "preview"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 3
