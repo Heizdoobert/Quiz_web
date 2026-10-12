@@ -13,10 +13,12 @@
 ## Global Constraints
 
 - Response envelope must match `{ success: true, data: T }` or `{ success: false, error: { code: string, message: string, details?: unknown } }`.
+- Domain errors (`CommunityErrorCode`, `notSavedReason`, `GetUserQuizzesResult`) must be mapped to appropriate HTTP status codes (400, 401, 403, 404, 429), never returning HTTP 200 with embedded failure data.
 - Auth uses Bearer tokens verified by `verifyMobileAuthToken` in `lib/services/mobile-auth.ts`.
-- Server actions retain backward-compatibility with web cookie sessions: accept optional `authAccount?: SessionAccount` parameter fallback.
+- Server actions retain backward-compatibility with web cookie sessions. Route handlers authenticate Bearer tokens using `requireAuth(req)` before invoking backend operations.
+- Root `package.json` configures workspaces (`workspaces: ["packages/*"]`).
 - The SDK package has ZERO runtime dependencies beyond standard global `fetch`.
-- SDK must support dual ESM/CJS formats and export complete TypeScript `.d.ts` types.
+- SDK must support dual ESM/CJS formats and export complete TypeScript `.d.ts` types bundled cleanly.
 - Follow existing codebase patterns and strict type safety (`tsc --noEmit` must pass cleanly).
 
 ---
@@ -90,7 +92,6 @@ describe('API Infrastructure Helpers', () => {
   it('requireAuth accepts valid token', () => {
     vi.spyOn(mobileAuth, 'verifyMobileAuthToken').mockReturnValueOnce({
       id: 'acc-123',
-      username: 'tester',
     });
     const req = new NextRequest('http://localhost/api/test', {
       headers: { Authorization: 'Bearer valid-jwt' },
@@ -249,9 +250,9 @@ Create route handlers under `app/api/v1/auth/`:
 - `signin/route.ts`: calls `signInAccount`, issues token, returns `apiOk({ token, accountId })`.
 - `signin/google/route.ts`: calls `signInAccountWithGoogle`, issues token, returns `apiOk({ token, accountId })`.
 - `email/request/route.ts`: calls `requestEmailCode`, returns `apiOk({ sent })`.
-- `email/verify/route.ts`: calls `verifyEmailCode`, returns `apiOk({ ok })`.
-- `session/route.ts`: `requireAuth(req)`, returns `apiOk({ id: account.id, username: account.username })`.
-- `signout/route.ts`: `requireAuth(req)`, returns `apiOk({ ok: true })`.
+- `email/verify/route.ts`: calls `verifyEmailCode(email, code, { issueToken: true })`, returns `apiOk({ ok: true, token, accountId })`.
+- `session/route.ts`: `requireAuth(req)`, calls `getSessionInfo(auth.account)`, returns `apiOk({ id: session.id, username: session.username })`.
+- `signout/route.ts`: `requireAuth(req)`, calls `signOut()`, returns `apiOk({ ok: true })`.
 
 - [ ] **Step 4: Run test to verify it passes**
 
