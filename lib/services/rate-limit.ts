@@ -2,7 +2,7 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 import { headers } from 'next/headers';
 import { logger } from '@/lib/logger';
-import { supabaseAdmin } from '@/lib/supabase/supabase-admin';
+import { rateLimitHit } from '@/lib/db/rpc';
 
 // Counts attempts per key in Postgres (supabase/migrations/17-auth-rate-limit.sql), so the
 // limit holds across serverless instances. The identifier is hashed so addresses and
@@ -18,15 +18,8 @@ export async function allowAttempt(
   windowSeconds: number
 ): Promise<boolean> {
   try {
-    if (!supabaseAdmin) return true;
     const digest = createHash('sha256').update(identifier.trim().toLowerCase()).digest('hex');
-    const { data, error } = await supabaseAdmin.rpc('rate_limit_hit', {
-      p_key: `${scope}:${digest}`,
-      p_max: max,
-      p_window_seconds: windowSeconds,
-    });
-    if (error) throw error;
-    if (data === false) {
+    if (!(await rateLimitHit(`${scope}:${digest}`, max, windowSeconds))) {
       logger.warn('auth_rate_limited', { scope });
       return false;
     }

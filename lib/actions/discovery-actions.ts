@@ -1,8 +1,8 @@
 'use server';
 
-import { supabase } from '@/lib/supabase/supabase';
+import { listTopicQuestions } from '@/lib/db/questions';
+import { searchQuestionsRpc } from '@/lib/db/rpc';
 import { SearchResult } from '@/lib/types';
-import { escapeLikePattern } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
 
 const PAGE_SIZE = 20;
@@ -34,17 +34,14 @@ export async function searchQuestions(
   const q = query.trim();
   if (q.length < 2 || q.length > 100) return { results: [], hasMore: false };
 
-  const { data, error } = await supabase.rpc('search_questions', {
-    p_query: q,
-    p_limit: PAGE_SIZE + 1,
-    p_offset: (Math.max(1, page) - 1) * PAGE_SIZE,
-  });
-  if (error || !data) {
-    logger.error('searchQuestions error:', error);
+  let rows: SearchQuestionRow[];
+  try {
+    rows = (await searchQuestionsRpc(q, PAGE_SIZE + 1, (Math.max(1, page) - 1) * PAGE_SIZE)) as SearchQuestionRow[];
+  } catch (err) {
+    logger.error('searchQuestions error:', err);
     return { results: [], hasMore: false };
   }
 
-  const rows = data as SearchQuestionRow[];
   return {
     results: rows.slice(0, PAGE_SIZE).map(toSearchResult),
     hasMore: rows.length > PAGE_SIZE,
@@ -68,20 +65,14 @@ export async function getTopicQuestions(
   // Public-question rule (status = 'verified' AND list_id IS NULL), same as
   // fetchRandomQuestion/getPublicQuestion. Topics group categories
   // case-insensitively (get_topics()), so this must match every casing too.
-  const { data, error } = await supabase
-    .from('questions')
-    .select('id, prompt, category, created_at, users(display_name)')
-    .eq('status', 'verified')
-    .is('list_id', null)
-    .ilike('category', escapeLikePattern(topic))
-    .order('created_at', { ascending: false })
-    .range(offset, offset + PAGE_SIZE);
-  if (error || !data) {
-    logger.error('getTopicQuestions error:', error);
+  let rows: TopicQuestionRow[];
+  try {
+    rows = (await listTopicQuestions(topic, offset, PAGE_SIZE)) as TopicQuestionRow[];
+  } catch (err) {
+    logger.error('getTopicQuestions error:', err);
     return { results: [], hasMore: false };
   }
 
-  const rows = data as unknown as TopicQuestionRow[];
   return {
     results: rows.slice(0, PAGE_SIZE).map((row) => ({
       id: row.id,

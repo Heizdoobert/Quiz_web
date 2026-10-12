@@ -1,5 +1,6 @@
 import 'server-only';
-import { supabase } from '@/lib/supabase/supabase';
+import { listQuestionsByAuthor } from '@/lib/db/questions';
+import { DbError } from '@/lib/db/errors';
 import { logger } from '@/lib/logger';
 import { ClientQuestion, GetUserQuizzesFilter, GetUserQuizzesResult } from '@/lib/types';
 
@@ -17,32 +18,13 @@ export async function quizzesForAccount(
     const limit = Math.min(Math.max(options?.limit ?? DEFAULT_LIMIT, 1), MAX_LIMIT);
     const offset = Math.max(options?.offset ?? 0, 0);
 
-    // SECURITY: Select public display fields only.
-    // Exclude correct_index and explanation to prevent answer leakage during quizzes.
-    let query = supabase
-      .from('questions')
-      .select('id, category, prompt, options, status, created_at')
-      .eq('created_by_user', accountId);
-
-    if (options?.category) {
-      query = query.eq('category', options.category);
-    }
-
-    if (options?.status) {
-      query = query.eq('status', options.status);
-    }
-
-    const { data, error } = await query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
-
-    if (error) {
-      return {
-        success: false,
-        error: 'Failed to fetch your quizzes.',
-        code: 'FETCH_FAILED',
-      };
-    }
+    // SECURITY: public display fields only (lib/db/questions.ts listQuestionsByAuthor).
+    const data = await listQuestionsByAuthor(accountId, {
+      category: options?.category,
+      status: options?.status,
+      offset,
+      limit,
+    });
 
     const quizzes = (data as ClientQuestion[]) || [];
     return {
@@ -52,6 +34,9 @@ export async function quizzesForAccount(
     };
   } catch (error: unknown) {
     logger.error('[quizzesForAccount]', error);
+    if (error instanceof DbError) {
+      return { success: false, error: 'Failed to fetch your quizzes.', code: 'FETCH_FAILED' };
+    }
     return {
       success: false,
       error: 'An unexpected error occurred.',
