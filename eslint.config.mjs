@@ -27,8 +27,9 @@ const eslintConfig = defineConfig([
     // packages to the first group. Sentry and PostHog live in sdk/tracking-analytics, which is
     // optional (see sdk/tracking-analytics/README.md).
     // lib/db owns database access: everything else calls its domain functions, never a
-    // Supabase client. The secret-key client bypasses RLS, so this is a security boundary.
-    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "tests/**"],
+    // Supabase client. sdk/remote_config is the one other caller of lib/db/client, for the
+    // remote_config table. The secret-key client bypasses RLS, so this is a security boundary.
+    ignores: ["lib/sdk/**", "sdk/tracking-analytics/**", "sdk/remote_config/**", "tests/**"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [
@@ -45,8 +46,9 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // lib/db is the one caller of the Supabase wrappers; vendor packages stay banned there.
-    files: ["lib/db/**"],
+    // lib/db and sdk/remote_config are the callers of the Supabase wrappers; vendor packages
+    // stay banned there.
+    files: ["lib/db/**", "sdk/remote_config/**"],
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [{
