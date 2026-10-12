@@ -1,36 +1,4 @@
 import { withSentryConfig } from '@sentry/nextjs/config';
-import withPWAInit from '@ducanh2912/next-pwa';
-
-const withPWA = withPWAInit({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-  runtimeCaching: [
-    {
-      urlPattern: /^https:\/\/.*\/api\/.*/i,
-      handler: 'NetworkFirst',
-      options: {
-        cacheName: 'api-cache',
-        expiration: {
-          maxEntries: 50,
-          maxAgeSeconds: 60 * 60 * 24, // 24 hours
-        },
-      },
-    },
-    {
-      urlPattern: /\.(?:js|css|webp|png|svg|ico)$/i,
-      handler: 'CacheFirst',
-      options: {
-        cacheName: 'static-assets',
-        expiration: {
-          maxEntries: 100,
-          maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-        },
-      },
-    },
-  ],
-});
 
 const isPreview = process.env.VERCEL_ENV === 'preview' || process.env.NEXT_PUBLIC_APP_ENV === 'preview';
 
@@ -83,7 +51,6 @@ const securityHeaders = [
 const nextConfig = {
   poweredByHeader: false,
   output: 'standalone',
-  turbopack: {},
   experimental: {
     optimizePackageImports: ['lucide-react'],
   },
@@ -92,7 +59,7 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(withPWA(nextConfig), {
+export default withSentryConfig(nextConfig, {
   // For all available options, see:
   // https://github.com/getsentry/sentry-webpack-plugin#options
 
