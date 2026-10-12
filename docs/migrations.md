@@ -47,5 +47,6 @@ Fill in the date each script was applied to production. "Unknown" means no recor
 | 17 | `17-analytics.sql` | analytics functions | unknown |
 | 18 | `17-auth-rate-limit.sql` | auth and answer rate limits (fails open until applied, ADR-008) | **not applied as of 2026-10-09 (owner task A6)** |
 | 19 | `18-ai-usage.sql` | daily AI usage | unknown |
-| 20 | `19-secure-ai-usage.sql` | on `preview` only; merge first | not applied |
+| 20 | `19-secure-ai-usage.sql` | closes `user_ai_usage` to the public key | not applied |
 | 21 | `20-drop-web3-schema.sql` | drop the wallet, reward and escrow schema (ADR-013); destructive, so back up first and apply only once production reads `questions.created_by_user`; test with `bash supabase/tests/run-drop-web3-schema.sh` | not applied |
+| 22 | `remote-config.sql` | `remote_config` table read by `GET /api/config` | applied by the owner, 2026-10-12 |

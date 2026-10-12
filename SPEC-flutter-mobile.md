@@ -26,10 +26,11 @@ app/api/mobile/v1/
 ├── quiz/sync/          POST  queued answers -> per-question verdicts (Bearer)
 ├── quiz/board/         GET   stats, history, leaderboard (guest without a header, 401 for a bad token)
 └── profile/quizzes/    GET   the player's own questions (Bearer)
+app/api/config/         GET   remote config, shared with the web (no auth, no /mobile/v1 prefix)
 mobile/lib/
 ├── api/                ApiClient: Bearer header, 401 reporting, token and account id storage
 ├── db/                 sqflite: question cache, answer queue
-├── services/           SyncService: sends the queue, keeps what the server has not settled
+├── services/           SyncService: sends the queue, keeps what the server has not settled; RemoteConfigService: reads /api/config, keeps defaults on failure
 ├── features/auth/      sign-in screen, AuthNotifier (session expiry, queue ownership)
 ├── features/quiz/      quiz screen, scoreboard and leaderboard panels
 └── features/profile/   profile screen
