@@ -29,7 +29,7 @@ const eslintConfig = defineConfig([
     rules: {
       "no-restricted-imports": ["error", {
         patterns: [{
-          group: ["@supabase/supabase-js", "**/supabase/supabase", "**/supabase/supabase-admin", "**/db/client"],
+          group: ["@supabase/*", "**/supabase/supabase", "**/supabase/supabase-admin", "**/db/client*"],
           message: "Use the domain functions in lib/db instead of a Supabase client.",
         }],
       }],

@@ -1,6 +1,6 @@
 import 'server-only';
 import { admin, pub } from './client';
-import { unwrap, unwrapOne } from './errors';
+import { DbError, unwrap, unwrapOne } from './errors';
 
 // Postgres functions (lib/sql/, supabase/migrations/). Later tasks add to this file.
 
@@ -39,7 +39,9 @@ export async function ratingSummary(questionId: string): Promise<Array<{ average
 
 // Pre-aggregated and pre-sorted in Postgres (supabase/migrations/stats-functions.sql).
 export async function globalLeaderboard(limit: number, offset: number): Promise<unknown[]> {
-  return unwrap('rpc.get_global_leaderboard', await pub.rpc('get_global_leaderboard', { p_limit: limit, p_offset: offset })) ?? [];
+  const rows = unwrap('rpc.get_global_leaderboard', await pub.rpc('get_global_leaderboard', { p_limit: limit, p_offset: offset }));
+  if (!rows) throw new DbError('rpc.get_global_leaderboard', { message: 'returned no data' });
+  return rows;
 }
 
 export async function groupLeaderboard(groupId: string, limit: number, offset: number): Promise<unknown[]> {

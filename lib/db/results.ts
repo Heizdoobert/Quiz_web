@@ -37,7 +37,7 @@ export async function hasRecordedAnswer(accountId: string, questionId: string): 
     'results.hasRecorded',
     await admin().from('quiz_results').select('id').eq('user_id', accountId).eq('question_id', questionId).maybeSingle()
   );
-  return row !== null;
+  return row != null;
 }
 
 // Every column, for the account's own backup; secret key only.

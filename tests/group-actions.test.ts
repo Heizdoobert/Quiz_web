@@ -102,6 +102,13 @@ describe('group action guards', () => {
     expect(res).toEqual({ success: false, error: 'You are already in this group.' });
   });
 
+  it('reports group-not-found on a foreign-key violation', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    mockTables({ group_members: { insertError: { code: '23503' } } });
+    const res = await joinGroup(GROUP_ID);
+    expect(res).toEqual({ success: false, error: 'Group not found.' });
+  });
+
   it('rejects joinGroup for a malformed group id', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const res = await joinGroup('not-a-uuid');
