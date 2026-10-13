@@ -19,7 +19,7 @@ for f in schema.sql schema.sql lock-down-public-writes.sql question-lists.sql se
          restrict-quiz-results-insert.sql contest-escrow.sql widen-reward-claims-amount.sql accounts.sql \
          stats-functions.sql topics.sql search.sql community.sql reward-payee.sql 15-sponsors.sql \
          16-leaderboard-pagination.sql 17-analytics.sql 17-auth-rate-limit.sql 18-ai-usage.sql 19-secure-ai-usage.sql \
-         20-drop-web3-schema.sql 21-rbac.sql; do
+         20-drop-web3-schema.sql remote-config.sql 21-rbac.sql; do
   apply "$f"
 done
 echo -n "re-run "; apply 21-rbac.sql
@@ -28,13 +28,17 @@ $P -At -c "select proname from pg_proc where proname in ('rate_limit_hit','get_g
 echo "--- get_global_leaderboard overloads (exactly one expected)"
 $P -At -c "select oid::regprocedure from pg_proc where proname = 'get_global_leaderboard'"
 
-# 21-rbac.sql: each check prints ok or FAIL, and any FAIL makes the script exit 1.
-echo "--- rbac checks (21-rbac.sql)"
+# Each check prints ok or FAIL, and any FAIL makes the script exit 1.
+echo "--- checks (remote-config.sql, 21-rbac.sql)"
 FAILED=0
 check() { # name, expected output, sql
   got=$($P -At -c "$3" 2>&1 | head -1)
   if [ "$got" = "$2" ]; then echo "ok: $1"; else echo "FAIL: $1 (expected '$2', got '$got')"; FAILED=1; fi
 }
+check "remote_config is seeded with maintenance_mode" "false" \
+  "select value::text from remote_config where key = 'maintenance_mode'"
+check "remote_config has RLS on and only a read policy" "true|1|0" \
+  "select (select relrowsecurity from pg_class where relname = 'remote_config') || '|' || count(*) filter (where cmd = 'SELECT') || '|' || count(*) filter (where cmd <> 'SELECT') from pg_policies where tablename = 'remote_config'"
 check "users.role is NOT NULL with default 'user'" "NO|'user'::text" \
   "select is_nullable || '|' || column_default from information_schema.columns where table_name = 'users' and column_name = 'role'"
 check "users.role rejects an unknown role" "" \
@@ -106,4 +110,20 @@ check "public keys cannot execute resolve_quarantined_question" "f" \
   "select has_function_privilege('anon', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute') or has_function_privilege('authenticated', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute')"
 check "service_role can execute resolve_quarantined_question" "t" \
   "select has_function_privilege('service_role', 'resolve_quarantined_question(uuid,text,uuid,text)', 'execute')"
+# A database that never ran accounts.sql (users keyed by wallet_address) must get a clear
+# message from 21-rbac.sql, not 42703 from the resolved_by foreign key.
+echo "--- prerequisites (21-rbac.sql)"
+prereq() { # name, expected first error message, setup sql for an otherwise empty database
+  $P -c "drop database if exists prereq" >/dev/null 2>&1
+  $P -c "create database prereq" >/dev/null 2>&1
+  $P -d prereq -c "$3" >/dev/null 2>&1
+  got=$($P -d prereq -f /m/21-rbac.sql 2>&1 | grep -m1 -o 'ERROR:  .*' | sed 's/^ERROR:  //')
+  if [ "$got" = "$2" ]; then echo "ok: $1"; else echo "FAIL: $1 (expected '$2', got '$got')"; FAILED=1; fi
+}
+prereq "stops when users has no id column (accounts.sql not applied)" \
+  "21-rbac.sql: public.users has no id column; apply accounts.sql first (docs/migrations.md)" \
+  "create table users (wallet_address text primary key); create table question_disputes (question_id uuid)"
+prereq "stops when question_disputes is missing (schema.sql not applied)" \
+  "21-rbac.sql: public.question_disputes does not exist; apply schema.sql and accounts.sql first (docs/migrations.md)" \
+  "create table users (id uuid primary key)"
 exit $FAILED

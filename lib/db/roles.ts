@@ -22,3 +22,19 @@ export async function setRole(accountId: string, role: string): Promise<boolean>
   );
   return (rows?.length ?? 0) > 0;
 }
+
+export type AccountRow = { id: string; display_name: string | null; role: string; created_at: string };
+
+// Accounts for the admin roles page, newest first, optionally those whose display name contains
+// `search`. Secret key only (users.role is not in the public column grant). The wildcards in
+// `search` are escaped so a name like "50%" matches literally.
+export async function listAccounts(search: string, limit: number, offset: number): Promise<AccountRow[]> {
+  let query = admin()
+    .from('users')
+    .select('id, display_name, role, created_at')
+    .order('created_at', { ascending: false })
+    .order('id')
+    .range(offset, offset + limit - 1);
+  if (search) query = query.ilike('display_name', `%${search.replace(/[\\%_]/g, '\\$&')}%`);
+  return unwrap<AccountRow[]>('roles.list', await query) ?? [];
+}

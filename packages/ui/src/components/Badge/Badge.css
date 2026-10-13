@@ -1,0 +1,55 @@
+/* QuickQuiz Badge Styles */
+
+.qq-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: var(--font-sans, inherit);
+  font-weight: 500;
+  border-radius: var(--radius-full, 9999px);
+  white-space: nowrap;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+/* Sizes */
+.qq-badge--sm {
+  font-size: 0.6875rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.qq-badge--md {
+  font-size: var(--font-size-xs, 0.75rem);
+  padding: 0.25rem 0.625rem;
+}
+
+/* Variants */
+.qq-badge--default {
+  background-color: var(--color-surface-subtle, #334155);
+  color: var(--color-text, #f8fafc);
+  border-color: var(--color-border, #334155);
+}
+
+.qq-badge--success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--color-accent, #10b981);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.qq-badge--warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+  border-color: rgba(245, 158, 11, 0.3);
+}
+
+.qq-badge--danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--color-destructive, #ef4444);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.qq-badge--outline {
+  background-color: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  border-color: var(--color-border, #334155);
+}
