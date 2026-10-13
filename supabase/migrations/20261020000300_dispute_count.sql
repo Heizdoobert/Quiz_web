@@ -3,6 +3,10 @@
 -- The trigger locks the question row in its own statement before counting, so the count
 -- statement's snapshot is taken after any concurrent dispute transaction has committed:
 -- dispute_count equals the unresolved count even under concurrent reports.
+-- The lock mode is NO KEY UPDATE, not UPDATE: the foreign-key check of a dispute insert
+-- already holds KEY SHARE on the parent question, and two inserts that each hold KEY SHARE
+-- and then ask for FOR UPDATE deadlock (FOR UPDATE conflicts with KEY SHARE; NO KEY UPDATE
+-- does not, yet NO KEY UPDATE locks still conflict with each other, so recounts serialise).
 -- The quarantine decision itself stays in the app (QUARANTINE_AT = 3) and still uses the
 -- app's own countDisputes read, which is not serialised with this trigger.
 -- One visible change: a retired question now shows 0 open disputes (they are all resolved).
@@ -18,7 +22,7 @@ DECLARE
   qid UUID := COALESCE(NEW.question_id, OLD.question_id);
 BEGIN
   -- Own statement: the UPDATE below then takes its snapshot after the lock wait.
-  PERFORM 1 FROM questions WHERE id = qid FOR UPDATE;
+  PERFORM 1 FROM questions WHERE id = qid FOR NO KEY UPDATE;
   UPDATE questions
      SET dispute_count = (SELECT count(*) FROM question_disputes WHERE question_id = qid AND resolved_at IS NULL)
    WHERE id = qid;
