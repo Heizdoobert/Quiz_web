@@ -1,6 +1,8 @@
 -- Phase 2a (readers). The gate below compares, for every account, the OLD get_user_stats (window
 -- functions over quiz_results) with the rollup. Any difference aborts the whole migration, so
--- the swap never ships a different number. Re-running after the swap is a harmless equality check.
+-- the swap never ships a different number. The gate is meaningful only on the first apply, while
+-- the OLD get_user_stats is still live; after the swap both sides read user_stats and a re-run
+-- checks nothing. Later drift is repaired with rebuild_user_stats().
 BEGIN;
 
 DO $$

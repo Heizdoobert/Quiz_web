@@ -229,7 +229,7 @@ export async function questionsForExport(accountId: string, limit: number): Prom
     'questions.export',
     await admin()
       .from('questions')
-      .select(`id, prompt, options, correct_index, explanation, created_by_user, status, dispute_count, created_at, ${TOPIC_EMBED}`)
+      .select(`id, prompt, options, correct_index, explanation, created_by_user, status, dispute_count, verified_at, created_at, ${TOPIC_EMBED}`)
       .eq('created_by_user', accountId)
       .limit(limit)
   ) as unknown as { topics: TopicEmbed }[] | null;

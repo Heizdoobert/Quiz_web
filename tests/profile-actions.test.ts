@@ -146,25 +146,29 @@ describe('profile-actions', () => {
 
     it('exports data keyed by account id, with schema version and the account id from the session', async () => {
       const topics = { slug: 'history', topic_translations: [{ locale: 'en', name: 'History' }] };
-      const mockQuizzes = [{ id: '1', prompt: 'Q1', topics }];
+      const mockQuizzes = [{ id: '1', prompt: 'Q1', verified_at: '2026-10-01T00:00:00Z', topics }];
       const mockStats = [{ id: 's1', score: 100 }];
       const eqCalls: Array<[string, string]> = [];
+      const selectCalls: string[] = [];
 
       let callCount = 0;
       (supabaseAdmin!.from as import("vitest").Mock).mockImplementation(() => {
         callCount++;
         return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockImplementation((col: string, val: string) => {
-              eqCalls.push([col, val]);
-              return {
-                limit: vi.fn().mockResolvedValue(
-                  callCount === 1
-                    ? { data: mockQuizzes, error: null }
-                    : { data: mockStats, error: null }
-                ),
-              };
-            }),
+          select: vi.fn().mockImplementation((cols: string) => {
+            selectCalls.push(cols);
+            return {
+              eq: vi.fn().mockImplementation((col: string, val: string) => {
+                eqCalls.push([col, val]);
+                return {
+                  limit: vi.fn().mockResolvedValue(
+                    callCount === 1
+                      ? { data: mockQuizzes, error: null }
+                      : { data: mockStats, error: null }
+                  ),
+                };
+              }),
+            };
           }),
         };
       });
@@ -173,12 +177,13 @@ describe('profile-actions', () => {
 
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('questions');
       expect(supabaseAdmin!.from).toHaveBeenCalledWith('quiz_results');
+      expect(selectCalls[0]).toContain('verified_at');
       expect(eqCalls).toContainEqual(['created_by_user', ACCOUNT_ID]);
       expect(eqCalls).toContainEqual(['user_id', ACCOUNT_ID]);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.version).toBe('1.0');
-        expect(result.data.quizzes).toEqual([{ id: '1', prompt: 'Q1', category: 'History' }]);
+        expect(result.data.quizzes).toEqual([{ id: '1', prompt: 'Q1', verified_at: '2026-10-01T00:00:00Z', category: 'History' }]);
         expect(result.data.stats).toEqual(mockStats);
         expect(result.data.accountId).toBe(ACCOUNT_ID);
         expect(result.data.isTruncated).toBe(false);
