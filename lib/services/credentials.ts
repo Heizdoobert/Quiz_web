@@ -10,7 +10,7 @@ import { logger } from '@/lib/logger';
 // (app/api/mobile/v1/auth/*, which issue a bearer token). They only prove who
 // the caller is; the session is the caller's job.
 
-const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
+export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const HOUR = 3600;
 const RATE_LIMITED_MESSAGE = 'Too many attempts. Please try again later.';
 
