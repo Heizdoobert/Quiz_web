@@ -1,4 +1,4 @@
-import { roleOf, setRole } from '@/lib/db/roles';
+import { AccountRow, listAccounts, roleOf, setRole } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
@@ -44,5 +44,29 @@ export async function setAccountRole(
   } catch (err) {
     logger.error('role_change_failed', err, { actorId: actor.id, targetId });
     return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to change the role.' } };
+  }
+}
+
+const DEFAULT_LIMIT = 20;
+const MAX_LIMIT = 50;
+const MAX_SEARCH_LENGTH = 50;
+
+// The roles page's account list. Same permission as setAccountRole.
+export async function listAccountsForAdmin(
+  params: { search: unknown; limit: unknown; offset: unknown },
+  authAccount?: SessionAccount
+): Promise<ActionResult<{ accounts: AccountRow[]; limit: number; offset: number }>> {
+  const auth = await authorize('roles.grant', authAccount);
+  if (!auth.success) return auth;
+
+  const search = typeof params.search === 'string' ? params.search.trim().slice(0, MAX_SEARCH_LENGTH) : '';
+  const { limit: rawLimit, offset: rawOffset } = params;
+  const limit = typeof rawLimit === 'number' && Number.isInteger(rawLimit) && rawLimit >= 1 ? Math.min(rawLimit, MAX_LIMIT) : DEFAULT_LIMIT;
+  const offset = typeof rawOffset === 'number' && Number.isInteger(rawOffset) && rawOffset >= 0 ? rawOffset : 0;
+  try {
+    return { success: true, data: { accounts: await listAccounts(search, limit, offset), limit, offset } };
+  } catch (err) {
+    logger.error('role_list_failed', err, { actorId: auth.data.account.id });
+    return { success: false, error: { code: 'SERVER_ERROR', message: 'Failed to load the accounts.' } };
   }
 }

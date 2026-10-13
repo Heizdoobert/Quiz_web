@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- **SDK**: `sdk/formatter` formats money, numbers, dates, relative time, durations and SEO text (`formatMoney`, `formatNumber`, `formatPercent`, `formatDate`, `formatRelativeTime`, `formatDuration`, `seoTitle`, `seoDescription`, `slugify`, `canonicalUrl`, `jsonLd`). It has no dependencies and prints the same text on server and browser (`en-US`, UTC by default). The app does not use it yet.
+- **Admin area** at `/admin` (see `docs/admin-area.md`): switch remote config (`maintenance_mode`), grant roles, resolve quarantined questions, and read the top unresolved Sentry issues. Each page checks its own permission; moderators see only the quarantine page. New permission `errors.read` (admin only). The error list needs `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` on the server and shows "not configured" without them.
 - **SDK**: `StorageManager` in `@heizdoobert/quickquiz-sdk/client` keeps JSON values in `sessionStorage`, gzip-compressed then AES-GCM encrypted. The key is a non-extractable `CryptoKey` in IndexedDB, and each entry is bound to its name.
 - **Mobile**: `StorageManager` (`mobile/lib/services/storage_manager.dart`) keeps small JSON values gzip-compressed in `flutter_secure_storage`, so the OS keystore encrypts them.
 
