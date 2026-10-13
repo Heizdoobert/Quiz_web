@@ -26,3 +26,8 @@ export async function listQuarantineAction(offset: number) {
 export async function resolveQuarantineAction(questionId: string, outcome: string, note: string) {
   return resolveQuestionDispute({ questionId, outcome, note });
 }
+
+export async function triggerReportAction(recipientEmail?: string) {
+  const { triggerSystemReport } = await import('../services/report-admin');
+  return triggerSystemReport(undefined, recipientEmail);
+}

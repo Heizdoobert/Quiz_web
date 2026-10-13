@@ -22,7 +22,10 @@ const eslintConfig = defineConfig([
   ]),
   {
     // An empty catch hides failures; say why ignoring is safe in a comment instead.
-    rules: { "no-empty": ["error", { allowEmptyCatch: false }] },
+    rules: {
+      "no-empty": ["error", { allowEmptyCatch: false }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    },
   },
   {
     // lib/sdk is the only place that imports a vendor SDK (see lib/sdk/README.md); add new

@@ -33,7 +33,7 @@ describe('admin layout', () => {
   it('shows an admin every page link and the page body', async () => {
     signInAs('admin');
     await renderLayout();
-    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Config', 'Roles', 'Quarantine', 'Errors']);
+    expect(screen.getAllByRole('link').map((a) => a.textContent)).toEqual(['Config', 'Roles', 'Quarantine', 'Errors', 'Reports']);
     expect(screen.getByText('page body')).toBeTruthy();
   });
 
