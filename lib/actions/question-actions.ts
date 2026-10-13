@@ -260,9 +260,9 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
       return [];
     }
     // Eliminating two wrong options narrows the answer to one of two, so this is only offered for
-    // public verified questions (whose answers submitAnswer shows anyway). Contest, pending and
-    // quarantined questions reveal nothing; the contest player has no 50/50.
-    if (data.status !== 'verified' || data.list_id) return [];
+    // public verified questions (whose answers submitAnswer shows anyway). Pending and
+    // quarantined questions reveal nothing.
+    if (data.status !== 'verified') return [];
     const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
 
     // Deterministic selection based on questionId hash so repeat calls return the exact same 2 wrong answers

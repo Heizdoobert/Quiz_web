@@ -19,14 +19,14 @@ function mockChain(result: { data: unknown[] | null; error: unknown }) {
 describe('fetchRandomQuestion (public-question rule)', () => {
   beforeEach(() => vi.resetAllMocks());
 
-  it('serves only status = verified AND list_id IS NULL', async () => {
+  it('serves only status = verified and never filters on the retired contest column', async () => {
     const row = { id: 'q1', category: 'General', prompt: 'p', options: ['a', 'b'], created_by: null, status: 'verified' };
     const { eq, is } = mockChain({ data: [row], error: null });
 
     const result = await fetchRandomQuestion();
 
     expect(eq).toHaveBeenCalledWith('status', 'verified');
-    expect(is).toHaveBeenCalledWith('list_id', null);
+    expect(is).not.toHaveBeenCalled();
     expect(result?.id).toBe('q1');
   });
 
@@ -115,7 +115,7 @@ describe('getPublicQuestion', () => {
     const result = await getPublicQuestion(row.id);
 
     expect(eq).toHaveBeenCalledWith('status', 'verified');
-    expect(is).toHaveBeenCalledWith('list_id', null);
+    expect(is).not.toHaveBeenCalled();
     expect(result).toEqual(row);
     expect(result).not.toHaveProperty('correct_index');
     expect(result).not.toHaveProperty('explanation');

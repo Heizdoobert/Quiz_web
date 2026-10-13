@@ -110,10 +110,10 @@ describe('rateQuestion', () => {
     expect(await rateQuestion('not-a-uuid', 5)).toEqual({ ok: false, code: 'INVALID' });
   });
 
-  it('rejects non-public or contest questions with NOT_ALLOWED', async () => {
+  it('rejects non-public questions with NOT_ALLOWED', async () => {
     (supabaseAdmin!.from as ReturnType<typeof vi.fn>).mockImplementation(
       createTableMock({
-        questions: [{ id: VALID_QID, status: 'verified', list_id: 'some-contest-list', created_by_user: AUTHOR_ID }],
+        questions: [{ id: VALID_QID, status: 'quarantined', created_by_user: AUTHOR_ID }],
       })
     );
 
@@ -129,7 +129,7 @@ describe('rateQuestion', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: AUTHOR_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: AUTHOR_ID },
             error: null,
           }),
         };
@@ -156,7 +156,7 @@ describe('rateQuestion', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: USER_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: USER_ID },
             error: null,
           }),
         };
@@ -184,7 +184,7 @@ describe('rateQuestion', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: AUTHOR_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: AUTHOR_ID },
             error: null,
           }),
         };
@@ -239,7 +239,7 @@ describe('addComment', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: AUTHOR_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: AUTHOR_ID },
             error: null,
           }),
         };
@@ -273,7 +273,7 @@ describe('addComment', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: USER_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: USER_ID },
             error: null,
           }),
         };
@@ -301,7 +301,7 @@ describe('addComment', () => {
           eq: vi.fn().mockReturnThis(),
           is: vi.fn().mockReturnThis(),
           maybeSingle: vi.fn().mockResolvedValue({
-            data: { id: VALID_QID, status: 'verified', list_id: null, created_by_user: USER_ID },
+            data: { id: VALID_QID, status: 'verified', created_by_user: USER_ID },
             error: null,
           }),
         };

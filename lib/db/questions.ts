@@ -11,7 +11,6 @@ export type QuestionRow = {
   correct_index: number;
   explanation: string | null;
   created_by_user: string | null;
-  list_id: string | null;
 };
 
 // The full row, including the answer key; secret key only.
@@ -66,13 +65,13 @@ export async function insertQuestion(row: NewQuestion): Promise<void> {
   unwrap('questions.insert', await admin().from('questions').insert(row));
 }
 
-// Public questions: verified and not in a contest list. Unordered, up to `limit`.
+// Public questions: verified. Unordered, up to `limit`.
 export async function listPublicQuestions(opts: {
   excludeIds?: string[];
   category?: string;
   limit: number;
 }): Promise<PublicQuestionRow[]> {
-  let query = pub.from('questions').select(PUBLIC_FIELDS).eq('status', 'verified').is('list_id', null);
+  let query = pub.from('questions').select(PUBLIC_FIELDS).eq('status', 'verified');
   if (opts.excludeIds?.length) query = query.not('id', 'in', `(${opts.excludeIds.join(',')})`);
   if (opts.category) query = query.ilike('category', escapeLikePattern(opts.category));
   return unwrap('questions.listPublic', await query.limit(opts.limit)) ?? [];
@@ -81,15 +80,15 @@ export async function listPublicQuestions(opts: {
 export async function publicQuestion(id: string): Promise<PublicQuestionRow | null> {
   return unwrapOne(
     'questions.public',
-    await pub.from('questions').select(PUBLIC_FIELDS).eq('id', id).eq('status', 'verified').is('list_id', null).single()
+    await pub.from('questions').select(PUBLIC_FIELDS).eq('id', id).eq('status', 'verified').single()
   );
 }
 
 // The answer key and visibility only; secret key only.
-export async function answerKey(id: string): Promise<{ correct_index: number; status: string; list_id: string | null } | null> {
+export async function answerKey(id: string): Promise<{ correct_index: number; status: string } | null> {
   return unwrapOne(
     'questions.answerKey',
-    await admin().from('questions').select('correct_index, status, list_id').eq('id', id).single()
+    await admin().from('questions').select('correct_index, status').eq('id', id).single()
   );
 }
 
@@ -101,7 +100,6 @@ export async function listTopicQuestions(topic: string, offset: number, pageSize
       .from('questions')
       .select('id, prompt, category, created_at, users(display_name)')
       .eq('status', 'verified')
-      .is('list_id', null)
       .ilike('category', escapeLikePattern(topic))
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize)
