@@ -32,6 +32,7 @@
     "check:task": "npm run check:fast && npm run check:architecture && npm run test:coverage",
     "check:full": "npm run check:task && npm run check:security && npm run check:deps",
     "check:deps": "npm audit --omit=dev --audit-level=high",
+    "check:db": "supabase db reset && supabase test db && supabase db lint --level warning",
     "docker:build": "docker compose build && docker image prune -f",
     "docker:up": "docker compose up -d --build && docker image prune -f"
   },
