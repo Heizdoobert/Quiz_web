@@ -1,38 +1,11 @@
 import { sendSystemReport } from '@/lib/services/system-report';
 import { logger } from '@/lib/logger';
+import { isCronAuthorized } from '@/lib/services/cron-auth';
 
 export const dynamic = 'force-dynamic';
 
-function isAuthorized(req: Request): boolean {
-  const cronSecret = process.env.CRON_SECRET;
-  if (!cronSecret) {
-    // When CRON_SECRET is not configured, deny all requests for security
-    return false;
-  }
-
-  const authHeader = req.headers.get('authorization');
-  if (authHeader && authHeader.startsWith('Bearer ')) {
-    const token = authHeader.slice(7).trim();
-    if (token === cronSecret) {
-      return true;
-    }
-  }
-
-  try {
-    const url = new URL(req.url);
-    const secretParam = url.searchParams.get('secret');
-    if (secretParam === cronSecret) {
-      return true;
-    }
-  } catch {
-    // URL parsing fallback
-  }
-
-  return false;
-}
-
 async function handleCron(req: Request) {
-  if (!isAuthorized(req)) {
+  if (!isCronAuthorized(req)) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
