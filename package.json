@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "next dev --turbo",
     "predev": "npm run build:ui",
-    "prebuild": "npm run build:ui",
+    "prebuild": "npm run build:sdk && npm run build:ui",
     "build": "next build",
     "build:sdk": "npm run --prefix sdk/shared_modules build && npm run --prefix sdk build",
     "build:sdk-core": "npm run --prefix sdk/shared_modules build",
