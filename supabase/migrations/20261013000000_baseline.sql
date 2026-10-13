@@ -1016,6 +1016,12 @@ GRANT SELECT("created_by_user") ON TABLE "public"."questions" TO "anon";
 GRANT SELECT("created_by_user") ON TABLE "public"."questions" TO "authenticated";
 
 
+-- Baseline edit: legacy schema.sql:153 grants list_id (the public-question filter needs it), but the
+-- table-level REVOKE in secure-rewards-and-answers.sql:30 wiped it during the replay.
+GRANT SELECT("list_id") ON TABLE "public"."questions" TO "anon";
+GRANT SELECT("list_id") ON TABLE "public"."questions" TO "authenticated";
+
+
 
 GRANT ALL ON TABLE "public"."client_questions" TO "anon";
 GRANT ALL ON TABLE "public"."client_questions" TO "authenticated";
