@@ -6,6 +6,7 @@ import type { ReportStatus } from '@/lib/services/report-admin';
 
 export default function ReportDashboard({ initial }: { initial: ReportStatus }) {
   const [status, setStatus] = useState<ReportStatus>(initial);
+  const [customEmail, setCustomEmail] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
   const [isError, setIsError] = useState<boolean>(false);
   const [pending, startTransition] = useTransition();
@@ -16,7 +17,8 @@ export default function ReportDashboard({ initial }: { initial: ReportStatus }) 
     setFeedback('');
     setIsError(false);
     startTransition(async () => {
-      const res = await triggerReportAction();
+      const emailToUse = customEmail.trim() || undefined;
+      const res = await triggerReportAction(emailToUse);
       if (res.success) {
         setFeedback(
           `Report email sent successfully! (messageId: ${res.data.messageId ?? 'delivered'})`
@@ -93,6 +95,13 @@ export default function ReportDashboard({ initial }: { initial: ReportStatus }) 
         </div>
 
         <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-cyber-border">
+          <input
+            type="email"
+            value={customEmail}
+            onChange={(e) => setCustomEmail(e.target.value)}
+            placeholder="Custom recipient email (optional)"
+            className="px-3 py-2 rounded bg-cyber-violet/60 border border-cyber-border text-white text-sm placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neo-mint min-w-[280px]"
+          />
           <button
             type="button"
             disabled={pending || !status.configured}

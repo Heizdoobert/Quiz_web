@@ -41,12 +41,27 @@ export async function getReportStatus(authAccount?: SessionAccount): Promise<Act
   };
 }
 
-export async function triggerSystemReport(authAccount?: SessionAccount): Promise<ActionResult<TriggerReportResult>> {
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export async function triggerSystemReport(
+  authAccount?: SessionAccount,
+  recipientEmail?: string
+): Promise<ActionResult<TriggerReportResult>> {
   const auth = await authorize('analytics.read', authAccount);
   if (!auth.success) return auth;
 
+  if (recipientEmail !== undefined && !EMAIL_REGEX.test(recipientEmail)) {
+    return {
+      success: false,
+      error: {
+        code: 'VALIDATION_FAILED',
+        message: 'Invalid recipient email address',
+      },
+    };
+  }
+
   try {
-    const result = await sendSystemReport();
+    const result = await sendSystemReport(recipientEmail);
     return {
       success: true,
       data: {

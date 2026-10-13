@@ -85,6 +85,28 @@ describe('ReportDashboard interactions', () => {
     expect(triggerSpy).toHaveBeenCalledTimes(1);
   });
 
+  it('allows entering a custom recipient email override before triggering', async () => {
+    const triggerSpy = vi.spyOn(adminActions, 'triggerReportAction').mockResolvedValue({
+      success: true,
+      data: {
+        sent: true,
+        messageId: 'msg-custom-777',
+        metrics: mockStatus.metrics,
+      },
+    });
+
+    render(<ReportDashboard initial={mockStatus} />);
+    const emailInput = screen.getByPlaceholderText(/Custom recipient email/i);
+    fireEvent.change(emailInput, { target: { value: 'custom@example.com' } });
+
+    const triggerBtn = screen.getByRole('button', { name: /Trigger Report Now/i });
+    fireEvent.click(triggerBtn);
+
+    await waitFor(() => {
+      expect(triggerSpy).toHaveBeenCalledWith('custom@example.com');
+    });
+  });
+
   it('disables trigger button and shows warning if unconfigured', () => {
     const unconfiguredStatus: ReportStatus = {
       ...mockStatus,

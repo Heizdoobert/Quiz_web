@@ -27,7 +27,7 @@ export async function resolveQuarantineAction(questionId: string, outcome: strin
   return resolveQuestionDispute({ questionId, outcome, note });
 }
 
-export async function triggerReportAction() {
+export async function triggerReportAction(recipientEmail?: string) {
   const { triggerSystemReport } = await import('../services/report-admin');
-  return triggerSystemReport();
+  return triggerSystemReport(undefined, recipientEmail);
 }

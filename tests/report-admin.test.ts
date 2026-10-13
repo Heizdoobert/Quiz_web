@@ -82,6 +82,25 @@ describe('triggerSystemReport', () => {
     expect(sendEmail).toHaveBeenCalledTimes(1);
   });
 
+  it('allows admin to specify a custom recipient email override', async () => {
+    const res = await triggerSystemReport(ADMIN, 'custom-admin@example.com');
+    expect(res.success).toBe(true);
+    if (!res.success) return;
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'custom-admin@example.com' })
+    );
+  });
+
+  it('rejects an invalid custom recipient email with VALIDATION_FAILED', async () => {
+    const res = await triggerSystemReport(ADMIN, 'invalid-email');
+    expect(res.success).toBe(false);
+    if (res.success) return;
+
+    expect(res.error.code).toBe('VALIDATION_FAILED');
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
+
   it('fails gracefully when email sending fails or config is missing', async () => {
     delete process.env.PRODUCT_REPORT_EMAIL;
     const res = await triggerSystemReport(ADMIN);
