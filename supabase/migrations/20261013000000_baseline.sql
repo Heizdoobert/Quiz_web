@@ -1,3 +1,11 @@
+-- PROVISIONAL BASELINE. Produced by replaying the legacy scripts in a local Supabase stack, NOT
+-- from a production dump, so production may differ. Known evidence: the replay lost anon SELECT on
+-- questions.list_id (re-added by hand below as a 'Baseline edit'), and production code calls
+-- increment_ai_generation with the public key, so production likely grants it.
+-- The owner must redo plan Task 0.4 from the real `supabase db dump` of production, and the schema
+-- diff (scripts/db-schema-diff.sh) must be empty BEFORE `supabase migration repair` marks this
+-- file applied anywhere. Keep every `-- Baseline edit:` hunk.
+
 
 
 
