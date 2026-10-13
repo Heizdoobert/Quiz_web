@@ -101,6 +101,26 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # Build once into the local daemon and scan it before anything is published. The push below
+      # reuses the same layers from the build cache. Trivy runs from a digest-pinned image, so no
+      # third-party action can change under us; --ignore-unfixed keeps the gate to findings that
+      # have a fix.
+      - name: Build Image for Scan
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: quiz-scan:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan Image (Trivy)
+        run: |
+          docker run --rm -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.58.1@sha256:ab70a02200597efa04748f210f793936eb647cbcdb0ea69cc30b226d6f5a22c7 \
+            image --severity HIGH,CRITICAL --ignore-unfixed --scanners vuln --exit-code 1 quiz-scan:ci
+
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v7
         with:
