@@ -2,6 +2,16 @@ import 'server-only';
 import { admin } from './client';
 import { DbError, unwrap } from './errors';
 
+// Display names are the usernames players pick, matched case-insensitively.
+// ponytail: check-then-insert race, a unique index on lower(display_name) closes it.
+export async function usernameTaken(username: string): Promise<boolean> {
+  const rows: { id: string }[] | null = unwrap(
+    'users.byDisplayName',
+    await admin().from('users').select('id').ilike('display_name', username.replace(/[\\%_]/g, '\\$&')).limit(1)
+  );
+  return (rows?.length ?? 0) > 0;
+}
+
 // The account id for a Supabase Auth user, creating the users row on its first sign-in.
 export async function ensureUserForAuthUser(authUserId: string, displayName: string): Promise<string> {
   unwrap(
