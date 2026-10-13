@@ -1,4 +1,5 @@
 import { answerKey, QuarantinedQuestion, quarantinedQuestions, resolveQuarantined } from '@/lib/db/questions';
+import { MAX_NOTE_LENGTH } from '@/lib/constants/moderation';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
@@ -10,7 +11,6 @@ import { SessionAccount } from './session';
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 50;
-export const MAX_NOTE_LENGTH = 500;
 
 const OUTCOMES = { restore: 'restored', retire: 'retired' } as const;
 type Outcome = (typeof OUTCOMES)[keyof typeof OUTCOMES];
