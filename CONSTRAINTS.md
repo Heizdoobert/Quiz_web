@@ -1,6 +1,6 @@
 # Constraints
 
-Last reviewed: 2026-10-08 by @alexheiz
+Last reviewed: 2026-10-13 by @alexheiz
 
 ## Floor (always enforced, no setup required)
 
@@ -27,6 +27,7 @@ Last reviewed: 2026-10-08 by @alexheiz
 | Accessibility | Zero critical or serious axe violations | `npm run check:a11y` (`axe $PREVIEW_URL --tags wcag2a,wcag2aa,wcag21aa`) | preview deploy (warns locally) |
 | Performance (runtime) | LCP ≤ 2500ms, CLS ≤ 0.1 | `npm run check:perf` (`lighthouse $PREVIEW_URL --output=json`) | preview deploy (warns locally) |
 | Performance (bundle) | First-load JS ≤ 150 kB gzip per route target; today's ratchet is 360 kB (measured 353.2 kB on 2026-10-09, after the wallet stack was removed) — must not grow, see Exceptions | `npm run build && npm run check:bundle` (sums the gzip size of every script in each prerendered page's HTML) | CI, after the build job |
+| Database | Migrations replay from the baseline without error, the pgTAP suite passes, lint is clean at the level `check:db` sets | `npm run check:db` (needs `npx supabase start`) | CI (`db` job), on-demand |
 
 ### Why these numbers
 
