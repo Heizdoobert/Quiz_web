@@ -6,6 +6,8 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+COPY packages/ ./packages/
+COPY sdk/ ./sdk/
 RUN npm ci --legacy-peer-deps
 
 # 2. Builder
