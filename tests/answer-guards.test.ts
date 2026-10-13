@@ -91,6 +91,20 @@ describe('submitAnswer guards', () => {
     expect(answerLimitCalls).toEqual([]);
   });
 
+  it('rejects an out-of-range or fractional answer index before revealing or recording anything', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    for (const answerIndex of [4, -1, 1.5]) {
+      const inserts = mockTables({
+        questions: { row: { correct_index: 1, explanation: 'why', status: 'verified' } },
+      });
+      const res = await submitAnswer({ questionId: Q_ID, answerIndex });
+      expect(res).toEqual({ isCorrect: false, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'error' });
+      expect(inserts.quiz_results).toBeUndefined();
+      expect(answerLimitCalls).toEqual([]);
+    }
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+  });
+
   it('reveals nothing when the question does not exist', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     mockTables({});
