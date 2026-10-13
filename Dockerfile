@@ -32,6 +32,9 @@ RUN npm run build
 # 3. Production Runner
 FROM base AS runner
 RUN apk add --no-cache libc6-compat curl
+# The server starts with `node server.js`, so npm and corepack are dead weight here, and npm's
+# bundled dependencies are what an image scan flags in the base image.
+RUN rm -rf /usr/local/lib/node_modules /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 WORKDIR /app
 
 ENV NODE_ENV=production
