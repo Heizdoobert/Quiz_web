@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { roleOf, setRole } from '../lib/db/roles';
+import { listAccounts, roleOf, setRole } from '../lib/db/roles';
 import { DbError } from '../lib/db/errors';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 
@@ -64,5 +64,37 @@ describe('setRole', () => {
   it('throws a DbError on a database error, such as the role check constraint', async () => {
     stubUpdate({ data: null, error: { message: 'violates check constraint "users_role_check"', code: '23514' } });
     await expect(setRole(ID, 'owner')).rejects.toBeInstanceOf(DbError);
+  });
+});
+
+// from('users').select().order().order().range() [.ilike()] awaited, resolving to `result`.
+function stubList(result: { data: unknown; error: { message: string } | null }) {
+  const chain: Record<string, unknown> = {};
+  for (const m of ['select', 'order', 'range']) chain[m] = vi.fn().mockReturnValue(chain);
+  chain.ilike = vi.fn().mockReturnValue(chain);
+  chain.then = (resolve: (v: unknown) => unknown) => resolve(result);
+  vi.mocked(supabaseAdmin!.from).mockReturnValue(chain as never);
+  return chain as { select: ReturnType<typeof vi.fn>; range: ReturnType<typeof vi.fn>; ilike: ReturnType<typeof vi.fn> };
+}
+
+describe('listAccounts', () => {
+  it('pages the newest accounts without a filter when there is no search', async () => {
+    const rows = [{ id: ID, display_name: 'Ann', role: 'user', created_at: '2026-10-01' }];
+    const chain = stubList({ data: rows, error: null });
+    await expect(listAccounts('', 20, 40)).resolves.toEqual(rows);
+    expect(chain.select).toHaveBeenCalledWith('id, display_name, role, created_at');
+    expect(chain.range).toHaveBeenCalledWith(40, 59);
+    expect(chain.ilike).not.toHaveBeenCalled();
+  });
+
+  it('escapes LIKE wildcards in the search term', async () => {
+    const chain = stubList({ data: [], error: null });
+    await listAccounts('50%_off\\', 20, 0);
+    expect(chain.ilike).toHaveBeenCalledWith('display_name', '%50\\%\\_off\\\\%');
+  });
+
+  it('throws a DbError when the read fails', async () => {
+    stubList({ data: null, error: { message: 'boom' } });
+    await expect(listAccounts('', 20, 0)).rejects.toBeInstanceOf(DbError);
   });
 });

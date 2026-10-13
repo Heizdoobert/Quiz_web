@@ -44,7 +44,7 @@ describe('app/robots.ts', () => {
       {
         userAgent: '*',
         allow: '/',
-        disallow: ['/api/'],
+        disallow: ['/api/', '/admin'],
       },
     ]);
     expect(res.sitemap).toBe('https://quickquiz.xyz/sitemap.xml');

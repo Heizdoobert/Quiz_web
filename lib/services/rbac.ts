@@ -4,7 +4,7 @@
 export const ROLES = ['user', 'moderator', 'admin'] as const;
 export type Role = (typeof ROLES)[number];
 
-export const PERMISSIONS = ['roles.grant', 'disputes.resolve', 'analytics.read', 'db.read', 'config.write'] as const;
+export const PERMISSIONS = ['roles.grant', 'disputes.resolve', 'analytics.read', 'db.read', 'config.write', 'errors.read'] as const;
 export type Permission = (typeof PERMISSIONS)[number];
 
 const ROLE_PERMISSIONS: Record<Role, readonly Permission[]> = {

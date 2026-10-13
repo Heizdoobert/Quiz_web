@@ -24,7 +24,8 @@
       "@heizdoobert/quickquiz-sdk/client": ["./sdk/src/client/index.ts"],
       "@heizdoobert/quickquiz-sdk/server": ["./sdk/src/server/index.ts"],
       "@heizdoobert/quickquiz-ui": ["./packages/ui/src/index.ts"],
-      "@heizdoobert/quickquiz-ui/styles.css": ["./packages/ui/src/styles/tokens.css"]
+      "@heizdoobert/quickquiz-ui/styles.css": ["./packages/ui/src/styles/tokens.css"],
+      "@quizweb/sdk-core": ["./sdk/shared_modules/src/index.ts"]
     }
   },
   "include": [
