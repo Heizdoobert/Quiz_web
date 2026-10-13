@@ -1,0 +1,18 @@
+begin;
+select plan(7);
+
+select hasnt_table('question_lists', 'question_lists is gone');
+select hasnt_table('list_entries', 'list_entries is gone');
+select hasnt_table('question_list_confirmations', 'question_list_confirmations is gone');
+select hasnt_column('questions', 'list_id', 'questions.list_id is gone');
+select hasnt_function('get_contest_analytics', 'get_contest_analytics is gone');
+select hasnt_view('client_questions', 'client_questions is gone');
+
+-- Only verified questions appear in topics and search.
+insert into questions (id, prompt, options, correct_index, status) values
+  ('00000000-0000-4000-8000-0000000000e1', 'a verified question prompt', '["a","b"]', 0, 'verified'),
+  ('00000000-0000-4000-8000-0000000000e2', 'a rejected question prompt', '["a","b"]', 0, 'rejected');
+select is((select sum(question_count)::int from get_topics()), 1, 'topics count only verified questions');
+
+select * from finish();
+rollback;
