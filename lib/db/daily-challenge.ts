@@ -2,7 +2,7 @@ import 'server-only';
 import { admin, pub } from './client';
 import { unwrap } from './errors';
 
-// Daily challenge functions (supabase/migrations/20261120000000_daily_challenge.sql).
+// Daily challenge functions (supabase/migrations/20261013001000_daily_challenge.sql).
 
 // Rows inserted: 0 when the day already has a challenge. Secret key only.
 export async function pickDailyChallenge(date: string, count = 10): Promise<number> {
