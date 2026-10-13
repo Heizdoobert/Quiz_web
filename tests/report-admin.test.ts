@@ -105,6 +105,7 @@ describe('triggerSystemReport', () => {
     delete process.env.PRODUCT_REPORT_EMAIL;
     const res = await triggerSystemReport(ADMIN);
     expect(res.success).toBe(false);
+    if (res.success) return;
     expect(res.error.code).toBe('VALIDATION_FAILED');
   });
 });
