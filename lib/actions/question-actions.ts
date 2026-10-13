@@ -2,7 +2,7 @@
 
 import {
   answerKey, countDisputes, countQuestions, countQuestionsByAuthorSince, insertDispute,
-  insertQuestion, listPublicQuestions, publicQuestion, setDisputeState,
+  insertQuestion, listPublicQuestions, publicQuestion, quarantineQuestion,
 } from '@/lib/db/questions';
 import { hasRecordedAnswer } from '@/lib/db/results';
 import { incrementAiGeneration, topics } from '@/lib/db/rpc';
@@ -227,11 +227,13 @@ export async function disputeQuestion(
 
     const quarantined = disputeCount >= QUARANTINE_AT;
     let updated = true;
-    try {
-      await setDisputeState(params.questionId, disputeCount, quarantined);
-    } catch (err) {
-      logger.error('dispute_question_update_failed', err, { questionId: params.questionId });
-      updated = false;
+    if (quarantined) {
+      try {
+        await quarantineQuestion(params.questionId);
+      } catch (err) {
+        logger.error('dispute_question_update_failed', err, { questionId: params.questionId });
+        updated = false;
+      }
     }
 
     logger.info('question_disputed', { userId: account.id, questionId: params.questionId, quarantined });

@@ -150,14 +150,9 @@ export async function countDisputes(questionId: string): Promise<number> {
   );
 }
 
-export async function setDisputeState(questionId: string, disputeCount: number, quarantine: boolean): Promise<void> {
-  unwrap(
-    'questions.setDisputeState',
-    await admin()
-      .from('questions')
-      .update({ dispute_count: disputeCount, ...(quarantine ? { status: 'quarantined' } : {}) })
-      .eq('id', questionId)
-  );
+// The count is kept by the database (a trigger on question_disputes); only the status changes here.
+export async function quarantineQuestion(questionId: string): Promise<void> {
+  unwrap('questions.quarantine', await admin().from('questions').update({ status: 'quarantined' }).eq('id', questionId));
 }
 
 // A quarantined question as a moderator sees it: the answer key and the open disputes'
