@@ -11,6 +11,7 @@ export default defineConfig({
       '@heizdoobert/quickquiz-sdk/server': path.resolve(__dirname, './sdk/src/server/index.ts'),
       '@heizdoobert/quickquiz-sdk': path.resolve(__dirname, './sdk/src/index.ts'),
       '@heizdoobert/quickquiz-ui': path.resolve(__dirname, './packages/ui/src/index.ts'),
+      '@quizweb/sdk-core': path.resolve(__dirname, './sdk/shared_modules/src/index.ts'),
       'server-only': path.resolve(__dirname, './tests/mocks/server-only.ts'),
     },
   },
