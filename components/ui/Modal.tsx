@@ -4,8 +4,12 @@ import React, { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X } from "lucide-react";
+import { Modal as QuickQuizModal, type ModalProps as QuickQuizModalProps } from "@heizdoobert/quickquiz-ui";
 
-interface ModalProps {
+export { QuickQuizModal };
+export type { QuickQuizModalProps };
+
+export interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
