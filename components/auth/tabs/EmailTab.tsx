@@ -4,12 +4,20 @@ import { requestEmailCode, verifyEmailCode } from "@/lib/actions/auth-actions";
 
 type EmailStep = "input" | "code";
 
+const SEND_ERRORS = {
+  RATE_LIMITED: "Too many requests. Please try again later.",
+  INVALID_USERNAME: "Username must be 3-20 characters (letters, numbers, underscores).",
+  USERNAME_TAKEN: "Username is already taken.",
+};
+
 export interface EmailTabProps {
+  mode?: "login" | "register";
   onSuccess: () => void;
   refresh: () => Promise<unknown>;
 }
 
-export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
+export function EmailTab({ mode = "login", onSuccess, refresh }: EmailTabProps) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [emailStep, setEmailStep] = useState<EmailStep>("input");
@@ -20,10 +28,10 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
     e.preventDefault();
     setPending(true);
     setError(null);
-    const res = await requestEmailCode(email);
+    const res = await requestEmailCode(email, mode === "register" ? username : undefined);
     setPending(false);
-    if (res.error === "RATE_LIMITED") {
-      setError("Too many requests. Please try again later.");
+    if (res.error) {
+      setError(SEND_ERRORS[res.error]);
       return;
     }
     setEmailStep("code");
@@ -50,11 +58,27 @@ export function EmailTab({ onSuccess, refresh }: EmailTabProps) {
   if (emailStep === "input") {
     return (
       <form onSubmit={handleSendCode} className="space-y-4">
-        <p className="text-xs text-slate-400">We email you a 6-digit code. New here? That creates your account.</p>
+        <p className="text-xs text-slate-400">
+          {mode === "register"
+            ? "Pick a username and we email you a 6-digit code to create your account."
+            : "We email you a 6-digit code to sign in."}
+        </p>
+        {mode === "register" && (
+          <input
+            type="text"
+            required
+            autoFocus
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            aria-label="Username"
+            placeholder="e.g. quiz_champ"
+            className="w-full px-4 py-2.5 rounded-xl bg-cyber-violet border border-cyber-border text-sm text-white placeholder:text-slate-500 focus:outline-none focus:border-neo-mint/60"
+          />
+        )}
         <input
           type="email"
           required
-          autoFocus
+          autoFocus={mode === "login"}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           aria-label="Email address"

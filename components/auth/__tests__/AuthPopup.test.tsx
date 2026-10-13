@@ -166,7 +166,7 @@ describe('AuthPopup', () => {
     fireEvent.click(sendBtn);
 
     await waitFor(() => {
-      expect(requestEmailCode).toHaveBeenCalledWith('test@example.com');
+      expect(requestEmailCode).toHaveBeenCalledWith('test@example.com', undefined);
     });
 
     // Enter code

@@ -4,7 +4,8 @@ import { getSessionAccount, setSessionAccount, clearSessionAccount, type Session
 import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
 import { ensureAccountForAuthUser } from '@/lib/services/users';
 import { auth } from '@/lib/db/auth';
-import { signInAccount, signUpAccount } from '@/lib/services/credentials';
+import { usernameTaken } from '@/lib/db/users';
+import { signInAccount, signUpAccount, USERNAME_RE } from '@/lib/services/credentials';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
 
@@ -14,9 +15,15 @@ const HOUR = 3600;
 
 // Same { sent: true } whether or not the email has an account, so a caller can't
 // use this to enumerate registered emails. shouldCreateUser lets a first-time
-// email register itself right here, with no separate registration step.
-export async function requestEmailCode(email: string): Promise<{ sent: boolean; error?: 'RATE_LIMITED' }> {
+// email register itself right here, with no separate registration step. A username
+// (register) is checked before any mail goes out and stored with the new account.
+export async function requestEmailCode(
+  email: string,
+  username?: string
+): Promise<{ sent: boolean; error?: 'RATE_LIMITED' | 'INVALID_USERNAME' | 'USERNAME_TAKEN' }> {
   const trimmed = email.trim();
+  const name = username?.trim();
+  if (name !== undefined && !USERNAME_RE.test(name)) return { sent: false, error: 'INVALID_USERNAME' };
   if (EMAIL_RE.test(trimmed)) {
     // Limits apply to every address alike, so hitting one reveals nothing about an account.
     if (
@@ -25,7 +32,12 @@ export async function requestEmailCode(email: string): Promise<{ sent: boolean; 
     ) {
       return { sent: false, error: 'RATE_LIMITED' };
     }
-    await auth().signInWithOtp({ email: trimmed, options: { shouldCreateUser: true } });
+    // Says nothing about the email, only about the name, so it can't enumerate accounts.
+    if (name && (await usernameTaken(name))) return { sent: false, error: 'USERNAME_TAKEN' };
+    await auth().signInWithOtp({
+      email: trimmed,
+      options: { shouldCreateUser: true, ...(name && { data: { username: name } }) },
+    });
   }
   return { sent: true };
 }
@@ -40,7 +52,7 @@ export async function verifyEmailCode(
     if (!(await allowAttempt('email-verify', email, 10, HOUR))) return { ok: false, error: 'RATE_LIMITED' };
     const { data, error } = await auth().verifyOtp({ email: email.trim(), token: code, type: 'email' });
     if (error || !data.user) return { ok: false };
-    const accountId = await ensureAccountForAuthUser(data.user.id);
+    const accountId = await ensureAccountForAuthUser(data.user.id, data.user.user_metadata?.username);
     if (!accountId) return { ok: false };
     const ok = await setSessionAccount({ id: accountId });
     const shouldIssue = typeof options === 'boolean' ? options : options?.issueToken;

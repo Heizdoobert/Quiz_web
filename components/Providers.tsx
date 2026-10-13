@@ -1,17 +1,22 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { MotionConfig } from 'framer-motion';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider, useSession } from '@/hooks/shared/use-session';
 import { ToastProvider } from '@/components/ui/Toast';
 
-const AuthPopup = dynamic(() => import('@/components/auth/AuthPopup'), { ssr: false });
+const loadAuthPopup = () => import('@/components/auth/AuthPopup');
+const AuthPopup = dynamic(loadAuthPopup, { ssr: false });
 
 // Lives here so any route can call useSession().requireSignIn().
 function SignInPopup() {
   const { modalOpen, cancelSignIn, refresh } = useSession();
+  // Fetch the popup chunk once the page is up, so the first Sign In tap doesn't wait on it.
+  useEffect(() => {
+    void loadAuthPopup();
+  }, []);
   return <AuthPopup isOpen={modalOpen} onClose={cancelSignIn} refresh={refresh} />;
 }
 
