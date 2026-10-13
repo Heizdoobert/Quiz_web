@@ -1,12 +1,14 @@
 begin;
 select plan(5);
 
+insert into topics (slug) values ('general') on conflict (slug) do nothing;
+
 insert into users (id, display_name) values
   ('00000000-0000-4000-8000-0000000000a1', 'lb-a'),
   ('00000000-0000-4000-8000-0000000000a2', 'lb-b'),
   ('00000000-0000-4000-8000-0000000000a3', 'lb-c');
-insert into questions (id, prompt, options, correct_index)
-select ('00000000-0000-4000-8000-0000000001' || lpad(g::text, 2, '0'))::uuid, 'reader question ' || g, '["a","b"]'::jsonb, 0
+insert into questions (id, prompt, options, correct_index, topic_id)
+select ('00000000-0000-4000-8000-0000000001' || lpad(g::text, 2, '0'))::uuid, 'reader question ' || g, '["a","b"]'::jsonb, 0, (select id from topics where slug = 'general')
   from generate_series(1, 3) g;
 
 -- lb-a: 3 of 3. lb-b: 2 of 3. lb-c: no answers.

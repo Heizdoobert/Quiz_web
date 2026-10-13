@@ -64,10 +64,9 @@ export async function countQuestionsByAuthorSince(accountId: string, since: stri
 }
 
 export async function insertQuestion(row: NewQuestion): Promise<void> {
-  // questions.category stays authoritative for old code and rollback until the contract migration:
-  // the bridge trigger only fills topic_id from category, never the other way round.
-  const topic_id = await getOrCreateTopicId(row.category);
-  unwrap('questions.insert', await admin().from('questions').insert({ ...row, topic_id }));
+  const { category, ...rest } = row;
+  const topic_id = await getOrCreateTopicId(category);
+  unwrap('questions.insert', await admin().from('questions').insert({ ...rest, topic_id }));
 }
 
 // Public questions: verified. Unordered, up to `limit`.
@@ -176,7 +175,7 @@ export async function quarantineQuestion(questionId: string): Promise<void> {
 // reasons, never who reported. Secret key only.
 export type QuarantinedQuestion = {
   id: string;
-  category: string | null;
+  category: string;
   prompt: string;
   options: unknown;
   correct_index: number;
@@ -224,7 +223,15 @@ export async function resolveQuarantined(
   return won === true;
 }
 
-// Every column, for the account's own backup; secret key only.
+// The account's own backup, in the `Question` shape (category derived from the topic); secret key only.
 export async function questionsForExport(accountId: string, limit: number): Promise<unknown[]> {
-  return unwrap('questions.export', await admin().from('questions').select('*').eq('created_by_user', accountId).limit(limit)) ?? [];
+  const rows = unwrap(
+    'questions.export',
+    await admin()
+      .from('questions')
+      .select(`id, prompt, options, correct_index, explanation, created_by_user, status, dispute_count, created_at, ${TOPIC_EMBED}`)
+      .eq('created_by_user', accountId)
+      .limit(limit)
+  ) as unknown as { topics: TopicEmbed }[] | null;
+  return (rows ?? []).map(withCategory);
 }

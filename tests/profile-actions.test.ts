@@ -145,7 +145,8 @@ describe('profile-actions', () => {
     });
 
     it('exports data keyed by account id, with schema version and the account id from the session', async () => {
-      const mockQuizzes = [{ id: '1', prompt: 'Q1' }];
+      const topics = { slug: 'history', topic_translations: [{ locale: 'en', name: 'History' }] };
+      const mockQuizzes = [{ id: '1', prompt: 'Q1', topics }];
       const mockStats = [{ id: 's1', score: 100 }];
       const eqCalls: Array<[string, string]> = [];
 
@@ -177,7 +178,7 @@ describe('profile-actions', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.version).toBe('1.0');
-        expect(result.data.quizzes).toEqual(mockQuizzes);
+        expect(result.data.quizzes).toEqual([{ id: '1', prompt: 'Q1', category: 'History' }]);
         expect(result.data.stats).toEqual(mockStats);
         expect(result.data.accountId).toBe(ACCOUNT_ID);
         expect(result.data.isTruncated).toBe(false);

@@ -104,7 +104,7 @@ describe('questions through topics', () => {
     await expect(publicQuestion('q1')).resolves.toMatchObject({ id: 'q1', category: 'DeFi' });
   });
 
-  it('insertQuestion stores topic_id and keeps category (authoritative until the contract migration)', async () => {
+  it('insertQuestion stores topic_id and no category column', async () => {
     const insert = vi.fn().mockResolvedValue({ error: null });
     const rpc = vi.fn().mockResolvedValue({ data: 'topic-9', error: null });
     vi.mocked(admin).mockReturnValue({ rpc, from: vi.fn().mockReturnValue({ insert }) } as never);
@@ -117,6 +117,6 @@ describe('questions through topics', () => {
     expect(rpc).toHaveBeenCalledWith('get_or_create_topic', { p_name: 'History' });
     const row = insert.mock.calls[0][0];
     expect(row.topic_id).toBe('topic-9');
-    expect(row.category).toBe('History');
+    expect(row).not.toHaveProperty('category');
   });
 });

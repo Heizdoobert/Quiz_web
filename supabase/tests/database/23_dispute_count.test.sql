@@ -1,12 +1,14 @@
 begin;
 select plan(5);
 
+insert into topics (slug) values ('general') on conflict (slug) do nothing;
+
 insert into users (id, display_name) values
   ('00000000-0000-4000-8000-0000000000a1', 'rep1'),
   ('00000000-0000-4000-8000-0000000000a2', 'rep2'),
   ('00000000-0000-4000-8000-0000000000a3', 'mod1');
-insert into questions (id, prompt, options, correct_index) values
-  ('00000000-0000-4000-8000-0000000000d1', 'dispute question prompt', '["a","b"]', 0);
+insert into questions (id, prompt, options, correct_index, topic_id) values
+  ('00000000-0000-4000-8000-0000000000d1', 'dispute question prompt', '["a","b"]', 0, (select id from topics where slug = 'general'));
 
 insert into question_disputes (id, question_id, reporter_user, reason) values
   ('00000000-0000-4000-8000-0000000000e1', '00000000-0000-4000-8000-0000000000d1', '00000000-0000-4000-8000-0000000000a1', 'wrong'),

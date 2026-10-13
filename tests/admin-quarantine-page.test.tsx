@@ -13,7 +13,7 @@ vi.mock('@/lib/actions/admin-actions', () => ({ listQuarantineAction: vi.fn(), r
 
 const q = (id: string, prompt: string): QuarantinedQuestion => ({
   id,
-  category: null,
+  category: 'General',
   prompt,
   options: ['Red', 'Blue'],
   correct_index: 1,
