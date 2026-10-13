@@ -60,6 +60,12 @@ AS $$
 DECLARE
   n INT;
 BEGIN
+  -- A live repair call must not race a concurrent answer: its snapshot would be taken before the
+  -- answer commits and its upsert would overwrite the trigger's increment. The lock blocks answer
+  -- inserts for the duration of the rebuild, so run it off-peak. (The migration-time call is
+  -- already inside a transaction that holds this lock; repeating it is harmless.)
+  LOCK TABLE quiz_results IN SHARE ROW EXCLUSIVE MODE;
+
   DELETE FROM user_stats s
    WHERE (p_user IS NULL OR s.user_id = p_user)
      AND NOT EXISTS (SELECT 1 FROM quiz_results r WHERE r.user_id = s.user_id);
