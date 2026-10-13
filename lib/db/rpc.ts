@@ -2,9 +2,9 @@ import 'server-only';
 import { admin, pub } from './client';
 import { DbError, unwrap, unwrapOne } from './errors';
 
-// Postgres functions (lib/sql/, supabase/migrations/). Later tasks add to this file.
+// Postgres functions (lib/sql/, supabase/legacy/migrations/). Later tasks add to this file.
 
-// True when the attempt is allowed (supabase/migrations/17-auth-rate-limit.sql).
+// True when the attempt is allowed (supabase/legacy/migrations/17-auth-rate-limit.sql).
 export async function rateLimitHit(key: string, max: number, windowSeconds: number): Promise<boolean> {
   const allowed = unwrap(
     'rpc.rate_limit_hit',
@@ -37,7 +37,7 @@ export async function ratingSummary(questionId: string): Promise<Array<{ average
   return unwrap('rpc.get_rating_summary', await pub.rpc('get_rating_summary', { p_question_id: questionId })) ?? [];
 }
 
-// Pre-aggregated and pre-sorted in Postgres (supabase/migrations/stats-functions.sql).
+// Pre-aggregated and pre-sorted in Postgres (supabase/legacy/migrations/stats-functions.sql).
 export async function globalLeaderboard(limit: number, offset: number): Promise<unknown[]> {
   const rows = unwrap('rpc.get_global_leaderboard', await pub.rpc('get_global_leaderboard', { p_limit: limit, p_offset: offset }));
   if (!rows) throw new DbError('rpc.get_global_leaderboard', { message: 'returned no data' });

@@ -7,7 +7,7 @@ import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
 import type { SessionAccount } from '@/lib/services/session';
 
-// Rows come pre-aggregated and pre-sorted from Postgres (supabase/migrations/stats-functions.sql);
+// Rows come pre-aggregated and pre-sorted from Postgres (supabase/legacy/migrations/stats-functions.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.
 type LeaderboardRow = {
   user_id: string;
