@@ -8,6 +8,7 @@ A role-gated web UI at `/admin` for the owner and moderators. It sits on the rol
 | `/admin/roles` | `roles.grant` | admin | Search accounts by display name and change a role |
 | `/admin/quarantine` | `disputes.resolve` | moderator, admin | Restore or retire quarantined questions, with an optional note |
 | `/admin/errors` | `errors.read` | admin | Read-only list of the most frequent unresolved Sentry issues |
+| `/admin/reports` | `analytics.read` | admin | System reports, cron schedule status, and manual dispatch trigger |
 
 `/admin` sends you to the first page your role may open. The nav shows only those pages. It is a convenience: every page and every action calls `authorize()` itself, which reads the role from the database on each request, so a revoked role stops working on the next one. The area is `noindex` and disallowed in `robots.txt`; there is no link to it from the public site.
 

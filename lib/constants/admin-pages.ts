@@ -7,4 +7,5 @@ export const ADMIN_PAGES: readonly { href: string; label: string; permission: Pe
   { href: '/admin/roles', label: 'Roles', permission: 'roles.grant' },
   { href: '/admin/quarantine', label: 'Quarantine', permission: 'disputes.resolve' },
   { href: '/admin/errors', label: 'Errors', permission: 'errors.read' },
+  { href: '/admin/reports', label: 'Reports', permission: 'analytics.read' },
 ];
