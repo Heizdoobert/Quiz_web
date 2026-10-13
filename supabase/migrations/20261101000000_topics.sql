@@ -12,7 +12,7 @@ STABLE
 SET search_path = public
 AS $$
   SELECT COALESCE(
-    NULLIF(trim(BOTH '-' FROM regexp_replace(lower(unaccent(trim(p_name))), '[^a-z0-9]+', '-', 'g')), ''),
+    NULLIF(trim(BOTH '-' FROM regexp_replace(lower(unaccent(COALESCE(NULLIF(trim(p_name), ''), 'General'))), '[^a-z0-9]+', '-', 'g')), ''),
     'topic-' || substr(md5(lower(trim(p_name))), 1, 8)
   );
 $$;

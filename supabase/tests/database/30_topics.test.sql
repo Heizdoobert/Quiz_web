@@ -1,5 +1,5 @@
 begin;
-select plan(13);
+select plan(15);
 
 select is(slugify_topic('  DeFi & NFTs '), 'defi-nfts', 'slug lowercases and collapses punctuation');
 select is(slugify_topic('Lịch sử'), 'lich-su', 'slug strips accents so different names stay different');
@@ -31,6 +31,17 @@ select is(resolve_topic('nothing like it'), null, 'resolve_topic returns null fo
 
 select is((select count(*)::int from search_questions('defi', 10, 0)), 2, 'search still finds the questions, now through the topic name');
 select is(has_function_privilege('anon', 'get_or_create_topic(text)', 'execute'), false, 'only the server may create topics');
+
+select is(slugify_topic(''), 'general', 'a blank name maps to General');
+
+-- Changing a question's category re-derives its topic through the trigger.
+insert into questions (id, prompt, options, correct_index, category) values
+  ('00000000-0000-4000-8000-0000000000d3', 'history question', '["a","b"]', 0, 'History');
+update questions set category = 'Science' where id = '00000000-0000-4000-8000-0000000000d3';
+select ok(
+  (select topic_id from questions where id = '00000000-0000-4000-8000-0000000000d3') = resolve_topic('Science')
+  and (select topic_id from questions where id = '00000000-0000-4000-8000-0000000000d3') <> resolve_topic('History'),
+  'updating category moves the question to the new topic');
 
 select * from finish();
 rollback;
