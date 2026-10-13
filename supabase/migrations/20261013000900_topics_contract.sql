@@ -1,6 +1,8 @@
 -- Phase 3c (contract). Apply only after the code that reads topics through the embed is live in
 -- production (Task 3.3). questions.category is dropped; its column grant and trigram index go with it.
 BEGIN;
+-- fail fast instead of queueing behind a long-running transaction; re-run off-peak
+SET LOCAL lock_timeout = '5s';
 
 DO $$
 BEGIN

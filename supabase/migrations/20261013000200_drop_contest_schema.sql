@@ -3,6 +3,8 @@
 -- question_lists, so the column goes first and the tables after. Never DELETE FROM question_lists:
 -- it would delete the questions and their answers.
 BEGIN;
+-- fail fast instead of queueing behind a long-running transaction; re-run off-peak
+SET LOCAL lock_timeout = '5s';
 
 DO $$
 BEGIN

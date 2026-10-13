@@ -2,6 +2,8 @@
 -- legacy row that breaks one aborts the migration instead of leaving a half-applied state.
 -- Limits mirror the app's validators. Run the preflight query from the plan first.
 BEGIN;
+-- fail fast instead of queueing behind a long-running transaction; re-run off-peak
+SET LOCAL lock_timeout = '5s';
 
 ALTER TABLE questions DROP CONSTRAINT IF EXISTS questions_options_shape;
 ALTER TABLE questions ADD CONSTRAINT questions_options_shape CHECK (

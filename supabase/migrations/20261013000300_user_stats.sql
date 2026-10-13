@@ -3,6 +3,8 @@
 -- at the latest answer, ordered by (answered_at, id). The app never supplies answered_at, so
 -- insertion order equals time order.
 BEGIN;
+-- fail fast instead of queueing behind a long-running transaction; re-run off-peak
+SET LOCAL lock_timeout = '5s';
 
 CREATE TABLE IF NOT EXISTS user_stats (
   user_id          UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,

@@ -2,6 +2,8 @@
 -- authoritative until the code release in Task 3.2 is live: a trigger fills topic_id from it, so
 -- code that still writes only category keeps working. Existing names are stored as locale 'en' (D5).
 BEGIN;
+-- fail fast instead of queueing behind a long-running transaction; re-run off-peak
+SET LOCAL lock_timeout = '5s';
 
 CREATE EXTENSION IF NOT EXISTS unaccent WITH SCHEMA public;
 
