@@ -142,9 +142,10 @@ export async function fetchRandomQuestion(
   }
 }
 
-export async function getTopics(): Promise<Array<{ name: string; questionCount: number; latestAt: string }>> {
+export async function getTopics(): Promise<Array<{ slug: string; name: string; questionCount: number; latestAt: string }>> {
   try {
     return (await topics()).map((row) => ({
+      slug: row.slug,
       name: row.name,
       questionCount: row.question_count,
       latestAt: row.latest_at,

@@ -1,7 +1,7 @@
 import 'server-only';
 import { admin, pub } from './client';
 import { countOf, unwrap, unwrapOne, UNIQUE_VIOLATION } from './errors';
-import { escapeLikePattern } from '@/lib/utils/validation';
+import { TOPIC_EMBED, type TopicEmbed, getOrCreateTopicId, resolveTopicId, withCategory } from './topics';
 
 // questions and question_disputes. Later tasks add to this file.
 
@@ -18,7 +18,7 @@ export async function questionForAnswer(id: string): Promise<QuestionRow | null>
   return unwrapOne('questions.forAnswer', await admin().from('questions').select('*').eq('id', id).single());
 }
 
-const PUBLIC_FIELDS = 'id, category, prompt, options, created_by_user, status';
+const PUBLIC_FIELDS = `id, prompt, options, created_by_user, status, ${TOPIC_EMBED}`;
 
 export type PublicQuestionRow = {
   id: string;
@@ -29,6 +29,8 @@ export type PublicQuestionRow = {
   // The column's check constraint; matches ClientQuestion['status'].
   status: 'verified' | 'pending' | 'quarantined' | 'rejected' | null;
 };
+
+type PublicQuestionDbRow = Omit<PublicQuestionRow, 'category'> & { topics: TopicEmbed };
 
 export type NewQuestion = {
   prompt: string;
@@ -62,7 +64,10 @@ export async function countQuestionsByAuthorSince(accountId: string, since: stri
 }
 
 export async function insertQuestion(row: NewQuestion): Promise<void> {
-  unwrap('questions.insert', await admin().from('questions').insert(row));
+  // questions.category stays authoritative for old code and rollback until the contract migration:
+  // the bridge trigger only fills topic_id from category, never the other way round.
+  const topic_id = await getOrCreateTopicId(row.category);
+  unwrap('questions.insert', await admin().from('questions').insert({ ...row, topic_id }));
 }
 
 // Public questions: verified. Unordered, up to `limit`.
@@ -73,15 +78,21 @@ export async function listPublicQuestions(opts: {
 }): Promise<PublicQuestionRow[]> {
   let query = pub.from('questions').select(PUBLIC_FIELDS).eq('status', 'verified');
   if (opts.excludeIds?.length) query = query.not('id', 'in', `(${opts.excludeIds.join(',')})`);
-  if (opts.category) query = query.ilike('category', escapeLikePattern(opts.category));
-  return unwrap('questions.listPublic', await query.limit(opts.limit)) ?? [];
+  if (opts.category) {
+    const topicId = await resolveTopicId(opts.category);
+    if (!topicId) return [];
+    query = query.eq('topic_id', topicId);
+  }
+  const rows = unwrap('questions.listPublic', await query.limit(opts.limit)) as PublicQuestionDbRow[] | null;
+  return (rows ?? []).map(withCategory);
 }
 
 export async function publicQuestion(id: string): Promise<PublicQuestionRow | null> {
-  return unwrapOne(
+  const row = unwrapOne(
     'questions.public',
     await pub.from('questions').select(PUBLIC_FIELDS).eq('id', id).eq('status', 'verified').single()
-  );
+  ) as PublicQuestionDbRow | null;
+  return row ? withCategory(row) : null;
 }
 
 // The answer key and visibility only; secret key only.
@@ -94,17 +105,19 @@ export async function answerKey(id: string): Promise<{ correct_index: number; st
 
 // One topic's public questions, newest first. Fetches pageSize + 1 rows so the caller can tell whether there is more.
 export async function listTopicQuestions(topic: string, offset: number, pageSize: number): Promise<unknown[]> {
+  const topicId = await resolveTopicId(topic);
+  if (!topicId) return [];
   const rows = unwrap(
     'questions.listTopic',
     await pub
       .from('questions')
-      .select('id, prompt, category, created_at, users(display_name)')
+      .select(`id, prompt, created_at, users(display_name), ${TOPIC_EMBED}`)
       .eq('status', 'verified')
-      .ilike('category', escapeLikePattern(topic))
+      .eq('topic_id', topicId)
       .order('created_at', { ascending: false })
       .range(offset, offset + pageSize)
-  );
-  return rows ?? [];
+  ) as Array<{ topics: TopicEmbed }> | null;
+  return (rows ?? []).map(withCategory);
 }
 
 // An author's questions, newest first; never correct_index or explanation.
@@ -114,15 +127,19 @@ export async function listQuestionsByAuthor(
 ): Promise<unknown[]> {
   let query = pub
     .from('questions')
-    .select('id, category, prompt, options, status, created_at')
+    .select(`id, prompt, options, status, created_at, ${TOPIC_EMBED}`)
     .eq('created_by_user', accountId);
-  if (f.category) query = query.eq('category', f.category);
+  if (f.category) {
+    const topicId = await resolveTopicId(f.category);
+    if (!topicId) return [];
+    query = query.eq('topic_id', topicId);
+  }
   if (f.status) query = query.eq('status', f.status);
   const rows = unwrap(
     'questions.listByAuthor',
     await query.order('created_at', { ascending: false }).range(f.offset, f.offset + f.limit - 1)
-  );
-  return rows ?? [];
+  ) as Array<{ topics: TopicEmbed }> | null;
+  return (rows ?? []).map(withCategory);
 }
 
 // One report per account and question.
@@ -170,18 +187,20 @@ export type QuarantinedQuestion = {
 };
 
 export async function quarantinedQuestions(limit: number, offset: number): Promise<QuarantinedQuestion[]> {
-  const rows: (Omit<QuarantinedQuestion, 'disputes'> & { question_disputes: QuarantinedQuestion['disputes'] | null })[] | null = unwrap(
+  const rows = unwrap(
     'questions.quarantined',
     await admin()
       .from('questions')
-      .select('id, category, prompt, options, correct_index, explanation, dispute_count, created_at, question_disputes(id, reason, created_at)')
+      .select(`id, prompt, options, correct_index, explanation, dispute_count, created_at, ${TOPIC_EMBED}, question_disputes(id, reason, created_at)`)
       .eq('status', 'quarantined')
       .is('question_disputes.resolved_at', null)
       .order('dispute_count', { ascending: false })
       .order('created_at', { ascending: true })
       .range(offset, offset + limit - 1)
-  );
-  return (rows ?? []).map(({ question_disputes, ...question }) => ({ ...question, disputes: question_disputes ?? [] }));
+  ) as unknown as
+    | (Omit<QuarantinedQuestion, 'disputes' | 'category'> & { topics: TopicEmbed; question_disputes: QuarantinedQuestion['disputes'] | null })[]
+    | null;
+  return (rows ?? []).map(({ question_disputes, ...question }) => ({ ...withCategory(question), disputes: question_disputes ?? [] }));
 }
 
 // Restores (back to verified, count reset) or retires (rejected) a quarantined question and

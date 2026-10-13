@@ -20,8 +20,8 @@ export async function userStats(accountId: string): Promise<UserStatsRow | null>
   return unwrapOne('rpc.get_user_stats', await pub.rpc('get_user_stats', { p_user: accountId }).single<UserStatsRow>());
 }
 
-export async function topics(): Promise<Array<{ name: string; question_count: number; latest_at: string }>> {
-  return unwrap('rpc.get_topics', await pub.rpc('get_topics')) ?? [];
+export async function topics(locale?: string): Promise<Array<{ slug: string; name: string; question_count: number; latest_at: string }>> {
+  return unwrap('rpc.get_topics', await pub.rpc('get_topics', locale ? { p_locale: locale } : undefined)) ?? [];
 }
 
 // Today's AI generations for the account, after counting this one.

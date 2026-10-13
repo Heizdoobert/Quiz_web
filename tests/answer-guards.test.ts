@@ -8,7 +8,7 @@ import { validateQuestionInput } from '../lib/utils/validation';
 let mockAnswerLimitHit = false;
 const answerLimitCalls: unknown[][] = [];
 
-vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/services/rate-limit', () => ({
   allowAttemptFromIp: async (...args: unknown[]) => {
@@ -259,9 +259,10 @@ describe('createQuestion guards', () => {
   it('creates a question keyed by account id', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({ questions: { count: 0 } });
+    (supabaseAdmin!.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'topic-1', error: null });
     const res = await createQuestion(params);
     expect(res.success).toBe(true);
-    expect(inserts.questions![0]).toMatchObject({ created_by_user: ACCOUNT_ID });
+    expect(inserts.questions![0]).toMatchObject({ created_by_user: ACCOUNT_ID, topic_id: 'topic-1' });
   });
 
   it('enforces the 5-per-day cap by account id', async () => {

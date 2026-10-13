@@ -3,11 +3,13 @@ import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
 import { supabase } from '../lib/sdk/supabase';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { getSessionAccount } from '../lib/services/session';
+import { TOPIC_EMBED } from '../lib/db/topics';
 
 // Mock the supabase module
 vi.mock('../lib/sdk/supabase', () => ({
   supabase: {
     from: vi.fn(),
+    rpc: vi.fn(),
   },
 }));
 
@@ -43,7 +45,8 @@ describe('profile-actions', () => {
 
     it('returns user quizzes with public fields only (no correct_index leak)', async () => {
       (getSessionAccount as import("vitest").Mock).mockResolvedValue(ACCOUNT);
-      const mockData = [{ id: '1', prompt: 'Test Question', options: ['A', 'B'], category: 'General' }];
+      const topics = { slug: 'general', topic_translations: [{ locale: 'en', name: 'General' }] };
+      const mockData = [{ id: '1', prompt: 'Test Question', options: ['A', 'B'], topics }];
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
@@ -60,21 +63,22 @@ describe('profile-actions', () => {
 
       expect(supabase.from).toHaveBeenCalledWith('questions');
       // Verify anti-cheat: ONLY public fields projected, correct_index and explanation omitted
-      expect(mockSelect).toHaveBeenCalledWith('id, category, prompt, options, status, created_at');
+      expect(mockSelect).toHaveBeenCalledWith(`id, prompt, options, status, created_at, ${TOPIC_EMBED}`);
       expect(mockEq).toHaveBeenCalledWith('created_by_user', ACCOUNT_ID);
       expect(mockOrder).toHaveBeenCalledWith('created_at', { ascending: false });
       expect(mockRange).toHaveBeenCalledWith(0, 499);
 
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.quizzes).toEqual(mockData);
+        expect(result.quizzes).toEqual([{ id: '1', prompt: 'Test Question', options: ['A', 'B'], category: 'General' }]);
         expect(result.count).toBe(1);
       }
     });
 
     it('honors pagination offset, limit, and category filter', async () => {
       (getSessionAccount as import("vitest").Mock).mockResolvedValue(ACCOUNT);
-      const mockData = [{ id: '2', prompt: 'Science Question', category: 'Science' }];
+      const mockData = [{ id: '2', prompt: 'Science Question', topics: { slug: 'science', topic_translations: [{ locale: 'en', name: 'Science' }] } }];
+      (supabase.rpc as import("vitest").Mock).mockResolvedValue({ data: 'topic-1', error: null });
       const mockSelect = vi.fn().mockReturnThis();
       const mockEq = vi.fn().mockReturnThis();
       const mockOrder = vi.fn().mockReturnThis();
@@ -90,7 +94,8 @@ describe('profile-actions', () => {
       const result = await getUserQuizzes({ limit: 10, offset: 20, category: 'Science' });
 
       expect(mockEq).toHaveBeenCalledWith('created_by_user', ACCOUNT_ID);
-      expect(mockEq).toHaveBeenCalledWith('category', 'Science');
+      expect(supabase.rpc).toHaveBeenCalledWith('resolve_topic', { p_name: 'Science' });
+      expect(mockEq).toHaveBeenCalledWith('topic_id', 'topic-1');
       expect(mockRange).toHaveBeenCalledWith(20, 29);
       expect(result.success).toBe(true);
     });

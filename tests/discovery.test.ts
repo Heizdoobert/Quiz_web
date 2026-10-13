@@ -6,6 +6,12 @@ vi.mock('../lib/sdk/supabase', () => ({ supabase: { rpc: vi.fn(), from: vi.fn() 
 
 // Chainable query stub matching tests/answer-and-list-guards.test.ts: every builder
 // method returns the chain, and the chain itself resolves via `then` when awaited.
+const DEFI = { slug: 'defi', topic_translations: [{ locale: 'en', name: 'DeFi' }] };
+
+function resolvesTopic() {
+  (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'topic-1', error: null });
+}
+
 function stubQuestionsTable(rows: unknown[] | null, error: unknown = null) {
   const calls: { method: string; args: unknown[] }[] = [];
   const chain: Record<string, unknown> = {};
@@ -144,18 +150,19 @@ describe('getTopicQuestions', () => {
   beforeEach(() => vi.resetAllMocks());
 
   it('maps rows newest first, falling back to Player when there is no display name', async () => {
+    resolvesTopic();
     stubQuestionsTable([
       {
         id: 'q1',
         prompt: 'What is a blockchain?',
-        category: 'DeFi',
+        topics: DEFI,
         created_at: '2026-09-29T00:00:00Z',
         users: { display_name: 'Ada' },
       },
       {
         id: 'q2',
         prompt: 'What is gas?',
-        category: 'DeFi',
+        topics: DEFI,
         created_at: '2026-09-28T00:00:00Z',
         users: null,
       },
@@ -172,22 +179,25 @@ describe('getTopicQuestions', () => {
     });
   });
 
-  it('escapes the topic for ILIKE and requests the right range for page 2', async () => {
+  it('filters on the resolved topic id and requests the right range for page 2', async () => {
+    resolvesTopic();
     const calls = stubQuestionsTable([]);
 
     await getTopicQuestions('50% off_deals', 2);
 
-    const ilikeCall = calls.find((c) => c.method === 'ilike');
+    const eqCall = calls.find((c) => c.method === 'eq' && c.args[0] === 'topic_id');
     const rangeCall = calls.find((c) => c.method === 'range');
-    expect(ilikeCall?.args).toEqual(['category', '50\\% off\\_deals']);
+    expect(supabase.rpc).toHaveBeenCalledWith('resolve_topic', { p_name: '50% off_deals' });
+    expect(eqCall?.args).toEqual(['topic_id', 'topic-1']);
     expect(rangeCall?.args).toEqual([20, 40]);
   });
 
   it('reports hasMore when the database returns one extra row, and trims it off', async () => {
+    resolvesTopic();
     const rows = Array.from({ length: 21 }, (_, i) => ({
       id: `q${i}`,
       prompt: `Prompt ${i}`,
-      category: 'DeFi',
+      topics: DEFI,
       created_at: '2026-09-29T00:00:00Z',
       users: { display_name: 'Player' },
     }));
@@ -200,10 +210,20 @@ describe('getTopicQuestions', () => {
   });
 
   it('returns no results when the database call errors', async () => {
+    resolvesTopic();
     stubQuestionsTable(null, { message: 'boom' });
 
     const result = await getTopicQuestions('DeFi');
 
     expect(result).toEqual({ results: [], hasMore: false });
+  });
+
+  it('returns no results, without reading questions, when the topic does not exist', async () => {
+    (supabase.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: null, error: null });
+
+    const result = await getTopicQuestions('nope');
+
+    expect(result).toEqual({ results: [], hasMore: false });
+    expect(supabase.from).not.toHaveBeenCalled();
   });
 });
