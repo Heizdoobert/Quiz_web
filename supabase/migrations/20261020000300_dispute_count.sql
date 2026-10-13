@@ -1,6 +1,10 @@
 -- Phase 2b. questions.dispute_count becomes derived: the number of unresolved disputes.
--- The app used to count and then write, so two concurrent reports could miss the quarantine
--- threshold. The quarantine decision itself stays in the app (QUARANTINE_AT = 3).
+-- The app used to count and then write, so two concurrent reports could write a stale count.
+-- The trigger locks the question row in its own statement before counting, so the count
+-- statement's snapshot is taken after any concurrent dispute transaction has committed:
+-- dispute_count equals the unresolved count even under concurrent reports.
+-- The quarantine decision itself stays in the app (QUARANTINE_AT = 3) and still uses the
+-- app's own countDisputes read, which is not serialised with this trigger.
 -- One visible change: a retired question now shows 0 open disputes (they are all resolved).
 BEGIN;
 
@@ -13,6 +17,8 @@ AS $$
 DECLARE
   qid UUID := COALESCE(NEW.question_id, OLD.question_id);
 BEGIN
+  -- Own statement: the UPDATE below then takes its snapshot after the lock wait.
+  PERFORM 1 FROM questions WHERE id = qid FOR UPDATE;
   UPDATE questions
      SET dispute_count = (SELECT count(*) FROM question_disputes WHERE question_id = qid AND resolved_at IS NULL)
    WHERE id = qid;
