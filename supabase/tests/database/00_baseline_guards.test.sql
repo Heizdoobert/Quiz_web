@@ -20,13 +20,10 @@ select is(has_column_privilege('authenticated', 'public.users', 'role', 'select'
 select is(has_column_privilege('anon', 'public.questions', 'prompt', 'select'), true,
   'anon can still read questions.prompt');
 
--- get_contest_analytics is dropped in Task 1.2 (spec F1); the other two are fixed in Task 2.5,
--- which removes this whole exclusion line.
 select is(
   (select count(*)::int
      from pg_proc p join pg_namespace n on n.oid = p.pronamespace
     where n.nspname = 'public' and p.prosecdef
-      and p.proname not in ('increment_ai_generation', 'get_question_analytics', 'get_contest_analytics')
       and not exists (select 1 from unnest(coalesce(p.proconfig, '{}')) c where c like 'search_path=%')),
   0, 'every SECURITY DEFINER function pins its search_path');
 

@@ -25,6 +25,7 @@ export async function topics(): Promise<Array<{ name: string; question_count: nu
 }
 
 // Today's AI generations for the account, after counting this one.
+// Server-only function (supabase/migrations/20261020000400_function_privileges.sql): secret key.
 export async function incrementAiGeneration(accountId: string): Promise<number> {
   return unwrap('rpc.increment_ai_generation', await admin().rpc('increment_ai_generation', { p_user_id: accountId })) ?? 0;
 }
@@ -53,6 +54,7 @@ export async function groupLeaderboard(groupId: string, limit: number, offset: n
   );
 }
 
+// Server-only function (supabase/migrations/20261020000400_function_privileges.sql): secret key.
 export async function questionAnalytics(accountId: string): Promise<unknown[]> {
-  return unwrap('rpc.get_question_analytics', await pub.rpc('get_question_analytics', { p_user_id: accountId })) ?? [];
+  return unwrap('rpc.get_question_analytics', await admin().rpc('get_question_analytics', { p_user_id: accountId })) ?? [];
 }
