@@ -13,6 +13,11 @@ describe('can', () => {
     expect(allowed).toEqual(['disputes.resolve']);
   });
 
+  it('keeps error tracking admin-only', () => {
+    expect(can('admin', 'errors.read')).toBe(true);
+    expect(can('moderator', 'errors.read')).toBe(false);
+  });
+
   it('gives a user nothing', () => {
     for (const permission of PERMISSIONS) expect(can('user', permission)).toBe(false);
   });
