@@ -27,7 +27,7 @@ describe('SendGrid Email Service (TDD)', () => {
   });
 
   it('sends an email successfully via SendGrid v3 API using fetch', async () => {
-    process.env.SENDGRID_API_KEY = 'SG.test_key_12345';
+    process.env.SENDGRID_API_KEY = 'test-sendgrid-key';
     process.env.SENDGRID_FROM_EMAIL = 'alerts@quickquiz.app';
 
     const mockFetch = vi.fn().mockResolvedValue({
@@ -54,7 +54,7 @@ describe('SendGrid Email Service (TDD)', () => {
     expect(url).toBe('https://api.sendgrid.com/v3/mail/send');
     expect(options.method).toBe('POST');
     expect(options.headers).toMatchObject({
-      Authorization: 'Bearer SG.test_key_12345',
+      Authorization: 'Bearer test-sendgrid-key',
       'Content-Type': 'application/json',
     });
 
@@ -69,7 +69,7 @@ describe('SendGrid Email Service (TDD)', () => {
   });
 
   it('supports multiple recipients and custom sender name', async () => {
-    process.env.SENDGRID_API_KEY = 'SG.custom_key';
+    process.env.SENDGRID_API_KEY = 'test-custom-key';
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: true,
@@ -96,7 +96,7 @@ describe('SendGrid Email Service (TDD)', () => {
   });
 
   it('throws descriptive error when SendGrid API returns error status', async () => {
-    process.env.SENDGRID_API_KEY = 'SG.invalid_key';
+    process.env.SENDGRID_API_KEY = 'test-invalid-key';
 
     const mockFetch = vi.fn().mockResolvedValue({
       ok: false,
