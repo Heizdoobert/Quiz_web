@@ -19,8 +19,9 @@ ALTER TABLE questions DROP CONSTRAINT IF EXISTS questions_explanation_length;
 ALTER TABLE questions ADD CONSTRAINT questions_explanation_length CHECK (explanation IS NULL OR char_length(explanation) <= 1000) NOT VALID;
 ALTER TABLE questions VALIDATE CONSTRAINT questions_explanation_length;
 
+-- -1 is the web per-question timer's timeout sentinel (recorded as a wrong answer); 0..3 are real options.
 ALTER TABLE quiz_results DROP CONSTRAINT IF EXISTS quiz_results_answer_index_range;
-ALTER TABLE quiz_results ADD CONSTRAINT quiz_results_answer_index_range CHECK (answer_index BETWEEN 0 AND 3) NOT VALID;
+ALTER TABLE quiz_results ADD CONSTRAINT quiz_results_answer_index_range CHECK (answer_index BETWEEN -1 AND 3) NOT VALID;
 ALTER TABLE quiz_results VALIDATE CONSTRAINT quiz_results_answer_index_range;
 
 ALTER TABLE question_disputes DROP CONSTRAINT IF EXISTS question_disputes_reason_length;

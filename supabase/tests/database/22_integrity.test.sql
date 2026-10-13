@@ -1,5 +1,5 @@
 begin;
-select plan(11);
+select plan(12);
 
 insert into users (id, display_name) values ('00000000-0000-4000-8000-0000000000a1', 'integrity');
 insert into questions (id, prompt, options, correct_index) values
@@ -16,7 +16,9 @@ select throws_ok($$ insert into questions (prompt, options, correct_index) value
 select throws_ok($$ insert into questions (prompt, options, correct_index) values (repeat('x', 301), '["a","b"]', 0) $$,
   '23514', null, 'a prompt is at most 300 characters');
 select throws_ok($$ insert into quiz_results (user_id, question_id, answer_index, is_correct) values ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000d1', 4, false) $$,
-  '23514', null, 'answer_index is 0 to 3');
+  '23514', null, 'answer_index is -1 to 3');
+select lives_ok($$ insert into quiz_results (user_id, question_id, answer_index, is_correct) values ('00000000-0000-4000-8000-0000000000a1', '00000000-0000-4000-8000-0000000000d1', -1, false) $$,
+  'answer_index -1 (timeout sentinel) is allowed');
 select throws_ok($$ insert into question_disputes (question_id, reporter_user, reason) values ('00000000-0000-4000-8000-0000000000d1', '00000000-0000-4000-8000-0000000000a1', repeat('x', 501)) $$,
   '23514', null, 'a dispute reason is at most 500 characters');
 select throws_ok($$ insert into groups (name, owner_user) values (repeat('x', 51), '00000000-0000-4000-8000-0000000000a1') $$,

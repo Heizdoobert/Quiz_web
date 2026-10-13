@@ -93,7 +93,7 @@ describe('submitAnswer guards', () => {
 
   it('rejects an out-of-range or fractional answer index before revealing or recording anything', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
-    for (const answerIndex of [4, -1, 1.5]) {
+    for (const answerIndex of [4, -2, 1.5]) {
       const inserts = mockTables({
         questions: { row: { correct_index: 1, explanation: 'why', status: 'verified' } },
       });
@@ -103,6 +103,17 @@ describe('submitAnswer guards', () => {
       expect(answerLimitCalls).toEqual([]);
     }
     expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+  });
+
+  it('records the -1 timeout sentinel as a wrong answer instead of rejecting it', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      questions: { row: { correct_index: 1, explanation: 'why', status: 'verified' } },
+    });
+    const res = await submitAnswer({ questionId: Q_ID, answerIndex: -1 });
+    expect(res.isCorrect).toBe(false);
+    expect(res.recorded).toBe(true);
+    expect(inserts.quiz_results).toHaveLength(1);
   });
 
   it('reveals nothing when the question does not exist', async () => {

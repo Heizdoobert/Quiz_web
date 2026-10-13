@@ -39,8 +39,8 @@ export async function submitAnswer(params: {
   });
   try {
     if (!isUuid(params.questionId)) return failed('error');
-    // The DB only stores 0..3; checking first means a bad index can never reveal the answer.
-    if (!Number.isInteger(params.answerIndex) || params.answerIndex < 0 || params.answerIndex > 3) return failed('error');
+    // The DB stores -1..3 (-1 is the web timer's timeout sentinel); checking first means a bad index can never reveal the answer.
+    if (!Number.isInteger(params.answerIndex) || params.answerIndex < -1 || params.answerIndex > 3) return failed('error');
     if (!(await allowAttemptFromIp('submit-answer-ip', ANSWERS_PER_IP_PER_HOUR, HOUR))) return failed('rate-limited');
     // correct_index and explanation are only readable with the secret key.
     const qData = await questionForAnswer(params.questionId);
