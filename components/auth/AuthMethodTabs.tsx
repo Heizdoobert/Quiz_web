@@ -68,7 +68,7 @@ export default function AuthMethodTabs({ mode, onBack, onSuccess, refresh }: Aut
       </div>
 
       {tab === 'username' && <UsernameTab mode={mode} onSuccess={onSuccess} refresh={refresh} />}
-      {tab === 'email' && <EmailTab onSuccess={onSuccess} refresh={refresh} />}
+      {tab === 'email' && <EmailTab mode={mode} onSuccess={onSuccess} refresh={refresh} />}
     </motion.div>
   );
 }
