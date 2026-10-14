@@ -62,4 +62,29 @@ describe('Mobile Quiz Sync API', () => {
     expect(json.results['q2'].recorded).toBe(true);
     expect(quizActions.submitAnswer).toHaveBeenCalled();
   });
+
+  it('processes at most 100 queued answers per request and leaves the rest for the next sync', async () => {
+    vi.mocked(mobileAuth.verifyMobileAuthToken).mockReturnValue({ id: 'user1' });
+    vi.mocked(quizActions.submitAnswer).mockResolvedValue({
+      isCorrect: true,
+      correctIndex: 1,
+      explanation: null,
+      recorded: true,
+    });
+
+    const items = Array.from({ length: 101 }, (_, n) => ({ questionId: `q${n}`, answerIndex: 1 }));
+    const req = new NextRequest('http://localhost/api/mobile/v1/quiz/sync', {
+      method: 'POST',
+      headers: { Authorization: 'Bearer valid-token' },
+      body: JSON.stringify(items),
+    });
+
+    const res = await POST(req);
+    const json = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(quizActions.submitAnswer).toHaveBeenCalledTimes(100);
+    expect(Object.keys(json.results)).toHaveLength(100);
+    expect(json.results['q100']).toBeUndefined();
+  });
 });

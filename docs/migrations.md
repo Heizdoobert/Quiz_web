@@ -99,6 +99,8 @@ Order matters: audit, then rebuild the baseline from the real dump, then prove i
 
 ### A. Audit production (task 0.2, owner, read-only)
 
+Audit query 6 was run on 2026-10-14: production held 1 user, 3 sponsors and zero questions, quiz results, groups, disputes and contest rows. If that is the right project, the data-preservation risks below (backfill locks, preflight failures, losing contest data) are small, but deploy order still matters: code that reads a table production lacks fails whatever the row counts.
+
 1. In the production SQL editor run `tasks/db-audit/prod-audit.sql` (6 queries) and save the results as `tasks/db-audit/prod-audit-output.txt`.
 2. Dump the schema (needs your Supabase login):
 

@@ -3,6 +3,10 @@ import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { AnswerSubmissionResult } from '@/lib/types';
 
+// One request handles at most this many queued answers; the app keeps the rows it gets no verdict
+// for and sends them with the next sync. Bounds the grading and achievement calls per request.
+const MAX_BATCH = 100;
+
 export async function POST(req: NextRequest) {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
@@ -23,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     const results: Record<string, AnswerSubmissionResult> = {};
 
-    for (const item of body) {
+    for (const item of body.slice(0, MAX_BATCH)) {
       const { questionId, answerIndex, timestamp } = item;
       
       // Anti-cheat: prevent answers from the future (allow 5 mins for clock skew)

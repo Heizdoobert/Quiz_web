@@ -1,4 +1,4 @@
-# ADR-015: Supabase CLI migrations and a production-derived baseline
+# ADR-015: Supabase CLI migrations and a baseline migration
 
 ## Status
 Accepted (owner approval of the database redesign design, 2026-10-13). Replaces the manual-process decision in `docs/migrations.md` of 2026-10-09.
