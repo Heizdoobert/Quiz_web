@@ -133,3 +133,4 @@ For technical architecture decisions and design trade-offs, consult:
 ## License
 
 MIT
+<!-- OWASP cleanup placeholder commit for PR -->
