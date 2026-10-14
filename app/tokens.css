@@ -1,0 +1,14 @@
+:root {
+  /* 1 Trắng Tinh Khiết – Làm nền chủ đạo, tạo cảm giác sạch sẽ, thoáng đãng. */
+  --color-pureWhite: #FFFFFF;
+  /* 2 Trắng Cam Nhạt – Màu chuyển tiếp rất nhẹ, giúp màu trắng không bị thô khi cạnh màu cam. */
+  --color-lightOrangeWhite: #FFF0E0;
+  /* 3 Cam Kem Sáng – Sắc cam dịu, làm dịu mắt và tạo sự cân bằng. */
+  --color-lightOrange: #FFB878;
+  /* 4 Cam Sáng – Sắc cam bắt mắt, tăng tính năng động và trẻ trung. */
+  --color-brightOrange: #FFA500;
+  /* 5 Cam Tươi – Tông màu nhấn cốt lõi, rực rỡ và đầy năng lượng. */
+  --color-vividOrange: #FF6B00;
+  /* 6 Cam Đậm – Tông cam trầm hơn ở cuối dải, tạo độ khối và chiều sâu. */
+  --color-deepOrange: #D44800;
+}

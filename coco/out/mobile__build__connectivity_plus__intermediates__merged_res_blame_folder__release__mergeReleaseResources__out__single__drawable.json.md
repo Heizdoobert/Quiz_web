@@ -1,0 +1,43 @@
+# mobile/build/connectivity_plus/intermediates/merged_res_blame_folder/release/mergeReleaseResources/out/single/drawable.json
+lines:46 exports:
+---
+[
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/ic_call_answer.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/ic_call_answer.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/ic_call_decline_low.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/ic_call_decline_low.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/notification_tile_bg.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/notification_tile_bg.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/ic_call_answer_low.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/ic_call_answer_low.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/notification_action_background.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/notification_action_background.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/notification_icon_background.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/notification_icon_background.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/notification_bg_low.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/notification_bg_low.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/ic_call_decline.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/ic_call_decline.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/ic_call_answer_video_low.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/ic_call_answer_video_low.xml"
+    },
+    {
+        "merged": "dev.fluttercommunity.plus.connectivity.connectivity_plus-release-26:/drawable/notification_bg.xml",
+        "source": "dev.fluttercommunity.plus.connectivity.connectivity_plus-core-1.18.0-19:/drawable/notification_bg.xml"

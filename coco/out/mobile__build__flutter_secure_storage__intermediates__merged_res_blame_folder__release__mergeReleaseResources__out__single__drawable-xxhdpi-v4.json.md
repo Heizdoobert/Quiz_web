@@ -1,0 +1,29 @@
+# mobile/build/flutter_secure_storage/intermediates/merged_res_blame_folder/release/mergeReleaseResources/out/single/drawable-xxhdpi-v4.json
+lines:26 exports:
+---
+[
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_decline_low.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_decline_low.png"
+    },
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_answer_video_low.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_answer_video_low.png"
+    },
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_decline.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_decline.png"
+    },
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_answer.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_answer.png"
+    },
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_answer_low.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_answer_low.png"
+    },
+    {
+        "merged": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/drawable-xxhdpi-v4/ic_call_answer_video.png",
+        "source": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-core-1.13.1-7:/drawable-xxhdpi-v4/ic_call_answer_video.png"
+    }
+]

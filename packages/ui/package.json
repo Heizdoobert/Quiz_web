@@ -18,7 +18,7 @@
         "default": "./dist/index.cjs"
       }
     },
-    "./styles.css": "./src/styles/tokens.css"
+    "./styles.css": "./dist/styles.css"
   },
   "files": [
     "dist"

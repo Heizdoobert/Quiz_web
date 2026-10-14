@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient } from '@/lib/sdk/supabase-ssr';
 import OwaspScanClient from '@/components/admin/OwaspScanClient';
 
 export const dynamic = 'force-dynamic';

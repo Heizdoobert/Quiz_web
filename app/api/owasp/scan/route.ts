@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import { createServerClient } from '@supabase/ssr';
+import { createServerClient } from '@/lib/sdk/supabase-ssr';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { readFile, access } from 'fs/promises';
+import { readFile, access, unlink } from 'fs/promises';
 import path from 'path';
 
 const execAsync = promisify(exec);
@@ -38,7 +38,7 @@ export function parseAlertsFromHtml(html: string): OwaspAlert[] {
   return alerts;
 }
 
-export async function POST(req: Request) {
+export async function POST(_req: Request) {
   try {
     // 1. Authenticate user via @supabase/ssr and cookies()
     const cookieStore = await cookies();
@@ -133,11 +133,11 @@ export async function POST(req: Request) {
     const highAlerts = parseAlertsFromHtml(reportHtml);
 
     // 7. Upload report to Supabase storage bucket 'owasp-reports'
-    let storageClient: any = supabase;
+    let storageClient: typeof supabase = supabase;
     if (process.env.SUPABASE_SECRET_KEY) {
       try {
         const { supabaseAdmin } = await import('@/lib/sdk/supabase-admin');
-        storageClient = supabaseAdmin;
+        if (supabaseAdmin) storageClient = supabaseAdmin;
       } catch {
         storageClient = supabase;
       }
@@ -162,6 +162,13 @@ export async function POST(req: Request) {
     const { data: publicUrlData } = storageClient.storage
       .from('owasp-reports')
       .getPublicUrl(reportFileName);
+
+    // 9. Cleanup temporary report file
+    try {
+      await unlink(reportFilePath);
+    } catch (cleanupError) {
+      console.warn('Failed to delete temporary ZAP report:', cleanupError);
+    }
 
     return NextResponse.json({
       highAlerts,

@@ -3,11 +3,13 @@
  */
 
 :root {
-  /* Brand & Semantic Colors */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-active: #4338ca;
-  --color-primary-foreground: #ffffff;
+  /* Custom Palette (Web Quiz) */
+  --color-pureWhite: #FFFFFF;
+  --color-lightOrangeWhite: #FFF0E0;
+  --color-lightOrange: #FFB878;
+  --color-brightOrange: #FFA500;
+  --color-vividOrange: #FF6B00;
+  --color-deepOrange: #D44800;
 
   --color-secondary: #3b82f6;
   --color-secondary-hover: #2563eb;
@@ -24,11 +26,11 @@
   --color-destructive-foreground: #ffffff;
 
   /* Surfaces & Backgrounds */
-  --color-background: #090d16;
-  --color-background-alt: #0f172a;
-  --color-surface: #1e293b;
-  --color-surface-subtle: #334155;
-  --color-surface-raised: #0f172a;
+  --color-background: var(--color-lightOrangeWhite); /* lightOrangeWhite */
+  --color-background-alt: var(--color-lightOrange); /* lightOrange */
+  --color-surface: var(--color-brightOrange); /* brightOrange */
+  --color-surface-subtle: var(--color-vividOrange); /* vividOrange */
+  --color-surface-raised: var(--color-deepOrange); /* deepOrange */
 
   /* Typography & Text */
   --color-text: #f8fafc;
@@ -66,14 +68,14 @@
 
 /* Light Theme Overrides (if requested or data-theme="light") */
 [data-theme="light"], .theme-light {
-  --color-background: #ffffff;
-  --color-background-alt: #f8fafc;
-  --color-surface: #f1f5f9;
-  --color-surface-subtle: #e2e8f0;
-  --color-surface-raised: #ffffff;
-  --color-text: #0f172a;
-  --color-text-muted: #64748b;
-  --color-text-inverse: #ffffff;
+  --color-background: var(--color-pureWhite);
+  --color-background-alt: var(--color-lightOrangeWhite);
+  --color-surface: var(--color-lightOrange);
+  --color-surface-subtle: var(--color-brightOrange);
+  --color-surface-raised: var(--color-vividOrange);
+  --color-text: var(--color-deepOrange);
+  --color-text-muted: var(--color-deepOrange);
+  --color-text-inverse: var(--color-pureWhite);
   --color-border: #cbd5e1;
   --color-border-subtle: #e2e8f0;
 }

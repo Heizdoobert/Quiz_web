@@ -1,0 +1,37 @@
+# mobile/build/flutter_secure_storage/intermediates/merged_res_blame_folder/release/mergeReleaseResources/out/multi-v2/values-en-rXC.json
+lines:34 exports:
+---
+{
+    "logs": [
+        {
+            "outputFile": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-release-25:/values-en-rXC/values-en-rXC.xml",
+            "map": [
+                {
+                    "source": "/home/alexheiz/.gradle/caches/9.3.1/transforms/36b2cade356a97d2665ce9d4675dfa9b/transformed/core-1.13.1/res/values-en-rXC/values-en-rXC.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,251,456,657,858,1065,1270,1482",
+                        "endColumns": "195,204,200,200,206,204,211,203",
+                        "endOffsets": "246,451,652,853,1060,1265,1477,1681"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.it_nomads.fluttersecurestorage.flutter_secure_storage-mergeReleaseResources-23:/values-en-rXC/values-en-rXC.xml",
+            "map": [
+                {
+                    "source": "/home/alexheiz/.gradle/caches/9.3.1/transforms/36b2cade356a97d2665ce9d4675dfa9b/transformed/core-1.13.1/res/values-en-rXC/values-en-rXC.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,251,456,657,858,1065,1270,1482",
+                        "endColumns": "195,204,200,200,206,204,211,203",
+                        "endOffsets": "246,451,652,853,1060,1265,1477,1681"
+                    }
+                }
+            ]
+        }
+    ]
+}

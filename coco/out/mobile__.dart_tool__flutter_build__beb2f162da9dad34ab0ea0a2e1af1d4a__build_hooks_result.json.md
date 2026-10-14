@@ -1,0 +1,4 @@
+# mobile/.dart_tool/flutter_build/beb2f162da9dad34ab0ea0a2e1af1d4a/build_hooks_result.json
+lines:1 exports:
+---
+{"android_arm":{"encodedAssets":[],"encodedAssetsForLinking":{},"dependencies":["file:///home/alexheiz/.local/flutter/bin/cache/dart-sdk/version","file:///mnt/second_drive/web_quiz/mobile/.dart_tool/package_config.json","file:///mnt/second_drive/web_quiz/mobile/pubspec.yaml"]},"android_arm64":{"encodedAssets":[],"encodedAssetsForLinking":{},"dependencies":["file:///home/alexheiz/.local/flutter/bin/cache/dart-sdk/version","file:///mnt/second_drive/web_quiz/mobile/.dart_tool/package_config.json","file:///mnt/second_drive/web_quiz/mobile/pubspec.yaml"]},"android_x64":{"encodedAssets":[],"encodedAssetsForLinking":{},"dependencies":["file:///home/alexheiz/.local/flutter/bin/cache/dart-sdk/version","file:///mnt/second_drive/web_quiz/mobile/.dart_tool/package_config.json","file:///mnt/second_drive/web_quiz/mobile/pubspec.yaml"]}}

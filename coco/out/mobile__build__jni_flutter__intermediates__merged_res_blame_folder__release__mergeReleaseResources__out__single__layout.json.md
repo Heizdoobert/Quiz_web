@@ -1,0 +1,25 @@
+# mobile/build/jni_flutter/intermediates/merged_res_blame_folder/release/mergeReleaseResources/out/single/layout.json
+lines:22 exports:
+---
+[
+    {
+        "merged": "com.github.dart_lang.jni_flutter-release-26:/layout/ime_base_split_test_activity.xml",
+        "source": "com.github.dart_lang.jni_flutter-core-1.13.1-7:/layout/ime_base_split_test_activity.xml"
+    },
+    {
+        "merged": "com.github.dart_lang.jni_flutter-release-26:/layout/ime_secondary_split_test_activity.xml",
+        "source": "com.github.dart_lang.jni_flutter-core-1.13.1-7:/layout/ime_secondary_split_test_activity.xml"
+    },
+    {
+        "merged": "com.github.dart_lang.jni_flutter-release-26:/layout/notification_template_part_time.xml",
+        "source": "com.github.dart_lang.jni_flutter-core-1.13.1-7:/layout/notification_template_part_time.xml"
+    },
+    {
+        "merged": "com.github.dart_lang.jni_flutter-release-26:/layout/custom_dialog.xml",
+        "source": "com.github.dart_lang.jni_flutter-core-1.13.1-7:/layout/custom_dialog.xml"
+    },
+    {
+        "merged": "com.github.dart_lang.jni_flutter-release-26:/layout/notification_template_part_chronometer.xml",
+        "source": "com.github.dart_lang.jni_flutter-core-1.13.1-7:/layout/notification_template_part_chronometer.xml"
+    }
+]
