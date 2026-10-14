@@ -31,7 +31,7 @@ Configured globally in `next.config.mjs` (verified by `tests/security-headers.te
 - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
 
 ### Authentication Rate Limits
-Implemented in `lib/services/rate-limit.ts` over the `auth_attempts` table and the atomic `rate_limit_hit` function (`supabase/legacy/migrations/17-auth-rate-limit.sql`, now part of the baseline migration). Identifiers are SHA-256 hashed before storage; a blocked attempt is not recorded, so it cannot extend its own lockout.
+Implemented in `lib/services/rate-limit.ts` over the `auth_attempts` table and the atomic `rate_limit_hit` function (in `supabase/migrations/20261013000000_baseline.sql`). Identifiers are SHA-256 hashed before storage; a blocked attempt is not recorded, so it cannot extend its own lockout.
 
 | Action | Limit |
 |---|---|
@@ -71,7 +71,7 @@ As of 2026-10-08 the command reports **0 vulnerabilities at every severity** on 
 - **Impact**: eliminates wallet spoofing and IDOR across data export and submission.
 
 ### B. Supabase RLS Write Lock-Down — RESOLVED
-- **Implementation**: `supabase/legacy/migrations/lock-down-public-writes.sql` and `supabase/legacy/migrations/question-lists.sql` (now part of the baseline migration under `supabase/migrations/`).
+- **Implementation**: the baseline migration `supabase/migrations/20261013000000_baseline.sql` (the old `lock-down-public-writes.sql` is in git history: `git show d820619:supabase/legacy/migrations/lock-down-public-writes.sql`).
 - **Enforcement**: public write access (`INSERT`, `UPDATE`, `DELETE`) is disabled for the anonymous client. All writes go through `supabaseAdmin` with the server-side secret key (`SUPABASE_SECRET_KEY`). `auth_attempts` has RLS enabled with no policies, so only the service role can read or write it.
 - **Impact**: prevents direct database manipulation and unauthenticated result injection.
 

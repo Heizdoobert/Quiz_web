@@ -4,7 +4,8 @@ import { auth, updateAuthUserPassword } from '@/lib/db/auth';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { ensureAccountForAuthUser } from '@/lib/services/users';
 import { logger } from '@/lib/logger';
-import type { AuthResult } from '@/lib/services/credentials';
+
+export type AuthResult = { ok: true; account?: { id: string } } | { ok: false; error: string };
 
 export const RESET_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const HOUR = 3600;

@@ -11,7 +11,7 @@ BEGIN
   IF EXISTS (SELECT 1 FROM information_schema.columns
               WHERE table_schema = 'public' AND table_name = 'questions' AND column_name = 'list_id') THEN
     IF EXISTS (SELECT 1 FROM questions WHERE list_id IS NOT NULL AND status <> 'rejected') THEN
-      RAISE EXCEPTION 'drop_contest_schema: a contest question is not rejected; apply retire_contest_questions first';
+      RAISE EXCEPTION 'drop_contest_schema: a contest question is not rejected; apply exclude_contest_questions_from_topics_and_search first';
     END IF;
   END IF;
 END $$;

@@ -6,7 +6,8 @@ node_modules
 docs
 tasks
 tests
-scripts
+scripts/*
+!scripts/gen-admin-modules.mjs
 .agents
 .github
 coverage

@@ -5,6 +5,7 @@ import { auth, createConfirmedUser } from '@/lib/db/auth';
 import { usernameTaken } from '@/lib/db/users';
 import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { logger } from '@/lib/logger';
+import type { AuthResult } from '@/lib/services/password-reset';
 
 // Username/password, email/password, and Google sign-in, shared by web server actions
 // (lib/actions/auth-actions.ts, which set cookies) and mobile routes
@@ -16,7 +17,7 @@ export const USERNAME_RE = /^[a-zA-Z0-9_]{3,20}$/;
 const HOUR = 3600;
 const RATE_LIMITED_MESSAGE = 'Too many attempts. Please try again later.';
 
-export type AuthResult = { ok: true; account?: { id: string } } | { ok: false; error: string };
+export type { AuthResult };
 
 export type CredentialResult =
   | { ok: true; account: SessionAccount; requiresVerification?: boolean }
