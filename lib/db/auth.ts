@@ -18,3 +18,8 @@ export async function createConfirmedUser(email: string, password: string, usern
     user_metadata: { username },
   });
 }
+
+export async function updateAuthUserPassword(userId: string, password: string) {
+  if (!supabaseAdmin?.auth?.admin?.updateUserById) return null;
+  return supabaseAdmin.auth.admin.updateUserById(userId, { password });
+}

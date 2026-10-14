@@ -7,12 +7,21 @@ import { POST as requestEmail } from '@/app/api/v1/auth/email/request/route';
 import { POST as verifyEmail } from '@/app/api/v1/auth/email/verify/route';
 import { GET as session } from '@/app/api/v1/auth/session/route';
 import { POST as signout } from '@/app/api/v1/auth/signout/route';
+import { POST as requestPassword } from '@/app/api/v1/auth/password/request/route';
+import { POST as verifyPassword } from '@/app/api/v1/auth/password/verify/route';
+import { POST as updatePassword } from '@/app/api/v1/auth/password/update/route';
 
 import { signUpAccount, signInAccount, signInAccountWithGoogle } from '@/lib/services/credentials';
 import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/mobile-auth';
 import { requestEmailCode, verifyEmailCode, getSessionInfo, signOut } from '@/lib/actions/auth-actions';
+import {
+  requestPasswordReset,
+  verifyPasswordResetCode,
+  updatePasswordWithReset,
+} from '@/lib/services/password-reset';
 
 vi.mock('@/lib/services/credentials');
+vi.mock('@/lib/services/password-reset');
 vi.mock('@/lib/actions/auth-actions', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/actions/auth-actions')>();
   return {
@@ -358,3 +367,193 @@ describe('getSessionInfo with optional authAccount', () => {
     expect(result).toEqual(passedAccount);
   });
 });
+
+describe('POST /api/v1/auth/password/request', () => {
+  it('requests password reset code successfully', async () => {
+    vi.mocked(requestPasswordReset).mockResolvedValue({ ok: true, sent: true });
+
+    const res = await requestPassword(
+      post('http://localhost/api/v1/auth/password/request', { email: 'alice@example.com' })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual({ sent: true });
+    expect(requestPasswordReset).toHaveBeenCalledWith('alice@example.com');
+  });
+
+  it('rejects missing or empty email with 400 VALIDATION_ERROR', async () => {
+    const res1 = await requestPassword(post('http://localhost/api/v1/auth/password/request', {}));
+    expect(res1.status).toBe(400);
+    const json1 = await res1.json();
+    expect(json1.success).toBe(false);
+    expect(json1.error.code).toBe('VALIDATION_ERROR');
+
+    const res2 = await requestPassword(post('http://localhost/api/v1/auth/password/request', { email: '   ' }));
+    expect(res2.status).toBe(400);
+    const json2 = await res2.json();
+    expect(json2.success).toBe(false);
+    expect(json2.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('returns 500 SERVER_ERROR if sending reset code fails', async () => {
+    vi.mocked(requestPasswordReset).mockResolvedValue({ ok: false, sent: false, error: 'Failed to send' });
+
+    const res = await requestPassword(
+      post('http://localhost/api/v1/auth/password/request', { email: 'alice@example.com' })
+    );
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+    expect(json.error.message).toBe('Failed to send');
+  });
+
+  it('returns 500 SERVER_ERROR on malformed json body', async () => {
+    const malformedReq = new NextRequest('http://localhost/api/v1/auth/password/request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'invalid-json{',
+    });
+    const res = await requestPassword(malformedReq);
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+  });
+});
+
+describe('POST /api/v1/auth/password/verify', () => {
+  it('successfully verifies reset code and returns resetToken', async () => {
+    vi.mocked(verifyPasswordResetCode).mockResolvedValue({ ok: true, resetToken: 'rst-valid-token' });
+
+    const res = await verifyPassword(
+      post('http://localhost/api/v1/auth/password/verify', { email: 'alice@example.com', code: '123456' })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual({ ok: true, resetToken: 'rst-valid-token' });
+    expect(verifyPasswordResetCode).toHaveBeenCalledWith('alice@example.com', '123456');
+  });
+
+  it('rejects missing or empty parameters with 400 VALIDATION_ERROR', async () => {
+    const res1 = await verifyPassword(
+      post('http://localhost/api/v1/auth/password/verify', { email: 'alice@example.com' })
+    );
+    expect(res1.status).toBe(400);
+    const json1 = await res1.json();
+    expect(json1.success).toBe(false);
+    expect(json1.error.code).toBe('VALIDATION_ERROR');
+
+    const res2 = await verifyPassword(
+      post('http://localhost/api/v1/auth/password/verify', { email: '', code: '   ' })
+    );
+    expect(res2.status).toBe(400);
+    const json2 = await res2.json();
+    expect(json2.success).toBe(false);
+    expect(json2.error.code).toBe('VALIDATION_ERROR');
+  });
+
+  it('returns 401 UNAUTHORIZED on invalid or expired code', async () => {
+    vi.mocked(verifyPasswordResetCode).mockResolvedValue({ ok: false, error: 'Invalid or expired OTP code.' });
+
+    const res = await verifyPassword(
+      post('http://localhost/api/v1/auth/password/verify', { email: 'alice@example.com', code: '000000' })
+    );
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('UNAUTHORIZED');
+    expect(json.error.message).toBe('Invalid or expired OTP code.');
+  });
+
+  it('returns 500 SERVER_ERROR on malformed json body', async () => {
+    const malformedReq = new NextRequest('http://localhost/api/v1/auth/password/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'invalid-json{',
+    });
+    const res = await verifyPassword(malformedReq);
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+  });
+});
+
+describe('POST /api/v1/auth/password/update', () => {
+  it('successfully updates password using valid resetToken, returning 200', async () => {
+    vi.mocked(updatePasswordWithReset).mockResolvedValue({ ok: true });
+
+    const res = await updatePassword(
+      post('http://localhost/api/v1/auth/password/update', {
+        email: 'alice@example.com',
+        resetToken: 'rst-valid-token-123',
+        newPassword: 'BrandNewSecurePassword123!',
+      })
+    );
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.success).toBe(true);
+    expect(json.data).toEqual({ ok: true });
+    expect(updatePasswordWithReset).toHaveBeenCalledWith(
+      'alice@example.com',
+      'rst-valid-token-123',
+      'BrandNewSecurePassword123!'
+    );
+  });
+
+  it('rejects missing or empty parameters with 400 VALIDATION_ERROR', async () => {
+    const testCases = [
+      { email: 'alice@example.com', resetToken: 'rst-tok' },
+      { email: 'alice@example.com', newPassword: 'pass' },
+      { resetToken: 'rst-tok', newPassword: 'pass' },
+      { email: '', resetToken: 'rst-tok', newPassword: 'pass' },
+      { email: 'alice@example.com', resetToken: '  ', newPassword: 'pass' },
+      { email: 'alice@example.com', resetToken: 'rst-tok', newPassword: '' },
+    ];
+
+    for (const body of testCases) {
+      const res = await updatePassword(post('http://localhost/api/v1/auth/password/update', body));
+      expect(res.status).toBe(400);
+      const json = await res.json();
+      expect(json.success).toBe(false);
+      expect(json.error.code).toBe('VALIDATION_ERROR');
+    }
+  });
+
+  it('returns 401 UNAUTHORIZED when updatePasswordWithReset fails (e.g. invalid or already used token)', async () => {
+    vi.mocked(updatePasswordWithReset).mockResolvedValue({
+      ok: false,
+      error: 'Invalid or expired reset token.',
+    });
+
+    const res = await updatePassword(
+      post('http://localhost/api/v1/auth/password/update', {
+        email: 'alice@example.com',
+        resetToken: 'rst-expired-token',
+        newPassword: 'BrandNewSecurePassword123!',
+      })
+    );
+    expect(res.status).toBe(401);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('UNAUTHORIZED');
+    expect(json.error.message).toBe('Invalid or expired reset token.');
+  });
+
+  it('returns 500 SERVER_ERROR on malformed json body', async () => {
+    const malformedReq = new NextRequest('http://localhost/api/v1/auth/password/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: 'invalid-json{',
+    });
+    const res = await updatePassword(malformedReq);
+    expect(res.status).toBe(500);
+    const json = await res.json();
+    expect(json.success).toBe(false);
+    expect(json.error.code).toBe('SERVER_ERROR');
+  });
+});
+

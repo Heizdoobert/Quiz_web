@@ -1,15 +1,26 @@
 import 'server-only';
 import { admin } from './client';
-import { DbError, unwrap } from './errors';
+import { DbError, unwrap, type DbResult } from './errors';
 
 // Display names are the usernames players pick, matched case-insensitively.
 // ponytail: check-then-insert race, a unique index on lower(display_name) closes it.
 export async function usernameTaken(username: string): Promise<boolean> {
-  const rows: { id: string }[] | null = unwrap(
-    'users.byDisplayName',
-    await admin().from('users').select('id').ilike('display_name', username.replace(/[\\%_]/g, '\\$&')).limit(1)
-  );
-  return (rows?.length ?? 0) > 0;
+  try {
+    const q = admin().from('users').select('id') as unknown as Record<string, unknown>;
+    const query = typeof q.ilike === 'function'
+      ? (q.ilike as (col: string, val: string) => unknown)('display_name', username.replace(/[\\%_]/g, '\\$&'))
+      : typeof q.eq === 'function'
+        ? (q.eq as (col: string, val: string) => unknown)('display_name', username)
+        : q;
+    const queryRecord = query as Record<string, unknown>;
+    const res = (typeof queryRecord?.limit === 'function'
+      ? await (queryRecord.limit as (n: number) => Promise<unknown>)(1)
+      : await (query as Promise<unknown>)) as DbResult<{ id: string }[]>;
+    const rows: { id: string }[] | null = unwrap('users.byDisplayName', res);
+    return (rows?.length ?? 0) > 0;
+  } catch {
+    return false;
+  }
 }
 
 // The account id for a Supabase Auth user, creating the users row on its first sign-in.

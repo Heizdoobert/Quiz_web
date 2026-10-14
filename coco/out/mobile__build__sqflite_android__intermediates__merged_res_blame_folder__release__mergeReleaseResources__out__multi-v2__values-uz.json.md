@@ -1,0 +1,37 @@
+# mobile/build/sqflite_android/intermediates/merged_res_blame_folder/release/mergeReleaseResources/out/multi-v2/values-uz.json
+lines:34 exports:
+---
+{
+    "logs": [
+        {
+            "outputFile": "com.tekartik.sqflite.sqflite_android-mergeReleaseResources-23:/values-uz/values-uz.xml",
+            "map": [
+                {
+                    "source": "/home/alexheiz/.gradle/caches/9.3.1/transforms/36b2cade356a97d2665ce9d4675dfa9b/transformed/core-1.13.1/res/values-uz/values-uz.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,157,259,360,460,568,672,791",
+                        "endColumns": "101,101,100,99,107,103,118,100",
+                        "endOffsets": "152,254,355,455,563,667,786,887"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.tekartik.sqflite.sqflite_android-release-25:/values-uz/values-uz.xml",
+            "map": [
+                {
+                    "source": "/home/alexheiz/.gradle/caches/9.3.1/transforms/36b2cade356a97d2665ce9d4675dfa9b/transformed/core-1.13.1/res/values-uz/values-uz.xml",
+                    "from": {
+                        "startLines": "2,3,4,5,6,7,8,9",
+                        "startColumns": "4,4,4,4,4,4,4,4",
+                        "startOffsets": "55,157,259,360,460,568,672,791",
+                        "endColumns": "101,101,100,99,107,103,118,100",
+                        "endOffsets": "152,254,355,455,563,667,786,887"
+                    }
+                }
+            ]
+        }
+    ]
+}

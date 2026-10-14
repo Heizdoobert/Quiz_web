@@ -1,0 +1,43 @@
+# mobile/linux/flutter/ephemeral/.plugin_symlinks/jni/android/.cxx/RelWithDebInfo/5p4r245a/armeabi-v7a/.cmake/api/v1/reply/cache-v2-1f41841af7c7990d3e86.json
+lines:1295 exports:
+---
+{
+	"entries" : 
+	[
+		{
+			"name" : "ANDROID_ABI",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "No help, variable specified on the command line."
+				}
+			],
+			"type" : "UNINITIALIZED",
+			"value" : "armeabi-v7a"
+		},
+		{
+			"name" : "ANDROID_NDK",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "No help, variable specified on the command line."
+				}
+			],
+			"type" : "UNINITIALIZED",
+			"value" : "/home/alexheiz/Android/Sdk/ndk/28.2.13676358"
+		},
+		{
+			"name" : "ANDROID_PLATFORM",
+			"properties" : 
+			[
+				{
+					"name" : "HELPSTRING",
+					"value" : "No help, variable specified on the command line."
+				}
+			],
+			"type" : "UNINITIALIZED",
+			"value" : "android-21"
+		},
+		{

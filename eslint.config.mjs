@@ -91,6 +91,12 @@ const eslintConfig = defineConfig([
     rules: {
       "max-lines": ["error", { "max": 200, "skipBlankLines": true, "skipComments": true }]
     }
+  },
+  {
+    files: ["tests/**"],
+    rules: {
+      "@typescript-eslint/no-explicit-any": "off"
+    }
   }
 ]);
 

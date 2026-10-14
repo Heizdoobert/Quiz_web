@@ -80,9 +80,7 @@
     "build": "tsup",
     "type-check": "tsc --noEmit"
   },
-  "dependencies": {
-    "@quizweb/sdk-core": "^0.1.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "tsup": "^8.5.1",
     "typescript": "^5.0.0"
