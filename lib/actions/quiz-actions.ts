@@ -2,6 +2,7 @@
 
 import { questionForAnswer } from '@/lib/db/questions';
 import { insertResult } from '@/lib/db/results';
+import { awardAchievements } from '@/lib/db/achievements';
 import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
 import { allowAttemptFromIp } from '@/lib/services/rate-limit';
 import { isUuid } from '@/lib/utils/validation';
@@ -39,6 +40,8 @@ export async function submitAnswer(params: {
   });
   try {
     if (!isUuid(params.questionId)) return failed('error');
+    // The DB stores -1..3 (-1 is the web timer's timeout sentinel); checking first means a bad index can never reveal the answer.
+    if (!Number.isInteger(params.answerIndex) || params.answerIndex < -1 || params.answerIndex > 3) return failed('error');
     if (!(await allowAttemptFromIp('submit-answer-ip', ANSWERS_PER_IP_PER_HOUR, HOUR))) return failed('rate-limited');
     // correct_index and explanation are only readable with the secret key.
     const qData = await questionForAnswer(params.questionId);
@@ -65,9 +68,12 @@ export async function submitAnswer(params: {
         answer_index: params.answerIndex,
         is_correct: isCorrect,
       });
-      return outcome === 'recorded'
-        ? { ...revealed, recorded: true }
-        : { ...revealed, recorded: false, notSavedReason: 'already-answered' };
+      if (outcome !== 'recorded') return { ...revealed, recorded: false, notSavedReason: 'already-answered' };
+      // The answer is saved either way; a failed award is logged and never changes the result.
+      await awardAchievements(account.id).catch((err) =>
+        logger.error('award_achievements_failed', err, { userId: account.id })
+      );
+      return { ...revealed, recorded: true };
     } catch (err) {
       logger.error('submitAnswer insert error:', err);
       return { ...revealed, recorded: false, notSavedReason: 'error' };

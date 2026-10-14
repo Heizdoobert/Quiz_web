@@ -62,7 +62,7 @@ export async function getTopicQuestions(
 ): Promise<{ results: SearchResult[]; hasMore: boolean }> {
   const offset = (Math.max(1, page) - 1) * PAGE_SIZE;
 
-  // Public-question rule (status = 'verified' AND list_id IS NULL), same as
+  // Public-question rule (status = 'verified'), same as
   // fetchRandomQuestion/getPublicQuestion. Topics group categories
   // case-insensitively (get_topics()), so this must match every casing too.
   let rows: TopicQuestionRow[];

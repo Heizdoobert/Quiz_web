@@ -17,6 +17,9 @@ async function loadHeaders(env: Record<string, string>): Promise<Record<string, 
 describe('security headers', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://abc.supabase.co';
+    delete process.env.NEXT_PUBLIC_SENTRY_DSN;
+    delete process.env.NEXT_PUBLIC_POSTHOG_KEY;
+    delete process.env.NEXT_PUBLIC_POSTHOG_HOST;
   });
 
   it('keeps the existing headers, including the enforcing frame-ancestors policy', async () => {
@@ -36,6 +39,21 @@ describe('security headers', () => {
     expect(csp).toContain('report-uri /api/csp-report');
     expect(csp).not.toMatch(/connect-src[^;]*\s\*(\s|;|$)/);
     expect(csp).not.toMatch(/connect-src[^;]*\shttps:(\s|;|$)/);
+  });
+
+  it('allows the Sentry and PostHog hosts only when they are configured', async () => {
+    const off = (await loadHeaders({}))['Content-Security-Policy-Report-Only'];
+    expect(off).not.toContain('sentry.io');
+    expect(off).not.toContain('posthog.com');
+    const on = (
+      await loadHeaders({
+        NEXT_PUBLIC_SENTRY_DSN: 'https://key123@o42.ingest.sentry.io/7',
+        NEXT_PUBLIC_POSTHOG_KEY: 'phc_test',
+      })
+    )['Content-Security-Policy-Report-Only'];
+    expect(on).toContain('https://o42.ingest.sentry.io');
+    expect(on).not.toContain('key123');
+    expect(on).toContain('https://app.posthog.com');
   });
 
   it('allows eval and the dev websocket only outside production', async () => {

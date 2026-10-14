@@ -2,7 +2,7 @@
 
 import {
   answerKey, countDisputes, countQuestions, countQuestionsByAuthorSince, insertDispute,
-  insertQuestion, listPublicQuestions, publicQuestion, setDisputeState,
+  insertQuestion, listPublicQuestions, publicQuestion, quarantineQuestion,
 } from '@/lib/db/questions';
 import { hasRecordedAnswer } from '@/lib/db/results';
 import { incrementAiGeneration, topics } from '@/lib/db/rpc';
@@ -142,9 +142,10 @@ export async function fetchRandomQuestion(
   }
 }
 
-export async function getTopics(): Promise<Array<{ name: string; questionCount: number; latestAt: string }>> {
+export async function getTopics(): Promise<Array<{ slug: string; name: string; questionCount: number; latestAt: string }>> {
   try {
     return (await topics()).map((row) => ({
+      slug: row.slug,
       name: row.name,
       questionCount: row.question_count,
       latestAt: row.latest_at,
@@ -227,11 +228,13 @@ export async function disputeQuestion(
 
     const quarantined = disputeCount >= QUARANTINE_AT;
     let updated = true;
-    try {
-      await setDisputeState(params.questionId, disputeCount, quarantined);
-    } catch (err) {
-      logger.error('dispute_question_update_failed', err, { questionId: params.questionId });
-      updated = false;
+    if (quarantined) {
+      try {
+        await quarantineQuestion(params.questionId);
+      } catch (err) {
+        logger.error('dispute_question_update_failed', err, { questionId: params.questionId });
+        updated = false;
+      }
     }
 
     logger.info('question_disputed', { userId: account.id, questionId: params.questionId, quarantined });
@@ -260,9 +263,9 @@ export async function get5050EliminatedIndices(questionId: string): Promise<numb
       return [];
     }
     // Eliminating two wrong options narrows the answer to one of two, so this is only offered for
-    // public verified questions (whose answers submitAnswer shows anyway). Contest, pending and
-    // quarantined questions reveal nothing; the contest player has no 50/50.
-    if (data.status !== 'verified' || data.list_id) return [];
+    // public verified questions (whose answers submitAnswer shows anyway). Pending and
+    // quarantined questions reveal nothing.
+    if (data.status !== 'verified') return [];
     const wrong = [0, 1, 2, 3].filter((idx) => idx !== data.correct_index);
 
     // Deterministic selection based on questionId hash so repeat calls return the exact same 2 wrong answers

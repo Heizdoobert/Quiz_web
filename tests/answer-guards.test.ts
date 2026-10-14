@@ -8,7 +8,7 @@ import { validateQuestionInput } from '../lib/utils/validation';
 let mockAnswerLimitHit = false;
 const answerLimitCalls: unknown[][] = [];
 
-vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
+vi.mock('../lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn(), rpc: vi.fn() } }));
 vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/services/rate-limit', () => ({
   allowAttemptFromIp: async (...args: unknown[]) => {
@@ -89,6 +89,31 @@ describe('submitAnswer guards', () => {
     expect(res.notSavedReason).toBe('error');
     expect(supabaseAdmin!.from).not.toHaveBeenCalled();
     expect(answerLimitCalls).toEqual([]);
+  });
+
+  it('rejects an out-of-range or fractional answer index before revealing or recording anything', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    for (const answerIndex of [4, -2, 1.5]) {
+      const inserts = mockTables({
+        questions: { row: { correct_index: 1, explanation: 'why', status: 'verified' } },
+      });
+      const res = await submitAnswer({ questionId: Q_ID, answerIndex });
+      expect(res).toEqual({ isCorrect: false, correctIndex: 0, explanation: null, recorded: false, notSavedReason: 'error' });
+      expect(inserts.quiz_results).toBeUndefined();
+      expect(answerLimitCalls).toEqual([]);
+    }
+    expect(supabaseAdmin!.from).not.toHaveBeenCalled();
+  });
+
+  it('records the -1 timeout sentinel as a wrong answer instead of rejecting it', async () => {
+    (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
+    const inserts = mockTables({
+      questions: { row: { correct_index: 1, explanation: 'why', status: 'verified' } },
+    });
+    const res = await submitAnswer({ questionId: Q_ID, answerIndex: -1 });
+    expect(res.isCorrect).toBe(false);
+    expect(res.recorded).toBe(true);
+    expect(inserts.quiz_results).toHaveLength(1);
   });
 
   it('reveals nothing when the question does not exist', async () => {
@@ -234,9 +259,10 @@ describe('createQuestion guards', () => {
   it('creates a question keyed by account id', async () => {
     (getSessionAccount as ReturnType<typeof vi.fn>).mockResolvedValue(ACCOUNT);
     const inserts = mockTables({ questions: { count: 0 } });
+    (supabaseAdmin!.rpc as ReturnType<typeof vi.fn>).mockResolvedValue({ data: 'topic-1', error: null });
     const res = await createQuestion(params);
     expect(res.success).toBe(true);
-    expect(inserts.questions![0]).toMatchObject({ created_by_user: ACCOUNT_ID });
+    expect(inserts.questions![0]).toMatchObject({ created_by_user: ACCOUNT_ID, topic_id: 'topic-1' });
   });
 
   it('enforces the 5-per-day cap by account id', async () => {

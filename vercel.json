@@ -5,6 +5,10 @@
     {
       "path": "/api/cron/system-report",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/daily-challenge",
+      "schedule": "5 0 * * *"
     }
   ]
 }

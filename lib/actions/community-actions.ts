@@ -50,7 +50,7 @@ async function checkCanDiscuss(
   questionId: string,
   options: { allowAuthor: boolean }
 ): Promise<CommunityResult> {
-  // 1. The question must be public (status = 'verified' AND list_id IS NULL)
+  // 1. The question must be public (status = 'verified')
   let question: Awaited<ReturnType<typeof questionForDiscussion>>;
   try {
     question = await questionForDiscussion(questionId);
@@ -58,7 +58,7 @@ async function checkCanDiscuss(
     logger.error('checkCanDiscuss question error:', err);
     return { ok: false, code: 'NOT_ALLOWED' };
   }
-  if (!question || question.status !== 'verified' || question.list_id !== null) {
+  if (!question || question.status !== 'verified') {
     return { ok: false, code: 'NOT_ALLOWED' };
   }
 

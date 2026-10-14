@@ -18,3 +18,6 @@ The policy is enforced only after a full wallet, email and username sign-in on p
 - **Positive**: real violations are collected without risking a broken sign-in.
 - **Trade-off**: until enforcement, the policy does not block anything beyond framing. `script-src` allows `'unsafe-inline'`, so it would not stop injected inline scripts even when enforced; nonces are the follow-up.
 - **Next step**: review `csp_violation` logs after a preview session, then move the directives to the enforced header (todo.md, Part 1 Task 6).
+
+## Update 2026-10-13
+`connect-src` now also lists the Sentry ingest origin (from `NEXT_PUBLIC_SENTRY_DSN`) and the PostHog host (from `NEXT_PUBLIC_POSTHOG_HOST`, default `https://app.posthog.com`, only when `NEXT_PUBLIC_POSTHOG_KEY` is set), the same variables `sdk/tracking-analytics` reads, so enforcing would not silently block telemetry. Production and preview run on Vercel. Enforcement still waits for `csp_violation` lines from a preview sign-in. PostHog may also load scripts from its assets host, which `script-src` does not allow yet; the logs will show it.

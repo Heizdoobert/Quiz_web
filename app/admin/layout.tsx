@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { adminNavItems } from '@/app/admin/_modules/nav';
 import AdminDenied from '@/components/admin/AdminDenied';
 import AdminNav from '@/components/admin/AdminNav';
 import { authorize } from '@/lib/services/authorize';
@@ -13,7 +14,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!auth.success) return <AdminDenied code={auth.error.code} />;
   return (
     <div>
-      <AdminNav role={auth.data.role} />
+      <AdminNav items={adminNavItems(auth.data.role)} />
       <main className="max-w-4xl mx-auto px-6 py-8">{children}</main>
     </div>
   );

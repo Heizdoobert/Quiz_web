@@ -59,7 +59,7 @@ beforeEach(() => {
   vi.mocked(roleOf).mockReset().mockImplementation(async (id) => ROLES[id] ?? null);
   vi.mocked(quarantinedQuestions).mockReset().mockResolvedValue([QUEUED]);
   vi.mocked(resolveQuarantined).mockReset().mockResolvedValue(true);
-  vi.mocked(answerKey).mockReset().mockResolvedValue({ correct_index: 0, status: 'quarantined', list_id: null });
+  vi.mocked(answerKey).mockReset().mockResolvedValue({ correct_index: 0, status: 'quarantined' });
   vi.mocked(logger.info).mockReset();
   vi.mocked(logger.error).mockReset();
 });

@@ -6,10 +6,10 @@ import { countOf, unwrap } from './errors';
 
 export async function questionForDiscussion(
   id: string
-): Promise<{ id: string; status: string; list_id: string | null; created_by_user: string | null } | null> {
+): Promise<{ id: string; status: string; created_by_user: string | null } | null> {
   return unwrap(
     'community.question',
-    await admin().from('questions').select('id, status, list_id, created_by_user').eq('id', id).maybeSingle()
+    await admin().from('questions').select('id, status, created_by_user').eq('id', id).maybeSingle()
   );
 }
 
