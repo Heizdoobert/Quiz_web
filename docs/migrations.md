@@ -93,6 +93,59 @@ Commits a4e0dd0 and 9b93d5a mix a migration with code (and 854651e/5f5f04d edite
 5. Run these off-peak: 1b, 3a and 3c take ACCESS EXCLUSIVE locks on `questions`; the user_stats backfill and `rebuild_user_stats()` lock `quiz_results` (blocks answer inserts); the integrity VALIDATE scans inside the transaction; the indexes are not CONCURRENT. The migrations set `lock_timeout = '5s'`, so a blocked push fails and can be retried off-peak.
 6. Apply to the preview/branch database first, then production.
 
+## Baseline cut-over (plan tasks 0.2, 0.4, 0.8)
+
+Order matters: audit, then rebuild the baseline from the real dump, then prove it on a branch, then record it in production. Nothing here changes production data; the only production write is one row in the migration history table (step C3). Audit outputs stay local in `tasks/db-audit/` (dev-only, never committed).
+
+### A. Audit production (task 0.2, owner, read-only)
+
+1. In the production SQL editor run `tasks/db-audit/prod-audit.sql` (6 queries) and save the results as `tasks/db-audit/prod-audit-output.txt`.
+2. Dump the schema (needs your Supabase login):
+
+   ```bash
+   npx supabase login
+   npx supabase link --project-ref <production project ref>
+   npx supabase db dump --linked --schema public -f tasks/db-audit/prod-schema.sql
+   ```
+
+   The file must contain `CREATE TABLE "public"."questions"`.
+3. Decision gate, query 4 of the audit: if `anon_can_execute` is true for `increment_ai_generation` or `get_question_analytics`, finding F7 is live. Then release B's function-privileges migration (and the `lib/db/rpc.ts` admin-client code it needs) goes first; do not wait for the rest.
+4. Gate, query 1: the Postgres major version must equal `[db] major_version` in `supabase/config.toml` (currently 17).
+5. Gate, query 2: every table has RLS (zero rows). Anything listed is a finding to fix before the baseline.
+
+### B. Rebuild the baseline from the dump (task 0.4, agent or owner)
+
+The current baseline is a replay of the old scripts, with six hand edits marked `-- Baseline edit:` (list in `tasks/db-audit/baseline-edits.md`). They compensate for the replay, not for production, so they are not carried over blindly.
+
+1. `cp tasks/db-audit/prod-schema.sql supabase/migrations/20261013000000_baseline.sql`, then `sed -i -E '/^\\(un)?restrict /d'` on it. Keep the `20261013000000` timestamp.
+2. Re-add only what a schema-only dump cannot carry:
+   - `CREATE EXTENSION IF NOT EXISTS "pg_trgm" WITH SCHEMA "public";` before the first trigram index (the dump omits extensions).
+   - The `remote_config` seed: `INSERT ... ('maintenance_mode', 'false'::jsonb) ON CONFLICT ("key") DO NOTHING;`.
+3. `npx supabase start && npx supabase db reset`, then fix each error the replay names (record the edit in `baseline-edits.md`).
+4. Prove it: `npx supabase db dump --local --schema public -f tasks/db-audit/local-schema.sql`, then `bash scripts/db-schema-diff.sh tasks/db-audit/prod-schema.sql tasks/db-audit/local-schema.sql`. It must print nothing. Do not explain a difference away; a grant that differs means the baseline is wrong.
+5. Re-run `npm run check:db`. The 11 migrations after the baseline and their 85 pgTAP tests were written against the replay, so any failure now is a real difference between production and what the tests assumed. Expected places: the F7 grants (tests 90), `questions.list_id` column grants (migrations 000100 and 000200) and `get_contest_analytics`. Fix the migration or test, never the baseline.
+6. Delete the "PROVISIONAL BASELINE" header, ADR-015's provisional wording and the matrix row's "provisional" text, then commit.
+
+### C. Prove it, then record it (task 0.8, owner)
+
+The branch step changed since the plan was written: the repository now holds 11 migrations after the baseline, so a plain `db push` on a branch applies all of them, contract ones included. That is a rehearsal of the whole sequence, not a proof that the baseline equals production. The baseline proof is B4 (empty diff). Use the branch for the rehearsal:
+
+1. Create a Supabase branch of production, `npx supabase link --project-ref <branch ref>`, `npx supabase db push`. Expected: all 12 files apply with no error. Run the preflight SQL from the owner checklist above first; every line must return 0.
+2. Check the app against the branch (question reads, leaderboard, profile stats, AI generation, daily cron route), then delete the branch.
+3. In production, and only after B4 is empty and the branch rehearsal passed:
+
+   ```bash
+   npx supabase link --project-ref <production ref>
+   npx supabase migration repair --status applied 20261013000000
+   npx supabase migration list
+   ```
+
+   Expected: the baseline shows in Local and Remote. Nothing else runs. Do NOT run `db push` here: it would apply every pending file, including the contract migrations that must wait for their code.
+4. Fill in the date in the baseline row of the Ledger above and commit `docs(db): record baseline applied to production`.
+5. Undo: `npx supabase migration repair --status reverted 20261013000000` removes only the history row.
+
+After C3, release A's migrations go out one release at a time with `db push` as in "Pending releases".
+
 ## First admin (run once, never commit the real address)
 
 The RBAC migration creates no admin: this repository is public and the owner's email must not be in it. Request an email code in the app once so your sign-in exists, then run this in the Supabase SQL editor, replacing the placeholder with your own address. It creates your account row if the first sign-in did not and sets the role either way:
