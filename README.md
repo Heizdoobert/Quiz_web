@@ -54,7 +54,7 @@ npx supabase db reset    # applies supabase/migrations/ from the baseline on
 npm run check:db         # replay + pgTAP tests + lint
 ```
 
-To apply to a hosted project: `npx supabase link --project-ref <ref>`, then `npx supabase db push` (a Supabase branch first, then production). The old hand-applied scripts are in [`supabase/legacy/`](supabase/legacy/) for history only.
+To apply to a hosted project: `npx supabase link --project-ref <ref>`, then `npx supabase db push` (a Supabase branch first, then production). The old hand-applied scripts were removed; they live in git history (`git show d820619:supabase/legacy/`).
 
 Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
 

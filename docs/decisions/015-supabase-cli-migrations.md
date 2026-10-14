@@ -9,7 +9,7 @@ The schema lived in 24 topic-named SQL files applied by hand in the Supabase SQL
 ## Decision
 - Migrations are timestamped files in `supabase/migrations/`, created with `supabase migration new` and applied with `supabase db push`.
 - The first file, `20261013000000_baseline.sql`, is meant to be the production schema (`supabase db dump`), checked against a replay of the old scripts. Production is the source of truth (D3 in the design spec). The file in the repository is provisional until the production dump is verified: it came from a replay, and the schema diff against the real dump must be empty before production records it as applied with `supabase migration repair` (no DDL runs).
-- The old files move to `supabase/legacy/` as history and are never run.
+- The old hand-applied files were removed from the tree (history: `git show d820619:supabase/legacy/`) and are never run.
 - CI replays the migrations on a local Supabase stack, runs the pgTAP tests in `supabase/tests/database/` and lints (`npm run check:db`).
 - The owner applies migrations to production by hand after `preview` is green (D4). CI never pushes to production.
 - Changes that remove or rename anything follow expand/contract: code stops using the old thing and ships, then a later migration removes it.

@@ -2,7 +2,7 @@ import 'server-only';
 import { admin, pub } from './client';
 import { unwrap } from './errors';
 
-// Topics are rows with per-locale names (supabase/migrations/20261013000800_topics.sql). The rest of
+// Topics are rows with per-locale names (supabase/migrations/20261013000800_add_topics_with_resolve_topic_and_get_or_create_topic.sql). The rest of
 // the app still sees a `category` string: the db layer derives it here.
 
 export const DEFAULT_LOCALE = 'en';
