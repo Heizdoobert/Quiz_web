@@ -6,6 +6,7 @@ import { PostHogProvider } from '@/components/providers/PostHogProvider';
 import AdZone from '@/components/ads/AdZone';
 import { FAQ_DATA } from '@/lib/constants/seo-data';
 import { getSiteUrl } from '@/lib/utils/site-url';
+import { Analytics } from '@vercel/analytics/next';
 
 const jetbrainsMono = JetBrains_Mono({
   subsets: ['latin'],
@@ -176,6 +177,7 @@ export default function RootLayout({
             </div>
           </Providers>
         </PostHogProvider>
+        <Analytics />
       </body>
     </html>
   );
