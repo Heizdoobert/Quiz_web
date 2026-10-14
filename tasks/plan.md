@@ -19,6 +19,7 @@ SDK Core (sdk/src/client/http.ts - DONE)
 ## Tasks
 
 ### Task 1: Document HTTP Options in SDK README
+**Status:** [x] Done: sdk/README.md documents timeout, retries and signal (commit 87be1aa era).
 **Description:** Update `sdk/README.md` to document the new `timeout`, `signal` (cancellation), and `retries` configuration options for `QuickQuizClient` and `HttpClient`.
 **Acceptance criteria:**
 - README documents `timeout`, `signal`, `retries` in configuration options.
@@ -31,6 +32,7 @@ SDK Core (sdk/src/client/http.ts - DONE)
 **Estimated scope:** Small (1 file).
 
 ### Task 2: Build & Verify SDK Distribution Artifacts
+**Status:** [x] Done 2026-10-14: sdk type-check and build:sdk pass; dist/client.d.ts exports HttpClientOptions and RequestOptions with timeout, retries, signal. dist is gitignored, nothing to commit.
 **Description:** Run SDK build tooling (`tsup`) to ensure `dist/` contains valid `.mjs`, `.cjs`, and `.d.ts` declaration maps reflecting the new options.
 **Acceptance criteria:**
 - `dist/client.d.ts` and `dist/index.d.ts` export updated `HttpClientOptions` and `RequestOptions`.
@@ -44,6 +46,7 @@ SDK Core (sdk/src/client/http.ts - DONE)
 **Estimated scope:** Small (build artifacts).
 
 ### Task 3: Next.js Client App Integration Helper (Optional)
+**Status:** [x] Closed as superseded: lib/sdk.ts getSdk() (tasks/todo.md) already covers it; lib/client/api-client.ts not needed.
 **Description:** Provide a shared singleton or factory in `lib/client/api-client.ts` for browser and server components to consume `@heizdoobert/quickquiz-sdk` with default timeout and retries.
 **Acceptance criteria:**
 - Helper initializes `createClient()` with appropriate `baseUrl` and defaults.
