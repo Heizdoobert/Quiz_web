@@ -45,7 +45,7 @@ describe('countDisputes', () => {
 describe('quarantinedQuestions', () => {
   const ROW = {
     id: Q_ID,
-    category: 'Science',
+    topics: { slug: 'science', topic_translations: [{ locale: 'en', name: 'Science' }] },
     prompt: 'Which planet is closest to the sun?',
     options: ['Mercury', 'Venus', 'Earth', 'Mars'],
     correct_index: 0,

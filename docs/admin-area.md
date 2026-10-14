@@ -32,6 +32,10 @@ Server actions in `lib/actions/admin-actions.ts` take no account argument (an ex
 
 The token is read only in `lib/services/error-issues.ts` and is never sent to the browser or logged. This is separate from `NEXT_PUBLIC_SENTRY_DSN`, which only sends events.
 
+## Adding a module
+
+A new admin feature is one folder, `app/admin/_modules/<id>/`, with a `manifest.ts` (label, required permission, optional order) and a `page.tsx`. Copy `app/admin/_modules/_template/` and follow its README. `scripts/gen-admin-modules.mjs` scans the folders into the committed `registry.generated.ts` (it runs on `predev`, `prebuild` and `pretest`; a test fails if the committed file is stale). The catch-all route `app/admin/[...module]` calls `authorize(manifest.permission)` before it loads the module, and the nav lists the module for roles that hold that permission. Writes stay the module's job: a server action must call a service that authorizes. The five pages above predate modules and are not migrated.
+
 ## Not included
 
 Audit log, content management for questions and quizzes, analytics and database pages, a mobile admin, moderator access to config or errors, more than one admin tier, and a consumer of `maintenance_mode` (banner or blocking play).

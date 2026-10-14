@@ -4,7 +4,7 @@ import { headers } from 'next/headers';
 import { logger } from '@/lib/logger';
 import { rateLimitHit } from '@/lib/db/rpc';
 
-// Counts attempts per key in Postgres (supabase/migrations/17-auth-rate-limit.sql), so the
+// Counts attempts per key in Postgres (supabase/legacy/migrations/17-auth-rate-limit.sql), so the
 // limit holds across serverless instances. The identifier is hashed so addresses and
 // usernames are not stored in the attempts table.
 //

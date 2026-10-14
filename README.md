@@ -46,37 +46,15 @@ Variables prefixed `NEXT_PUBLIC_` are compiled into the browser bundle at build 
 
 ### Database Setup
 
-Run these in the Supabase SQL Editor, in this order (a Supabase branch first, then production). Most scripts are idempotent; the exceptions are listed in [`docs/migrations.md`](docs/migrations.md), which is also the ledger of what has been applied and the forward-fix rule (there are no down scripts). `bash scripts/verify-migrations.sh` applies this whole order to a throwaway Postgres and reports errors.
+The schema is managed with the Supabase CLI (see [`docs/migrations.md`](docs/migrations.md) and ADR-015). With Docker running:
 
-All files are in [`supabase/migrations/`](supabase/migrations/):
+```bash
+npx supabase start       # local Supabase: database, auth, API
+npx supabase db reset    # applies supabase/migrations/ from the baseline on
+npm run check:db         # replay + pgTAP tests + lint
+```
 
-1. [`schema.sql`](supabase/migrations/schema.sql) — tables and constraints (run it twice on a fresh database: `reward_claims` references `question_lists` before the file creates it).
-2. [`lock-down-public-writes.sql`](supabase/migrations/lock-down-public-writes.sql) — server-only writes, no public read of answers.
-3. [`question-lists.sql`](supabase/migrations/question-lists.sql) — peer-reviewed lists and contests.
-4. [`secure-rewards-and-answers.sql`](supabase/migrations/secure-rewards-and-answers.sql) — one open voucher per account.
-5. [`restrict-quiz-results-insert.sql`](supabase/migrations/restrict-quiz-results-insert.sql) — only the server records answers.
-6. [`contest-escrow.sql`](supabase/migrations/contest-escrow.sql) — contest claims in `reward_claims`.
-7. [`widen-reward-claims-amount.sql`](supabase/migrations/widen-reward-claims-amount.sql) — wei amounts as `NUMERIC(78,0)`.
-8. [`accounts.sql`](supabase/migrations/accounts.sql) — key every table by account id (`users.id`).
-9. [`stats-functions.sql`](supabase/migrations/stats-functions.sql) — stats and leaderboard functions (needs step 8).
-10. [`retire-sample-questions.sql`](supabase/migrations/retire-sample-questions.sql) — marks the old seed questions `rejected` (deletes nothing) Skip it on a fresh database: it asserts the old seed questions exist.
-11. [`topics.sql`](supabase/migrations/topics.sql) — `get_topics()`.
-12. [`search.sql`](supabase/migrations/search.sql) — `pg_trgm` search.
-13. [`community.sql`](supabase/migrations/community.sql) — ratings, comments, suggestions.
-14. [`reward-payee.sql`](supabase/migrations/reward-payee.sql) — treasury sweep for wallet-less accounts.
-15. [`15-sponsors.sql`](supabase/migrations/15-sponsors.sql) — ad sponsors.
-16. [`16-leaderboard-pagination.sql`](supabase/migrations/16-leaderboard-pagination.sql) — paginated `get_global_leaderboard`.
-17. [`17-analytics.sql`](supabase/migrations/17-analytics.sql) — question and contest analytics functions.
-18. [`17-auth-rate-limit.sql`](supabase/migrations/17-auth-rate-limit.sql) — attempt counter behind the auth and answer rate limits. Until it is applied the limiter fails open (ADR-008).
-19. [`18-ai-usage.sql`](supabase/migrations/18-ai-usage.sql) — daily AI generation usage.
-20. [`19-secure-ai-usage.sql`](supabase/migrations/19-secure-ai-usage.sql) — closes `user_ai_usage` to the public key (RLS on, no policies).
-21. [`20-drop-web3-schema.sql`](supabase/migrations/20-drop-web3-schema.sql) — drops the wallet, reward and escrow schema (ADR-013). Destructive: take a backup first, and on an existing database apply it only once production runs code that reads `questions.created_by_user`.
-22. [`remote-config.sql`](supabase/migrations/remote-config.sql) — `remote_config` table with a public read policy and the `maintenance_mode` seed row. No write policy: edit values in the dashboard.
-23. [`21-rbac.sql`](supabase/migrations/21-rbac.sql) — one role per account (`users.role`), the columns a moderator's dispute resolution is recorded in, and closes `question_disputes` to the public key. Creates no admin; the first admin is granted by the one-off statement in [`docs/migrations.md`](docs/migrations.md).
-
-[`ecosystem-v1-migration.sql`](supabase/migrations/ecosystem-v1-migration.sql) is only for databases created before `schema.sql` held the contest columns; skip it on a fresh database.
-
-The older scripts still create the reward, escrow, voucher and payee schema; step 21 removes it again. `bash supabase/tests/run-drop-web3-schema.sh` checks that step against a copy of production's history.
+To apply to a hosted project: `npx supabase link --project-ref <ref>`, then `npx supabase db push` (a Supabase branch first, then production). The old hand-applied scripts are in [`supabase/legacy/`](supabase/legacy/) for history only.
 
 Email sign-in also needs the Supabase Auth email provider on, with an OTP template that shows `{{ .Token }}`.
 

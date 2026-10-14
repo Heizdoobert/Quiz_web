@@ -185,8 +185,8 @@ describe('GET /api/v1/questions/[id]', () => {
 describe('GET /api/v1/topics', () => {
   it('returns list of topics', async () => {
     const mockTopics = [
-      { name: 'Science', questionCount: 10, latestAt: '2026-10-12T00:00:00Z' },
-      { name: 'History', questionCount: 5, latestAt: '2026-10-11T00:00:00Z' },
+      { slug: 'science', name: 'Science', questionCount: 10, latestAt: '2026-10-12T00:00:00Z' },
+      { slug: 'history', name: 'History', questionCount: 5, latestAt: '2026-10-11T00:00:00Z' },
     ];
     vi.mocked(getTopics).mockResolvedValue(mockTopics);
 

@@ -84,10 +84,3 @@ export function validateQuestionInput(params: {
 export function normalizePrompt(prompt: string): string {
   return prompt.trim().toLowerCase().replace(/\s+/g, ' ');
 }
-
-// Escapes ILIKE wildcards so a category used as a case-insensitive exact-match
-// pattern (topics are grouped case-insensitively, e.g. "DeFi" and "defi") can't
-// have a stray "%" or "_" in a player-typed category matched as a wildcard.
-export function escapeLikePattern(value: string): string {
-  return value.replace(/[\\%_]/g, (ch) => `\\${ch}`);
-}
