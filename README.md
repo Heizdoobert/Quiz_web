@@ -51,8 +51,6 @@ Generated APKs:
 - 32-bit phones: `build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk`
 - Emulators: `build/app/outputs/flutter-apk/app-x86_64-release.apk`
 
-To apply to a hosted project: `npx supabase link --project-ref <ref>`, then `npx supabase db push` (a Supabase branch first, then production). The old hand-applied scripts were removed; they live in git history (`git show d820619:supabase/legacy/`).
-
 ---
 
 ## 🛠️ Common Commands

@@ -668,7 +668,7 @@ Outcome: no contest objects remain, and no live question disappears or becomes v
 ### Task 1.1: Migration 1a: retire contest questions and decouple the readers
 
 **Files:**
-- Create: `supabase/migrations/20261013000100_retire_contest_questions.sql`, `supabase/tests/database/10_retire_contest_questions.test.sql`
+- Create: `supabase/migrations/20261013000100_exclude_contest_questions_from_topics_and_search.sql`, `supabase/tests/database/10_retire_contest_questions.test.sql`
 
 **Interfaces:**
 - Produces: `get_topics()` and `search_questions(TEXT, INT, INT)` that no longer mention `list_id` (still same signatures, so old code keeps working); every question with `list_id` set has `status = 'rejected'`.
@@ -708,7 +708,7 @@ Expected: FAIL on the two `unlike` tests (the functions still mention `list_id`)
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013000100_retire_contest_questions.sql`:
+Create `supabase/migrations/20261013000100_exclude_contest_questions_from_topics_and_search.sql`:
 
 ```sql
 -- Phase 1a (expand). Safe while the old code runs: the two public readers stop depending on
@@ -794,7 +794,7 @@ Expected: PASS, including the 5 new tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add supabase/migrations/20261013000100_retire_contest_questions.sql supabase/tests/database/10_retire_contest_questions.test.sql
+git add supabase/migrations/20261013000100_exclude_contest_questions_from_topics_and_search.sql supabase/tests/database/10_retire_contest_questions.test.sql
 git commit -m "feat(db): retire contest questions and stop filtering on list_id (phase 1a)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
@@ -965,7 +965,7 @@ git commit -m "refactor(questions): stop reading the contest list_id column" -m 
 ### Task 1.4: Migration 1b: drop the contest schema (after Task 1.3 is live)
 
 **Files:**
-- Create: `supabase/migrations/20261013000200_drop_contest_schema.sql`, `supabase/tests/database/11_drop_contest_schema.test.sql`
+- Create: `supabase/migrations/20261013000200_drop_contest_tables_and_get_contest_analytics.sql`, `supabase/tests/database/11_drop_contest_schema.test.sql`
 
 **Interfaces:**
 - Consumes: Task 1.3 complete (production reads no `list_id`).
@@ -1014,7 +1014,7 @@ Expected: FAIL (the objects still exist).
 
 - [ ] **Step 5: Write the migration**
 
-Create `supabase/migrations/20261013000200_drop_contest_schema.sql`:
+Create `supabase/migrations/20261013000200_drop_contest_tables_and_get_contest_analytics.sql`:
 
 ```sql
 -- Phase 1b (contract). Apply only after the code that stops reading list_id is live in production
@@ -1052,7 +1052,7 @@ Expected: PASS. If `db reset` fails on `DROP VIEW`, a dependent object exists; r
 - [ ] **Step 7: Commit, then the owner applies**
 
 ```bash
-git add supabase/migrations/20261013000200_drop_contest_schema.sql supabase/tests/database/11_drop_contest_schema.test.sql
+git add supabase/migrations/20261013000200_drop_contest_tables_and_get_contest_analytics.sql supabase/tests/database/11_drop_contest_schema.test.sql
 git commit -m "feat(db)!: drop the contest tables, questions.list_id and unused view (phase 1b)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
@@ -1067,7 +1067,7 @@ Phase 2 migrations are independent of Phase 1 contract timing but run after Task
 ### Task 2.1: `user_stats` table, trigger and rebuild function
 
 **Files:**
-- Create: `supabase/migrations/20261013000300_user_stats.sql`, `supabase/tests/database/20_user_stats.test.sql`
+- Create: `supabase/migrations/20261013000300_add_user_stats_with_apply_quiz_result_and_rebuild_user_stats.sql`, `supabase/tests/database/20_user_stats.test.sql`
 
 **Interfaces:**
 - Produces: table `user_stats`; trigger `quiz_results_apply` on `quiz_results`; `rebuild_user_stats(p_user UUID DEFAULT NULL) RETURNS INT` (service role only, returns the number of rows upserted).
@@ -1139,7 +1139,7 @@ Expected: FAIL (`user_stats` does not exist).
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013000300_user_stats.sql`:
+Create `supabase/migrations/20261013000300_add_user_stats_with_apply_quiz_result_and_rebuild_user_stats.sql`:
 
 ```sql
 -- Phase 2a. Persisted per-player totals, kept by a trigger on quiz_results (spec section 6).
@@ -1265,14 +1265,14 @@ Expected: PASS, including the 9 new tests.
 - [ ] **Step 5: Commit**
 
 ```bash
-git add supabase/migrations/20261013000300_user_stats.sql supabase/tests/database/20_user_stats.test.sql
+git add supabase/migrations/20261013000300_add_user_stats_with_apply_quiz_result_and_rebuild_user_stats.sql supabase/tests/database/20_user_stats.test.sql
 git commit -m "feat(db): add user_stats rollup kept by a trigger on quiz_results (phase 2a)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
 ### Task 2.2: Swap the stats and leaderboard readers onto `user_stats`
 
 **Files:**
-- Create: `supabase/migrations/20261013000400_stats_readers.sql`, `supabase/tests/database/21_stats_readers.test.sql`
+- Create: `supabase/migrations/20261013000400_read_leaderboards_and_get_user_stats_from_user_stats.sql`, `supabase/tests/database/21_stats_readers.test.sql`
 
 **Interfaces:**
 - Consumes: `user_stats` (Task 2.1).
@@ -1343,7 +1343,7 @@ Expected: these tests may already pass (the old functions compute the same numbe
 
 - [ ] **Step 3: Write the migration with the reconcile gate**
 
-Create `supabase/migrations/20261013000400_stats_readers.sql`:
+Create `supabase/migrations/20261013000400_read_leaderboards_and_get_user_stats_from_user_stats.sql`:
 
 ```sql
 -- Phase 2a (readers). The gate below compares, for every account, the OLD get_user_stats (window
@@ -1432,14 +1432,14 @@ Expected: if the migration is re-run now, the gate raises `1 account(s) differ`.
 - [ ] **Step 6: Commit**
 
 ```bash
-git add supabase/migrations/20261013000400_stats_readers.sql supabase/tests/database/21_stats_readers.test.sql
+git add supabase/migrations/20261013000400_read_leaderboards_and_get_user_stats_from_user_stats.sql supabase/tests/database/21_stats_readers.test.sql
 git commit -m "feat(db): read stats and leaderboards from user_stats behind a reconcile gate (phase 2a)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
 ### Task 2.3: Integrity constraints and indexes
 
 **Files:**
-- Create: `supabase/migrations/20261013000500_integrity_and_indexes.sql`, `supabase/tests/database/22_integrity.test.sql`
+- Create: `supabase/migrations/20261013000500_add_check_constraints_and_indexes.sql`, `supabase/tests/database/22_integrity.test.sql`
 
 **Interfaces:**
 - Produces: CHECK constraints `questions_options_shape`, `questions_prompt_length`, `questions_explanation_length`, `quiz_results_answer_index_range`, `question_disputes_reason_length`, `groups_name_length`, `groups_description_length`; indexes `quiz_results_user_answered`, `questions_status_created`, `groups_owner_user`. Limits come from the app's validators (`lib/utils/validation.ts`: prompt 300, explanation 1000; `lib/actions/question-actions.ts`: dispute reason 500; `lib/actions/group-actions.ts`: name 50, description 200).
@@ -1505,7 +1505,7 @@ Expected: FAIL (no constraints, no indexes yet).
 
 - [ ] **Step 4: Write the migration**
 
-Create `supabase/migrations/20261013000500_integrity_and_indexes.sql`:
+Create `supabase/migrations/20261013000500_add_check_constraints_and_indexes.sql`:
 
 ```sql
 -- Phase 2b/2c. Constraints are added NOT VALID then validated in the same transaction, so a
@@ -1567,14 +1567,14 @@ Expected: PASS (validators already enforce these limits; nothing in code changes
 - [ ] **Step 7: Commit**
 
 ```bash
-git add supabase/migrations/20261013000500_integrity_and_indexes.sql supabase/tests/database/22_integrity.test.sql
+git add supabase/migrations/20261013000500_add_check_constraints_and_indexes.sql supabase/tests/database/22_integrity.test.sql
 git commit -m "feat(db): add integrity constraints and missing indexes (phase 2b, 2c)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
 ### Task 2.4: Derived `dispute_count`
 
 **Files:**
-- Create: `supabase/migrations/20261013000600_dispute_count.sql`, `supabase/tests/database/23_dispute_count.test.sql`
+- Create: `supabase/migrations/20261013000600_add_sync_dispute_count_trigger.sql`, `supabase/tests/database/23_dispute_count.test.sql`
 - Modify: `lib/db/questions.ts` (`setDisputeState` becomes `quarantineQuestion`), `lib/actions/question-actions.ts`
 - Test: `tests/dispute-quarantine.test.ts` (new)
 
@@ -1624,7 +1624,7 @@ Expected: FAIL on the first test (`dispute_count` stays 0 because nothing mainta
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013000600_dispute_count.sql`:
+Create `supabase/migrations/20261013000600_add_sync_dispute_count_trigger.sql`:
 
 ```sql
 -- Phase 2b. questions.dispute_count becomes derived: the number of unresolved disputes.
@@ -1750,14 +1750,14 @@ Expected: PASS.
 - [ ] **Step 9: Commit**
 
 ```bash
-git add supabase/migrations/20261013000600_dispute_count.sql supabase/tests/database/23_dispute_count.test.sql lib tests/dispute-quarantine.test.ts
+git add supabase/migrations/20261013000600_add_sync_dispute_count_trigger.sql supabase/tests/database/23_dispute_count.test.sql lib tests/dispute-quarantine.test.ts
 git commit -m "feat(db): derive dispute_count from unresolved disputes with a trigger (phase 2b)" -m "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>"
 ```
 
 ### Task 2.5: Privilege fixes and the permanent callable-function guard (spec F7)
 
 **Files:**
-- Create: `supabase/migrations/20261013000700_function_privileges.sql`, `supabase/tests/database/90_function_privileges.test.sql`
+- Create: `supabase/migrations/20261013000700_restrict_increment_ai_generation_and_get_question_analytics_to_service_role.sql`, `supabase/tests/database/90_function_privileges.test.sql`
 - Modify: `supabase/tests/database/00_baseline_guards.test.sql` (remove the exclusion), `lib/db/rpc.ts`
 - Test: `tests/question-analytics.test.ts` (new)
 
@@ -1795,7 +1795,7 @@ Expected: FAIL in `set_eq` (the baseline allows the public key to execute `incre
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013000700_function_privileges.sql`:
+Create `supabase/migrations/20261013000700_restrict_increment_ai_generation_and_get_question_analytics_to_service_role.sql`:
 
 ```sql
 -- Phase 2d (spec F7). Two SECURITY DEFINER functions had no pinned search_path and were callable
@@ -1902,7 +1902,7 @@ Expected: FAIL (the code calls `pub.rpc`).
 In `lib/db/rpc.ts` replace `questionAnalytics`:
 
 ```ts
-// Server-only function (supabase/migrations/20261013000700_function_privileges.sql): secret key.
+// Server-only function (supabase/migrations/20261013000700_restrict_increment_ai_generation_and_get_question_analytics_to_service_role.sql): secret key.
 export async function questionAnalytics(accountId: string): Promise<unknown[]> {
   return unwrap('rpc.get_question_analytics', await admin().rpc('get_question_analytics', { p_user_id: accountId })) ?? [];
 }
@@ -1939,7 +1939,7 @@ Three steps (spec section 7): 3a adds the objects and keeps old code working, 3b
 ### Task 3.1: Migration 3a: topics, translations, backfill, bridge trigger
 
 **Files:**
-- Create: `supabase/migrations/20261013000800_topics.sql`, `supabase/tests/database/30_topics.test.sql`
+- Create: `supabase/migrations/20261013000800_add_topics_with_resolve_topic_and_get_or_create_topic.sql`, `supabase/tests/database/30_topics.test.sql`
 - Modify: `supabase/tests/database/90_function_privileges.test.sql` (public list gains `resolve_topic`)
 
 **Interfaces:**
@@ -1995,7 +1995,7 @@ Expected: FAIL (`slugify_topic` does not exist).
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013000800_topics.sql`:
+Create `supabase/migrations/20261013000800_add_topics_with_resolve_topic_and_get_or_create_topic.sql`:
 
 ```sql
 -- Phase 3a (expand). Topics become rows with per-locale names. questions.category stays and stays
@@ -2300,7 +2300,7 @@ import 'server-only';
 import { admin, pub } from './client';
 import { unwrap } from './errors';
 
-// Topics are rows with per-locale names (supabase/migrations/20261013000800_topics.sql). The rest of
+// Topics are rows with per-locale names (supabase/migrations/20261013000800_add_topics_with_resolve_topic_and_get_or_create_topic.sql). The rest of
 // the app still sees a `category` string: the db layer derives it here.
 
 export const DEFAULT_LOCALE = 'en';
@@ -2576,7 +2576,7 @@ git commit -m "feat(topics): read and write questions through topics, keep the c
 ### Task 3.4: Migration 3c: contract (after Task 3.3 is live)
 
 **Files:**
-- Create: `supabase/migrations/20261013000900_topics_contract.sql`, `supabase/tests/database/31_topics_contract.test.sql`
+- Create: `supabase/migrations/20261013000900_drop_questions_category_and_set_question_topic.sql`, `supabase/tests/database/31_topics_contract.test.sql`
 - Modify: every pgTAP file that inserts into `questions`
 
 **Interfaces:**
@@ -2614,7 +2614,7 @@ Expected: FAIL (`category` still exists).
 
 - [ ] **Step 4: Write the migration**
 
-Create `supabase/migrations/20261013000900_topics_contract.sql`:
+Create `supabase/migrations/20261013000900_drop_questions_category_and_set_question_topic.sql`:
 
 ```sql
 -- Phase 3c (contract). Apply only after the code that reads topics through the embed is live in
@@ -2677,7 +2677,7 @@ Decision D1: daily answers live in their own tables; `quiz_results` and `user_st
 ### Task 4.1: Migration: daily challenge tables and functions
 
 **Files:**
-- Create: `supabase/migrations/20261013001000_daily_challenge.sql`, `supabase/tests/database/40_daily_challenge.test.sql`
+- Create: `supabase/migrations/20261013001000_add_daily_challenge_with_pick_daily_challenge_and_get_daily_leaderboard.sql`, `supabase/tests/database/40_daily_challenge.test.sql`
 - Modify: `supabase/tests/database/90_function_privileges.test.sql` (public list gains `get_daily_leaderboard`)
 
 **Interfaces:**
@@ -2750,7 +2750,7 @@ Expected: FAIL (`pick_daily_challenge` does not exist).
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013001000_daily_challenge.sql`:
+Create `supabase/migrations/20261013001000_add_daily_challenge_with_pick_daily_challenge_and_get_daily_leaderboard.sql`:
 
 ```sql
 -- Phase 4 (spec section 8, decision D1). The daily challenge keeps its own answer tables:
@@ -3063,7 +3063,7 @@ import 'server-only';
 import { admin, pub } from './client';
 import { unwrap } from './errors';
 
-// Daily challenge functions (supabase/migrations/20261013001000_daily_challenge.sql).
+// Daily challenge functions (supabase/migrations/20261013001000_add_daily_challenge_with_pick_daily_challenge_and_get_daily_leaderboard.sql).
 
 // Rows inserted: 0 when the day already has a challenge. Secret key only.
 export async function pickDailyChallenge(date: string, count = 10): Promise<number> {
@@ -3155,7 +3155,7 @@ git commit -m "feat(daily): add daily challenge wrappers and a cron job that pic
 ### Task 5.1: Migration: achievements, unlocks and `award_achievements`
 
 **Files:**
-- Create: `supabase/migrations/20261013001100_achievements.sql`, `supabase/tests/database/50_achievements.test.sql`
+- Create: `supabase/migrations/20261013001100_add_achievements_with_award_achievements.sql`, `supabase/tests/database/50_achievements.test.sql`
 
 **Interfaces:**
 - Consumes: `user_stats` (Task 2.1), `daily_attempts` (Task 4.1).
@@ -3210,7 +3210,7 @@ Expected: FAIL (`achievements` does not exist).
 
 - [ ] **Step 3: Write the migration**
 
-Create `supabase/migrations/20261013001100_achievements.sql`:
+Create `supabase/migrations/20261013001100_add_achievements_with_award_achievements.sql`:
 
 ```sql
 -- Phase 5 (spec section 9). Achievements are rows (metric + threshold), unlocked by a function the
@@ -3420,7 +3420,7 @@ import 'server-only';
 import { admin } from './client';
 import { unwrap } from './errors';
 
-// supabase/migrations/20261013001100_achievements.sql. Secret key only.
+// supabase/migrations/20261013001100_add_achievements_with_award_achievements.sql. Secret key only.
 
 // Slugs unlocked by this call (none when nothing new).
 export async function awardAchievements(accountId: string): Promise<string[]> {
