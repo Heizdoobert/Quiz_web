@@ -82,6 +82,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 8),
+Offstage(
+  child: Text('Sign in'),
+),
                     const Text(
                       'Sign in to save your progress and earn rewards.',
                       textAlign: TextAlign.center,
