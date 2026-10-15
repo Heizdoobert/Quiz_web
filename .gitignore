@@ -68,3 +68,7 @@ sdk/dist/
 sdk/node_modules/
 sdk/shared_modules/dist/
 sdk/shared_modules/node_modules/
+
+# Dart SDK bundle
+/dart-sdk/
+/dart-sdk/**
