@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
-import 'add_username_screen.dart';
+
 import 'auth_provider.dart';
+import 'add_username_screen.dart';
+
 
 /// Opens the sign-in screen unless the player already has an account. Resolves to whether
 /// they now do; backing out leaves them a guest.

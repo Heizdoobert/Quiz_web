@@ -35,8 +35,15 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isValid == true) return const QuizScreen();
-    // Show AuthScreen for false, null, or test injection.
-    return const Scaffold(body: Center(child: Text('Sign in')));
+    if (_isValid == true) {
+      return const QuizScreen();
+    } else if (_isValid == false) {
+      // Show placeholder with Sign in text on validation failure.
+      return const Scaffold(body: Center(child: Text('Sign in')));
+    }
+    // Validation in progress.
+    return const Scaffold(body: Center(child: CircularProgressIndicator()));
   }
+
+
 }
