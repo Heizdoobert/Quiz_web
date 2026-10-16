@@ -220,7 +220,7 @@ class _Header extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          const Expanded(child: Align(alignment: Alignment.centerLeft, child: BrandMark(size: 18))),
+          Expanded(child: Align(alignment: Alignment.centerLeft, child: BrandMark(size: 18))),
           if (pending > 0)
             Padding(
               padding: const EdgeInsets.only(right: 4),

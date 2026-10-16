@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:mobile/main.dart' as app;
 
 void main() {
+  var IntegrationTestWidgetsFlutterBinding;
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('App starts on QuizScreen when token is valid', (WidgetTester tester) async {

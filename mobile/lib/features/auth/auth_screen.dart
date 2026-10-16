@@ -6,7 +6,6 @@ import '../../widgets/glass_card.dart';
 import 'auth_provider.dart';
 import 'add_username_screen.dart';
 
-
 /// Opens the sign-in screen unless the player already has an account. Resolves to whether
 /// they now do; backing out leaves them a guest.
 Future<bool> requireSignIn(BuildContext context, WidgetRef ref) async {
@@ -33,50 +32,25 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   @override
   void initState() {
     super.initState();
-    // Listen for successful sign‑up to navigate to username screen.
-    ref.listen<AuthState>(authProvider, (previous, next) {
-      if (next.isAuthenticated && _signUp) {
-        // After sign‑up, push the add‑username screen.
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddUsernameScreen()))
-            .then((_) {
-          // Reset sign‑up flag after returning.
-          setState(() => _signUp = false);
-        });
-      }
-    });
+    // No listener here; moved to build to satisfy Riverpod restrictions.
   }
 
-  @override
-  void dispose() {
-    _email.dispose();
-    _username.dispose();
-    _password.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    ref.read(authProvider.notifier).signInWithPassword(_email.text, _password.text, signUp: _signUp);
-  }
-
-  InputDecoration _field(String label, IconData icon) {
-    OutlineInputBorder border(Color color) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: color),
-        );
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, size: 20, color: AppColors.slate400),
-      filled: true,
-      fillColor: AppColors.deepSpace.withValues(alpha: 0.6),
-      border: border(AppColors.cyberBorder),
-      enabledBorder: border(AppColors.cyberBorder),
-      focusedBorder: border(AppColors.neoMint),
-    );
-  }
+  bool _hasNavigated = false;
 
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    // Listen for successful sign‑up to navigate to AddUsernameScreen.
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.isAuthenticated && _signUp && !_hasNavigated) {
+        _hasNavigated = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const AddUsernameScreen()))
+              .then((_) => setState(() => _signUp = false));
+        });
+      }
+    });
     // Signed in: hand control back to whatever asked for the account.
     ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
       if (signedIn) Navigator.of(context).maybePop();
@@ -95,7 +69,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Center(child: BrandMark(size: 28)),
+                    Center(child: BrandMark(size: 28)),
                     const SizedBox(height: 24),
                     const Text(
                       'Ready to play?',
@@ -103,10 +77,10 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 8),
-Padding(
-  padding: const EdgeInsets.symmetric(vertical: 8),
-  child: const Text('Sign in', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: const Text('Sign in', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                    ),
                     const Text(
                       'Sign in to save your progress and earn rewards.',
                       textAlign: TextAlign.center,
@@ -153,7 +127,7 @@ Padding(
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
+                          child: const Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
                         ),
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
                       ],
@@ -179,7 +153,37 @@ Padding(
       ),
     );
   }
-}
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _username.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    ref.read(authProvider.notifier).signInWithPassword(_email.text, _password.text, signUp: _signUp);
+  }
+
+  InputDecoration _field(String label, IconData icon) {
+    OutlineInputBorder border(Color color) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: color),
+        );
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, size: 20, color: AppColors.slate400),
+      filled: true,
+      fillColor: AppColors.deepSpace.withValues(alpha: 0.6),
+      border: border(AppColors.cyberBorder),
+      enabledBorder: border(AppColors.cyberBorder),
+      focusedBorder: border(AppColors.neoMint),
+    );
+  }
+  }
+
+
 
 /// The web header's logo: mint bolt tile beside the gradient "Quick Quiz" wordmark.
 class BrandMark extends StatelessWidget {
