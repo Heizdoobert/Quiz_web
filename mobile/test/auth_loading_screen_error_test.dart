@@ -36,7 +36,8 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle(const Duration(seconds: 5));
+    await tester.pump(const Duration(seconds: 2));
+await tester.pumpAndSettle(const Duration(seconds: 5));
 
     // Assuming AuthScreen contains a visible widget with text 'Sign in'
     expect(find.text('Sign in'), findsOneWidget);

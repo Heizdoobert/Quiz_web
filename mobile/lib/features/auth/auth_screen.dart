@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
+import 'add_username_screen.dart';
 import 'auth_provider.dart';
 
 /// Opens the sign-in screen unless the player already has an account. Resolves to whether
 /// they now do; backing out leaves them a guest.
 Future<bool> requireSignIn(BuildContext context, WidgetRef ref) async {
   if (ref.read(authProvider).isAuthenticated) return true;
-  await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => const AuthScreen()));
+  await Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AuthScreen()));
   return context.mounted && ref.read(authProvider).isAuthenticated;
 }
 
@@ -22,19 +23,37 @@ class AuthScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthScreenState extends ConsumerState<AuthScreen> {
+  final _email = TextEditingController();
   final _username = TextEditingController();
   final _password = TextEditingController();
   bool _signUp = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Listen for successful sign‑up to navigate to username screen.
+    ref.listen<AuthState>(authProvider, (previous, next) {
+      if (next.isAuthenticated && _signUp) {
+        // After sign‑up, push the add‑username screen.
+        Navigator.of(context).push(MaterialPageRoute(builder: (_) => AddUsernameScreen()))
+            .then((_) {
+          // Reset sign‑up flag after returning.
+          setState(() => _signUp = false);
+        });
+      }
+    });
+  }
+
+  @override
   void dispose() {
+    _email.dispose();
     _username.dispose();
     _password.dispose();
     super.dispose();
   }
 
   void _submit() {
-    ref.read(authProvider.notifier).signInWithPassword(_username.text, _password.text, signUp: _signUp);
+    ref.read(authProvider.notifier).signInWithPassword(_email.text, _password.text, signUp: _signUp);
   }
 
   InputDecoration _field(String label, IconData icon) {
@@ -82,8 +101,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 0.5),
                     ),
                     const SizedBox(height: 8),
-Offstage(
-  child: Text('Sign in'),
+Padding(
+  padding: const EdgeInsets.symmetric(vertical: 8),
+  child: const Text('Sign in', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
 ),
                     const Text(
                       'Sign in to save your progress and earn rewards.',
@@ -92,12 +112,12 @@ Offstage(
                     ),
                     const SizedBox(height: 24),
                     TextField(
-                      controller: _username,
+                      controller: _email,
                       enabled: !auth.isLoading,
                       autocorrect: false,
                       textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.username],
-                      decoration: _field('Username', Icons.person_outline),
+                      autofillHints: const [AutofillHints.email],
+                      decoration: _field('Email', Icons.email_outlined),
                     ),
                     const SizedBox(height: 12),
                     TextField(

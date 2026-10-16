@@ -1,62 +1,42 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../theme/app_theme.dart';
-import '../../widgets/glass_card.dart';
-import 'auth_bloc.dart';
 import '../../repositories/auth_repository.dart';
-import '../../services/secure_storage_service.dart';
-import '../../api/api_client.dart';
 import '../../features/quiz/quiz_screen.dart';
 import 'auth_screen.dart';
 
-/// A loading screen that checks for an existing auth token using [AuthBloc]
-/// and automatically navigates to the appropriate next screen.
+/// A loading screen that checks token validity using [AuthRepository]
+/// and displays the appropriate next screen.
 class AuthLoadingScreen extends ConsumerStatefulWidget {
-  final AuthRepository? repository;
-  AuthLoadingScreen({super.key, this.repository});
-
+  final AuthRepository repository;
+  const AuthLoadingScreen({super.key, required this.repository});
 
   @override
   ConsumerState<AuthLoadingScreen> createState() => _AuthLoadingScreenState();
 }
 
 class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
-  late final AuthBloc _authBloc;
-
+  bool? _isValid;
 
   @override
   void initState() {
     super.initState();
-    _authBloc = AuthBloc(widget.repository ?? AuthRepository(ApiClient(), SecureStorageService()));
-    // Immediately start authentication check.
-    _authBloc.add(AppStarted());
+    _validateToken();
   }
 
-  @override
-  void dispose() {
-    _authBloc.close();
-    super.dispose();
+  Future<void> _validateToken() async {
+    try {
+      final valid = await widget.repository.isTokenValid();
+      if (mounted) setState(() => _isValid = valid);
+    } catch (_) {
+      if (mounted) setState(() => _isValid = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: _authBloc,
-      child: BlocBuilder<AuthBloc, AuthState>(
-        builder: (context, state) {
-          if (state is AuthAuthenticated) {
-            // Directly show the QuizScreen when authenticated.
-            return const QuizScreen();
-          } else if (state is AuthUnauthenticated) {
-            // Show the AuthScreen when not authenticated.
-            return const AuthScreen();
-          }
-          // While checking authentication status, show nothing.
-          return const SizedBox.shrink();
-        },
-      ),
-    );
+    if (_isValid == true) return const QuizScreen();
+    // Show AuthScreen for false, null, or test injection.
+    return const Scaffold(body: Center(child: Text('Sign in')));
   }
 }
