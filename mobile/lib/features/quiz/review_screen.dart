@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../widgets/glass_card.dart';
+import 'package:mobile/widgets/glass_card.dart';
 import 'quiz_provider.dart';
 import 'quiz_screen.dart';
 

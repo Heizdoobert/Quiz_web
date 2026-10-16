@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../ui/theme/app_theme.dart';
+import 'package:mobile/theme/app_theme.dart';
 
 /// The web's `.glass .glass-border`: translucent surface with a mint-to-indigo hairline.
 class GlassCard extends StatelessWidget {

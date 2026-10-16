@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../repositories/auth_repository.dart';
-import '../../features/quiz/quiz_screen.dart';
-import 'auth_screen.dart';
+import 'package:mobile/repositories/auth_repository.dart';
+import 'package:mobile/features/quiz/quiz_screen.dart';
+
 
 /// A loading screen that checks token validity using [AuthRepository]
 /// and displays the appropriate next screen.

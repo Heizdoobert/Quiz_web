@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
-import 'package:mobile/services/remote_config_service.dart';
+import 'package:mobile/services/remote_config/remote_config_service.dart';
 
 void main() {
   RemoteConfigService serviceFor(Future<http.Response> Function(http.Request) handler) =>

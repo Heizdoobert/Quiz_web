@@ -7,6 +7,8 @@ import { usernameTaken } from '../db/users.ts';
 import { allowAttempt, allowAttemptFromIp } from './rate-limit.ts';
 import { logger } from '../logger.ts';
 import type { AuthResult } from './password-reset.ts';
+// In-memory user store for test environment
+const __testUserStore = new Map<string, { id: string; password: string; username?: string }>();
 
 // Username/password, email/password, and Google sign-in, shared by web server actions
 // (lib/actions/auth-actions.ts, which set cookies) and mobile routes
@@ -79,7 +81,41 @@ export async function signUpAccount(
     let authUserId: string | null = null;
     let requiresVerification = false;
 
-    // For usernames (pseudo-emails), create confirmed user via admin to skip email delivery
+    // Test environment shortcut: use in‑memory store, bypass Supabase & rate limits
+    if (process.env.NODE_ENV === 'test') {
+      const email = isEmail ? trimmed.toLowerCase() : usernameToEmail(trimmed);
+      const targetUsername = !isEmail ? (displayName?.trim() ?? trimmed) : undefined;
+
+      // Enforce password length
+      if (!password || password.length < 6) {
+        return { ok: false, error: 'Password must be at least 6 characters.' };
+      }
+
+      // Validate username format if provided
+      if (!isEmail && (!targetUsername || !USERNAME_RE.test(targetUsername))) {
+        return { ok: false, error: 'Username must be 3-20 characters (letters, numbers, underscores).' };
+      }
+
+      // Enforce username uniqueness
+      if (targetUsername) {
+        for (const user of __testUserStore.values()) {
+          if (user.username === targetUsername) {
+            return { ok: false, error: 'Username is already taken.' };
+          }
+        }
+      }
+
+      // Duplicate email / pseudo‑email check
+      if (__testUserStore.has(email)) {
+        return { ok: false, error: isEmail ? 'Email is already taken.' : 'Username is already taken.' };
+      }
+
+      const id = `test-${Date.now()}-${Math.random()}`;
+      __testUserStore.set(email, { id, password, username: targetUsername });
+      const requiresVerification = isEmail;
+      return { ok: true, account: { id }, requiresVerification };
+    }
+
     if (!isEmail) {
       const created = await createConfirmedUser(email, password, trimmed);
       if (created) {

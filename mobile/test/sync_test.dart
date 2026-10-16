@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/services/sync_service.dart';
+import 'package:mobile/services/sync/sync_service.dart';
 
 void main() {
   final queued = [

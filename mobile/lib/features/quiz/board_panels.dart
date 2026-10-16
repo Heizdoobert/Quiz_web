@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/glass_card.dart';
+import 'package:mobile/theme/app_theme.dart';
+import 'package:mobile/widgets/glass_card.dart';
 import 'board_provider.dart';
 
 /// The web Sidebar: "Live Scoreboard" with the Score / Streak / Accuracy tiles and Recent History.

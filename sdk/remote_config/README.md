@@ -11,4 +11,4 @@ Flags and tunable values the owner changes in the Supabase dashboard, with no de
 
 1. Add it to `KEYS` in `keys.ts` with a `default` and a `parse` that returns `undefined` for a wrong type.
 2. Insert a row in the dashboard or in a new migration.
-3. Mirror it in `mobile/lib/services/remote_config_service.dart`.
+3. Mirror it in `../../mobile/lib/services/remote_config/remote_config_service.dart`.

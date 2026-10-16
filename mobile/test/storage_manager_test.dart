@@ -1,6 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/services/storage_manager.dart';
+import 'package:mobile/services/storage/storage_manager.dart';
 
 void main() {
   late StorageManager manager;

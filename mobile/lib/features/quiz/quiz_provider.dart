@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../db/quiz_repository.dart';
-import '../../services/sync_service.dart';
+import 'package:mobile/db/quiz_repository.dart';
+import '../../services/sync/sync_service.dart';
 import '../auth/auth_provider.dart';
 
 class QuizState {

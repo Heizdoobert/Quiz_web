@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../api/api_client.dart';
-import '../ui/theme/app_theme.dart';
+import 'package:mobile/api/api_client.dart';
+import 'package:mobile/theme/app_theme.dart';
 
 /// A page on the website that serves this app's API. Play asks for both pages to be reachable
 /// from inside the app.

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../theme/app_theme.dart';
-import '../../widgets/glass_card.dart';
+import 'package:mobile/theme/app_theme.dart';
+import 'package:mobile/widgets/glass_card.dart';
 
 import 'auth_provider.dart';
 import 'add_username_screen.dart';
@@ -127,7 +127,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12),
-                          child: const Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
+                          child: Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
                         ),
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
                       ],
