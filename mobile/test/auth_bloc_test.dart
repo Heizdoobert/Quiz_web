@@ -3,7 +3,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/auth/auth_bloc.dart';
 import 'package:mobile/repositories/auth_repository.dart';
-import 'package:mobile/services/secure_storage_service.dart';
+import 'package:mobile/services/storage/secure_storage_service.dart';
 import 'package:mobile/api/api_client.dart';
 
 class FakeAuthRepository extends AuthRepository {

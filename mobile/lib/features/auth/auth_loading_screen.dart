@@ -52,9 +52,6 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   @override
   Widget build(BuildContext context) {
     // Show a loading indicator while token validation is in progress.
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return const Scaffold(body: Center(child: Text('Loading')));
   }
-}
-
-
 }
