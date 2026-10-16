@@ -52,47 +52,9 @@ class _AddUsernameScreenState extends ConsumerState<AddUsernameScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.watch(authProvider);
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, title: const Text('Add Username')),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: GlassCard(
-              padding: const EdgeInsets.all(28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Center(child: BrandMark(size: 28)),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Choose a username',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    controller: _usernameController,
-                    enabled: !auth.isLoading,
-                    autocorrect: false,
-                    textInputAction: TextInputAction.done,
-                    onSubmitted: (_) => _submit(),
-                    decoration: _field('Username', Icons.person_outline),
-                  ),
-                  const SizedBox(height: 16),
-                  GradientButton(
-                    label: 'Save',
-                    loading: auth.isLoading,
-                    onPressed: _submit,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+      appBar: AppBar(title: const Text('Add Username')),
+      body: const Center(child: Text('Add your username here')),
     );
   }
 }
