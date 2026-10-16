@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../api/api_client.dart';
-import '../db/quiz_repository.dart';
-import '../features/auth/auth_provider.dart';
+import '../../api/api_client.dart';
+import '../../db/quiz_repository.dart';
+import '../../features/auth/auth_provider.dart';
 
 final syncServiceProvider = Provider(
   (ref) => SyncService(ref.watch(apiClientProvider), ref.watch(quizRepositoryProvider)),

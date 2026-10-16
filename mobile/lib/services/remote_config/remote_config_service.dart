@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
-import '../api/api_client.dart';
+import '../../api/api_client.dart';
 
 final remoteConfigServiceProvider = Provider((ref) => RemoteConfigService());
 
