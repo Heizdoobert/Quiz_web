@@ -5,9 +5,6 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import 'auth_provider.dart';
 import 'auth_screen.dart';
-
-
-
 /// Screen that appears after a successful sign‑up to let the user choose a username.
 class AddUsernameScreen extends ConsumerStatefulWidget {
   const AddUsernameScreen({super.key});
@@ -57,7 +54,7 @@ class _AddUsernameScreenState extends ConsumerState<AddUsernameScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent),
+      appBar: AppBar(backgroundColor: Colors.transparent, title: const Text('Add Username')),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
