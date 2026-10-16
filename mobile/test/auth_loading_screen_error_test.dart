@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/api/api_client.dart';
 import 'package:mobile/features/auth/auth_loading_screen.dart';
 import 'package:mobile/repositories/auth_repository.dart';
-import 'package:mobile/services/secure_storage_service.dart';
+import 'package:mobile/services/storage/secure_storage_service.dart';
 
 /// A fake repository that throws an exception during token validation.
 class ThrowingAuthRepository extends AuthRepository {

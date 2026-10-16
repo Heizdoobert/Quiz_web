@@ -1,5 +1,5 @@
 import 'package:mobile/api/api_client.dart';
-import 'package:mobile/services/secure_storage_service.dart';
+import 'package:mobile/services/storage/secure_storage_service.dart';
 
 /// A thin repository that abstracts authentication logic.
 /// It checks if a token exists, validates it via a simple API call
