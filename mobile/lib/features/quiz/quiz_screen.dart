@@ -8,7 +8,7 @@ import '../profile/profile_screen.dart';
 import 'board_panels.dart';
 import 'board_provider.dart';
 import 'quiz_provider.dart';
-
+import 'review_screen.dart';
 typedef Question = Map<String, dynamic>;
 
 const _letters = ['A', 'B', 'C', 'D'];
@@ -17,7 +17,10 @@ const _letters = ['A', 'B', 'C', 'D'];
 /// Answers are queued offline, so the correct option is not shown here: the server only
 /// reveals it (and scores it) when the queue syncs.
 class QuizScreen extends ConsumerStatefulWidget {
-  const QuizScreen({super.key});
+  /// Optional ID of a question to edit directly from the review screen.
+  final String? initialQuestionId;
+
+  const QuizScreen({super.key, this.initialQuestionId});
 
   @override
   ConsumerState<QuizScreen> createState() => _QuizScreenState();
@@ -25,6 +28,15 @@ class QuizScreen extends ConsumerStatefulWidget {
 
 class _QuizScreenState extends ConsumerState<QuizScreen> {
   static const _all = 'All';
+
+  // If navigating from ReviewScreen, start with this specific question.
+  String? _forcedQuestionId;
+
+  @override
+  void initState() {
+    super.initState();
+    _forcedQuestionId = widget.initialQuestionId;
+  }
 
   String _category = _all;
   // Answered or skipped this session; the answered question stays on screen until Next.
@@ -36,6 +48,12 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       [_all, ...{for (final q in qs) if ((q['category'] as String?)?.isNotEmpty ?? false) q['category'] as String}];
 
   Question? _current(List<Question> qs) {
+    // If a specific question ID was passed from ReviewScreen, show it regardless of category/seen.
+    if (_forcedQuestionId != null) {
+      for (final q in qs) {
+        if (q['id'] == _forcedQuestionId) return q;
+      }
+    }
     if (_pickedId != null) {
       for (final q in qs) {
         if (q['id'] == _pickedId) return q;
@@ -47,6 +65,9 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
     }
     return null;
   }
+
+
+
 
   Future<void> _answer(Question q, int index) async {
     // Playing needs an account, so the first pick asks a guest to sign in.
@@ -82,18 +103,25 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
           }),
         ),
         const SizedBox(height: 16),
-        if (qs.isEmpty)
-          const _Message(text: 'No questions available offline.')
-        else if (current == null)
-          const _Message(text: 'You have gone through every question here. Pull a fresh set with refresh.')
-        else if (_pickedId != null)
-          _AnswerCard(question: current, pickedIndex: _pickedIndex!, onNext: () => _next(current))
-        else
-          _QuestionCard(
-            question: current,
-            onPick: (i) => _answer(current, i),
-            onSkip: () => _next(current),
-          ),
+                qs.isEmpty
+                    ? const _Message(text: 'No questions available offline.')
+                    : current == null
+                        ? const ReviewScreen()
+                        : _pickedId != null
+                            ? _AnswerCard(
+                                question: current,
+                                pickedIndex: _pickedIndex!,
+                                onNext: () => _next(current),
+                              )
+                            : _QuestionCard(
+                                question: current,
+                                onPick: (i) => _answer(current, i),
+                                onSkip: () => _next(current),
+                              ),
+          // Duplicate legacy block removed
+        
+
+
       ],
     );
   }
@@ -417,7 +445,7 @@ class _QuestionCard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Text(
-              question['prompt'] as String,
+              (question['prompt'] as String?) ?? (question['question'] as String?) ?? '',
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, height: 1.5, color: Colors.white),
             ),

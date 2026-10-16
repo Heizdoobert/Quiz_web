@@ -106,6 +106,21 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = const AuthState();
   }
 
+  // Set username after sign‑up
+  Future<void> setUsername(String username) async {
+    state = const AuthState(isLoading: true);
+    try {
+      await _apiClient.post('/auth/username', {'username': username});
+      // Keep user authenticated.
+      state = const AuthState(isAuthenticated: true);
+    } on ApiException catch (e) {
+      state = AuthState(error: e.message);
+    } catch (e) {
+      state = AuthState(error: 'Failed to set username: $e');
+    }
+  }
+
+
   /// Signs out after the server rejected the token, keeping the answer queue and the account
   /// id. Several requests can fail at once; only the first one acts.
   Future<void> sessionExpired() async {

@@ -7,19 +7,23 @@ import '../auth/auth_provider.dart';
 
 class QuizState {
   final AsyncValue<List<Map<String, dynamic>>> questions;
+  final Map<String, int> answers; // questionId -> selected index
   final int pendingSyncCount;
 
   QuizState({
     required this.questions,
+    this.answers = const {},
     this.pendingSyncCount = 0,
   });
 
   QuizState copyWith({
     AsyncValue<List<Map<String, dynamic>>>? questions,
+    Map<String, int>? answers,
     int? pendingSyncCount,
   }) {
     return QuizState(
       questions: questions ?? this.questions,
+      answers: answers ?? this.answers,
       pendingSyncCount: pendingSyncCount ?? this.pendingSyncCount,
     );
   }
@@ -30,13 +34,14 @@ final quizProvider = NotifierProvider<QuizNotifier, QuizState>(QuizNotifier.new)
 class QuizNotifier extends Notifier<QuizState> {
   @override
   QuizState build() {
-    // Answers given offline go up as soon as a request gets through.
+    // Periodic sync
     final timer = Timer.periodic(const Duration(seconds: 30), (_) => _sync());
     ref.onDispose(timer.cancel);
-    // Signing in (again, after an expired session) sends what queued up meanwhile right away.
+    // Sync on sign‑in
     ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
       if (signedIn) _sync();
     });
+    // Load data async
     Future.microtask(loadData);
     return QuizState(questions: const AsyncValue.loading());
   }
@@ -45,13 +50,12 @@ class QuizNotifier extends Notifier<QuizState> {
     state = state.copyWith(questions: const AsyncValue.loading());
     final repo = ref.read(quizRepositoryProvider);
     final api = ref.read(apiClientProvider);
-
     try {
+      // Try API first
       try {
         final response = await api.get('/quiz/questions');
         final data = response['questions'] as List;
         final questionsList = List<Map<String, dynamic>>.from(data);
-        // An empty list is a failed pick on the server, not a reason to wipe the offline cache.
         if (questionsList.isNotEmpty) await repo.cacheQuestions(questionsList);
       } catch (e) {
         debugPrint('Failed to fetch questions from API: $e');
@@ -73,19 +77,30 @@ class QuizNotifier extends Notifier<QuizState> {
   Future<void> submitAnswer(String questionId, int answerIndex) async {
     final repo = ref.read(quizRepositoryProvider);
     await repo.queueAnswer(questionId, answerIndex);
-
+    // Update local answers map
+    final newAnswers = Map<String, int>.from(state.answers)
+      ..[questionId] = answerIndex;
     final queued = await repo.getQueuedAnswers();
-    state = state.copyWith(pendingSyncCount: queued.length);
+    state = state.copyWith(
+      answers: newAnswers,
+      pendingSyncCount: queued.length,
+    );
     await _sync();
   }
 
-  /// Sends what is still queued, then clears it. Answers the server could not take are
-  /// dropped here so the next account to sign in on this device is not credited with them.
+  /// Called when the quiz is finished – clear local answers and sync.
+  Future<void> finalizeQuiz() async {
+    // Clear stored answers locally
+    state = state.copyWith(answers: {});
+    // Ensure any queued answers are sent
+    await _sync();
+  }
+
   Future<void> signOut() async {
     await ref.read(syncServiceProvider).syncAnswers();
     await ref.read(quizRepositoryProvider).clearAllQueuedAnswers();
     await ref.read(authProvider.notifier).logout();
-    if (ref.mounted) state = state.copyWith(pendingSyncCount: 0);
+    if (ref.mounted) state = state.copyWith(pendingSyncCount: 0, answers: {});
   }
 
   Future<void> _sync() async {
