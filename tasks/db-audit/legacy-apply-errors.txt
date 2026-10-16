@@ -1,0 +1,60 @@
+== [1] schema.sql
+psql:<stdin>:81: ERROR:  column "created_by_user" of relation "questions" does not exist
+psql:<stdin>:103: ERROR:  relation "question_lists" does not exist
+psql:<stdin>:105: ERROR:  relation "reward_claims" does not exist
+psql:<stdin>:106: ERROR:  relation "reward_claims" does not exist
+psql:<stdin>:107: ERROR:  relation "reward_claims" does not exist
+psql:<stdin>:110: ERROR:  relation "reward_claims" does not exist
+psql:<stdin>:112: ERROR:  relation "reward_claims" does not exist
+== [2] schema.sql
+psql:<stdin>:67: ERROR:  policy "Allow public read for users" for table "users" already exists
+psql:<stdin>:70: ERROR:  policy "Allow public read for groups" for table "groups" already exists
+psql:<stdin>:72: ERROR:  policy "Allow public read for group_members" for table "group_members" already exists
+psql:<stdin>:77: ERROR:  policy "Allow public read for questions" for table "questions" already exists
+psql:<stdin>:81: ERROR:  column "created_by_user" of relation "questions" does not exist
+psql:<stdin>:126: ERROR:  policy "Allow public read for question_disputes" for table "question_disputes" already exists
+psql:<stdin>:185: ERROR:  policy "Allow public read for question_lists" for table "question_lists" already exists
+psql:<stdin>:186: ERROR:  policy "Allow public read for question_list_confirmations" for table "question_list_confirmations" already exists
+psql:<stdin>:187: ERROR:  policy "Allow public read for list_entries" for table "list_entries" already exists
+== [3] lock-down-public-writes.sql
+(no errors)
+== [4] question-lists.sql
+(no errors)
+== [5] secure-rewards-and-answers.sql
+(no errors)
+== [6] restrict-quiz-results-insert.sql
+(no errors)
+== [7] contest-escrow.sql
+(no errors)
+== [8] widen-reward-claims-amount.sql
+(no errors)
+== [9] accounts.sql
+(no errors)
+== [10] stats-functions.sql
+(no errors)
+== [11] topics.sql
+(no errors)
+== [12] search.sql
+(no errors)
+== [13] community.sql
+(no errors)
+== [14] reward-payee.sql
+(no errors)
+== [15] 15-sponsors.sql
+(no errors)
+== [16] 16-leaderboard-pagination.sql
+(no errors)
+== [17] 17-analytics.sql
+(no errors)
+== [18] 17-auth-rate-limit.sql
+(no errors)
+== [19] 18-ai-usage.sql
+(no errors)
+== [20] 19-secure-ai-usage.sql
+(no errors)
+== [21] 20-drop-web3-schema.sql
+(no errors)
+== [22] remote-config.sql
+(no errors)
+== [23] 21-rbac.sql
+(no errors)

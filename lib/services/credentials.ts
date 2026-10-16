@@ -1,12 +1,12 @@
 // import 'server-only'; // disabled for node script
 // Use relative imports for Node script execution (aliases not resolved at runtime)
-import { ensureAccountForAuthUser } from './users';
-import type { SessionAccount } from './session';
-import { auth, createConfirmedUser } from '../db/auth';
-import { usernameTaken } from '../db/users';
-import { allowAttempt, allowAttemptFromIp } from './rate-limit';
-import { logger } from '../logger';
-import type { AuthResult } from './password-reset';
+import { ensureAccountForAuthUser } from './users.ts';
+import type { SessionAccount } from './session.ts';
+import { auth, createConfirmedUser } from '../db/auth.ts';
+import { usernameTaken } from '../db/users.ts';
+import { allowAttempt, allowAttemptFromIp } from './rate-limit.ts';
+import { logger } from '../logger.ts';
+import type { AuthResult } from './password-reset.ts';
 
 // Username/password, email/password, and Google sign-in, shared by web server actions
 // (lib/actions/auth-actions.ts, which set cookies) and mobile routes
