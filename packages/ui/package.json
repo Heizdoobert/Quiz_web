@@ -24,7 +24,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "node build.mjs && tsc --emitDeclarationOnly --outDir dist",
     "type-check": "tsc --noEmit"
   },
   "peerDependencies": {
