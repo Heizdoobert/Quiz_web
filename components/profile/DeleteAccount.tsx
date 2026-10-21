@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { AlertCircle, Loader2, Trash2 } from 'lucide-react';
 import Modal from '@/components/ui/Modal';
-import { deleteMyAccount } from '@/lib/actions/profile-actions';
+import { deleteMyAccount } from '@/lib/actions/users';
 import { useSession } from '@/hooks/shared/use-session';
 import { logger } from '@/lib/logger';
 

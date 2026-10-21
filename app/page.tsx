@@ -1,6 +1,5 @@
 import QuizLayout from '@/components/quiz/QuizLayout';
-import { fetchRandomQuestion } from '@/lib/actions/question-actions';
-import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+import { fetchRandomQuestion, getGlobalLeaderboard } from '@/lib/actions/quiz';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

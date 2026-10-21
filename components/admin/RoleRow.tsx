@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { setRoleAction } from '@/lib/actions/admin-actions';
+import { setRoleAction } from '@/lib/actions/admin';
 import type { AccountRow } from '@/lib/db/roles';
 import { ROLES } from '@/lib/services/rbac/rbac';
 

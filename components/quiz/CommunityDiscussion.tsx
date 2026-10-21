@@ -4,7 +4,7 @@ import {
   getQuestionDiscussion,
   RatingSummary,
   CommentView,
-} from '@/lib/actions/community-actions';
+} from '@/lib/actions/community';
 import RatingStars from '@/components/community/RatingStars';
 import CommentList from '@/components/community/CommentList';
 import SuggestionForm from '@/components/community/SuggestionForm';

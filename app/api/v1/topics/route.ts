@@ -1,4 +1,4 @@
-import { getTopics } from '@/lib/actions/question-actions';
+import { getTopics } from '@/lib/actions/quiz';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';

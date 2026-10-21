@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Layers, Hash } from 'lucide-react';
-import { getTopics } from '@/lib/actions/question-actions';
+import { getTopics } from '@/lib/actions/quiz';
 
 interface CategoryBarProps {
   selectedCategory: string;

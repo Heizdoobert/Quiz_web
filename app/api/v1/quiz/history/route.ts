@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/services/auth/api-auth';
-import { getAnswerHistory } from '@/lib/actions/quiz-actions';
+import { getAnswerHistory } from '@/lib/actions/quiz';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';

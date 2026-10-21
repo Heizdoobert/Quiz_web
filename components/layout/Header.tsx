@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Zap, Volume2, VolumeX, User, LogOut } from "lucide-react";
 import { useSoundToggle } from "@/hooks/shared/use-sound-toggle";
 import { useSession } from "@/hooks/shared/use-session";
-import { signOut } from "@/lib/actions/auth-actions";
+import { signOut } from "@/lib/actions/auth";
 import SearchBox from "@/components/discovery/SearchBox";
 
 interface HeaderProps {

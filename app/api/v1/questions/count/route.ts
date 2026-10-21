@@ -1,4 +1,4 @@
-import { getQuestionCount } from '@/lib/actions/question-actions';
+import { getQuestionCount } from '@/lib/actions/quiz';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';

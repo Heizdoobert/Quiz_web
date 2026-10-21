@@ -3,7 +3,7 @@ import { User, KeyRound, Loader2 } from "lucide-react";
 import {
   signInWithUsername,
   signUpWithUsername,
-} from "@/lib/actions/auth-actions";
+} from "@/lib/actions/auth";
 type AuthMode = "login" | "register";
 
 export interface UsernameTabProps {

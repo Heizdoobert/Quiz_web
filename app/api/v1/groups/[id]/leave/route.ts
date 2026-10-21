@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/services/auth/api-auth';
-import { leaveGroup } from '@/lib/actions/group-actions';
+import { leaveGroup } from '@/lib/actions/community';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';

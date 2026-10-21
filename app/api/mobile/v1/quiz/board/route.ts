@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
-import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+import { getGlobalLeaderboard } from '@/lib/actions/quiz';
 import { historyForAccount, statsForAccount, ZERO_STATS } from '@/lib/utils/stats';
 
 // What the web's Live Scoreboard and Global Top panels show: the global leaderboard for

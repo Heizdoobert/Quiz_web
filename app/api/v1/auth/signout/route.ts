@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/services/auth/api-auth';
-import { signOut } from '@/lib/actions/auth-actions';
+import { signOut } from '@/lib/actions/auth';
 import { apiOk } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {

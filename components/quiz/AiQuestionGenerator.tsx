@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, ChevronUp, Loader2, Bot } from 'lucide-react';
-import { generateQuestion } from '@/lib/actions/question-actions';
+import { generateQuestion } from '@/lib/actions/quiz';
 
 interface AiQuestionGeneratorProps {
   onSuccess: (data: { prompt: string; options: string[]; correctIndex: number; explanation: string }) => void;

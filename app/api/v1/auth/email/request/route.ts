@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { requestEmailCode } from '@/lib/actions/auth-actions';
+import { requestEmailCode } from '@/lib/actions/auth';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {

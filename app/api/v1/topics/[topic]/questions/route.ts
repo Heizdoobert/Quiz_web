@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getTopicQuestions } from '@/lib/actions/discovery-actions';
+import { getTopicQuestions } from '@/lib/actions/quiz';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';

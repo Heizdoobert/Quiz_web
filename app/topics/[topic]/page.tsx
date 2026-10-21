@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import SearchResultList from '@/components/discovery/SearchResultList';
-import { getTopicQuestions } from '@/lib/actions/discovery-actions';
+import { getTopicQuestions } from '@/lib/actions/quiz';
 
 // Player-typed topic names become public URLs, so keep these out of search
 // engines until that's decided (see docs/specs/discovery.md Open Questions).

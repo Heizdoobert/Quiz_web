@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import SearchResultList from '@/components/discovery/SearchResultList';
-import { searchQuestions } from '@/lib/actions/discovery-actions';
+import { searchQuestions } from '@/lib/actions/quiz';
 
 export const metadata: Metadata = {
   title: 'Search',

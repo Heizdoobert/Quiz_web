@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { fetchRandomQuestion } from '@/lib/actions/question-actions';
+import { fetchRandomQuestion } from '@/lib/actions/quiz';
 
 // No request argument, so Next would prerender this at build time and freeze one question set.
 export const dynamic = 'force-dynamic';

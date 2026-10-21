@@ -6,7 +6,7 @@ import {
   SuggestionView,
   getSuggestionsForAuthor,
   resolveSuggestion,
-} from "@/lib/actions/community-actions";
+} from "@/lib/actions/community";
 import { formatRelativeTime } from "@/lib/utils/format";
 import { logger } from '@/lib/logger';
 

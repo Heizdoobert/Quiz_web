@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Star } from 'lucide-react';
-import { rateQuestion } from '@/lib/actions/community-actions';
+import { rateQuestion } from '@/lib/actions/community';
 import { logger } from '@/lib/logger';
 
 interface RatingStarsProps {

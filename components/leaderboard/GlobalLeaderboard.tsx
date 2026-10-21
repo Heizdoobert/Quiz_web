@@ -37,7 +37,7 @@ export default function GlobalLeaderboard({
     if (safePage >= totalPages && hasMore && !loadingMore) {
       setLoadingMore(true);
       const { getGlobalLeaderboard } =
-        await import("@/lib/actions/leaderboard-actions");
+        await import("@/lib/actions/quiz");
       const moreEntries = await getGlobalLeaderboard(50, entries.length);
       if (moreEntries.length < 50) setHasMore(false);
       setEntries((prev) => [...prev, ...moreEntries]);

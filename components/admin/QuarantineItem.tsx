@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { resolveQuarantineAction } from '@/lib/actions/admin-actions';
+import { resolveQuarantineAction } from '@/lib/actions/admin';
 import type { QuarantinedQuestion } from '@/lib/db/questions';
 import { MAX_NOTE_LENGTH } from '@/lib/constants/moderation';
 

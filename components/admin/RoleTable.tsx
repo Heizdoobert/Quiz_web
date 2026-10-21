@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useTransition } from 'react';
-import { listAccountsAction } from '@/lib/actions/admin-actions';
+import { listAccountsAction } from '@/lib/actions/admin';
 import type { AccountRow } from '@/lib/db/roles';
 import RoleRow from './RoleRow';
 

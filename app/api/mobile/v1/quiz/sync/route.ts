@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
-import { submitAnswer } from '@/lib/actions/quiz-actions';
+import { submitAnswer } from '@/lib/actions/quiz';
 import { AnswerSubmissionResult } from '@/lib/types';
 
 // One request handles at most this many queued answers; the app keeps the rows it gets no verdict

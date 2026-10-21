@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Lightbulb, Send, X, Check } from "lucide-react";
-import { addComment } from "@/lib/actions/community-actions";
+import { addComment } from "@/lib/actions/community";
 import { logger } from '@/lib/logger';
 
 interface SuggestionFormProps {

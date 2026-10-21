@@ -1,8 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import QuizLayout from '@/components/quiz/QuizLayout';
-import { getPublicQuestion } from '@/lib/actions/question-actions';
-import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
+import { getPublicQuestion, getGlobalLeaderboard } from '@/lib/actions/quiz';
 
 export const dynamic = 'force-dynamic';
 

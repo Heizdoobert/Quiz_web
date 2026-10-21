@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { getQuestionAnalytics, QuestionAnalytics } from '@/lib/actions/profile-actions';
+import { getQuestionAnalytics, QuestionAnalytics } from '@/lib/actions/users';
 import { Loader2,Users, Target } from 'lucide-react';
 
 export function QuestionAnalyticsPanel() {

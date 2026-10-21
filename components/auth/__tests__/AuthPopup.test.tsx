@@ -4,7 +4,7 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import AuthPopup from '../AuthPopup';
 import {
   signInWithUsername,
-} from '@/lib/actions/auth-actions';
+} from '@/lib/actions/auth';
 
 // Mock framer-motion to render immediately without animations
 vi.mock('framer-motion', async () => {
@@ -19,7 +19,7 @@ vi.mock('framer-motion', async () => {
 });
 
 // Mock auth actions
-vi.mock('@/lib/actions/auth-actions', () => ({
+vi.mock('@/lib/actions/auth', () => ({
   signInWithUsername: vi.fn(),
   signUpWithUsername: vi.fn(),
   requestEmailCode: vi.fn(),
@@ -147,7 +147,7 @@ describe('AuthPopup', () => {
   });
 
   it('navigates to Email tab and sends code, then verifies code', async () => {
-    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
+    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth');
     vi.mocked(requestEmailCode).mockResolvedValue({ sent: true });
     vi.mocked(verifyEmailCode).mockResolvedValue({ ok: true });
 
@@ -185,7 +185,7 @@ describe('AuthPopup', () => {
   });
 
   it('displays error on invalid email code', async () => {
-    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth-actions');
+    const { requestEmailCode, verifyEmailCode } = await import('@/lib/actions/auth');
     vi.mocked(requestEmailCode).mockResolvedValue({ sent: true });
     vi.mocked(verifyEmailCode).mockResolvedValue({ ok: false });
 

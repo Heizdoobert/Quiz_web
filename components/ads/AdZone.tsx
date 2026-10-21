@@ -4,7 +4,7 @@ import { logger } from "@/lib/logger";
 import React, { useEffect, useState } from "react";
 import { Zap, Rocket, Shield } from "lucide-react";
 import StickyBannerAd from "./StickyBannerAd";
-import { fetchRandomSponsor, Sponsor } from "@/lib/actions/ads-actions";
+import { fetchRandomSponsor, Sponsor } from "@/lib/actions/ads";
 
 interface AdZoneProps {
   variant: "skyscraper" | "banner" | "sticky-bottom";

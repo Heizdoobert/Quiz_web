@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Header from '@/components/layout/Header';
 import TopicList from '@/components/discovery/TopicList';
-import { getTopics } from '@/lib/actions/question-actions';
+import { getTopics } from '@/lib/actions/quiz';
 
 export const metadata: Metadata = {
   title: 'Topics',

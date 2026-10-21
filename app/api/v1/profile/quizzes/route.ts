@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { requireAuth } from '@/lib/services/auth/api-auth';
-import { getUserQuizzes } from '@/lib/actions/profile-actions';
+import { getUserQuizzes } from '@/lib/actions/users';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 import { Question } from '@/lib/types';
 

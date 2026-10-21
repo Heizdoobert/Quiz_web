@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Loader2, ArrowLeft } from 'lucide-react';
-import { requestPasswordReset, verifyPasswordResetCode, updatePasswordWithReset } from '@/lib/actions/auth-actions';
+import { requestPasswordReset, verifyPasswordResetCode, updatePasswordWithReset } from '@/lib/actions/auth';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 type ResetStep = 'request' | 'verify' | 'new-password';

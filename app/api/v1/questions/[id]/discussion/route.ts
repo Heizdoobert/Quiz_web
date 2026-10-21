@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { optionalAuth } from '@/lib/services/auth/api-auth';
-import { getQuestionDiscussion } from '@/lib/actions/community-actions';
+import { getQuestionDiscussion } from '@/lib/actions/community';
 import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';
