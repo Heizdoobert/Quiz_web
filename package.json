@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "node scripts/ensure-supabase-types.mjs",
     "dev": "next dev --turbo",
     "gen:admin": "node scripts/gen-admin-modules.mjs",
     "predev": "npm run gen:admin && npm run build:ui",
