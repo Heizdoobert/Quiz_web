@@ -23,3 +23,8 @@ export async function updateAuthUserPassword(userId: string, password: string) {
   if (!supabaseAdmin?.auth?.admin?.updateUserById) return null;
   return supabaseAdmin.auth.admin.updateUserById(userId, { password });
 }
+
+export async function deleteAuthUser(authUserId: string) {
+  if (!supabaseAdmin?.auth?.admin?.deleteUser) return { error: null };
+  return supabaseAdmin.auth.admin.deleteUser(authUserId);
+}

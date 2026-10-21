@@ -21,30 +21,30 @@ describe('Auth identifier flow', () => {
   it('signs up with email', async () => {
     const res = await signUpAccount('testemail@example.com', 'Password1')
     expect(res.ok).toBe(true)
-    emailUserId = res.account.id
+    if (res.ok) emailUserId = res.account.id
   })
 
   it('signs up with username', async () => {
     const res = await signUpAccount('testuser123', 'Password1')
     expect(res.ok).toBe(true)
-    usernameUserId = res.account.id
+    if (res.ok) usernameUserId = res.account.id
   })
 
   it('prevents duplicate username', async () => {
     const res = await signUpAccount('testuser123', 'Password1')
     expect(res.ok).toBe(false)
-    expect(res.error).toContain('already taken')
+    if (!res.ok) expect(res.error).toContain('already taken')
   })
 
   it('signs in with email', async () => {
     const res = await signInAccount('testemail@example.com', 'Password1')
     expect(res.ok).toBe(true)
-    expect(res.account.id).toBe(emailUserId)
+    if (res.ok) expect(res.account.id).toBe(emailUserId)
   })
 
   it('signs in with username', async () => {
     const res = await signInAccount('testuser123', 'Password1')
     expect(res.ok).toBe(true)
-    expect(res.account.id).toBe(usernameUserId)
+    if (res.ok) expect(res.account.id).toBe(usernameUserId)
   })
 })

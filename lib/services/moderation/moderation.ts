@@ -3,8 +3,8 @@ import { MAX_NOTE_LENGTH } from '@/lib/constants/moderation';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
-import { authorize } from './authorize';
-import { SessionAccount } from './session';
+import { authorize } from '../authorize';
+import { SessionAccount } from '../session';
 
 // Not in lib/actions for the reason given in role-admin.ts: the account comes from the
 // route, which verified the bearer token, never from a caller-controlled argument.

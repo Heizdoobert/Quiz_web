@@ -1,8 +1,8 @@
 import 'server-only';
 import { ActionResult } from '@/lib/types';
-import { authorize } from './authorize';
-import { SessionAccount } from './session';
-import { collectSystemMetrics, sendSystemReport, type SystemMetrics } from './system-report';
+import { authorize } from '../authorize';
+import { SessionAccount } from '../session';
+import { collectSystemMetrics, sendSystemReport, type SystemMetrics } from '../system-report';
 
 export interface ReportStatus {
   configured: boolean;

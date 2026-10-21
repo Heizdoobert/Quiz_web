@@ -1,6 +1,6 @@
 import { ping } from '@/lib/db/questions';
 import { getSystemCounts } from '@/lib/db/metrics';
-import { sendEmail, type SendEmailResult } from './sendgrid';
+import { sendEmail, type SendEmailResult } from '../sendgrid';
 
 export interface SystemMetrics {
   timestamp: string;

@@ -4,7 +4,8 @@ import { logger } from "@/lib/logger";
 import { questionsForExport } from '../db/questions';
 import { resultsForExport } from '../db/results';
 import { questionAnalytics } from '../db/rpc';
-import { getSessionAccount, type SessionAccount } from '../services/session';
+import { getSessionAccount, clearSessionAccount, type SessionAccount } from '../services/session';
+import { deleteAccount, type DeleteAccountResult } from '../services/account-deletion';
 import { quizzesForAccount } from '../services/user-quizzes';
 import {
   Question,
@@ -117,4 +118,25 @@ export async function getQuestionAnalytics(authAccount?: SessionAccount): Promis
     return { success: false, error: 'An unexpected error occurred.' };
   }
 }
+
+export type DeleteMyAccountResult =
+  | DeleteAccountResult
+  | { success: false; error: string; code: 'UNAUTHORIZED' };
+
+export async function deleteMyAccount(authAccount?: SessionAccount): Promise<DeleteMyAccountResult> {
+  const account = authAccount ?? (await getSessionAccount());
+  if (!account) {
+    return {
+      success: false,
+      error: 'Sign in to delete your account.',
+      code: 'UNAUTHORIZED',
+    };
+  }
+  const result = await deleteAccount(account);
+  if (result.success) {
+    await clearSessionAccount();
+  }
+  return result;
+}
+
 

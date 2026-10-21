@@ -61,7 +61,7 @@ export async function createQuestion(
     }
 
     // AI Moderation
-    const { moderateContent } = await import('@/lib/services/ai-moderation');
+    const { moderateContent } = await import('@/lib/services/moderation/ai-moderation');
     const modResult = await moderateContent(validated.prompt, validated.options);
     if (!modResult.isSafe) {
       logger.warn('question_creation_ai_rejected', { userId: account.id, reason: modResult.reason });

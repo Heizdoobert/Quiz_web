@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { moderateContent } from '../lib/services/ai-moderation';
+import { moderateContent } from '../lib/services/moderation/ai-moderation';
 
 const { mockGenerateContent } = vi.hoisted(() => ({ mockGenerateContent: vi.fn() }));
 

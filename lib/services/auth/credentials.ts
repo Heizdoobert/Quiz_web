@@ -1,12 +1,12 @@
 // import 'server-only'; // disabled for node script
 // Use relative imports for Node script execution (aliases not resolved at runtime)
-import { ensureAccountForAuthUser } from './users.ts';
-import type { SessionAccount } from './session.ts';
-import { auth, createConfirmedUser } from '../db/auth.ts';
-import { usernameTaken } from '../db/users.ts';
-import { allowAttempt, allowAttemptFromIp } from './rate-limit.ts';
-import { logger } from '../logger.ts';
-import type { AuthResult } from './password-reset.ts';
+import { ensureAccountForAuthUser } from '../users';
+import type { SessionAccount } from './session';
+import { auth, createConfirmedUser } from '../../db/auth';
+import { usernameTaken } from '../../db/users';
+import { allowAttempt, allowAttemptFromIp } from './rate-limit';
+import { logger } from '../../logger';
+import type { AuthResult } from './password-reset';
 // In-memory user store for test environment
 const __testUserStore = new Map<string, { id: string; password: string; username?: string }>();
 
@@ -161,6 +161,10 @@ export async function signUpAccount(
       if (isEmail && !data.user.email_confirmed_at && !data.session) {
         requiresVerification = true;
       }
+    }
+
+    if (!authUserId) {
+      return { ok: false, error: 'Registration failed. Try a different username or email.' };
     }
 
     if (requiresVerification) {

@@ -5,10 +5,11 @@ import { POST as signIn } from "@/app/api/v1/auth/signin/route";
 test("POST /api/v1/auth/signin sets JWT and refresh cookies", async () => {
   const req = new NextRequest("http://example.com/api/v1/auth/signin", {
     method: "POST",
-    json: {
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
       username: "testuser",
       password: "testpass",
-    },
+    }),
   });
 
   const res = await signIn(req);

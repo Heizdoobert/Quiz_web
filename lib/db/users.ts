@@ -39,3 +39,12 @@ export async function ensureUserForAuthUser(authUserId: string, displayName: str
   if (!row) throw new DbError('users.byAuthUser', { message: 'no users row after upsert' });
   return row.id;
 }
+
+export async function authUserIdOf(userId: string): Promise<string | null | undefined> {
+  const row = unwrap('users.authUserIdOf', await admin().from('users').select('auth_user_id').eq('id', userId).single());
+  return (row as unknown as { auth_user_id?: string | null })?.auth_user_id ?? null;
+}
+
+export async function deleteUserRow(userId: string): Promise<void> {
+  unwrap('users.delete', await admin().from('users').delete().eq('id', userId));
+}

@@ -1,7 +1,7 @@
 import { logger } from '@/lib/logger';
 import { deleteAuthUser } from '@/lib/db/auth';
 import { authUserIdOf, deleteUserRow } from '@/lib/db/users';
-import type { SessionAccount } from './session';
+import type { SessionAccount } from '../session';
 
 export type DeleteAccountResult =
   | { success: true }

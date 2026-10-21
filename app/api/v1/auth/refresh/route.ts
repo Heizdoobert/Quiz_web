@@ -1,6 +1,6 @@
 // Refresh token endpoint
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyRefresh, signJwt, createJwtCookie, createRefreshCookie } from '@/lib/auth';
+import { verifyRefresh, signJwt, signRefresh, createJwtCookie, createRefreshCookie } from '@/lib/auth';
 import { apiOk, apiError } from '@/lib/services/api-response';
 
 export async function POST(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
     if (!refreshToken) {
       return apiError('UNAUTHORIZED', 'Refresh token missing');
     }
-    const payload = verifyRefresh(refreshToken);
+    const payload = verifyRefresh(refreshToken) as { accountId?: string } | null;
     if (!payload || typeof payload.accountId !== 'string') {
       return apiError('UNAUTHORIZED', 'Invalid refresh token');
     }

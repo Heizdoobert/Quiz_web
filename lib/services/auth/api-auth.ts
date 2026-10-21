@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
 import { SessionAccount } from '@/lib/services/session';
-import { apiError } from './api-response';
+import { apiError } from '../api-response';
 
 export function extractBearerToken(req: NextRequest): string | null {
   const authHeader = req.headers.get('Authorization') || req.headers.get('authorization');

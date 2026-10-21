@@ -15,6 +15,7 @@
     "incremental": false,
     "plugins": [{ "name": "next" }],
     "paths": {
+    "@/lib/*": ["./lib/*"],
       "@/*": ["./*"],
       "@heizdoobert/quickquiz-sdk": ["./sdk/src/index.ts"],
       "@heizdoobert/quickquiz-sdk/client": ["./sdk/src/client/index.ts"],
@@ -24,7 +25,7 @@
       "@quizweb/sdk-core": ["./sdk/shared_modules/src/index.ts"]
     }
   },
-  "exclude": ["node_modules", ".agents", "mobile", "sdk/dist"],
+  "exclude": ["node_modules", ".agents", "mobile", "sdk/dist", "server", "lib/api"],
   "include": [
     "next-env.d.ts",
     "**/*.ts",
