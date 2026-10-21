@@ -3,6 +3,12 @@ module.exports = {
     environment: 'node',
     globals: true,
     setupFiles: ['./tests/setup-env.ts'],
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        singleThread: true,
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],
