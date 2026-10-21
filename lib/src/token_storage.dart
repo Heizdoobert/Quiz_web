@@ -1,7 +1,6 @@
 // Conditional export: use the file‑based implementation on all platforms except the web, where the HTML implementation is needed.
 export 'mobile_token_storage.dart' if (dart.library.html) 'web_token_storage.dart';
 
-import 'dart:convert';
 import 'models.dart';
 
 /// Abstract token storage used by the SDK.

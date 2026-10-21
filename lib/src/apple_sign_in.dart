@@ -8,8 +8,8 @@
 
 library auth_sdk.apple;
 
-import 'src/models.dart';
-import 'src/token_storage.dart';
+import 'models.dart';
+import 'token_storage.dart';
 
 /// Perform Apple Sign‑In and return a `UserSession`.
 ///

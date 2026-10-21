@@ -3,12 +3,8 @@
 library auth_sdk;
 
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'src/models.dart';
 import 'src/token_storage.dart';
-import 'src/auth_flow.dart';
-import 'src/refresh.dart';
-import 'src/sign_out.dart';
 
 /// Public entry point for the Authentication SDK.
 class AuthSdk {
@@ -103,4 +99,16 @@ class AuthSdk {
       throw const AuthException('not_initialized', 'AuthSdk.initialize must be called before using the SDK.');
     }
   }
+}
+
+Future<UserSession> _signInFlow(AuthProviderConfig provider, TokenStorage storage) async {
+  throw const AuthException('not_implemented', 'Sign-in flow is not yet implemented in this stub.');
+}
+
+Future<TokenBundle> _refreshTokens(TokenBundle tokens, TokenStorage storage) async {
+  throw const AuthException('not_implemented', 'Token refresh is not yet implemented in this stub.');
+}
+
+Future<void> _signOut(TokenStorage storage) async {
+  await storage.clear();
 }

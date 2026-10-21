@@ -1,8 +1,7 @@
-import 'dart:io';
 import 'package:test/test.dart';
 
-import 'package:auth_s../features/auth/token_storage.dart';
-import 'package:auth_s../features/auth/models.dart';
+import 'package:auth_sdk/src/mobile_token_storage.dart';
+import 'package:auth_sdk/src/models.dart';
 
 void main() {
   group('MobileTokenStorage', () {
