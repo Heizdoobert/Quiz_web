@@ -9,9 +9,9 @@ import {
 } from '../lib/actions/community-actions';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { supabase } from '../lib/sdk/supabase';
-import { getSessionAccount } from '../lib/services/session';
+import { getSessionAccount } from '@/lib/services/auth/session';
 
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 

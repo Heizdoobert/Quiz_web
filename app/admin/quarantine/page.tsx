@@ -1,7 +1,7 @@
 import AdminDenied from '@/components/admin/AdminDenied';
 import QuarantineList from '@/components/admin/QuarantineList';
-import { authorize } from '@/lib/services/authorize';
-import { listQuarantinedQuestions } from '@/lib/services/moderation';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listQuarantinedQuestions } from '@/lib/services/moderation/moderation';
 
 export const dynamic = 'force-dynamic';
 

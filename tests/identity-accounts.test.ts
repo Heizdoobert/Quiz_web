@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from 'vitest';
-import { getSessionAccount, setSessionAccount } from '../lib/services/session';
+import { getSessionAccount, setSessionAccount } from '@/lib/services/auth/session';
 import { requestEmailCode, verifyEmailCode } from '../lib/actions/auth-actions';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 import { supabase } from '../lib/sdk/supabase';

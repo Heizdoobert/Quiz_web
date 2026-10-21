@@ -1,0 +1,19 @@
+# vitest.node.config.ts
+lines:16 exports:default
+---
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    environment: 'node',
+    globals: true,
+    setupFiles: ['./tests/setup-env.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json-summary', 'html'],
+      include: ['app/**', 'lib/**', 'hooks/**', 'components/**'],
+      exclude: ['**/*.d.ts', '**/__tests__/**', '**/*.test.*'],
+    },
+    maxWorkers: 1,
+  },
+});

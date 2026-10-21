@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';
 

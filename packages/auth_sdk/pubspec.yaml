@@ -1,0 +1,21 @@
+name: auth_sdk
+description: A pure Dart Flutter SDK for unified OAuth2 authentication across mobile and web platforms.
+version: 0.1.0
+homepage: https://github.com/yourorg/auth_sdk
+environment:
+  sdk: '>=2.19.0 <4.0.0'
+
+dependencies:
+  http: ^1.2.0
+  path: ^1.9.1
+  sqflite: ^2.4.4+2
+
+  universal_io: ^2.2.0
+  flutter_riverpod: ^2.4.0
+  # sqflite dependency moved to mobile pubspec
+  uuid: ^3.0.7
+
+
+dev_dependencies:
+  test: ^1.24.0
+  flutter_lints: ^6.0.0

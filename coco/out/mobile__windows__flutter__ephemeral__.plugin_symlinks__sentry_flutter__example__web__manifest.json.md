@@ -1,0 +1,26 @@
+# mobile/windows/flutter/ephemeral/.plugin_symlinks/sentry_flutter/example/web/manifest.json
+lines:23 exports:
+---
+{
+    "name": "sentry_flutter_example",
+    "short_name": "sentry_flutter_example",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0175C2",
+    "theme_color": "#0175C2",
+    "description": "Demonstrates how to use the sentry_flutter plugin.",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/Icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "icons/Icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}

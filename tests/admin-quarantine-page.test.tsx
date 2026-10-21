@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminQuarantinePage from '@/app/admin/quarantine/page';
 import QuarantineList from '@/components/admin/QuarantineList';
-import { authorize } from '@/lib/services/authorize';
-import { listQuarantinedQuestions } from '@/lib/services/moderation';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listQuarantinedQuestions } from '@/lib/services/moderation/moderation';
 import { listQuarantineAction, resolveQuarantineAction } from '@/lib/actions/admin-actions';
 import type { QuarantinedQuestion } from '@/lib/db/questions';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
-vi.mock('@/lib/services/moderation', () => ({ listQuarantinedQuestions: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/moderation/moderation', () => ({ listQuarantinedQuestions: vi.fn() }));
 vi.mock('@/lib/actions/admin-actions', () => ({ listQuarantineAction: vi.fn(), resolveQuarantineAction: vi.fn() }));
 
 const q = (id: string, prompt: string): QuarantinedQuestion => ({

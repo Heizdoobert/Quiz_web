@@ -12,17 +12,17 @@ import {
 import {
   setSessionAccount,
   getSessionAccount,
-} from '@/lib/services/session';
+} from '@/lib/services/auth/session';
 import {
   createResetToken,
   verifyResetToken,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';
 import {
   issueMobileAuthToken,
   verifyMobileAuthToken,
-} from '@/lib/services/mobile-auth';
+} from '@/lib/services/auth/mobile-auth';
 import { supabase } from '@/lib/sdk/supabase';
-import * as rateLimitModule from '@/lib/services/rate-limit';
+import * as rateLimitModule from '@/lib/services/auth/rate-limit';
 
 // Simulated cookie jar for Next.js cookies()
 const cookieStore = new Map<string, { value: string; [key: string]: unknown }>();
@@ -76,7 +76,7 @@ vi.mock('@/lib/sdk/supabase-admin', () => ({
   },
 }));
 
-vi.mock('@/lib/services/rate-limit', () => ({
+vi.mock('@/lib/services/auth/rate-limit', () => ({
   allowAttempt: vi.fn().mockResolvedValue(true),
   allowAttemptFromIp: vi.fn().mockResolvedValue(true),
 }));

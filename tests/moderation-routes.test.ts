@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { GET } from '@/app/api/v1/moderation/questions/route';
 import { POST } from '@/app/api/v1/moderation/questions/[id]/resolve/route';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 import { roleOf } from '@/lib/db/roles';
 import { answerKey, quarantinedQuestions, resolveQuarantined } from '@/lib/db/questions';
 import { logger } from '@/lib/logger';
 
 vi.mock('@/lib/db/roles', () => ({ roleOf: vi.fn(), setRole: vi.fn() }));
 vi.mock('@/lib/db/questions', () => ({ answerKey: vi.fn(), quarantinedQuestions: vi.fn(), resolveQuarantined: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
 const ADMIN = '00000000-0000-4000-8000-0000000000a1';

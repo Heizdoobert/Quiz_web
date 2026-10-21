@@ -1,6 +1,6 @@
 // import 'server-only'; // disabled for node script
 // Use relative imports for Node script execution (aliases not resolved at runtime)
-import { ensureAccountForAuthUser } from '../users';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
 import type { SessionAccount } from './session';
 import { auth, createConfirmedUser } from '../../db/auth';
 import { usernameTaken } from '../../db/users';
@@ -290,4 +290,4 @@ export {
   requestPasswordReset,
   verifyPasswordResetCode,
   updatePasswordWithReset,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';

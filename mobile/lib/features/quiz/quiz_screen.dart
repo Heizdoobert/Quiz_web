@@ -148,6 +148,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            const Center(child: Text('Quiz', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white))),
             _Header(pending: quiz.pendingSyncCount),
             Expanded(
               child: quiz.questions.when(

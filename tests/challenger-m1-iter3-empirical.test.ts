@@ -7,7 +7,7 @@ import {
   verifyResetToken,
   clearUsedResetTokens,
   updatePasswordWithReset,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';
 import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
 
 
@@ -42,7 +42,7 @@ vi.mock('@/lib/sdk/supabase-admin', () => ({
   },
 }));
 
-vi.mock('@/lib/services/rate-limit', () => ({
+vi.mock('@/lib/services/auth/rate-limit', () => ({
   allowAttempt: vi.fn().mockResolvedValue(true),
   allowAttemptFromIp: vi.fn().mockResolvedValue(true),
 }));

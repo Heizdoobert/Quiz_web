@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
-import { requestPasswordReset } from '@/lib/services/password-reset';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { requestPasswordReset } from '@/lib/services/auth/password-reset';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {
   try {

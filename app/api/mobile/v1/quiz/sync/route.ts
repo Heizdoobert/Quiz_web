@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
+import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { AnswerSubmissionResult } from '@/lib/types';
 

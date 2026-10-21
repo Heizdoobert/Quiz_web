@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
-import { signUpAccount } from '@/lib/services/credentials';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { signUpAccount } from '@/lib/services/auth/credentials';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {
   try {

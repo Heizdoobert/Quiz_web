@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { POST } from '@/app/api/mobile/v1/quiz/sync/route';
 import { NextRequest } from 'next/server';
-import * as mobileAuth from '@/lib/services/mobile-auth';
+import * as mobileAuth from '@/lib/services/auth/mobile-auth';
 import * as quizActions from '@/lib/actions/quiz-actions';
 
-vi.mock('@/lib/services/mobile-auth');
+vi.mock('@/lib/services/auth/mobile-auth');
 vi.mock('@/lib/actions/quiz-actions');
 
 describe('Mobile Quiz Sync API', () => {

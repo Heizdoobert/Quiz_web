@@ -1,9 +1,9 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import * as credentialsModule from '@/lib/services/credentials';
+import * as credentialsModule from '@/lib/services/auth/credentials';
 import * as authActionsModule from '@/lib/actions/auth-actions';
 import { supabase } from '@/lib/sdk/supabase';
-import * as rateLimitModule from '@/lib/services/rate-limit';
+import * as rateLimitModule from '@/lib/services/auth/rate-limit';
 
 // Mocks
 vi.mock('@/lib/sdk/supabase', () => ({
@@ -14,12 +14,12 @@ vi.mock('@/lib/sdk/supabase', () => ({
   },
 }));
 
-vi.mock('@/lib/services/rate-limit', () => ({
+vi.mock('@/lib/services/auth/rate-limit', () => ({
   allowAttempt: vi.fn().mockResolvedValue(true),
   allowAttemptFromIp: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock('@/lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   setSessionAccount: vi.fn().mockResolvedValue(true),
   getSessionAccount: vi.fn().mockResolvedValue(null),
   clearSessionAccount: vi.fn().mockResolvedValue(undefined),

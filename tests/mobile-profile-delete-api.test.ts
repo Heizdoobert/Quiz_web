@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { DELETE } from '@/app/api/mobile/v1/profile/route';
-import * as mobileAuth from '@/lib/services/mobile-auth';
-import * as deletion from '@/lib/services/account-deletion';
+import * as mobileAuth from '@/lib/services/auth/mobile-auth';
+import * as deletion from '@/lib/services/admin/account-deletion';
 
-vi.mock('@/lib/services/mobile-auth');
-vi.mock('@/lib/services/account-deletion');
+vi.mock('@/lib/services/auth/mobile-auth');
+vi.mock('@/lib/services/admin/account-deletion');
 
 const URL = 'http://localhost/api/mobile/v1/profile';
 const call = (headers?: Record<string, string>) => DELETE(new NextRequest(URL, { method: 'DELETE', headers }));

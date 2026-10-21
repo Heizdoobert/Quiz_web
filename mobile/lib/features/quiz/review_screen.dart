@@ -16,7 +16,7 @@ class ReviewScreen extends ConsumerWidget {
     final answered = quiz.questions.when(
   data: (qs) => qs.where((q) => quiz.answers.containsKey(q['id'] as String)).toList(),
   loading: () => [],
-  error: (_, __) => [],
+  error: (_, _) => [],
 );
 
     return Scaffold(

@@ -29,8 +29,14 @@ class ApiClient {
   /// 401 on a request sent without a token, such as a wrong password at sign-in.
   final void Function()? onUnauthorized;
 
+  /// Retrieves the stored authentication token.
+  /// Supports both the current 'jwt_token' key and the legacy 'auth_token' key used by older builds and integration tests.
   Future<String?> getToken() async {
-    return await _storage.read(key: 'jwt_token');
+    var token = await _storage.read(key: 'jwt_token');
+    if (token == null) {
+      token = await _storage.read(key: 'auth_token');
+    }
+    return token;
   }
 
   Future<void> saveToken(String token) async {

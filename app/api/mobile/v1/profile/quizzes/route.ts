@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
-import { quizzesForAccount } from '@/lib/services/user-quizzes';
+import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { quizzesForAccount } from '@/lib/services/users/user-quizzes';
 
 // The questions the signed-in player wrote, as the web profile lists them.
 export async function GET(req: NextRequest) {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
+import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 import { getGlobalLeaderboard } from '@/lib/actions/leaderboard-actions';
 import { historyForAccount, statsForAccount, ZERO_STATS } from '@/lib/utils/stats';
 

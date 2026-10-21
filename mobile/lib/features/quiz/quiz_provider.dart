@@ -1,9 +1,11 @@
 import 'dart:async';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/db/quiz_repository.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../../services/sync/sync_service.dart';
 import '../auth/auth_provider.dart';
+import 'package:flutter/widgets.dart';
 
 class QuizState {
   final AsyncValue<List<Map<String, dynamic>>> questions;
@@ -31,12 +33,22 @@ class QuizState {
 
 final quizProvider = NotifierProvider<QuizNotifier, QuizState>(QuizNotifier.new);
 
-class QuizNotifier extends Notifier<QuizState> {
+class QuizNotifier extends Notifier<QuizState> with WidgetsBindingObserver {
   @override
   QuizState build() {
-    // Periodic sync
-    final timer = Timer.periodic(const Duration(seconds: 30), (_) => _sync());
-    ref.onDispose(timer.cancel);
+    // Register WidgetsBindingObserver for app lifecycle events
+    WidgetsBinding.instance.addObserver(this);
+    ref.onDispose(() => WidgetsBinding.instance.removeObserver(this));
+    // Listen for network connectivity changes and trigger sync
+    final connectivitySub = Connectivity().onConnectivityChanged.listen((result) {
+      if (result != ConnectivityResult.none) {
+        _sync();
+      }
+    });
+    ref.onDispose(connectivitySub.cancel);
+    // Remove the periodic timer (previously line 38-40)
+    // ref.onDispose(timer.cancel);
+
     // Sync on sign‑in
     ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
       if (signedIn) _sync();
@@ -109,4 +121,12 @@ class QuizNotifier extends Notifier<QuizState> {
     final queued = await ref.read(quizRepositoryProvider).getQueuedAnswers();
     if (ref.mounted) state = state.copyWith(pendingSyncCount: queued.length);
   }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _sync();
+    }
+  }
 }
+

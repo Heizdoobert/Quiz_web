@@ -37,19 +37,19 @@ import { GET as getQuestionByIdRoute } from '@/app/api/v1/questions/[id]/route';
 import { POST as submitAnswerRoute } from '@/app/api/v1/quiz/answer/route';
 
 // Underlying services mocked for handler execution
-import { signUpAccount, signInAccount } from '@/lib/services/credentials';
-import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/mobile-auth';
+import { signUpAccount, signInAccount } from '@/lib/services/auth/credentials';
+import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 import { fetchRandomQuestion, getQuestionCount, getPublicQuestion } from '@/lib/actions/question-actions';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
 
-vi.mock('@/lib/services/credentials', () => ({
+vi.mock('@/lib/services/auth/credentials', () => ({
   signUpAccount: vi.fn(),
   signInAccount: vi.fn(),
   signInAccountWithGoogle: vi.fn(),
 }));
 
-vi.mock('@/lib/services/mobile-auth', () => ({
+vi.mock('@/lib/services/auth/mobile-auth', () => ({
   issueMobileAuthToken: vi.fn(),
   verifyMobileAuthToken: vi.fn(),
 }));

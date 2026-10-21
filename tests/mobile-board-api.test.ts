@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '@/app/api/mobile/v1/quiz/board/route';
 import { NextRequest } from 'next/server';
-import * as mobileAuth from '@/lib/services/mobile-auth';
+import * as mobileAuth from '@/lib/services/auth/mobile-auth';
 import * as leaderboard from '@/lib/actions/leaderboard-actions';
 import * as stats from '@/lib/utils/stats';
 
-vi.mock('@/lib/services/mobile-auth');
+vi.mock('@/lib/services/auth/mobile-auth');
 vi.mock('@/lib/actions/leaderboard-actions');
 vi.mock('@/lib/utils/stats', async (importOriginal) => ({
   ...(await importOriginal<typeof stats>()),

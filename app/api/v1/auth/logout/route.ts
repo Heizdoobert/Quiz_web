@@ -1,7 +1,7 @@
 // Logout endpoint - clears authentication cookies
 import { NextRequest, NextResponse } from 'next/server';
 import { createJwtCookie, createRefreshCookie } from '@/lib/auth';
-import { apiOk } from '@/lib/services/api-response';
+import { apiOk } from '@/lib/services/api/api-response';
 
 export async function POST(_req?: NextRequest) {
   const res = NextResponse.json({});

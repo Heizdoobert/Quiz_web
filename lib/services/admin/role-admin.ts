@@ -2,9 +2,9 @@ import { AccountRow, listAccounts, roleOf, setRole } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
-import { authorize } from '../authorize';
-import { isRole, Role } from '../rbac';
-import { SessionAccount } from '../session';
+import { authorize } from '@/lib/services/auth/authorize';
+import { isRole, Role } from '@/lib/services/rbac/rbac';
+import { SessionAccount } from '@/lib/services/auth/session';
 
 // Deliberately not in lib/actions: every export of a 'use server' file is a public endpoint
 // whose arguments the caller controls, so a function taking an account there lets anyone

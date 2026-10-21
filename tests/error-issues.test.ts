@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { listErrorIssues } from '@/lib/services/error-issues';
+import { listErrorIssues } from '@/lib/services/api/error-issues';
 import { roleOf } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
 
 vi.mock('@/lib/db/roles', () => ({ roleOf: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
 const ADMIN = { id: '00000000-0000-4000-8000-0000000000a1' };

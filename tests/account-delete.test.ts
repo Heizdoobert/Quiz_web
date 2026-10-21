@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { deleteAccount } from '../lib/services/account-deletion';
+import { deleteAccount } from '@/lib/services/admin/account-deletion';
 import { deleteAuthUser } from '../lib/db/auth';
 import { authUserIdOf, deleteUserRow } from '../lib/db/users';
 

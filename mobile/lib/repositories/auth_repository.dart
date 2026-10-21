@@ -17,7 +17,7 @@ class AuthRepository {
     if (token == null) return false;
     try {
       // Assuming the backend has an endpoint that validates the token.
-      final res = await _apiClient.get('/auth/validate');
+      final _ = await _apiClient.get('/auth/validate');
       // If the call succeeds, we consider the token valid.
       return true;
     } on ApiException catch (_) {

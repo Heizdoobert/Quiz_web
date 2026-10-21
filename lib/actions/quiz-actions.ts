@@ -3,8 +3,8 @@
 import { questionForAnswer } from '@/lib/db/questions';
 import { insertResult } from '@/lib/db/results';
 import { awardAchievements } from '@/lib/db/achievements';
-import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
-import { allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/auth/session';
+import { allowAttemptFromIp } from '@/lib/services/auth/rate-limit';
 import { isUuid } from '@/lib/utils/validation';
 import { historyForAccount, statsForAccount } from '@/lib/utils/stats';
 import { AnswerSubmissionResult, UserStats, HistoryItem } from '@/lib/types';

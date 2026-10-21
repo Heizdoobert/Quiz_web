@@ -2,13 +2,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminReportsPage from '@/app/admin/reports/page';
 import ReportDashboard from '@/components/admin/ReportDashboard';
-import { authorize } from '@/lib/services/authorize';
-import { getReportStatus } from '@/lib/services/report-admin';
+import { authorize } from '@/lib/services/auth/authorize';
+import { getReportStatus } from '@/lib/services/admin/report-admin';
 import * as adminActions from '@/lib/actions/admin-actions';
-import type { ReportStatus } from '@/lib/services/report-admin';
+import type { ReportStatus } from '@/lib/services/admin/report-admin';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
-vi.mock('@/lib/services/report-admin', () => ({ getReportStatus: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/admin/report-admin', () => ({ getReportStatus: vi.fn() }));
 
 const mockStatus: ReportStatus = {
   configured: true,

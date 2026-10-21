@@ -1,7 +1,7 @@
 import AdminDenied from '@/components/admin/AdminDenied';
 import IssueList from '@/components/admin/IssueList';
-import { authorize } from '@/lib/services/authorize';
-import { listErrorIssues } from '@/lib/services/error-issues';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listErrorIssues } from '@/lib/services/api/error-issues';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '@/app/api/mobile/v1/profile/quizzes/route';
 import { NextRequest } from 'next/server';
-import * as mobileAuth from '@/lib/services/mobile-auth';
-import * as userQuizzes from '@/lib/services/user-quizzes';
+import * as mobileAuth from '@/lib/services/auth/mobile-auth';
+import * as userQuizzes from '@/lib/services/users/user-quizzes';
 
-vi.mock('@/lib/services/mobile-auth');
-vi.mock('@/lib/services/user-quizzes');
+vi.mock('@/lib/services/auth/mobile-auth');
+vi.mock('@/lib/services/users/user-quizzes');
 
 const URL = 'http://localhost/api/mobile/v1/profile/quizzes';
 const QUIZ = { id: 'q1', category: 'Science', prompt: 'Why?', options: ['a', 'b'], status: 'approved', created_at: '2026-10-01' };

@@ -1,6 +1,6 @@
-import { sendSystemReport } from '@/lib/services/system-report';
+import { sendSystemReport } from '@/lib/services/reporting/system-report';
 import { logger } from '@/lib/logger';
-import { isCronAuthorized } from '@/lib/services/cron-auth';
+import { isCronAuthorized } from '@/lib/services/auth/cron-auth';
 
 export const dynamic = 'force-dynamic';
 

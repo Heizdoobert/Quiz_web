@@ -21,9 +21,18 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'quiz_app.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: _onCreate,
+      onUpgrade: _onUpgrade,
     );
+  }
+
+  // Handles schema migrations
+  Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) {
+      // Add client_uuid column to answer_queue for idempotent sync
+      await db.execute('ALTER TABLE answer_queue ADD COLUMN client_uuid TEXT;');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -43,7 +52,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         questionId TEXT,
         answerIndex INTEGER,
-        timestamp TEXT
+        timestamp TEXT,
+        client_uuid TEXT
       )
     ''');
   }

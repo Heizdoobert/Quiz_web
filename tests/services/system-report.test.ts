@@ -4,7 +4,7 @@ import {
   formatSystemReport,
   sendSystemReport,
   type SystemMetrics,
-} from '@/lib/services/system-report';
+} from '@/lib/services/reporting/system-report';
 
 vi.mock('@/lib/db/questions', () => ({
   ping: vi.fn(),
@@ -14,13 +14,13 @@ vi.mock('@/lib/db/metrics', () => ({
   getSystemCounts: vi.fn(),
 }));
 
-vi.mock('@/lib/services/sendgrid', () => ({
+vi.mock('@/lib/services/api/sendgrid', () => ({
   sendEmail: vi.fn(),
 }));
 
 import { ping } from '@/lib/db/questions';
 import { getSystemCounts } from '@/lib/db/metrics';
-import { sendEmail } from '@/lib/services/sendgrid';
+import { sendEmail } from '@/lib/services/api/sendgrid';
 
 describe('System Report Service (TDD)', () => {
   const originalEnv = process.env;

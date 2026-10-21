@@ -1,61 +1,120 @@
+import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../api/api_client.dart';
 import '../../db/quiz_repository.dart';
 import '../../features/auth/auth_provider.dart';
+import 'dart:developer' as dev;
 
-final syncServiceProvider = Provider(
-  (ref) => SyncService(ref.watch(apiClientProvider), ref.watch(quizRepositoryProvider)),
-);
+/// Exponential backoff helper for retrying sync operations.
+class _BackoffHelper {
+  int _retryAttempts = 0;
+  static const Duration _baseDelay = Duration(seconds: 5);
+  static const Duration _maxDelay = Duration(minutes: 1);
 
-/// The queued rows the server is finished with. A row stays queued only when the server
-/// could not look at it yet (rate-limited) or sent no verdict for it. Everything else is
-/// final: recorded, already answered, own question, or a question that is gone.
-List<int> settledIds(List<Map<String, dynamic>> queued, Map<String, dynamic> results) {
-  return [
-    for (final row in queued)
-      if (_isSettled(results[row['questionId']])) row['id'] as int,
-  ];
+  Duration compute() {
+    // Cap the exponential backoff exponent to avoid overflow.
+    final int exponent = math.min(_retryAttempts, 30);
+    var delay = _baseDelay * (1 << exponent);
+    if (delay > _maxDelay) delay = _maxDelay;
+    // Apply jitter ±30% (0.7×delay … 1.3×delay).
+    final jitterFactor = 0.7 + math.Random().nextDouble() * 0.6;
+    return Duration(milliseconds: (delay.inMilliseconds * jitterFactor).round());
+  }
+
+  void reset() => _retryAttempts = 0;
+  void increment() => _retryAttempts++;
 }
 
-bool _isSettled(Object? result) {
-  if (result is! Map) return false;
-  return result['recorded'] == true || result['notSavedReason'] != 'rate-limited';
-}
+final syncServiceProvider = Provider.autoDispose((ref) => SyncService(
+      ref.watch(apiClientProvider),
+      ref.watch(quizRepositoryProvider),
+    ));
 
 class SyncService {
-  SyncService(this._apiClient, this._quizRepository);
+  SyncService(this._apiClient, this._quizRepository, {this.onRetryRequested});
 
   final ApiClient _apiClient;
   final QuizRepository _quizRepository;
+  final void Function(Duration)? onRetryRequested;
+
   bool _running = false;
   DateTime? _pausedUntil;
+  final _BackoffHelper _backoff = _BackoffHelper();
+  
 
-  /// Sends the queued answers and drops the ones the server has settled. A network error or
-  /// a non-2xx answer keeps the whole queue for the next try.
+  /// Sends queued answers to the server and removes those that have been settled.
+  /// Handles rate‑limiting by pausing further attempts for a configured period.
   Future<void> syncAnswers() async {
     final pausedUntil = _pausedUntil;
     if (_running || (pausedUntil != null && DateTime.now().isBefore(pausedUntil))) return;
     _running = true;
     try {
       final queued = await _quizRepository.getQueuedAnswers();
-      if (queued.isEmpty) return;
+      if (queued.isEmpty) {
+        // No work to do – reset running flag before returning
+        _running = false;
+        return;
+      }
 
       final response = await _apiClient.post('/quiz/sync', [
         for (final e in queued)
-          {'questionId': e['questionId'], 'answerIndex': e['answerIndex'], 'timestamp': e['timestamp']},
+          {'questionId': e['questionId'], 'answerIndex': e['answerIndex'], 'timestamp': e['timestamp'], 'client_uuid': e['client_uuid']},
       ]);
       final results = (response['results'] as Map?)?.cast<String, dynamic>() ?? const <String, dynamic>{};
-      await _quizRepository.clearQueuedAnswers(settledIds(queued, results));
+      final idsToClear = settledIds(queued, results);
+    if (idsToClear.isNotEmpty) {
+      await _quizRepository.clearQueuedAnswers(idsToClear);
+    }
 
-      // The server limits answers per hour; asking again every 30 seconds only keeps it limited.
+      // If any answer was rate‑limited, pause future sync attempts.
+
       if (results.values.any((r) => r is Map && r['notSavedReason'] == 'rate-limited')) {
-        _pausedUntil = DateTime.now().add(const Duration(minutes: 10));
+        _pausedUntil = DateTime.now().add(_backoff.compute());
+        _backoff.increment();
+        // Do not reset backoff here to retain backoff state.
+      } else {
+        _backoff.reset();
+        _pausedUntil = null;
       }
     } catch (e) {
-      debugPrint('Sync failed, will retry later: $e');
+      dev.log('Sync failed, will retry later: $e', name: 'SyncService');
+      _backoff.increment();
+      // Notify optional retry callback with the backoff duration.
+      if (onRetryRequested != null) {
+        onRetryRequested!(_backoff.compute());
+      }
+      // Optionally schedule a retry after backoff delay (handled by caller if needed).
     } finally {
       _running = false;
     }
   }
+  bool get isPaused => _pausedUntil != null && DateTime.now().isBefore(_pausedUntil!);
+  int get backoffAttempts => _backoff._retryAttempts;
+  /// Test‑only helper to reset pause state.
+  /// Test‑only helper to reset pause state and backoff counter.
+  void resetPauseForTest() {
+    _pausedUntil = null;
+    _backoff.reset();
+  }
+
+}
+
+/// Helper to collect IDs of rows the server has settled.
+List<int> settledIds(List<Map<String, dynamic>> queued, Map<String, dynamic> results) {
+  final ids = <int>[];
+  for (final row in queued) {
+    final qId = row['questionId'];
+    if (qId is! String) continue; // Skip rows without valid questionId
+    final result = results[qId];
+    if (_isSettled(result)) {
+      ids.add(row['id'] as int);
+    }
+  }
+  return ids;
+}
+
+bool _isSettled(Object? result) {
+  if (result is! Map) return false;
+  return result['recorded'] == true || (result['notSavedReason'] != null && result['notSavedReason'] != 'rate-limited');
 }

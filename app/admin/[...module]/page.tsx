@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { ADMIN_MODULES } from '@/app/admin/_modules/registry.generated';
 import AdminDenied from '@/components/admin/AdminDenied';
-import { authorize } from '@/lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 
 export const dynamic = 'force-dynamic';
 

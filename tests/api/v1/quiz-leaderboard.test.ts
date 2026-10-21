@@ -8,7 +8,7 @@ import { GET as getGroupLeaderboardRoute } from '@/app/api/v1/leaderboard/group/
 
 import { submitAnswer, getAnswerHistory, getUserStats } from '@/lib/actions/quiz-actions';
 import { getGlobalLeaderboard, getGroupLeaderboard } from '@/lib/actions/leaderboard-actions';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 
 vi.mock('@/lib/actions/quiz-actions', () => ({
   submitAnswer: vi.fn(),

@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { signInAccountWithGoogle } from '@/lib/services/credentials';
-import { ensureAccountForAuthUser } from '@/lib/services/users';
-import { allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { signInAccountWithGoogle } from '@/lib/services/auth/credentials';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
+import { allowAttemptFromIp } from '@/lib/services/auth/rate-limit';
 import { supabase } from '@/lib/sdk/supabase';
 
 vi.mock('server-only', () => ({}));
-vi.mock('@/lib/services/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
-vi.mock('@/lib/services/rate-limit', () => ({ allowAttempt: vi.fn(), allowAttemptFromIp: vi.fn() }));
+vi.mock('@/lib/services/users/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
+vi.mock('@/lib/services/auth/rate-limit', () => ({ allowAttempt: vi.fn(), allowAttemptFromIp: vi.fn() }));
 vi.mock('@/lib/sdk/supabase', () => ({ supabase: { auth: { signInWithIdToken: vi.fn() } } }));
 vi.mock('@/lib/sdk/supabase-admin', () => ({ supabaseAdmin: null }));
 

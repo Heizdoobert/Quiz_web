@@ -3,11 +3,11 @@ import { NextRequest } from 'next/server';
 import { POST as password } from '@/app/api/mobile/v1/auth/password/route';
 import { POST as google } from '@/app/api/mobile/v1/auth/google/route';
 import { GET as questions } from '@/app/api/mobile/v1/quiz/questions/route';
-import { verifyMobileAuthToken } from '@/lib/services/mobile-auth';
-import { signInAccount, signInAccountWithGoogle, signUpAccount } from '@/lib/services/credentials';
+import { verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { signInAccount, signInAccountWithGoogle, signUpAccount } from '@/lib/services/auth/credentials';
 import { fetchRandomQuestion } from '@/lib/actions/question-actions';
 
-vi.mock('@/lib/services/credentials');
+vi.mock('@/lib/services/auth/credentials');
 vi.mock('@/lib/actions/question-actions');
 
 const post = (body: unknown, bearer?: string) =>

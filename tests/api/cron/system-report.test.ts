@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
-vi.mock('@/lib/services/system-report', () => ({
+vi.mock('@/lib/services/reporting/system-report', () => ({
   sendSystemReport: vi.fn(),
 }));
 
-import { sendSystemReport } from '@/lib/services/system-report';
+import { sendSystemReport } from '@/lib/services/reporting/system-report';
 import { GET, POST } from '@/app/api/cron/system-report/route';
 
 describe('System Report Cron Route (TDD)', () => {

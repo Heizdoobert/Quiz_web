@@ -28,7 +28,7 @@ import {
   exportUserData,
   getQuestionAnalytics,
 } from '@/lib/actions/profile-actions';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 
 vi.mock('@/lib/actions/group-actions', () => ({
   createGroup: vi.fn(),

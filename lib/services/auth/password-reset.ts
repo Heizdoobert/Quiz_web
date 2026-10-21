@@ -1,8 +1,8 @@
 import 'server-only';
 import { createHmac, timingSafeEqual, createHash } from 'node:crypto';
 import { auth, updateAuthUserPassword } from '@/lib/db/auth';
-import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
-import { ensureAccountForAuthUser } from '@/lib/services/users';
+import { allowAttempt, allowAttemptFromIp } from '@/lib/services/auth/rate-limit';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
 import { logger } from '@/lib/logger';
 
 export type AuthResult = { ok: true; account?: { id: string } } | { ok: false; error: string };

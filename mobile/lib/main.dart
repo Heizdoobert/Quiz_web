@@ -9,14 +9,29 @@ import 'features/quiz/quiz_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
-
+import 'package:mobile/api/api_client.dart';
 // Pass with --dart-define=SENTRY_DSN=... (CI uses the MOBILE_SENTRY_DSN repository variable).
 // Without it, crashes are not reported anywhere: the default for local runs.
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
 Future<void> main() async {
-  const app = ProviderScope(child: QuickQuizApp());
-  if (_sentryDsn.isEmpty) return runApp(app);
+  WidgetsFlutterBinding.ensureInitialized();
+  // Guard token read to avoid crashes if secure storage is unavailable.
+  String? token;
+  try {
+    token = await apiClient.getToken();
+  } catch (e) {
+    // If reading fails, treat as no token.
+    token = null;
+  }
+  final initialRoute = (token != null && token.isNotEmpty) ? '/quiz' : '/auth';
+  final app = ProviderScope(
+    child: const StartupGate(),
+  );
+  if (_sentryDsn.isEmpty) {
+    runApp(app);
+    return;
+  }
   await SentryFlutter.init(
     (options) => options.dsn = _sentryDsn,
     appRunner: () => runApp(app),
@@ -24,7 +39,12 @@ Future<void> main() async {
 }
 
 class QuickQuizApp extends StatelessWidget {
-  const QuickQuizApp({super.key});
+  const QuickQuizApp({
+    super.key,
+    this.initialRoute = '/auth',
+  });
+
+  final String initialRoute;
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +52,7 @@ class QuickQuizApp extends StatelessWidget {
       title: 'Quick Quiz',
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      initialRoute: '/auth',
+      initialRoute: initialRoute,
       routes: {
         '/auth': (_) => const AuthScreen(),
         '/main': (_) => const MainScreen(),

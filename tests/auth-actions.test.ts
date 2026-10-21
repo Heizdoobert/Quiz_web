@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { setSessionAccount, getSessionAccount, clearSessionAccount } from '../lib/services/session';
+import { setSessionAccount, getSessionAccount, clearSessionAccount } from '@/lib/services/auth/session';
 import {
   signOut,
   getSessionInfo,

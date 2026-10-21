@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server';
 import { verifyEmailCode } from '@/lib/actions/auth-actions';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {
   try {

@@ -6,7 +6,7 @@ import {
 } from '@/lib/db/questions';
 import { hasRecordedAnswer } from '@/lib/db/results';
 import { incrementAiGeneration, topics } from '@/lib/db/rpc';
-import { getSessionAccount, SessionAccount } from '@/lib/services/session';
+import { getSessionAccount, SessionAccount } from '@/lib/services/auth/session';
 import { ClientQuestion } from '@/lib/types';
 import { isUuid, validateQuestionInput } from '@/lib/utils/validation';
 import { gemini } from '@/lib/sdk/gemini';

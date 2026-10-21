@@ -4,9 +4,9 @@ import { logger } from "@/lib/logger";
 import { questionsForExport } from '../db/questions';
 import { resultsForExport } from '../db/results';
 import { questionAnalytics } from '../db/rpc';
-import { getSessionAccount, clearSessionAccount, type SessionAccount } from '../services/session';
-import { deleteAccount, type DeleteAccountResult } from '../services/account-deletion';
-import { quizzesForAccount } from '../services/user-quizzes';
+import { getSessionAccount, clearSessionAccount, type SessionAccount } from '@/lib/services/auth/session';
+import { deleteAccount, type DeleteAccountResult } from '@/lib/services/admin/account-deletion';
+import { quizzesForAccount } from '@/lib/services/users/user-quizzes';
 import {
   Question,
   QuizResult,

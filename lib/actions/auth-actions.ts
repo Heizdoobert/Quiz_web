@@ -1,8 +1,8 @@
 'use server';
 
-import { getSessionAccount, setSessionAccount, clearSessionAccount, type SessionAccount } from '@/lib/services/session';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
-import { ensureAccountForAuthUser } from '@/lib/services/users';
+import { getSessionAccount, setSessionAccount, clearSessionAccount, type SessionAccount } from '@/lib/services/auth/session';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
 import { auth } from '@/lib/db/auth';
 import { usernameTaken } from '@/lib/db/users';
 import {
@@ -11,13 +11,13 @@ import {
   USERNAME_RE,
   EMAIL_RE,
   type AuthResult,
-} from '@/lib/services/credentials';
+} from '@/lib/services/auth/credentials';
 import {
   requestPasswordResetService,
   verifyPasswordResetCodeService,
   updatePasswordWithResetService,
-} from '@/lib/services/password-reset';
-import { allowAttempt, allowAttemptFromIp } from '@/lib/services/rate-limit';
+} from '@/lib/services/auth/password-reset';
+import { allowAttempt, allowAttemptFromIp } from '@/lib/services/auth/rate-limit';
 import { logger } from '@/lib/logger';
 
 export type { AuthResult };

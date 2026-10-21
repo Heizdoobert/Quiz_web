@@ -1,8 +1,8 @@
 'use server';
 
-import { setConfigValue } from '../services/config-admin';
-import { listQuarantinedQuestions, resolveQuestionDispute } from '../services/moderation';
-import { listAccountsForAdmin, setAccountRole } from '../services/role-admin';
+import { setConfigValue } from '@/lib/services/admin/config-admin';
+import { listQuarantinedQuestions, resolveQuestionDispute } from '@/lib/services/moderation/moderation';
+import { listAccountsForAdmin, setAccountRole } from '@/lib/services/admin/role-admin';
 
 // Every export here is a public endpoint, so none takes an account: each service called below
 // authorizes from the session cookie.
@@ -28,6 +28,6 @@ export async function resolveQuarantineAction(questionId: string, outcome: strin
 }
 
 export async function triggerReportAction(recipientEmail?: string) {
-  const { triggerSystemReport } = await import('../services/report-admin');
+  const { triggerSystemReport } = await import('@/lib/services/admin/report-admin');
   return triggerSystemReport(undefined, recipientEmail);
 }

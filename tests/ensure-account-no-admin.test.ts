@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { ensureAccountForAuthUser } from '../lib/services/users';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
 
 // Isolated from identity-accounts.test.ts because it needs supabaseAdmin to be
 // null for the whole file, not toggled mid-test.

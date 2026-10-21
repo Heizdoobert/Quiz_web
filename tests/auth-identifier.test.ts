@@ -1,7 +1,7 @@
 // Tests for authentication using either email or username as identifier
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import { supabaseAdmin } from '@/lib/sdk/supabase-admin'
-import { signUpAccount, signInAccount } from '@/lib/services/credentials'
+import { signUpAccount, signInAccount } from '@/lib/services/auth/credentials'
 
 // Helper to clean up created users
 async function deleteUser(userId: string) {

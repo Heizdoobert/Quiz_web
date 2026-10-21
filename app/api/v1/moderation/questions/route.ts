@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
-import { requireAuth } from '@/lib/services/api-auth';
-import { apiError, apiOk } from '@/lib/services/api-response';
-import { listQuarantinedQuestions } from '@/lib/services/moderation';
+import { requireAuth } from '@/lib/services/auth/api-auth';
+import { apiError, apiOk } from '@/lib/services/api/api-response';
+import { listQuarantinedQuestions } from '@/lib/services/moderation/moderation';
 
 export const dynamic = 'force-dynamic';
 

@@ -1,7 +1,7 @@
 // Refresh token endpoint
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyRefresh, signJwt, signRefresh, createJwtCookie, createRefreshCookie } from '@/lib/auth';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export async function POST(req: NextRequest) {
   try {

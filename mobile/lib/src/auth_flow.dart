@@ -13,17 +13,20 @@ class AuthSdk {
   /// Mimics the original private sign‑in flow used in the outdated test.
   /// It simply executes the provided request function. The request
   /// returns a map that would normally be processed by the real SDK.
+// ignore: unused_element
   Future<void> _signInFlow(Future<Map<String, dynamic>> Function() request) async {
     await request(); // No further processing needed for the stub.
   }
 
   /// Token refresh stub – the actual refresh logic lives in ApiClient.
   /// This method is a no‑op to keep the test compiling.
+// ignore: unused_element
   Future<void> _refreshTokens() async {
     // Intentionally left blank.
   }
 
   /// Sign‑out stub – delegates to the AuthProvider's public logout method.
+// ignore: unused_element
   Future<void> _signOut() async {
     await _container.read(authProvider.notifier).logout();
   }

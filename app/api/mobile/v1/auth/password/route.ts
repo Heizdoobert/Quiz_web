@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
-import { signInAccount, signUpAccount } from '@/lib/services/credentials';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { signInAccount, signUpAccount } from '@/lib/services/auth/credentials';
 
 // Username + password sign-in or sign-up.
 export async function POST(req: NextRequest) {

@@ -1,5 +1,5 @@
 import { ADMIN_PAGES } from '@/lib/constants/admin-pages';
-import { can } from '@/lib/services/rbac';
+import { can } from '@/lib/services/rbac/rbac';
 import { ADMIN_MODULES } from './registry.generated';
 
 // The five pages that predate modules come first in their own order, then the modules by

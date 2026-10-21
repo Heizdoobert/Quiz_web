@@ -1,8 +1,8 @@
 import { describe, it, expect, vi } from 'vitest';
 import { NextRequest } from 'next/server';
-import { apiOk, apiError, mapErrorCodeToStatus } from '@/lib/services/api-response';
-import { extractBearerToken, requireAuth, optionalAuth } from '@/lib/services/api-auth';
-import * as mobileAuth from '@/lib/services/mobile-auth';
+import { apiOk, apiError, mapErrorCodeToStatus } from '@/lib/services/api/api-response';
+import { extractBearerToken, requireAuth, optionalAuth } from '@/lib/services/auth/api-auth';
+import * as mobileAuth from '@/lib/services/auth/mobile-auth';
 
 describe('API Infrastructure Helpers', () => {
   it('maps error codes to appropriate HTTP status codes', () => {

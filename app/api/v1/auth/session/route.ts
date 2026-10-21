@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server';
-import { requireAuth } from '@/lib/services/api-auth';
+import { requireAuth } from '@/lib/services/auth/api-auth';
 import { getSessionInfo } from '@/lib/actions/auth-actions';
-import { apiOk, apiError } from '@/lib/services/api-response';
+import { apiOk, apiError } from '@/lib/services/api/api-response';
 
 export const dynamic = 'force-dynamic';
 

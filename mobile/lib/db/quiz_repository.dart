@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:sqflite/sqflite.dart';
 import 'database_helper.dart';
@@ -57,14 +58,15 @@ class QuizRepository {
   Future<void> queueAnswer(String questionId, int answerIndex) async {
     final db = await _dbHelper.database;
     await db.transaction((txn) async {
-      await txn.insert(
-        'answer_queue',
-        {
-          'questionId': questionId,
-          'answerIndex': answerIndex,
-          'timestamp': DateTime.now().toIso8601String(),
-        },
-      );
+        await txn.insert(
+          'answer_queue',
+          {
+            'questionId': questionId,
+            'answerIndex': answerIndex,
+            'timestamp': DateTime.now().toIso8601String(),
+            'client_uuid': const Uuid().v4(),
+          },
+        );
       await txn.delete('questions', where: 'id = ?', whereArgs: [questionId]);
     });
   }

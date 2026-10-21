@@ -7,7 +7,7 @@ import {
 } from '@/lib/db/community';
 import { hasRecordedAnswer } from '@/lib/db/results';
 import { ratingSummary } from '@/lib/db/rpc';
-import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/auth/session';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
 

@@ -11,7 +11,7 @@ import {
   disputeQuestion,
   get5050EliminatedIndices,
 } from '@/lib/actions/question-actions';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 
 vi.mock('@/lib/actions/question-actions', () => ({
   createQuestion: vi.fn(),

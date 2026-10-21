@@ -4,7 +4,7 @@ import {
   setSessionAccount,
   getSessionAccount,
   clearSessionAccount,
-} from '@/lib/services/session';
+} from '@/lib/services/auth/session';
 import { createHmac } from 'crypto';
 
 // In-memory cookie store simulating Next.js cookie jar

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { issueMobileAuthToken } from '@/lib/services/mobile-auth';
-import { signInAccountWithGoogle } from '@/lib/services/credentials';
+import { issueMobileAuthToken } from '@/lib/services/auth/mobile-auth';
+import { signInAccountWithGoogle } from '@/lib/services/auth/credentials';
 
 // Google sign-in with the ID token the app got from the OS.
 export async function POST(req: NextRequest) {

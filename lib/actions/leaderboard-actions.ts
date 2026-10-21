@@ -5,7 +5,7 @@ import { globalLeaderboard, groupLeaderboard } from '@/lib/db/rpc';
 import { LeaderboardEntry } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';
-import type { SessionAccount } from '@/lib/services/session';
+import type { SessionAccount } from '@/lib/services/auth/session';
 
 // Rows come pre-aggregated and pre-sorted from Postgres (supabase/migrations/20261013000400_read_leaderboards_and_get_user_stats_from_user_stats.sql);
 // raw quiz_results reads are capped at 1000 rows, so counting is done there.

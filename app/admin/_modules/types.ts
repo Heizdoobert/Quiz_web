@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Permission, Role } from '@/lib/services/rbac';
+import type { Permission, Role } from '@/lib/services/rbac/rbac';
 
 // A module is the folder app/admin/_modules/<id>/ with a manifest.ts and a page.tsx.
 // The id is the folder name and the URL segment: /admin/<id>.

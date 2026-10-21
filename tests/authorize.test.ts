@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { authorize } from '../lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 import { roleOf } from '../lib/db/roles';
-import { getSessionAccount } from '../lib/services/session';
+import { getSessionAccount } from '@/lib/services/auth/session';
 import { logger } from '../lib/logger';
 
 vi.mock('../lib/db/roles', () => ({ roleOf: vi.fn() }));
-vi.mock('../lib/services/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn() }));
 vi.mock('../lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
 const ACCOUNT = { id: '00000000-0000-4000-8000-0000000000a1' };

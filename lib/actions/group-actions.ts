@@ -1,7 +1,7 @@
 'use server';
 
 import { addMember, groupsForAccount, insertGroup, removeMember } from '@/lib/db/groups';
-import { getSessionAccount, type SessionAccount } from '@/lib/services/session';
+import { getSessionAccount, type SessionAccount } from '@/lib/services/auth/session';
 import { Group } from '@/lib/types';
 import { isUuid } from '@/lib/utils/validation';
 import { logger } from '@/lib/logger';

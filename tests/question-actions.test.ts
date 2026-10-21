@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { generateQuestion, fetchRandomQuestion, getPublicQuestion } from '../lib/actions/question-actions';
-import { getSessionAccount } from '../lib/services/session';
+import { getSessionAccount } from '@/lib/services/auth/session';
 import { supabase } from '../lib/sdk/supabase';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
 
@@ -19,7 +19,7 @@ vi.mock('@google/genai', () => ({
   }),
 }));
 
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 
