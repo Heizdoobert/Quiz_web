@@ -43,6 +43,7 @@ class ApiClient {
 
   Future<void> clearToken() async {
     await _storage.delete(key: 'jwt_token');
+    await _storage.delete(key: 'auth_token');
   }
 
   /// The account that last signed in on this device. Kept after the token expires, so the
