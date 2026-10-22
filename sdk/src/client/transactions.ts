@@ -196,16 +196,22 @@ export class TransactionManager {
       userId: cleanUserId,
     });
 
-    if (!result.success) {
+    const finalize = (update: Partial<PackageTransaction>): PackageTransaction => {
       txn = {
         ...txn,
-        status: result.status,
-        receipt: result.receipt,
+        ...update,
         completedAt: new Date().toISOString(),
-        errorReason: result.errorReason,
       };
       this.record(txn);
       return txn;
+    };
+
+    if (!result.success) {
+      return finalize({
+        status: result.status,
+        receipt: result.receipt,
+        errorReason: result.errorReason,
+      });
     }
 
     // Step 3: Verification
@@ -213,26 +219,18 @@ export class TransactionManager {
       transactionId: txnId,
     });
     if (!isValid) {
-      txn = {
-        ...txn,
+      return finalize({
         status: 'failed',
         receipt: result.receipt,
-        completedAt: new Date().toISOString(),
         errorReason: 'Receipt validation failed',
-      };
-      this.record(txn);
-      return txn;
+      });
     }
 
     // Step 4: Verified
-    txn = {
-      ...txn,
+    return finalize({
       status: 'verified',
       receipt: result.receipt,
-      completedAt: new Date().toISOString(),
-    };
-    this.record(txn);
-    return txn;
+    });
   }
 
   async restorePurchases(options?: {
