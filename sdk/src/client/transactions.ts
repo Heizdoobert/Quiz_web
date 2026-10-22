@@ -170,6 +170,9 @@ export class TransactionManager {
       throw new Error(`Package "${packageId}" not found in catalog`);
     }
 
+    const cleanUserId = options?.userId
+      ? String(options.userId).slice(0, 128).trim()
+      : '';
     const now = new Date().toISOString();
     const txnId = `txn_${Date.now()}_${pkg.id}`;
 
@@ -177,7 +180,7 @@ export class TransactionManager {
     let txn: PackageTransaction = {
       transactionId: txnId,
       packageId: pkg.id,
-      userId: options?.userId ?? '',
+      userId: cleanUserId,
       amount: pkg.price,
       currency: pkg.currency,
       status: 'initiated',
@@ -188,7 +191,10 @@ export class TransactionManager {
     this.record(txn);
 
     // Step 2: Processing via Gateway
-    const result = await this.gateway.requestPayment(pkg, options);
+    const result = await this.gateway.requestPayment(pkg, {
+      ...options,
+      userId: cleanUserId,
+    });
 
     if (!result.success) {
       txn = {

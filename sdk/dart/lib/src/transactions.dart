@@ -172,6 +172,9 @@ class TransactionManager {
       throw ArgumentError('Package "$packageId" not found in catalog');
     }
 
+    final cleanUserId = userId != null
+        ? (userId.length > 128 ? userId.substring(0, 128) : userId).trim()
+        : '';
     final now = DateTime.now().toUtc().toIso8601String();
     final txnId = 'txn_${DateTime.now().millisecondsSinceEpoch}_${pkg.id}';
 
@@ -179,7 +182,7 @@ class TransactionManager {
     var txn = PackageTransaction(
       transactionId: txnId,
       packageId: pkg.id,
-      userId: userId ?? '',
+      userId: cleanUserId,
       amount: pkg.price,
       currency: pkg.currency,
       status: 'initiated',
@@ -190,7 +193,7 @@ class TransactionManager {
     _record(txn);
 
     // Step 2: Processing via Gateway
-    final result = await gateway.requestPayment(pkg, userId: userId);
+    final result = await gateway.requestPayment(pkg, userId: cleanUserId);
 
     if (!result.success) {
       txn = PackageTransaction(

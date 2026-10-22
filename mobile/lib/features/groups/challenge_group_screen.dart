@@ -44,27 +44,33 @@ class _ChallengeGroupScreenState extends ConsumerState<ChallengeGroupScreen> {
               TextField(
                 key: const Key('group_title_field'),
                 controller: titleController,
+                maxLength: 60,
                 decoration: const InputDecoration(
                   labelText: 'Group Title',
                   hintText: 'e.g. DeFi Masters Arena',
+                  counterText: '',
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 key: const Key('group_topic_field'),
                 controller: topicController,
+                maxLength: 40,
                 decoration: const InputDecoration(
                   labelText: 'Topic / Category',
                   hintText: 'e.g. Flutter, Web3, Tech',
+                  counterText: '',
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 key: const Key('group_desc_field'),
                 controller: descController,
+                maxLength: 250,
                 decoration: const InputDecoration(
                   labelText: 'Description',
                   hintText: 'Rules and challenge details...',
+                  counterText: '',
                 ),
                 maxLines: 2,
               ),

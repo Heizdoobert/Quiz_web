@@ -211,6 +211,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                 TextFormField(
                   controller: _promptController,
                   maxLines: 2,
+                  maxLength: 500,
                   decoration: InputDecoration(
                     hintText: 'Enter your question here...',
                     hintStyle: const TextStyle(color: AppColors.slate400),
@@ -218,8 +219,13 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                     fillColor: AppColors.cyberViolet,
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
                     enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
+                    counterStyle: const TextStyle(color: AppColors.slate400, fontSize: 11),
                   ),
-                  validator: (v) => (v == null || v.trim().isEmpty) ? 'Please enter a question prompt' : null,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Please enter a question prompt';
+                    if (v.trim().length > 500) return 'Question prompt cannot exceed 500 characters';
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -254,6 +260,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                 if (_isCreatingCustomTopic && tier.canCreateCustomTopic)
                   TextFormField(
                     controller: _customTopicController,
+                    maxLength: 50,
                     decoration: InputDecoration(
                       hintText: 'Enter new topic name...',
                       hintStyle: const TextStyle(color: AppColors.slate400),
@@ -261,8 +268,14 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                       fillColor: AppColors.cyberViolet,
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
                       enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
+                      counterStyle: const TextStyle(color: AppColors.slate400, fontSize: 11),
                     ),
-                    validator: (v) => (_isCreatingCustomTopic && (v == null || v.trim().isEmpty)) ? 'Please enter topic name' : null,
+                    validator: (v) {
+                      if (!_isCreatingCustomTopic) return null;
+                      if (v == null || v.trim().isEmpty) return 'Please enter topic name';
+                      if (v.trim().length > 50) return 'Topic name cannot exceed 50 characters';
+                      return null;
+                    },
                   )
                 else
                   DropdownButtonFormField<String>(
@@ -303,6 +316,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                         Expanded(
                           child: TextFormField(
                             controller: _optionControllers[i],
+                            maxLength: 200,
                             decoration: InputDecoration(
                               hintText: 'Option ${String.fromCharCode(65 + i)}',
                               hintStyle: const TextStyle(color: AppColors.slate400),
@@ -311,8 +325,13 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
                               enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
                               contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                              counterText: '',
                             ),
-                            validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                            validator: (v) {
+                              if (v == null || v.trim().isEmpty) return 'Required';
+                              if (v.trim().length > 200) return 'Option cannot exceed 200 characters';
+                              return null;
+                            },
                           ),
                         ),
                       ],
