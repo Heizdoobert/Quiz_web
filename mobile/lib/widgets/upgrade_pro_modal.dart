@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:quickquiz_sdk/quickquiz_sdk.dart';
 import '../theme/app_theme.dart';
 import '../services/tier/tier_provider.dart';
 import '../services/transactions/package_transaction_manager.dart';

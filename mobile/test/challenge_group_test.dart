@@ -69,7 +69,8 @@ void main() {
     // Pro Upgrade Modal should be shown
     expect(find.text('Unlock Pro Package'), findsOneWidget);
     expect(find.text('Open Challenge Groups'), findsOneWidget);
-    expect(find.text('Unlock Pro Package (Full Limit)'), findsOneWidget);
+    expect(find.text('Choose Your Plan'), findsOneWidget);
+    expect(find.byKey(const Key('purchase_package_button')), findsOneWidget);
   });
 
   testWidgets('Pro player can create a new challenge group and see it in list', (WidgetTester tester) async {

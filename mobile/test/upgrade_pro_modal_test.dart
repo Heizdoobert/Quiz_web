@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/widgets/upgrade_pro_modal.dart';
 import 'package:mobile/services/tier/tier_provider.dart';
-import 'package:mobile/services/transactions/package_transaction_manager.dart';
 
 void main() {
   testWidgets('showUpgradeProModal displays package tiers and features', (WidgetTester tester) async {
