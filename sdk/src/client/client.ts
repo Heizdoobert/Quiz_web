@@ -7,6 +7,7 @@ import { CommunityResource } from './community';
 import { GroupsResource } from './groups';
 import { DiscoveryResource } from './discovery';
 import { ProfileResource } from './profile';
+import { TransactionManager } from './transactions';
 
 export type QuickQuizClientOptions = HttpClientOptions;
 
@@ -20,6 +21,7 @@ export class QuickQuizClient {
   readonly groups: GroupsResource;
   readonly discovery: DiscoveryResource;
   readonly profile: ProfileResource;
+  readonly transactions: TransactionManager;
 
   constructor(options: QuickQuizClientOptions) {
     this.http = new HttpClient(options);
@@ -31,6 +33,7 @@ export class QuickQuizClient {
     this.groups = new GroupsResource(this);
     this.discovery = new DiscoveryResource(this);
     this.profile = new ProfileResource(this);
+    this.transactions = new TransactionManager();
   }
 
   /**

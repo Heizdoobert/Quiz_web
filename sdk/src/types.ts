@@ -254,3 +254,42 @@ export interface UserQuizzesResult {
   }>;
   count: number;
 }
+
+export type PackageId = 'pro_monthly' | 'pro_annual' | 'pro_lifetime';
+
+export type TransactionStatus =
+  | 'initiated'
+  | 'processing'
+  | 'verified'
+  | 'failed'
+  | 'cancelled'
+  | 'refunded';
+
+export type BillingInterval = 'month' | 'year' | 'lifetime';
+
+export interface UpgradePackage {
+  id: PackageId;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  interval: BillingInterval;
+  badge?: string;
+  savingsPercentage?: number;
+  features: string[];
+}
+
+export interface PackageTransaction {
+  transactionId: string;
+  packageId: PackageId;
+  userId: string;
+  amount: number;
+  currency: string;
+  status: TransactionStatus;
+  gateway: 'sandbox' | 'google_play' | 'app_store' | 'stripe' | string;
+  receipt: string;
+  startedAt: string;
+  completedAt?: string;
+  errorReason?: string;
+}
+

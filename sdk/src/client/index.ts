@@ -109,3 +109,15 @@ export {
 // Storage
 export { StorageManager } from '../storage';
 export type { StorageManagerOptions } from '../storage';
+
+// Transactions
+export {
+  TransactionManager,
+  SandboxGatewayAdapter,
+  DEFAULT_UPGRADE_PACKAGES,
+} from './transactions';
+export type {
+  PaymentResult,
+  PaymentGatewayAdapter,
+  SandboxGatewayOptions,
+} from './transactions';
