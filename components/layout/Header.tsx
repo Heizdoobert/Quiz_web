@@ -35,7 +35,13 @@ export default function Header({ onOpenProfile }: HeaderProps) {
           Quick Quiz
         </span>
       </Link>
-      <SearchBox />
+              <Link
+          href="/rcm"
+          className="ml-4 px-3 py-1 rounded bg-neo-mint text-white hover:bg-neo-mint/80 transition"
+        >
+          RCM
+        </Link>
+
       {/* min-h reserves the Sign In button's height; it mounts after the session loads and shifted the page */}
       <div className="flex shrink-0 min-h-10 items-center gap-2.5 sm:gap-3">
         {/* Sound FX Toggle Button */}

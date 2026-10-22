@@ -36,19 +36,36 @@ const brandGradient = LinearGradient(colors: [AppColors.neoMint, AppColors.elect
 /// The web's heading face is JetBrains Mono; not bundled, so use the platform monospace.
 const headingFont = 'monospace';
 
-ThemeData buildAppTheme() {
+/// Light theme colors
+class LightAppColors {
+  static const background = Color(0xFFFFFFFF);
+  static const primary = Color(0xFF0A1128);
+  static const onPrimary = Color(0xFF00FFCC);
+  // Add other light colors as needed
+}
+
+ThemeData buildAppTheme({bool isLight = false}) {
   final base = ThemeData(
-    brightness: Brightness.dark,
+    brightness: isLight ? Brightness.light : Brightness.dark,
     useMaterial3: true,
-    colorScheme: const ColorScheme.dark(
-      primary: AppColors.neoMint,
-      onPrimary: AppColors.deepSpace,
-      secondary: AppColors.electricIndigo,
-      error: AppColors.popCoral,
-      surface: AppColors.cyberViolet,
-      onSurface: AppColors.foreground,
-    ),
-    scaffoldBackgroundColor: AppColors.deepSpace,
+    colorScheme: isLight
+        ? const ColorScheme.light(
+            primary: LightAppColors.onPrimary,
+            onPrimary: LightAppColors.primary,
+            secondary: AppColors.electricIndigo,
+            error: AppColors.popCoral,
+            surface: LightAppColors.background,
+            onSurface: AppColors.deepSpace,
+          )
+        : const ColorScheme.dark(
+            primary: AppColors.neoMint,
+            onPrimary: AppColors.deepSpace,
+            secondary: AppColors.electricIndigo,
+            error: AppColors.popCoral,
+            surface: AppColors.cyberViolet,
+            onSurface: AppColors.foreground,
+          ),
+    scaffoldBackgroundColor: isLight ? LightAppColors.background : AppColors.deepSpace,
   );
   return base.copyWith(
     appBarTheme: const AppBarTheme(
@@ -57,8 +74,8 @@ ThemeData buildAppTheme() {
       elevation: 0,
     ),
     textTheme: base.textTheme.apply(
-      bodyColor: AppColors.slate200,
-      displayColor: AppColors.foreground,
+      bodyColor: isLight ? Colors.black87 : AppColors.slate200,
+      displayColor: isLight ? Colors.black : AppColors.foreground,
     ),
     snackBarTheme: const SnackBarThemeData(
       backgroundColor: AppColors.elevation2,

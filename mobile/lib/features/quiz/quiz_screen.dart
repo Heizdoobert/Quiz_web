@@ -165,7 +165,7 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
                       // Same breakpoint as the web's lg:grid-cols-12: scoreboard 3, quiz 6, leaderboard 3.
                       final wide = constraints.maxWidth >= 1024;
                       return SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(16, 24, 16, 24),
+                        padding: EdgeInsets.fromLTRB(Responsive(context).scale(16), Responsive(context).scale(24), Responsive(context).scale(16), Responsive(context).scale(24)),
                         child: Center(
                           child: ConstrainedBox(
                             constraints: const BoxConstraints(maxWidth: 1152),

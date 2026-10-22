@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/theme/theme_mode_provider.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
 import 'package:mobile/widgets/legal_links.dart';
@@ -84,7 +85,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive(context).scale(20),
+            vertical: Responsive(context).scale(16),
+          ),
           children: [
             // Account Section
             const Text(
@@ -170,7 +174,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+                            // Theme toggle
+                Consumer(
+                  builder: (context, ref, _) {
+                    final mode = ref.watch(themeModeProvider);
+                    final isDark = mode == ThemeMode.dark;
+                    return SwitchListTile(
+                      title: const Text('Dark mode', style: TextStyle(color: AppColors.foreground)),
+                      value: isDark,
+                      onChanged: (value) => ref.read(themeModeProvider.notifier).toggle(value),
+                      activeColor: AppColors.neoMint,
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
 
             // Tier & Membership Section
             const Text(
@@ -269,7 +286,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+                            // Theme toggle
+                Consumer(
+                  builder: (context, ref, _) {
+                    final mode = ref.watch(themeModeProvider);
+                    final isDark = mode == ThemeMode.dark;
+                    return SwitchListTile(
+                      title: const Text('Dark mode', style: TextStyle(color: AppColors.foreground)),
+                      value: isDark,
+                      onChanged: (value) => ref.read(themeModeProvider.notifier).toggle(value),
+                      activeColor: AppColors.neoMint,
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
 
             // Offline Sync Section
             const Text(
@@ -335,7 +365,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 24),
+                            // Theme toggle
+                Consumer(
+                  builder: (context, ref, _) {
+                    final mode = ref.watch(themeModeProvider);
+                    final isDark = mode == ThemeMode.dark;
+                    return SwitchListTile(
+                      title: const Text('Dark mode', style: TextStyle(color: AppColors.foreground)),
+                      value: isDark,
+                      onChanged: (value) => ref.read(themeModeProvider.notifier).toggle(value),
+                      activeColor: AppColors.neoMint,
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
 
             // About & Legal
             const Text(

@@ -7,4 +7,3 @@ export type AnswerSubmissionResult = any;
 export type Question = any;
 export type SearchResult = any;
 export type LeaderboardEntry = any;
-export type UserStats = any;

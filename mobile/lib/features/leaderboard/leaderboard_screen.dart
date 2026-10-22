@@ -90,8 +90,8 @@ class LeaderboardScreen extends ConsumerWidget {
               child: Column(
                 children: [
                   Container(
-                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    margin: EdgeInsets.fromLTRB(Responsive(context).scale(16), Responsive(context).scale(8), Responsive(context).scale(16), Responsive(context).scale(4)),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(14), vertical: Responsive(context).scale(10)),
                     decoration: BoxDecoration(
                       color: AppColors.cyberViolet,
                       borderRadius: BorderRadius.circular(12),
@@ -132,7 +132,7 @@ class LeaderboardScreen extends ConsumerWidget {
                   ),
                   Expanded(
                     child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(16), vertical: Responsive(context).scale(12)),
                       itemCount: list.length,
                       separatorBuilder: (context, index) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
@@ -156,7 +156,7 @@ class LeaderboardScreen extends ConsumerWidget {
 
                   // Current user pinned stats
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: EdgeInsets.all(Responsive(context).scale(16)),
                     decoration: BoxDecoration(
                       color: AppColors.cyberViolet,
                       border: const Border(top: BorderSide(color: AppColors.cyberBorder)),

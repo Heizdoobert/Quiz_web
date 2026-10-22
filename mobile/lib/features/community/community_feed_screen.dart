@@ -138,12 +138,12 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                 // Topic chips
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(16), vertical: Responsive(context).scale(8)),
                   child: Row(
                     children: topics.map((t) {
                       final isSelected = _selectedTopic == t;
                       return Padding(
-                        padding: const EdgeInsets.only(right: 8),
+                        padding: EdgeInsets.only(right: Responsive(context).scale(8)),
                         child: FilterChip(
                           label: Text(t),
                           selected: isSelected,
@@ -168,14 +168,14 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                           child: Text('No quizzes found for this topic.', style: TextStyle(color: AppColors.slate400)),
                         )
                       : ListView.builder(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(Responsive(context).scale(16)),
                           itemCount: filtered.length,
                           itemBuilder: (context, index) {
                             final item = filtered[index];
                             return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: EdgeInsets.only(bottom: Responsive(context).scale(12)),
                               child: GlassCard(
-                                padding: const EdgeInsets.all(16),
+                                padding: EdgeInsets.all(Responsive(context).scale(16)),
                                 radius: 16,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +184,7 @@ class _CommunityFeedScreenState extends ConsumerState<CommunityFeedScreen> {
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(10), vertical: Responsive(context).scale(4)),
                                           decoration: BoxDecoration(
                                             color: AppColors.forCategory(item.topic).withValues(alpha: 0.15),
                                             borderRadius: BorderRadius.circular(8),

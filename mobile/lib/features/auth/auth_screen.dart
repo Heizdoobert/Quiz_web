@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
-import 'package:mobile/widgets/glass_card.dart';
+import 'package:mobile/utils/responsive.dart';
+
 
 import 'auth_provider.dart';
 import 'add_username_screen.dart';
@@ -61,9 +62,9 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(Responsive(context).scale(24)),
             child: GlassCard(
-              padding: const EdgeInsets.all(28),
+              padding: EdgeInsets.all(Responsive(context).scale(28)),
               child: AutofillGroup(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -78,7 +79,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                     ),
                     const SizedBox(height: 8),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: EdgeInsets.symmetric(vertical: Responsive(context).scale(8)),
                       child: const Text('Sign in', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
                     ),
                     const Text(
@@ -126,7 +127,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       children: [
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
                         Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 12),
+                          padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(12)),
                           child: Text('or', style: TextStyle(color: AppColors.slate500, fontSize: 12)),
                         ),
                         Expanded(child: Divider(color: AppColors.cyberBorder)),
@@ -140,7 +141,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
                         side: const BorderSide(color: AppColors.cyberBorder),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        padding: EdgeInsets.symmetric(vertical: Responsive(context).scale(14)),,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
                     ),
@@ -197,7 +198,7 @@ class BrandMark extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Container(
-          padding: const EdgeInsets.all(6),
+          padding: EdgeInsets.all(Responsive(context).scale(6)),
           decoration: BoxDecoration(
             color: AppColors.neoMint.withValues(alpha: 0.15),
             border: Border.all(color: AppColors.neoMint.withValues(alpha: 0.4)),

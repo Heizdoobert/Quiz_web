@@ -5,6 +5,7 @@ import '../../theme/app_theme.dart';
 import '../../widgets/glass_card.dart';
 import '../../services/tier/tier_provider.dart';
 import '../../services/tier/session_quiz_store.dart';
+import '../../utils/responsive.dart';
 import '../../db/quiz_repository.dart';
 import '../auth/auth_screen.dart' show requireSignIn;
 
@@ -165,7 +166,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(Responsive(context).scale(16)),
           child: Form(
             key: _formKey,
             child: Column(
@@ -274,7 +275,7 @@ class _TierQuotaBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(16), vertical: Responsive(context).scale(12)),
       child: Row(
         children: [
           Icon(
@@ -425,7 +426,7 @@ class _OptionRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final letter = String.fromCharCode(65 + index);
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.only(bottom: Responsive(context).scale(10)),
       child: Row(
         children: [
           ChoiceChip(
@@ -459,7 +460,7 @@ class _OptionRow extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: AppColors.cyberBorder),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(14), vertical: Responsive(context).scale(12)),
                 counterText: '',
               ),
               validator: (v) {

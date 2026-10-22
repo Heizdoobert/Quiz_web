@@ -55,13 +55,13 @@ class ProfileScreen extends ConsumerWidget {
           }
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(Responsive(context).scale(16)),
           children: [
             if (!auth.isAuthenticated)
               Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: EdgeInsets.only(bottom: Responsive(context).scale(16)),
                 child: GlassCard(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(Responsive(context).scale(16)),
                   radius: 16,
                   child: Row(
                     children: [
@@ -126,9 +126,9 @@ class _QuestionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final details = [question.category, question.status].whereType<String>().join(' · ');
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: Responsive(context).scale(12)),
       child: GlassCard(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(Responsive(context).scale(16)),
         radius: 16,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

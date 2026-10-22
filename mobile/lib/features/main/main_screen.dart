@@ -32,11 +32,39 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final screens = const [
-      QuizScreen(),
-      CommunityFeedScreen(),
-      LeaderboardScreen(),
-      ProfileScreen(),
-      SettingsScreen(),
+      QuizScreen(key: PageStorageKey('quiz')),
+      CommunityFeedScreen(key: PageStorageKey('community')),
+      LeaderboardScreen(key: PageStorageKey('leaderboard')),
+      ProfileScreen(key: PageStorageKey('profile')),
+      SettingsScreen(key: PageStorageKey('settings')),
+    ];
+    // Define navigation destinations once for performance & accessibility
+    const _navDestinations = [
+      NavigationDestination(
+        icon: Icon(Icons.quiz_outlined, semanticLabel: 'Quiz'),
+        selectedIcon: Icon(Icons.quiz_rounded, color: AppColors.neoMint, semanticLabel: 'Quiz selected'),
+        label: 'Quiz',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.people_outline_rounded, semanticLabel: 'Community'),
+        selectedIcon: Icon(Icons.people_rounded, color: AppColors.neoMint, semanticLabel: 'Community selected'),
+        label: 'Community',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.leaderboard_outlined, semanticLabel: 'Leaderboard'),
+        selectedIcon: Icon(Icons.leaderboard_rounded, color: AppColors.neoMint, semanticLabel: 'Leaderboard selected'),
+        label: 'Leaderboard',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.person_outline_rounded, semanticLabel: 'Profile'),
+        selectedIcon: Icon(Icons.person_rounded, color: AppColors.neoMint, semanticLabel: 'Profile selected'),
+        label: 'Profile',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.settings_outlined, semanticLabel: 'Settings'),
+        selectedIcon: Icon(Icons.settings_rounded, color: AppColors.neoMint, semanticLabel: 'Settings selected'),
+        label: 'Settings',
+      ),
     ];
 
     return Scaffold(
@@ -65,35 +93,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             _currentIndex = index;
           });
         },
-        backgroundColor: AppColors.cyberViolet,
-        indicatorColor: AppColors.neoMint.withValues(alpha: 0.2),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.quiz_outlined),
-            selectedIcon: Icon(Icons.quiz_rounded, color: AppColors.neoMint),
-            label: 'Quiz',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outline_rounded),
-            selectedIcon: Icon(Icons.people_rounded, color: AppColors.neoMint),
-            label: 'Community',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.leaderboard_outlined),
-            selectedIcon: Icon(Icons.leaderboard_rounded, color: AppColors.neoMint),
-            label: 'Leaderboard',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded, color: AppColors.neoMint),
-            label: 'Profile',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings_rounded, color: AppColors.neoMint),
-            label: 'Settings',
-          ),
-        ],
+          labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
       ),
     );
   }

@@ -3,12 +3,8 @@ module.exports = {
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup-env.ts'],
-    pool: 'threads',
-    poolOptions: {
-      threads: {
-        singleThread: true,
-      },
-    },
+    pool: 'forks',
+
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],

@@ -3,7 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:mobile/widgets/glass_card.dart';
 import 'package:mobile/widgets/save_quiz_dialog.dart';
-import 'quiz_provider.dart';
+import '../../utils/responsive.dart';
+
 import 'quiz_screen.dart';
 
 /// Shows a list of answered questions with the ability to edit each answer.
@@ -41,7 +42,7 @@ class ReviewScreen extends ConsumerWidget {
       ),
       body: SafeArea(
         child: ListView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(Responsive(context).scale(16)),
           itemCount: answered.length,
           itemBuilder: (context, index) {
             final q = answered[index];

@@ -12,6 +12,7 @@ import 'features/groups/challenge_group_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_mode_provider.dart';
 import 'startup_gate.dart';
 
 // Pass with --dart-define=SENTRY_DSN=... (CI uses the MOBILE_SENTRY_DSN repository variable).
@@ -21,7 +22,7 @@ const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final app = const ProviderScope(
-    child: StartupGate(),
+    child: QuickQuizApp(),
   );
   if (_sentryDsn.isEmpty) {
     runApp(app);
@@ -33,7 +34,7 @@ Future<void> main() async {
   );
 }
 
-class QuickQuizApp extends StatelessWidget {
+class QuickQuizApp extends ConsumerWidget {
   const QuickQuizApp({
     super.key,
     this.initialRoute = '/main',
@@ -42,11 +43,15 @@ class QuickQuizApp extends StatelessWidget {
   final String initialRoute;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final themeMode = ref.watch(themeModeProvider);
+    final isLight = themeMode == ThemeMode.light;
     return MaterialApp(
       title: 'Quick Quiz',
       debugShowCheckedModeBanner: false,
-      theme: buildAppTheme(),
+      theme: buildAppTheme(isLight: true),
+      darkTheme: buildAppTheme(isLight: false),
+      themeMode: themeMode,
       initialRoute: initialRoute,
       onGenerateRoute: (settings) {
         final name = settings.name ?? '';
@@ -72,7 +77,6 @@ class QuickQuizApp extends StatelessWidget {
         if (path.isEmpty || path == '/') {
           path = initialRoute;
         }
-
         switch (path) {
           case '/auth':
             return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);

@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto';
 
 export const config = {
   matcher: ['/profile/:path*', '/admin/:path*'],
+  runtime: 'nodejs',
 };
 
 /**

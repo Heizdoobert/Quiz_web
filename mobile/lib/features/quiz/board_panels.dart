@@ -12,7 +12,7 @@ class ScoreboardPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(Responsive(context).scale(24)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

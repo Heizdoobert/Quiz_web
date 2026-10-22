@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
-import 'package:mobile/widgets/save_quiz_dialog.dart';
+import '../../utils/responsive.dart';
+
 import '../quiz/board_provider.dart';
 import '../quiz/quiz_provider.dart';
 
@@ -54,7 +55,7 @@ class ScoreScreen extends ConsumerWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(20), vertical: Responsive(context).scale(16)),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
                   minHeight: constraints.maxHeight - 32,
@@ -101,7 +102,7 @@ class ScoreScreen extends ConsumerWidget {
                       // Results Cards
                       GlassCard(
                         child: Padding(
-                          padding: const EdgeInsets.all(16),
+                          padding: EdgeInsets.all(Responsive(context).scale(16)),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [

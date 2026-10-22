@@ -73,7 +73,7 @@ class _ChallengeGroupScreenState extends ConsumerState<ChallengeGroupScreen> {
       ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 80),
+          padding: EdgeInsets.fromLTRB(Responsive(context).scale(16), Responsive(context).scale(12), Responsive(context).scale(16), Responsive(context).scale(80)),
           children: [
             if (tier.isPro)
               const _ProStatusBanner()
@@ -102,8 +102,8 @@ class _ProStatusBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
-      margin: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(Responsive(context).scale(14)),
+      margin: EdgeInsets.only(bottom: Responsive(context).scale(16)),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -152,8 +152,8 @@ class _UpgradeCalloutBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
-      margin: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(Responsive(context).scale(14)),
+      margin: EdgeInsets.only(bottom: Responsive(context).scale(16)),
       decoration: BoxDecoration(
         color: AppColors.cyberViolet,
         borderRadius: BorderRadius.circular(14),
@@ -190,7 +190,7 @@ class _UpgradeCalloutBanner extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.neoMint,
               foregroundColor: AppColors.deepSpace,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(12), vertical: Responsive(context).scale(8)),
               textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             ),
             child: const Text('Upgrade'),

@@ -1,5 +1,5 @@
 // JWT utilities for the Web Quiz API
-import jwt from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 
 const JWT_SECRET = (() => {
   if (process.env.NODE_ENV !== 'development' && !process.env.JWT_SECRET) {
@@ -8,14 +8,20 @@ const JWT_SECRET = (() => {
   return process.env.JWT_SECRET || 'dev-secret';
 })();
 
+/**
+ * Sign a JWT token.
+ * @param payload - The payload to embed in the token.
+ * @param expiresIn - Expiration time (default '1h').
+ */
 export function signToken(payload: object, expiresIn: string = '1h'): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+  return sign(payload, JWT_SECRET, { expiresIn } as any);
 }
 
+/** Verify a JWT token and return the decoded payload or null on failure. */
 export function verifyToken(token: string): object | null {
   try {
-    return jwt.verify(token, JWT_SECRET) as object;
-  } catch (err) {
+    return verify(token, JWT_SECRET) as object;
+  } catch {
     return null;
   }
 }
