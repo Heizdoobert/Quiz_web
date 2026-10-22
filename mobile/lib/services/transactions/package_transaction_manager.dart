@@ -59,20 +59,16 @@ class PackageTransactionNotifier extends StateNotifier<PackageTransactionState> 
     try {
       final txn = await _sdkManager.purchasePackage(packageId, userId: userId);
 
-      if (txn.status == 'verified') {
+      final isVerified = txn.status == 'verified';
+      if (isVerified) {
         _ref.read(tierProvider.notifier).upgradeToPro();
-        state = state.copyWith(
-          isLoading: false,
-          lastTransaction: txn,
-          errorMessage: null,
-        );
-      } else {
-        state = state.copyWith(
-          isLoading: false,
-          lastTransaction: txn,
-          errorMessage: txn.errorReason ?? 'Transaction ${txn.status}',
-        );
       }
+
+      state = state.copyWith(
+        isLoading: false,
+        lastTransaction: txn,
+        errorMessage: isVerified ? null : (txn.errorReason ?? 'Transaction ${txn.status}'),
+      );
       return txn;
     } catch (e) {
       state = state.copyWith(
