@@ -1,6 +1,6 @@
 module.exports = {
   test: {
-    environment: 'node',
+    environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup-env.ts'],
     pool: 'threads',
