@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/api/api_client.dart';
-import 'package:mobile/main.dart' show QuickQuizApp; // Re‑use existing app widget
+import 'package:mobile/main.dart' show QuickQuizApp;
+import 'package:mobile/services/sync/sync_service.dart';
 
 /// A widget that determines the initial route based on the stored auth token.
 ///
-/// It reads the token (both the current `jwt_token` and the legacy
-/// `auth_token` key) safely, falling back to `/auth` if no valid token is
+/// It reads the token safely, falling back to `/auth` if no valid token is
 /// available or if the storage read throws. Once the route is resolved it
 /// builds the regular [QuickQuizApp] with the appropriate `initialRoute`.
+/// Also listens to app lifecycle events to sync queued offline answers on resume.
 class StartupGate extends ConsumerStatefulWidget {
   const StartupGate({super.key});
 
@@ -18,11 +19,23 @@ class StartupGate extends ConsumerStatefulWidget {
 
 class _StartupGateState extends ConsumerState<StartupGate> {
   late Future<String> _initialRouteFuture;
+  late final AppLifecycleListener _lifecycleListener;
 
   @override
   void initState() {
     super.initState();
     _initialRouteFuture = _determineInitialRoute();
+    _lifecycleListener = AppLifecycleListener(
+      onResume: () {
+        ref.read(syncServiceProvider).syncAnswers();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycleListener.dispose();
+    super.dispose();
   }
 
   Future<String> _determineInitialRoute() async {
@@ -31,10 +44,9 @@ class _StartupGateState extends ConsumerState<StartupGate> {
     try {
       token = await apiClient.getToken();
     } catch (_) {
-      // On any error treat as no token.
       token = null;
     }
-    return (token != null && token.isNotEmpty) ? '/quiz' : '/auth';
+    return (token != null && token.isNotEmpty) ? '/main' : '/auth';
   }
 
   @override

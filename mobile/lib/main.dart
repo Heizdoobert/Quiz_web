@@ -9,24 +9,16 @@ import 'features/quiz/quiz_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
-import 'package:mobile/api/api_client.dart';
+import 'startup_gate.dart';
+
 // Pass with --dart-define=SENTRY_DSN=... (CI uses the MOBILE_SENTRY_DSN repository variable).
 // Without it, crashes are not reported anywhere: the default for local runs.
 const _sentryDsn = String.fromEnvironment('SENTRY_DSN');
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Guard token read to avoid crashes if secure storage is unavailable.
-  String? token;
-  try {
-    token = await apiClient.getToken();
-  } catch (e) {
-    // If reading fails, treat as no token.
-    token = null;
-  }
-  final initialRoute = (token != null && token.isNotEmpty) ? '/quiz' : '/auth';
-  final app = ProviderScope(
-    child: const StartupGate(),
+  final app = const ProviderScope(
+    child: StartupGate(),
   );
   if (_sentryDsn.isEmpty) {
     runApp(app);
@@ -53,6 +45,47 @@ class QuickQuizApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
       initialRoute: initialRoute,
+      onGenerateRoute: (settings) {
+        final name = settings.name ?? '';
+        final uri = Uri.tryParse(name);
+        String path = uri?.path ?? name;
+        if (uri != null && uri.scheme == 'quickquiz') {
+          final host = uri.host;
+          if (host == 'leaderboard') {
+            return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1), settings: settings);
+          } else if (host == 'profile') {
+            return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 2), settings: settings);
+          } else if (host == 'settings') {
+            return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 3), settings: settings);
+          } else if (host == 'quiz') {
+            return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 0), settings: settings);
+          }
+          path = uri.host.isNotEmpty ? '/${uri.host}${uri.path}' : uri.path;
+        }
+        if (path.isEmpty || path == '/') {
+          path = initialRoute;
+        }
+
+        switch (path) {
+          case '/auth':
+            return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);
+          case '/main':
+            final index = settings.arguments is int ? settings.arguments as int : 0;
+            return MaterialPageRoute(builder: (_) => MainScreen(initialIndex: index), settings: settings);
+          case '/settings':
+            return MaterialPageRoute(builder: (_) => const SettingsScreen(), settings: settings);
+          case '/user':
+            return MaterialPageRoute(builder: (_) => const UserScreen(), settings: settings);
+          case '/quiz':
+            return MaterialPageRoute(builder: (_) => const QuizScreen(), settings: settings);
+          case '/leaderboard':
+            return MaterialPageRoute(builder: (_) => const LeaderboardScreen(), settings: settings);
+          case '/score':
+            return MaterialPageRoute(builder: (_) => const ScoreScreen(), settings: settings);
+          default:
+            return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);
+        }
+      },
       routes: {
         '/auth': (_) => const AuthScreen(),
         '/main': (_) => const MainScreen(),
