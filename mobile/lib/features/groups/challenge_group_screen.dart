@@ -240,10 +240,10 @@ class _ChallengeGroupCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: Responsive(context).scale(12)),
       child: GlassCard(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(Responsive(context).scale(16)),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -271,7 +271,7 @@ class _ChallengeGroupCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(8), vertical: Responsive(context).scale(4)),
                     decoration: BoxDecoration(
                       color: AppColors.gold.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(6),
@@ -292,7 +292,7 @@ class _ChallengeGroupCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(8), vertical: Responsive(context).scale(2)),
                     decoration: BoxDecoration(
                       color: AppColors.cyberVioletLight,
                       borderRadius: BorderRadius.circular(4),
@@ -329,7 +329,7 @@ class _ChallengeGroupCard extends StatelessWidget {
                   ),
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(color: AppColors.gold.withValues(alpha: 0.6)),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    padding: EdgeInsets.symmetric(vertical: Responsive(context).scale(8)),
                   ),
                 ),
               ),
@@ -480,7 +480,7 @@ class _GroupLeaderboardSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(Responsive(context).scale(20)),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -515,7 +515,7 @@ class _GroupLeaderboardSheet extends StatelessWidget {
               itemBuilder: (context, idx) {
                 final member = group.leaderboard[idx];
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(14), vertical: Responsive(context).scale(10)),
                   decoration: BoxDecoration(
                     color: AppColors.cyberVioletLight,
                     borderRadius: BorderRadius.circular(10),
@@ -555,7 +555,7 @@ class _GroupLeaderboardSheet extends StatelessWidget {
                             if (member.isChallenger) ...[
                               const SizedBox(width: 6),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(6), vertical: Responsive(context).scale(2)),
                                 decoration: BoxDecoration(
                                   color: AppColors.gold.withValues(alpha: 0.2),
                                   borderRadius: BorderRadius.circular(4),

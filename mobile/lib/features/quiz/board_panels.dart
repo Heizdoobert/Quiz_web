@@ -83,7 +83,7 @@ class _StatTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(6), vertical: Responsive(context).scale(12)),
         decoration: BoxDecoration(
           color: AppColors.elevation2,
           borderRadius: BorderRadius.circular(16),
@@ -146,7 +146,7 @@ class _HistoryList extends StatelessWidget {
         else
           for (final item in history.take(6))
             Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: EdgeInsets.only(bottom: Responsive(context).scale(6)),
               child: _HistoryRow(prompt: item['prompt'] as String, isCorrect: item['isCorrect'] as bool),
             ),
       ],
@@ -164,7 +164,7 @@ class _HistoryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = isCorrect ? AppColors.neoMint : AppColors.popCoral;
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(Responsive(context).scale(10)),
       decoration: BoxDecoration(color: AppColors.elevation2, borderRadius: BorderRadius.circular(16)),
       child: Row(
         children: [
@@ -178,7 +178,7 @@ class _HistoryRow extends StatelessWidget {
           ),
           const SizedBox(width: 8),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+            padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(6), vertical: Responsive(context).scale(2)),
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.15),
               border: Border.all(color: color.withValues(alpha: 0.3)),
@@ -230,10 +230,10 @@ class _LeaderboardPanelState extends State<LeaderboardPanel> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.only(bottom: Responsive(context).scale(12)),
             decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.cyberBorder))),
             child: Container(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: EdgeInsets.only(bottom: Responsive(context).scale(6)),
               decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: AppColors.gold, width: 2))),
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
@@ -259,7 +259,7 @@ class _LeaderboardPanelState extends State<LeaderboardPanel> {
               child: Column(
                 children: [
                   for (var i = 0; i < shown.length; i++)
-                    Padding(padding: const EdgeInsets.only(bottom: 8), child: _LeaderboardRow(entry: shown[i], index: i)),
+                    Padding(padding: EdgeInsets.only(bottom: Responsive(context).scale(8)), child: _LeaderboardRow(entry: shown[i], index: i)),
                 ],
               ),
             ),
@@ -298,7 +298,7 @@ class _LeaderboardNote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 24),
+      padding: EdgeInsets.symmetric(vertical: Responsive(context).scale(24)),
       child: Text(
         text,
         textAlign: TextAlign.center,

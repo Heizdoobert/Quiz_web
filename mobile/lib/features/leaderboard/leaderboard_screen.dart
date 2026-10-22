@@ -249,7 +249,7 @@ class _LeaderboardRow extends StatelessWidget {
 
     return GlassCard(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(14), vertical: Responsive(context).scale(12)),
         child: Row(
           children: [
             SizedBox(
