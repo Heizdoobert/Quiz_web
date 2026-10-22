@@ -61,7 +61,11 @@ class ReviewScreen extends ConsumerWidget {
             // Call the existing submit logic.
             ref.read(quizProvider.notifier).finalizeQuiz();
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Quiz submitted!')));
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            try {
+              Navigator.of(context).pushReplacementNamed('/score');
+            } catch (_) {
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            }
           },
         ),
       ),
