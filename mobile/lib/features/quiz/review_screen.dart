@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:mobile/widgets/glass_card.dart';
+import 'package:mobile/widgets/save_quiz_dialog.dart';
 import 'quiz_provider.dart';
 import 'quiz_screen.dart';
 
@@ -14,10 +15,10 @@ class ReviewScreen extends ConsumerWidget {
     final quiz = ref.watch(quizProvider);
     // Filter questions that have an answer recorded.
     final answered = quiz.questions.when(
-  data: (qs) => qs.where((q) => quiz.answers.containsKey(q['id'] as String)).toList(),
-  loading: () => [],
-  error: (_, _) => [],
-);
+      data: (qs) => qs.where((q) => quiz.answers.containsKey(q['id'] as String)).toList(),
+      loading: () => [],
+      error: (_, _) => [],
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -26,6 +27,17 @@ class ReviewScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.of(context).pop(),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bookmark_add_outlined),
+            tooltip: 'Save Quiz List',
+            onPressed: () {
+              final qs = quiz.questions.value ?? [];
+              if (qs.isEmpty) return;
+              promptSaveQuizDialog(context, ref, questions: qs);
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: ListView.builder(
@@ -57,7 +69,12 @@ class ReviewScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16.0),
         child: ElevatedButton(
           child: const Text('Submit'),
-          onPressed: () {
+          onPressed: () async {
+            final qs = quiz.questions.value ?? [];
+            if (qs.isNotEmpty) {
+              await promptSaveQuizDialog(context, ref, questions: qs);
+            }
+            if (!context.mounted) return;
             // Call the existing submit logic.
             ref.read(quizProvider.notifier).finalizeQuiz();
             ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Quiz submitted!')));

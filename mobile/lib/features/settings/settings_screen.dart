@@ -4,6 +4,7 @@ import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
 import 'package:mobile/widgets/legal_links.dart';
 import '../auth/auth_provider.dart';
+import '../auth/auth_screen.dart' show requireSignIn;
 import '../../db/quiz_repository.dart';
 import '../../services/sync/sync_service.dart';
 
@@ -59,7 +60,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Future<void> _handleLogout() async {
     await ref.read(authProvider.notifier).logout();
     if (mounted) {
-      Navigator.of(context).pushNamedAndRemoveUntil('/auth', (route) => false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Signed out successfully.')),
+      );
     }
   }
 
@@ -132,18 +135,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 16),
                     SizedBox(
                       width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: _handleLogout,
-                        icon: const Icon(Icons.logout_rounded, color: AppColors.popCoral),
-                        label: const Text(
-                          'Sign Out',
-                          style: TextStyle(color: AppColors.popCoral, fontWeight: FontWeight.bold),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: const BorderSide(color: AppColors.popCoral),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                        ),
-                      ),
+                      child: authState.isAuthenticated
+                          ? OutlinedButton.icon(
+                              onPressed: _handleLogout,
+                              icon: const Icon(Icons.logout_rounded, color: AppColors.popCoral),
+                              label: const Text(
+                                'Sign Out',
+                                style: TextStyle(color: AppColors.popCoral, fontWeight: FontWeight.bold),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: AppColors.popCoral),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            )
+                          : ElevatedButton.icon(
+                              onPressed: () => requireSignIn(context, ref),
+                              icon: const Icon(Icons.login_rounded),
+                              label: const Text(
+                                'Sign In / Register',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.neoMint,
+                                foregroundColor: AppColors.deepSpace,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                              ),
+                            ),
                     ),
                   ],
                 ),

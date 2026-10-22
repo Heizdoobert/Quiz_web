@@ -100,6 +100,15 @@ void main() {
 
     // Tap the Submit button.
     await tester.tap(find.widgetWithText(ElevatedButton, 'Submit'));
+    await tester.pumpAndSettle();
+
+    // Verify the Save Quiz dialog appears with Save and Don't Save options
+    expect(find.text('Save Quiz List?'), findsOneWidget);
+    expect(find.text("Don't Save"), findsOneWidget);
+    expect(find.text('Save'), findsOneWidget);
+
+    // Choose "Don't Save" to continue
+    await tester.tap(find.text("Don't Save"));
     await tester.pump(); // start snackbar animation
     await tester.pump(const Duration(seconds: 1)); // let it appear
 

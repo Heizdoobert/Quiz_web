@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mobile/api/api_client.dart';
 import 'package:mobile/db/quiz_repository.dart';
+import 'package:mobile/features/auth/auth_provider.dart';
 import 'package:mobile/features/settings/settings_screen.dart';
 import 'package:mobile/widgets/legal_links.dart';
 
@@ -29,14 +31,22 @@ class FakeQuizRepo extends QuizRepository {
   Future<List<Map<String, dynamic>>> getCachedQuestions() async => [];
 }
 
+class FakeAuthNotifier extends AuthNotifier {
+  FakeAuthNotifier({bool isAuthenticated = true})
+      : super(ApiClient(), QuizRepository()) {
+    state = AuthState(isAuthenticated: isAuthenticated);
+  }
+}
+
 void main() {
-  testWidgets('SettingsScreen displays account info, sync queue and legal links', (WidgetTester tester) async {
+  testWidgets('SettingsScreen displays account info, sync queue and legal links for authenticated user', (WidgetTester tester) async {
     final fakeRepo = FakeQuizRepo();
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           quizRepositoryProvider.overrideWithValue(fakeRepo),
+          authProvider.overrideWith((ref) => FakeAuthNotifier(isAuthenticated: true)),
         ],
         child: const MaterialApp(
           home: SettingsScreen(),
@@ -53,5 +63,26 @@ void main() {
     expect(find.text('Sync Now'), findsOneWidget);
     expect(find.text('1'), findsOneWidget); // pending sync count
     expect(find.byType(LegalLinks), findsOneWidget);
+  });
+
+  testWidgets('SettingsScreen displays guest info and Sign In button for unauthenticated guest', (WidgetTester tester) async {
+    final fakeRepo = FakeQuizRepo();
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          quizRepositoryProvider.overrideWithValue(fakeRepo),
+          authProvider.overrideWith((ref) => FakeAuthNotifier(isAuthenticated: false)),
+        ],
+        child: const MaterialApp(
+          home: SettingsScreen(),
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 50));
+
+    expect(find.text('Guest Player'), findsOneWidget);
+    expect(find.text('Sign In / Register'), findsOneWidget);
   });
 }

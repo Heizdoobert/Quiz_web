@@ -21,7 +21,7 @@ class DatabaseHelper {
     String path = join(await getDatabasesPath(), 'quiz_app.db');
     return await openDatabase(
       path,
-      version: 2,
+      version: 3,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -32,6 +32,16 @@ class DatabaseHelper {
     if (oldVersion < 2) {
       // Add client_uuid column to answer_queue for idempotent sync
       await db.execute('ALTER TABLE answer_queue ADD COLUMN client_uuid TEXT;');
+    }
+    if (oldVersion < 3) {
+      await db.execute('''
+        CREATE TABLE IF NOT EXISTS saved_quizzes (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          questions TEXT,
+          saved_at TEXT
+        )
+      ''');
     }
   }
 
@@ -54,6 +64,15 @@ class DatabaseHelper {
         answerIndex INTEGER,
         timestamp TEXT,
         client_uuid TEXT
+      )
+    ''');
+
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS saved_quizzes (
+        id TEXT PRIMARY KEY,
+        name TEXT,
+        questions TEXT,
+        saved_at TEXT
       )
     ''');
   }

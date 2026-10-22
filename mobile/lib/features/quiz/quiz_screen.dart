@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
+import 'package:mobile/widgets/save_quiz_dialog.dart';
 import '../auth/auth_provider.dart';
 import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
 import '../profile/profile_screen.dart';
@@ -70,8 +71,6 @@ class _QuizScreenState extends ConsumerState<QuizScreen> {
 
 
   Future<void> _answer(Question q, int index) async {
-    // Playing needs an account, so the first pick asks a guest to sign in.
-    if (!await requireSignIn(context, ref) || !mounted) return;
     ref.read(quizProvider.notifier).submitAnswer(q['id'] as String, index);
     setState(() {
       _pickedId = q['id'] as String;
@@ -237,6 +236,20 @@ class _Header extends ConsumerWidget {
             onTap: () {
               ref.read(quizProvider.notifier).loadData();
               ref.invalidate(boardProvider);
+            },
+          ),
+          _HeaderButton(
+            icon: Icons.bookmark_add_outlined,
+            tooltip: 'Save Quiz List',
+            onTap: () {
+              final qs = ref.read(quizProvider).questions.value ?? [];
+              if (qs.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('No questions to save.')),
+                );
+                return;
+              }
+              promptSaveQuizDialog(context, ref, questions: qs);
             },
           ),
           if (auth.isAuthenticated)

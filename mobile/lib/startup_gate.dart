@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mobile/api/api_client.dart';
 import 'package:mobile/main.dart' show QuickQuizApp;
 import 'package:mobile/services/sync/sync_service.dart';
 
@@ -39,14 +38,8 @@ class _StartupGateState extends ConsumerState<StartupGate> {
   }
 
   Future<String> _determineInitialRoute() async {
-    final apiClient = ApiClient();
-    String? token;
-    try {
-      token = await apiClient.getToken();
-    } catch (_) {
-      token = null;
-    }
-    return (token != null && token.isNotEmpty) ? '/main' : '/auth';
+    // Open directly to the main screen without requiring authentication.
+    return '/main';
   }
 
   @override

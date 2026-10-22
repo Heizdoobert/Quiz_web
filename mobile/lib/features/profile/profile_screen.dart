@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
 import '../auth/auth_provider.dart';
+import '../auth/auth_screen.dart' show requireSignIn;
 import '../quiz/board_panels.dart';
 import '../quiz/board_provider.dart';
 
@@ -22,8 +23,14 @@ class MyQuestion {
 }
 
 final myQuestionsProvider = FutureProvider.autoDispose<List<MyQuestion>>((ref) async {
-  final response = await ref.watch(apiClientProvider).get('/profile/quizzes');
-  return [for (final q in response['quizzes'] as List) MyQuestion.fromJson(q as Map<String, dynamic>)];
+  final isAuthenticated = ref.watch(authProvider).isAuthenticated;
+  if (!isAuthenticated) return const <MyQuestion>[];
+  try {
+    final response = await ref.watch(apiClientProvider).get('/profile/quizzes');
+    return [for (final q in response['quizzes'] as List) MyQuestion.fromJson(q as Map<String, dynamic>)];
+  } catch (_) {
+    return const <MyQuestion>[];
+  }
 });
 
 /// The web profile for a phone: the player's stats and the questions they wrote. Writing and
@@ -33,12 +40,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
     final board = ref.watch(boardProvider).value ?? const Board();
     final questions = ref.watch(myQuestionsProvider);
-    // An expired session signs the player out; there is nothing left to show here.
-    ref.listen(authProvider.select((a) => a.isAuthenticated), (_, signedIn) {
-      if (!signedIn) Navigator.of(context).maybePop();
-    });
 
     return Scaffold(
       appBar: AppBar(title: const Text('Profile'), backgroundColor: AppColors.deepSpace),
@@ -46,11 +50,55 @@ class ProfileScreen extends ConsumerWidget {
         color: AppColors.neoMint,
         onRefresh: () async {
           ref.invalidate(boardProvider);
-          await ref.refresh(myQuestionsProvider.future).catchError((_) => <MyQuestion>[]);
+          if (auth.isAuthenticated) {
+            await ref.refresh(myQuestionsProvider.future).catchError((_) => <MyQuestion>[]);
+          }
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            if (!auth.isAuthenticated)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: GlassCard(
+                  padding: const EdgeInsets.all(16),
+                  radius: 16,
+                  child: Row(
+                    children: [
+                      const CircleAvatar(
+                        backgroundColor: AppColors.cyberVioletLight,
+                        child: Icon(Icons.person_rounded, color: AppColors.slate300),
+                      ),
+                      const SizedBox(width: 12),
+                      const Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Guest Player',
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              'Sign in to sync your stats to your account',
+                              style: TextStyle(fontSize: 12, color: AppColors.slate400),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ElevatedButton(
+                        onPressed: () => requireSignIn(context, ref),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.neoMint,
+                          foregroundColor: AppColors.deepSpace,
+                          textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        child: const Text('Sign In'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ScoreboardPanel(board: board),
             const SizedBox(height: 24),
             const Text('My questions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
+import 'package:mobile/widgets/save_quiz_dialog.dart';
 import '../quiz/board_provider.dart';
 import '../quiz/quiz_provider.dart';
 
@@ -151,6 +152,26 @@ class ScoreScreen extends ConsumerWidget {
                           backgroundColor: AppColors.neoMint,
                           foregroundColor: AppColors.deepSpace,
                           textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: () {
+                          final qs = ref.read(quizProvider).questions.value ?? [];
+                          if (qs.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('No quiz questions to save.')),
+                            );
+                            return;
+                          }
+                          promptSaveQuizDialog(context, ref, questions: qs);
+                        },
+                        icon: const Icon(Icons.bookmark_add_outlined, color: AppColors.neoMint),
+                        label: const Text('Save Quiz List for Reuse'),
+                        style: OutlinedButton.styleFrom(
+                          minimumSize: const Size.fromHeight(50),
+                          foregroundColor: AppColors.neoMint,
+                          side: const BorderSide(color: AppColors.neoMint),
                         ),
                       ),
                       const SizedBox(height: 10),

@@ -90,4 +90,37 @@ class QuizRepository {
     final db = await _dbHelper.database;
     await db.delete('answer_queue');
   }
+
+  // --- Saved Quizzes (for reuse) ---
+
+  Future<void> saveQuizList({
+    required String name,
+    required List<Map<String, dynamic>> questions,
+  }) async {
+    final db = await _dbHelper.database;
+    await db.insert(
+      'saved_quizzes',
+      {
+        'id': const Uuid().v4(),
+        'name': name,
+        'questions': jsonEncode(questions),
+        'saved_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> getSavedQuizLists() async {
+    final db = await _dbHelper.database;
+    final List<Map<String, dynamic>> maps =
+        await db.query('saved_quizzes', orderBy: 'saved_at DESC');
+    return maps.map((m) {
+      return {
+        'id': m['id'],
+        'name': m['name'],
+        'questions': jsonDecode(m['questions'] as String),
+        'saved_at': m['saved_at'],
+      };
+    }).toList();
+  }
 }

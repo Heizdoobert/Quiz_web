@@ -33,7 +33,7 @@ Future<void> main() async {
 class QuickQuizApp extends StatelessWidget {
   const QuickQuizApp({
     super.key,
-    this.initialRoute = '/auth',
+    this.initialRoute = '/main',
   });
 
   final String initialRoute;
