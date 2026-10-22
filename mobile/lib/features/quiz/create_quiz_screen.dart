@@ -48,6 +48,38 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
     super.dispose();
   }
 
+  Future<void> _showSessionLimitDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.cyberViolet,
+        title: const Text('Session Limit Reached (20/20)'),
+        content: const Text(
+          'Guests can only create up to 20 quizzes per session. '
+          'Sign in to save your quizzes, sync with server, and unlock 100 quizzes!',
+          style: TextStyle(color: AppColors.slate300),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.slate400)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await requireSignIn(context, ref);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.neoMint,
+              foregroundColor: AppColors.deepSpace,
+            ),
+            child: const Text('Sign In to Unlock'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -56,32 +88,7 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
 
     // Enforce Guest limit (max 20 session quizzes)
     if (tier.isGuest && sessionStore.isFull) {
-      await showDialog<void>(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          backgroundColor: AppColors.cyberViolet,
-          title: const Text('Session Limit Reached (20/20)'),
-          content: const Text(
-            'Guests can only create up to 20 quizzes per session. '
-            'Sign in to save your quizzes, sync with server, and unlock 100 quizzes!',
-            style: TextStyle(color: AppColors.slate300),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: const Text('Cancel', style: TextStyle(color: AppColors.slate400)),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(ctx).pop();
-                await requireSignIn(context, ref);
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.neoMint, foregroundColor: AppColors.deepSpace),
-              child: const Text('Sign In to Unlock'),
-            ),
-          ],
-        ),
-      );
+      await _showSessionLimitDialog();
       return;
     }
 
@@ -164,49 +171,16 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Quota & Tier Status Banner
-                GlassCard(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Row(
-                    children: [
-                      Icon(
-                        tier.isPro
-                            ? Icons.star_rounded
-                            : (tier.isAuthenticated ? Icons.verified_user_rounded : Icons.info_outline_rounded),
-                        color: tier.isPro ? AppColors.gold : AppColors.neoMint,
-                        size: 24,
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tier.label,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.foreground),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              tier.isGuest
-                                  ? 'Quizzes: ${sessionStore.count} / 20 in session'
-                                  : (tier.isPro ? 'Quizzes: Full Limit (Unlimited)' : 'Quizzes: up to 100 per list (80% Tier)'),
-                              style: const TextStyle(fontSize: 12, color: AppColors.slate400),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (tier.isGuest)
-                        TextButton(
-                          onPressed: () => requireSignIn(context, ref),
-                          child: const Text('Unlock 100', style: TextStyle(color: AppColors.neoMint, fontWeight: FontWeight.bold)),
-                        ),
-                    ],
-                  ),
+                _TierQuotaBanner(
+                  tier: tier,
+                  sessionStore: sessionStore,
+                  onUnlock: () => requireSignIn(context, ref),
                 ),
                 const SizedBox(height: 16),
-
-                // Question Prompt
-                const Text('Question Prompt', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground)),
+                const Text(
+                  'Question Prompt',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground),
+                ),
                 const SizedBox(height: 6),
                 TextFormField(
                   controller: _promptController,
@@ -217,8 +191,14 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                     hintStyle: const TextStyle(color: AppColors.slate400),
                     filled: true,
                     fillColor: AppColors.cyberViolet,
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                    enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.cyberBorder),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppColors.cyberBorder),
+                    ),
                     counterStyle: const TextStyle(color: AppColors.slate400, fontSize: 11),
                   ),
                   validator: (v) {
@@ -228,119 +208,36 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-
-                // Category / Topic Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Topic / Category', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground)),
-                    if (tier.canCreateCustomTopic)
-                      TextButton.icon(
-                        onPressed: () {
-                          setState(() {
-                            _isCreatingCustomTopic = !_isCreatingCustomTopic;
-                          });
-                        },
-                        icon: Icon(_isCreatingCustomTopic ? Icons.list_rounded : Icons.add_rounded, size: 16),
-                        label: Text(_isCreatingCustomTopic ? 'Pick from list' : '+ Custom Topic'),
-                        style: TextButton.styleFrom(foregroundColor: AppColors.neoMint),
-                      )
-                    else
-                      const Row(
-                        children: [
-                          Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.slate400),
-                          SizedBox(width: 4),
-                          Text('Custom topic locked', style: TextStyle(fontSize: 12, color: AppColors.slate400)),
-                        ],
-                      ),
-                  ],
+                _TopicSelector(
+                  tier: tier,
+                  isCreatingCustomTopic: _isCreatingCustomTopic,
+                  selectedTopic: _selectedTopic,
+                  customTopicController: _customTopicController,
+                  onToggleCustomTopic: () {
+                    setState(() {
+                      _isCreatingCustomTopic = !_isCreatingCustomTopic;
+                    });
+                  },
+                  onTopicChanged: (v) {
+                    if (v != null) setState(() => _selectedTopic = v);
+                  },
                 ),
-                const SizedBox(height: 6),
-
-                if (_isCreatingCustomTopic && tier.canCreateCustomTopic)
-                  TextFormField(
-                    controller: _customTopicController,
-                    maxLength: 50,
-                    decoration: InputDecoration(
-                      hintText: 'Enter new topic name...',
-                      hintStyle: const TextStyle(color: AppColors.slate400),
-                      filled: true,
-                      fillColor: AppColors.cyberViolet,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                      counterStyle: const TextStyle(color: AppColors.slate400, fontSize: 11),
-                    ),
-                    validator: (v) {
-                      if (!_isCreatingCustomTopic) return null;
-                      if (v == null || v.trim().isEmpty) return 'Please enter topic name';
-                      if (v.trim().length > 50) return 'Topic name cannot exceed 50 characters';
-                      return null;
-                    },
-                  )
-                else
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedTopic,
-                    dropdownColor: AppColors.cyberViolet,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: AppColors.cyberViolet,
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                    ),
-                    items: kPredefinedTopics.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
-                    onChanged: (v) {
-                      if (v != null) setState(() => _selectedTopic = v);
-                    },
-                  ),
                 const SizedBox(height: 20),
-
-                // Answers Section
-                const Text('Answer Options (Select correct answer)', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground)),
+                const Text(
+                  'Answer Options (Select correct answer)',
+                  style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground),
+                ),
                 const SizedBox(height: 8),
-
                 for (int i = 0; i < 4; i++)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Row(
-                      children: [
-                        ChoiceChip(
-                          label: Text(String.fromCharCode(65 + i), style: TextStyle(fontWeight: FontWeight.bold, color: _correctIndex == i ? AppColors.deepSpace : AppColors.foreground)),
-                          selected: _correctIndex == i,
-                          selectedColor: AppColors.neoMint,
-                          backgroundColor: AppColors.cyberViolet,
-                          onSelected: (selected) {
-                            if (selected) setState(() => _correctIndex = i);
-                          },
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: TextFormField(
-                            controller: _optionControllers[i],
-                            maxLength: 200,
-                            decoration: InputDecoration(
-                              hintText: 'Option ${String.fromCharCode(65 + i)}',
-                              hintStyle: const TextStyle(color: AppColors.slate400),
-                              filled: true,
-                              fillColor: AppColors.cyberViolet,
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppColors.cyberBorder)),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                              counterText: '',
-                            ),
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) return 'Required';
-                              if (v.trim().length > 200) return 'Option cannot exceed 200 characters';
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
+                  _OptionRow(
+                    index: i,
+                    isCorrect: _correctIndex == i,
+                    controller: _optionControllers[i],
+                    onSelected: (selected) {
+                      if (selected) setState(() => _correctIndex = i);
+                    },
                   ),
-
                 const SizedBox(height: 24),
-
-                // Submit Button
                 ElevatedButton(
                   onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
@@ -358,6 +255,221 @@ class _CreateQuizScreenState extends ConsumerState<CreateQuizScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _TierQuotaBanner extends StatelessWidget {
+  final TierCapabilities tier;
+  final SessionQuizStore sessionStore;
+  final VoidCallback onUnlock;
+
+  const _TierQuotaBanner({
+    required this.tier,
+    required this.sessionStore,
+    required this.onUnlock,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GlassCard(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          Icon(
+            tier.isPro
+                ? Icons.star_rounded
+                : (tier.isAuthenticated ? Icons.verified_user_rounded : Icons.info_outline_rounded),
+            color: tier.isPro ? AppColors.gold : AppColors.neoMint,
+            size: 24,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  tier.label,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.foreground),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  tier.isGuest
+                      ? 'Quizzes: ${sessionStore.count} / 20 in session'
+                      : (tier.isPro ? 'Quizzes: Full Limit (Unlimited)' : 'Quizzes: up to 100 per list (80% Tier)'),
+                  style: const TextStyle(fontSize: 12, color: AppColors.slate400),
+                ),
+              ],
+            ),
+          ),
+          if (tier.isGuest)
+            TextButton(
+              onPressed: onUnlock,
+              child: const Text('Unlock 100', style: TextStyle(color: AppColors.neoMint, fontWeight: FontWeight.bold)),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _TopicSelector extends StatelessWidget {
+  final TierCapabilities tier;
+  final bool isCreatingCustomTopic;
+  final String selectedTopic;
+  final TextEditingController customTopicController;
+  final VoidCallback onToggleCustomTopic;
+  final ValueChanged<String?> onTopicChanged;
+
+  const _TopicSelector({
+    required this.tier,
+    required this.isCreatingCustomTopic,
+    required this.selectedTopic,
+    required this.customTopicController,
+    required this.onToggleCustomTopic,
+    required this.onTopicChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Topic / Category', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground)),
+            if (tier.canCreateCustomTopic)
+              TextButton.icon(
+                onPressed: onToggleCustomTopic,
+                icon: Icon(isCreatingCustomTopic ? Icons.list_rounded : Icons.add_rounded, size: 16),
+                label: Text(isCreatingCustomTopic ? 'Pick from list' : '+ Custom Topic'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.neoMint),
+              )
+            else
+              const Row(
+                children: [
+                  Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.slate400),
+                  SizedBox(width: 4),
+                  Text('Custom topic locked', style: TextStyle(fontSize: 12, color: AppColors.slate400)),
+                ],
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        if (isCreatingCustomTopic && tier.canCreateCustomTopic)
+          TextFormField(
+            controller: customTopicController,
+            maxLength: 50,
+            decoration: InputDecoration(
+              hintText: 'Enter new topic name...',
+              hintStyle: const TextStyle(color: AppColors.slate400),
+              filled: true,
+              fillColor: AppColors.cyberViolet,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.cyberBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.cyberBorder),
+              ),
+              counterStyle: const TextStyle(color: AppColors.slate400, fontSize: 11),
+            ),
+            validator: (v) {
+              if (!isCreatingCustomTopic) return null;
+              if (v == null || v.trim().isEmpty) return 'Please enter topic name';
+              if (v.trim().length > 50) return 'Topic name cannot exceed 50 characters';
+              return null;
+            },
+          )
+        else
+          DropdownButtonFormField<String>(
+            initialValue: selectedTopic,
+            dropdownColor: AppColors.cyberViolet,
+            decoration: InputDecoration(
+              filled: true,
+              fillColor: AppColors.cyberViolet,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.cyberBorder),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(color: AppColors.cyberBorder),
+              ),
+            ),
+            items: kPredefinedTopics.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+            onChanged: onTopicChanged,
+          ),
+      ],
+    );
+  }
+}
+
+class _OptionRow extends StatelessWidget {
+  final int index;
+  final bool isCorrect;
+  final TextEditingController controller;
+  final ValueChanged<bool> onSelected;
+
+  const _OptionRow({
+    required this.index,
+    required this.isCorrect,
+    required this.controller,
+    required this.onSelected,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final letter = String.fromCharCode(65 + index);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        children: [
+          ChoiceChip(
+            label: Text(
+              letter,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: isCorrect ? AppColors.deepSpace : AppColors.foreground,
+              ),
+            ),
+            selected: isCorrect,
+            selectedColor: AppColors.neoMint,
+            backgroundColor: AppColors.cyberViolet,
+            onSelected: onSelected,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextFormField(
+              controller: controller,
+              maxLength: 200,
+              decoration: InputDecoration(
+                hintText: 'Option $letter',
+                hintStyle: const TextStyle(color: AppColors.slate400),
+                filled: true,
+                fillColor: AppColors.cyberViolet,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.cyberBorder),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.cyberBorder),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                counterText: '',
+              ),
+              validator: (v) {
+                if (v == null || v.trim().isEmpty) return 'Required';
+                if (v.trim().length > 200) return 'Option cannot exceed 200 characters';
+                return null;
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
