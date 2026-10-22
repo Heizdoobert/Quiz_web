@@ -214,7 +214,7 @@ class _Header extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authProvider);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(16), vertical: Responsive(context).scale(10)),
       decoration: const BoxDecoration(
         color: Color(0x9914163A),
         border: Border(bottom: BorderSide(color: AppColors.cyberBorder)),
@@ -224,7 +224,7 @@ class _Header extends ConsumerWidget {
           Expanded(child: Align(alignment: Alignment.centerLeft, child: BrandMark(size: 18))),
           if (pending > 0)
             Padding(
-              padding: const EdgeInsets.only(right: 4),
+              padding: EdgeInsets.only(right: Responsive(context).scale(4)),
               child: _Pill(
                 icon: Icons.cloud_upload_outlined,
                 label: '$pending',
@@ -277,10 +277,10 @@ class _Header extends ConsumerWidget {
             )
           else
             Padding(
-              padding: const EdgeInsets.only(left: 6),
+              padding: EdgeInsets.only(left: Responsive(context).scale(6)),,
               child: GradientButton(
                 label: 'Sign In',
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+                padding: EdgeInsets.symmetric(horizontal: Responsive(context).scale(14), vertical: Responsive(context).scale(9)),
                 onPressed: () => requireSignIn(context, ref),
               ),
             ),
@@ -300,7 +300,7 @@ class _HeaderButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(left: 6),
+      padding: EdgeInsets.only(left: Responsive(context).scale(6)),,
       child: Material(
         color: AppColors.cyberVioletLight,
         shape: RoundedRectangleBorder(
