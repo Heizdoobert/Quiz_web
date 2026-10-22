@@ -7,6 +7,7 @@ import 'features/settings/settings_screen.dart';
 import 'features/user/user_screen.dart';
 import 'features/quiz/quiz_screen.dart';
 import 'features/quiz/create_quiz_screen.dart';
+import 'features/community/community_feed_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
@@ -52,12 +53,14 @@ class QuickQuizApp extends StatelessWidget {
         String path = uri?.path ?? name;
         if (uri != null && uri.scheme == 'quickquiz') {
           final host = uri.host;
-          if (host == 'leaderboard') {
+          if (host == 'community') {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 1), settings: settings);
-          } else if (host == 'profile') {
+          } else if (host == 'leaderboard') {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 2), settings: settings);
-          } else if (host == 'settings') {
+          } else if (host == 'profile') {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 3), settings: settings);
+          } else if (host == 'settings') {
+            return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 4), settings: settings);
           } else if (host == 'quiz') {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 0), settings: settings);
           }
@@ -85,6 +88,8 @@ class QuickQuizApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const ScoreScreen(), settings: settings);
           case '/create-quiz':
             return MaterialPageRoute(builder: (_) => const CreateQuizScreen(), settings: settings);
+          case '/community':
+            return MaterialPageRoute(builder: (_) => const CommunityFeedScreen(), settings: settings);
           default:
             return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);
         }
@@ -98,6 +103,7 @@ class QuickQuizApp extends StatelessWidget {
         '/leaderboard': (_) => const LeaderboardScreen(),
         '/score': (_) => const ScoreScreen(),
         '/create-quiz': (_) => const CreateQuizScreen(),
+        '/community': (_) => const CommunityFeedScreen(),
       },
     );
   }

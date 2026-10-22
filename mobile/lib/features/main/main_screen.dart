@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import '../quiz/quiz_screen.dart';
 import '../quiz/create_quiz_screen.dart';
+import '../community/community_feed_screen.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_screen.dart';
@@ -32,6 +33,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final screens = const [
       QuizScreen(),
+      CommunityFeedScreen(),
       LeaderboardScreen(),
       ProfileScreen(),
       SettingsScreen(),
@@ -43,7 +45,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         index: _currentIndex,
         children: screens,
       ),
-      floatingActionButton: _currentIndex == 0
+      floatingActionButton: (_currentIndex == 0 || _currentIndex == 1)
           ? FloatingActionButton.extended(
               onPressed: () {
                 Navigator.of(context).push(
@@ -70,6 +72,11 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             icon: Icon(Icons.quiz_outlined),
             selectedIcon: Icon(Icons.quiz_rounded, color: AppColors.neoMint),
             label: 'Quiz',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.people_outline_rounded),
+            selectedIcon: Icon(Icons.people_rounded, color: AppColors.neoMint),
+            label: 'Community',
           ),
           NavigationDestination(
             icon: Icon(Icons.leaderboard_outlined),
