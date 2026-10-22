@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as h;
 import 'http.dart';
 import 'models.dart';
+import 'transactions.dart';
 
 /// Entry point, same shape as the TypeScript `QuickQuizClient`. `baseUrl` is the site's `/api`
 /// root (for example `https://quickquiz.app/api`); every path below starts with `/v1`.
@@ -26,6 +27,7 @@ class QuickQuizClient {
     groups = GroupsResource(this);
     discovery = DiscoveryResource(this);
     profile = ProfileResource(this);
+    transactions = TransactionManager();
   }
 
   final HttpClient http;
@@ -37,6 +39,7 @@ class QuickQuizClient {
   late final GroupsResource groups;
   late final DiscoveryResource discovery;
   late final ProfileResource profile;
+  late final TransactionManager transactions;
 
   String? get token => http.token;
   set token(String? value) => http.token = value;

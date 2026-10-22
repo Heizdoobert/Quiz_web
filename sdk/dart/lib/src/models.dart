@@ -232,3 +232,94 @@ class UserQuizzes {
   final List<ClientQuestion> quizzes;
   final num count;
 }
+
+class UpgradePackage {
+  UpgradePackage({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.price,
+    this.currency = 'USD',
+    required this.interval,
+    this.badge,
+    this.savingsPercentage,
+    required this.features,
+  });
+
+  UpgradePackage.fromJson(Json j)
+      : id = j['id'] as String,
+        name = j['name'] as String,
+        description = j['description'] as String,
+        price = (j['price'] as num).toDouble(),
+        currency = j['currency'] as String? ?? 'USD',
+        interval = j['interval'] as String,
+        badge = j['badge'] as String?,
+        savingsPercentage = (j['savingsPercentage'] as num?)?.toInt(),
+        features = List<String>.from(j['features'] as List? ?? const []);
+
+  final String id, name, description, currency, interval;
+  final double price;
+  final String? badge;
+  final int? savingsPercentage;
+  final List<String> features;
+
+  Json toJson() => {
+        'id': id,
+        'name': name,
+        'description': description,
+        'price': price,
+        'currency': currency,
+        'interval': interval,
+        if (badge != null) 'badge': badge,
+        if (savingsPercentage != null) 'savingsPercentage': savingsPercentage,
+        'features': features,
+      };
+}
+
+class PackageTransaction {
+  PackageTransaction({
+    required this.transactionId,
+    required this.packageId,
+    required this.userId,
+    required this.amount,
+    this.currency = 'USD',
+    required this.status,
+    required this.gateway,
+    required this.receipt,
+    required this.startedAt,
+    this.completedAt,
+    this.errorReason,
+  });
+
+  PackageTransaction.fromJson(Json j)
+      : transactionId = j['transactionId'] as String,
+        packageId = j['packageId'] as String,
+        userId = j['userId'] as String? ?? '',
+        amount = (j['amount'] as num).toDouble(),
+        currency = j['currency'] as String? ?? 'USD',
+        status = j['status'] as String,
+        gateway = j['gateway'] as String,
+        receipt = j['receipt'] as String? ?? '',
+        startedAt = j['startedAt'] as String,
+        completedAt = j['completedAt'] as String?,
+        errorReason = j['errorReason'] as String?;
+
+  final String transactionId, packageId, userId, currency, status, gateway, receipt, startedAt;
+  final double amount;
+  final String? completedAt, errorReason;
+
+  Json toJson() => {
+        'transactionId': transactionId,
+        'packageId': packageId,
+        'userId': userId,
+        'amount': amount,
+        'currency': currency,
+        'status': status,
+        'gateway': gateway,
+        'receipt': receipt,
+        'startedAt': startedAt,
+        if (completedAt != null) 'completedAt': completedAt,
+        if (errorReason != null) 'errorReason': errorReason,
+      };
+}
+
