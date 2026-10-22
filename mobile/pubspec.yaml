@@ -49,6 +49,8 @@ dependencies:
 
   state_notifier: ^1.0.0
   listen: ^1.0.1
+  quickquiz_sdk:
+    path: ../sdk/dart
 
 dev_dependencies:
   flutter_test:
