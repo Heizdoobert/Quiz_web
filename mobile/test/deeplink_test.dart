@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/main.dart';
 import 'package:mobile/features/quiz/quiz_screen.dart';
 import 'package:mobile/features/leaderboard/leaderboard_screen.dart';
+import 'package:mobile/features/groups/challenge_group_screen.dart';
 import 'package:mobile/features/auth/auth_screen.dart';
 
 void main() {
@@ -26,6 +27,17 @@ void main() {
     await tester.pump();
 
     expect(find.byType(LeaderboardScreen), findsOneWidget);
+  });
+
+  testWidgets('QuickQuizApp routes quickquiz://challenge-groups to ChallengeGroupScreen', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(
+        child: QuickQuizApp(initialRoute: 'quickquiz://challenge-groups'),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byType(ChallengeGroupScreen), findsOneWidget);
   });
 
   testWidgets('QuickQuizApp routes unknown path to AuthScreen', (WidgetTester tester) async {

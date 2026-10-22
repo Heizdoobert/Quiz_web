@@ -59,9 +59,13 @@ void main() {
     expect(find.text('Settings'), findsOneWidget);
     expect(find.text('Account'), findsOneWidget);
     expect(find.text('Sign Out'), findsOneWidget);
+    expect(find.text('Membership & Limits'), findsOneWidget);
+    expect(find.text('Authenticated Player (80% Tier)'), findsOneWidget);
+    expect(find.text('Upgrade to Pro (Full Limit)'), findsOneWidget);
     expect(find.text('Data & Offline Storage'), findsOneWidget);
     expect(find.text('Sync Now'), findsOneWidget);
     expect(find.text('1'), findsOneWidget); // pending sync count
+    await tester.scrollUntilVisible(find.byType(LegalLinks), 100);
     expect(find.byType(LegalLinks), findsOneWidget);
   });
 
@@ -84,5 +88,7 @@ void main() {
 
     expect(find.text('Guest Player'), findsOneWidget);
     expect(find.text('Sign In / Register'), findsOneWidget);
+    expect(find.text('Guest Session (Limited)'), findsOneWidget);
+    expect(find.text('Max 20 quizzes in RAM, no custom topics, no sync'), findsOneWidget);
   });
 }

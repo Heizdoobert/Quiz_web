@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
 import 'package:mobile/widgets/legal_links.dart';
+import 'package:mobile/widgets/upgrade_pro_modal.dart';
+import 'package:mobile/services/tier/tier_provider.dart';
 import '../auth/auth_provider.dart';
 import '../auth/auth_screen.dart' show requireSignIn;
+import '../groups/challenge_group_screen.dart';
 import '../../db/quiz_repository.dart';
 import '../../services/sync/sync_service.dart';
 
@@ -69,6 +72,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final tier = ref.watch(tierProvider);
 
     return Scaffold(
       backgroundColor: AppColors.deepSpace,
@@ -162,6 +166,105 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               ),
                             ),
                     ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Tier & Membership Section
+            const Text(
+              'Membership & Limits',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: AppColors.neoMint,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GlassCard(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          tier.isPro
+                              ? Icons.workspace_premium_rounded
+                              : (tier.isFree ? Icons.verified_user_rounded : Icons.person_outline_rounded),
+                          color: tier.isPro ? AppColors.gold : AppColors.neoMint,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                tier.isPro
+                                    ? 'Pro Package (100% Full Limit)'
+                                    : (tier.isFree ? 'Authenticated Player (80% Tier)' : 'Guest Session (Limited)'),
+                                style: const TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.foreground,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                tier.isPro
+                                    ? 'Unlimited quizzes, open Challenge Groups & rank boost'
+                                    : (tier.isFree
+                                        ? 'Up to 100 quizzes, custom topics, server sync enabled'
+                                        : 'Max 20 quizzes in RAM, no custom topics, no sync'),
+                                style: const TextStyle(fontSize: 12, color: AppColors.slate400),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    const Divider(color: AppColors.cyberBorder, height: 1),
+                    const SizedBox(height: 14),
+                    if (tier.isPro) ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Challenge Groups Access', style: TextStyle(color: AppColors.slate300, fontSize: 13)),
+                          TextButton.icon(
+                            key: const Key('settings_challenge_groups_btn'),
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(builder: (_) => const ChallengeGroupScreen()),
+                              );
+                            },
+                            icon: const Icon(Icons.groups_rounded, size: 16, color: AppColors.gold),
+                            label: const Text('View Groups', style: TextStyle(color: AppColors.gold, fontWeight: FontWeight.bold, fontSize: 13)),
+                          ),
+                        ],
+                      ),
+                    ] else ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          key: const Key('settings_upgrade_pro_btn'),
+                          onPressed: () => showUpgradeProModal(context, ref),
+                          icon: const Icon(Icons.bolt_rounded, color: AppColors.deepSpace),
+                          label: const Text(
+                            'Upgrade to Pro (Full Limit)',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.neoMint,
+                            foregroundColor: AppColors.deepSpace,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

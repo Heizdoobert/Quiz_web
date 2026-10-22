@@ -8,6 +8,7 @@ import 'features/user/user_screen.dart';
 import 'features/quiz/quiz_screen.dart';
 import 'features/quiz/create_quiz_screen.dart';
 import 'features/community/community_feed_screen.dart';
+import 'features/groups/challenge_group_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
@@ -63,6 +64,8 @@ class QuickQuizApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 4), settings: settings);
           } else if (host == 'quiz') {
             return MaterialPageRoute(builder: (_) => const MainScreen(initialIndex: 0), settings: settings);
+          } else if (host == 'challenge-groups' || host == 'groups') {
+            return MaterialPageRoute(builder: (_) => const ChallengeGroupScreen(), settings: settings);
           }
           path = uri.host.isNotEmpty ? '/${uri.host}${uri.path}' : uri.path;
         }
@@ -90,6 +93,8 @@ class QuickQuizApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const CreateQuizScreen(), settings: settings);
           case '/community':
             return MaterialPageRoute(builder: (_) => const CommunityFeedScreen(), settings: settings);
+          case '/challenge-groups':
+            return MaterialPageRoute(builder: (_) => const ChallengeGroupScreen(), settings: settings);
           default:
             return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);
         }
@@ -104,6 +109,7 @@ class QuickQuizApp extends StatelessWidget {
         '/score': (_) => const ScoreScreen(),
         '/create-quiz': (_) => const CreateQuizScreen(),
         '/community': (_) => const CommunityFeedScreen(),
+        '/challenge-groups': (_) => const ChallengeGroupScreen(),
       },
     );
   }

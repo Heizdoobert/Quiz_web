@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import 'package:mobile/widgets/glass_card.dart';
 import '../quiz/board_provider.dart';
+import '../groups/challenge_group_screen.dart';
 
 class LeaderboardScreen extends ConsumerWidget {
   const LeaderboardScreen({super.key});
@@ -18,6 +19,18 @@ class LeaderboardScreen extends ConsumerWidget {
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          IconButton(
+            key: const Key('challenge_groups_btn'),
+            icon: const Icon(Icons.groups_rounded, color: AppColors.gold),
+            tooltip: 'Challenge Groups (Pro)',
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChallengeGroupScreen()),
+              );
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: boardAsync.when(
@@ -76,6 +89,47 @@ class LeaderboardScreen extends ConsumerWidget {
               onRefresh: () async => ref.refresh(boardProvider.future),
               child: Column(
                 children: [
+                  Container(
+                    margin: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.cyberViolet,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.cyberBorder),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.workspace_premium_rounded, color: AppColors.gold, size: 22),
+                        const SizedBox(width: 10),
+                        const Expanded(
+                          child: Text(
+                            'Open Challenge Groups to cross top ranks faster!',
+                            style: TextStyle(
+                              color: AppColors.foreground,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                        TextButton(
+                          key: const Key('leaderboard_open_groups_link'),
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(builder: (_) => const ChallengeGroupScreen()),
+                            );
+                          },
+                          child: const Text(
+                            'Groups',
+                            style: TextStyle(
+                              color: AppColors.neoMint,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                   Expanded(
                     child: ListView.separated(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

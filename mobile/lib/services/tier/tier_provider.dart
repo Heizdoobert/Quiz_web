@@ -73,6 +73,7 @@ class TierCapabilities {
   }
 
   bool get isPro => tier == UserTier.pro;
+  bool get isFree => tier == UserTier.free;
   bool get isGuest => tier == UserTier.guest;
   bool get isAuthenticated => tier != UserTier.guest;
 }
