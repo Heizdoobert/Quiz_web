@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile/theme/app_theme.dart';
 import '../quiz/quiz_screen.dart';
+import '../quiz/create_quiz_screen.dart';
 import '../leaderboard/leaderboard_screen.dart';
 import '../profile/profile_screen.dart';
 import '../settings/settings_screen.dart';
@@ -42,6 +43,19 @@ class _MainScreenState extends ConsumerState<MainScreen> {
         index: _currentIndex,
         children: screens,
       ),
+      floatingActionButton: _currentIndex == 0
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const CreateQuizScreen()),
+                );
+              },
+              backgroundColor: AppColors.neoMint,
+              foregroundColor: AppColors.deepSpace,
+              icon: const Icon(Icons.add_rounded),
+              label: const Text('Create Quiz', style: TextStyle(fontWeight: FontWeight.bold)),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (index) {

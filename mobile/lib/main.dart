@@ -6,6 +6,7 @@ import 'features/main/main_screen.dart';
 import 'features/settings/settings_screen.dart';
 import 'features/user/user_screen.dart';
 import 'features/quiz/quiz_screen.dart';
+import 'features/quiz/create_quiz_screen.dart';
 import 'features/leaderboard/leaderboard_screen.dart';
 import 'features/score/score_screen.dart';
 import 'theme/app_theme.dart';
@@ -82,6 +83,8 @@ class QuickQuizApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const LeaderboardScreen(), settings: settings);
           case '/score':
             return MaterialPageRoute(builder: (_) => const ScoreScreen(), settings: settings);
+          case '/create-quiz':
+            return MaterialPageRoute(builder: (_) => const CreateQuizScreen(), settings: settings);
           default:
             return MaterialPageRoute(builder: (_) => const AuthScreen(), settings: settings);
         }
@@ -94,6 +97,7 @@ class QuickQuizApp extends StatelessWidget {
         '/quiz': (_) => const QuizScreen(),
         '/leaderboard': (_) => const LeaderboardScreen(),
         '/score': (_) => const ScoreScreen(),
+        '/create-quiz': (_) => const CreateQuizScreen(),
       },
     );
   }

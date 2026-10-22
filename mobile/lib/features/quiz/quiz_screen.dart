@@ -8,6 +8,7 @@ import '../auth/auth_screen.dart' show BrandMark, requireSignIn;
 import '../profile/profile_screen.dart';
 import 'board_panels.dart';
 import 'board_provider.dart';
+import 'create_quiz_screen.dart';
 import 'quiz_provider.dart';
 import 'review_screen.dart';
 typedef Question = Map<String, dynamic>;
@@ -250,6 +251,15 @@ class _Header extends ConsumerWidget {
                 return;
               }
               promptSaveQuizDialog(context, ref, questions: qs);
+            },
+          ),
+          _HeaderButton(
+            icon: Icons.add_circle_outline_rounded,
+            tooltip: 'Create Quiz',
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const CreateQuizScreen()),
+              );
             },
           ),
           if (auth.isAuthenticated)
