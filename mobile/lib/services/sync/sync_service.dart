@@ -47,16 +47,16 @@ class SyncService {
   bool _running = false;
   DateTime? _pausedUntil;
   final _BackoffHelper _backoff = _BackoffHelper();
-  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+  StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
 
   /// Starts listening to network connectivity events to automatically trigger
   /// sync when the device reconnects to Wi-Fi, Mobile or Ethernet.
   void initConnectivityListener([Connectivity? connectivity]) {
     final conn = connectivity ?? Connectivity();
     _connectivitySubscription?.cancel();
-    _connectivitySubscription = conn.onConnectivityChanged.listen((result) {
-      if (result != ConnectivityResult.none) {
-        dev.log('Connectivity active ($result), running auto-sync', name: 'SyncService');
+    _connectivitySubscription = conn.onConnectivityChanged.listen((results) {
+      if (results.any((result) => result != ConnectivityResult.none)) {
+        dev.log('Connectivity active ($results), running auto-sync', name: 'SyncService');
         syncAnswers();
       }
     });

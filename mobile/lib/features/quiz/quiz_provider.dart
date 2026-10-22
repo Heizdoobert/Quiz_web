@@ -40,8 +40,8 @@ class QuizNotifier extends Notifier<QuizState> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     ref.onDispose(() => WidgetsBinding.instance.removeObserver(this));
     // Listen for network connectivity changes and trigger sync
-    final connectivitySub = Connectivity().onConnectivityChanged.listen((result) {
-      if (result != ConnectivityResult.none) {
+    final connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.any((result) => result != ConnectivityResult.none)) {
         _sync();
       }
     });
