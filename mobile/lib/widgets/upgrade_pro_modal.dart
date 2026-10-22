@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:quickquiz_sdk/quickquiz_sdk.dart';
 import '../theme/app_theme.dart';
 import '../services/tier/tier_provider.dart';
+import '../services/transactions/package_transaction_manager.dart';
 
 Future<void> showUpgradeProModal(BuildContext context, WidgetRef ref) {
   return showModalBottomSheet<void>(
@@ -12,14 +14,42 @@ Future<void> showUpgradeProModal(BuildContext context, WidgetRef ref) {
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       side: BorderSide(color: AppColors.cyberBorder),
     ),
-    builder: (modalCtx) {
-      final tier = ref.watch(tierProvider);
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
+    builder: (modalCtx) => const _UpgradeProModalContent(),
+  );
+}
+
+class _UpgradeProModalContent extends ConsumerStatefulWidget {
+  const _UpgradeProModalContent();
+
+  @override
+  ConsumerState<_UpgradeProModalContent> createState() => _UpgradeProModalContentState();
+}
+
+class _UpgradeProModalContentState extends ConsumerState<_UpgradeProModalContent> {
+  String _selectedPackageId = 'pro_annual';
+
+  @override
+  Widget build(BuildContext context) {
+    final tier = ref.watch(tierProvider);
+    final txnState = ref.watch(packageTransactionManagerProvider);
+    final packages = ref.watch(packageTransactionManagerProvider.notifier).getPackages();
+
+    final selectedPkg = packages.firstWhere(
+      (p) => p.id == _selectedPackageId,
+      orElse: () => packages.first,
+    );
+
+    return SafeArea(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
             Center(
               child: Container(
                 width: 40,
@@ -45,31 +75,168 @@ Future<void> showUpgradeProModal(BuildContext context, WidgetRef ref) {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             const Text(
-              'Unlock 100% full limit, host private Challenge Groups for your friends, and boost your rankings across the leaderboard.',
-              style: TextStyle(fontSize: 14, color: AppColors.slate300, height: 1.4),
+              'Unlock full limits, host private Challenge Groups with custom leaderboards, and cross top rankings easier.',
+              style: TextStyle(fontSize: 13, color: AppColors.slate300, height: 1.4),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Features overview
             const _FeatureRow(
               icon: Icons.all_inclusive_rounded,
               title: 'Full Limit: Unlimited Quizzes',
-              subtitle: 'No 20 or 100 quiz caps',
+              subtitle: 'No 20 or 100 quiz session caps',
             ),
             const _FeatureRow(
               icon: Icons.groups_rounded,
               title: 'Open Challenge Groups',
-              subtitle: 'Create group battles & dedicated leaderboards',
+              subtitle: 'Dedicated leaderboards & friend arenas',
             ),
             const _FeatureRow(
               icon: Icons.leaderboard_rounded,
-              title: 'Challenger Rank Boost',
-              subtitle: 'Cross top rankings easier with Challenger status',
+              title: 'Challenger Rank Multipliers',
+              subtitle: 'Boost points and climb the top leaderboards',
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
+
+            // Package selector header
+            const Text(
+              'Choose Your Plan',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.foreground,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            // Package Cards
+            ...packages.map((pkg) {
+              final isSelected = pkg.id == _selectedPackageId;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: InkWell(
+                  key: Key('package_card_${pkg.id}'),
+                  onTap: () {
+                    setState(() {
+                      _selectedPackageId = pkg.id;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.gold.withValues(alpha: 0.12)
+                          : AppColors.cyberVioletLight,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: isSelected ? AppColors.gold : AppColors.cyberBorder,
+                        width: isSelected ? 2 : 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+                          color: isSelected ? AppColors.gold : AppColors.slate400,
+                          size: 20,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    pkg.name,
+                                    style: const TextStyle(
+                                      color: AppColors.foreground,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 15,
+                                    ),
+                                  ),
+                                  if (pkg.badge != null) ...[
+                                    const SizedBox(width: 8),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.gold.withValues(alpha: 0.2),
+                                        borderRadius: BorderRadius.circular(4),
+                                        border: Border.all(color: AppColors.gold.withValues(alpha: 0.4)),
+                                      ),
+                                      child: Text(
+                                        pkg.badge!,
+                                        style: const TextStyle(
+                                          color: AppColors.gold,
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                pkg.description,
+                                style: const TextStyle(color: AppColors.slate400, fontSize: 11),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              '\$${pkg.price.toStringAsFixed(2)}',
+                              style: const TextStyle(
+                                color: AppColors.neoMint,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              pkg.interval == 'lifetime' ? 'once' : '/ ${pkg.interval}',
+                              style: const TextStyle(color: AppColors.slate400, fontSize: 11),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            }),
+
+            if (txnState.errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.popCoral.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.popCoral.withValues(alpha: 0.5)),
+                ),
+                child: Text(
+                  txnState.errorMessage!,
+                  style: const TextStyle(color: AppColors.popCoral, fontSize: 12),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 16),
+
+            // Action Button
             if (tier.isPro)
               ElevatedButton.icon(
-                onPressed: () => Navigator.of(modalCtx).pop(),
+                onPressed: () => Navigator.of(context).pop(),
                 icon: const Icon(Icons.check_circle_rounded, color: AppColors.deepSpace),
                 label: const Text('Pro Package Already Active'),
                 style: ElevatedButton.styleFrom(
@@ -81,18 +248,40 @@ Future<void> showUpgradeProModal(BuildContext context, WidgetRef ref) {
               )
             else
               ElevatedButton.icon(
-                onPressed: () {
-                  ref.read(tierProvider.notifier).upgradeToPro();
-                  Navigator.of(modalCtx).pop();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Pro Package Activated! Full limits and Challenge Groups unlocked.'),
-                      backgroundColor: AppColors.elevation2,
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.bolt_rounded, color: AppColors.deepSpace),
-                label: const Text('Unlock Pro Package (Full Limit)'),
+                key: const Key('purchase_package_button'),
+                onPressed: txnState.isLoading
+                    ? null
+                    : () async {
+                        try {
+                          final txn = await ref
+                              .read(packageTransactionManagerProvider.notifier)
+                              .purchasePackage(selectedPkg.id);
+
+                          if (!context.mounted) return;
+
+                          if (txn.status == 'verified') {
+                            Navigator.of(context).pop();
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Upgraded to ${selectedPkg.name}! Pro limits unlocked.'),
+                                backgroundColor: AppColors.elevation2,
+                              ),
+                            );
+                          }
+                        } catch (_) {}
+                      },
+                icon: txnState.isLoading
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.deepSpace),
+                      )
+                    : const Icon(Icons.bolt_rounded, color: AppColors.deepSpace),
+                label: Text(
+                  txnState.isLoading
+                      ? 'Processing Upgrade...'
+                      : 'Upgrade to ${selectedPkg.name} (\$${selectedPkg.price.toStringAsFixed(2)})',
+                ),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.neoMint,
                   foregroundColor: AppColors.deepSpace,
@@ -100,11 +289,54 @@ Future<void> showUpgradeProModal(BuildContext context, WidgetRef ref) {
                   textStyle: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
+
+            const SizedBox(height: 8),
+
+            // Restore Purchases
+            Center(
+              child: TextButton(
+                onPressed: txnState.isLoading
+                    ? null
+                    : () async {
+                        final restored = await ref
+                            .read(packageTransactionManagerProvider.notifier)
+                            .restorePurchases();
+
+                        if (!context.mounted) return;
+
+                        if (restored.any((t) => t.status == 'verified')) {
+                          Navigator.of(context).pop();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Purchases restored successfully! Pro unlocked.'),
+                              backgroundColor: AppColors.elevation2,
+                            ),
+                          );
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('No previous active purchases found.'),
+                              backgroundColor: AppColors.cyberViolet,
+                            ),
+                          );
+                        }
+                      },
+                child: const Text(
+                  'Restore Purchases',
+                  style: TextStyle(
+                    color: AppColors.slate400,
+                    fontSize: 12,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ),
           ],
         ),
-      );
-    },
+      ),
+    ),
   );
+  }
 }
 
 class _FeatureRow extends StatelessWidget {
@@ -117,26 +349,26 @@ class _FeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: const EdgeInsets.all(5),
             decoration: BoxDecoration(
               color: AppColors.cyberVioletLight,
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: AppColors.neoMint, size: 20),
+            child: Icon(icon, color: AppColors.neoMint, size: 18),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground, fontSize: 14)),
-                const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(color: AppColors.slate400, fontSize: 12)),
+                Text(title, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.foreground, fontSize: 13)),
+                const SizedBox(height: 1),
+                Text(subtitle, style: const TextStyle(color: AppColors.slate400, fontSize: 11)),
               ],
             ),
           ),
