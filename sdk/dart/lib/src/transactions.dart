@@ -195,18 +195,13 @@ class TransactionManager {
     // Step 2: Processing via Gateway
     final result = await gateway.requestPayment(pkg, userId: cleanUserId);
 
+    final completedAt = DateTime.now().toUtc().toIso8601String();
+
     if (!result.success) {
-      txn = PackageTransaction(
-        transactionId: txn.transactionId,
-        packageId: txn.packageId,
-        userId: txn.userId,
-        amount: txn.amount,
-        currency: txn.currency,
+      txn = txn.copyWith(
         status: result.status,
-        gateway: txn.gateway,
         receipt: result.receipt,
-        startedAt: txn.startedAt,
-        completedAt: DateTime.now().toUtc().toIso8601String(),
+        completedAt: completedAt,
         errorReason: result.errorReason,
       );
       _record(txn);
@@ -216,17 +211,10 @@ class TransactionManager {
     // Step 3: Verification
     final isValid = await gateway.verifyReceipt(result.receipt, transactionId: txnId);
     if (!isValid) {
-      txn = PackageTransaction(
-        transactionId: txn.transactionId,
-        packageId: txn.packageId,
-        userId: txn.userId,
-        amount: txn.amount,
-        currency: txn.currency,
+      txn = txn.copyWith(
         status: 'failed',
-        gateway: txn.gateway,
         receipt: result.receipt,
-        startedAt: txn.startedAt,
-        completedAt: DateTime.now().toUtc().toIso8601String(),
+        completedAt: completedAt,
         errorReason: 'Receipt validation failed',
       );
       _record(txn);
@@ -234,17 +222,10 @@ class TransactionManager {
     }
 
     // Step 4: Verified
-    txn = PackageTransaction(
-      transactionId: txn.transactionId,
-      packageId: txn.packageId,
-      userId: txn.userId,
-      amount: txn.amount,
-      currency: txn.currency,
+    txn = txn.copyWith(
       status: 'verified',
-      gateway: txn.gateway,
       receipt: result.receipt,
-      startedAt: txn.startedAt,
-      completedAt: DateTime.now().toUtc().toIso8601String(),
+      completedAt: completedAt,
     );
     _record(txn);
     return txn;

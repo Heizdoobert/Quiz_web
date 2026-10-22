@@ -308,6 +308,34 @@ class PackageTransaction {
   final double amount;
   final String? completedAt, errorReason;
 
+  PackageTransaction copyWith({
+    String? transactionId,
+    String? packageId,
+    String? userId,
+    double? amount,
+    String? currency,
+    String? status,
+    String? gateway,
+    String? receipt,
+    String? startedAt,
+    String? completedAt,
+    String? errorReason,
+  }) {
+    return PackageTransaction(
+      transactionId: transactionId ?? this.transactionId,
+      packageId: packageId ?? this.packageId,
+      userId: userId ?? this.userId,
+      amount: amount ?? this.amount,
+      currency: currency ?? this.currency,
+      status: status ?? this.status,
+      gateway: gateway ?? this.gateway,
+      receipt: receipt ?? this.receipt,
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
+      errorReason: errorReason ?? this.errorReason,
+    );
+  }
+
   Json toJson() => {
         'transactionId': transactionId,
         'packageId': packageId,
