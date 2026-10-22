@@ -7,7 +7,6 @@ import 'package:mobile/features/auth/auth_loading_screen.dart';
 import 'package:mobile/features/auth/auth_screen.dart';
 
 import 'package:mobile/features/profile/profile_screen.dart';
-import 'package:mobile/features/quiz/quiz_provider.dart';
 import 'package:mobile/features/quiz/quiz_screen.dart';
 import 'package:mobile/features/quiz/review_screen.dart';
 import 'package:mobile/widgets/glass_card.dart';

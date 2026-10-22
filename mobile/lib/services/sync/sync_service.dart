@@ -1,5 +1,6 @@
+import 'dart:async';
 import 'dart:math' as math;
-import 'package:flutter/foundation.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../api/api_client.dart';
 import '../../db/quiz_repository.dart';
@@ -26,10 +27,15 @@ class _BackoffHelper {
   void increment() => _retryAttempts++;
 }
 
-final syncServiceProvider = Provider.autoDispose((ref) => SyncService(
-      ref.watch(apiClientProvider),
-      ref.watch(quizRepositoryProvider),
-    ));
+final syncServiceProvider = Provider.autoDispose((ref) {
+  final service = SyncService(
+    ref.watch(apiClientProvider),
+    ref.watch(quizRepositoryProvider),
+  );
+  service.initConnectivityListener();
+  ref.onDispose(() => service.dispose());
+  return service;
+});
 
 class SyncService {
   SyncService(this._apiClient, this._quizRepository, {this.onRetryRequested});
@@ -41,7 +47,25 @@ class SyncService {
   bool _running = false;
   DateTime? _pausedUntil;
   final _BackoffHelper _backoff = _BackoffHelper();
-  
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
+
+  /// Starts listening to network connectivity events to automatically trigger
+  /// sync when the device reconnects to Wi-Fi, Mobile or Ethernet.
+  void initConnectivityListener([Connectivity? connectivity]) {
+    final conn = connectivity ?? Connectivity();
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = conn.onConnectivityChanged.listen((result) {
+      if (result != ConnectivityResult.none) {
+        dev.log('Connectivity active ($result), running auto-sync', name: 'SyncService');
+        syncAnswers();
+      }
+    });
+  }
+
+  void dispose() {
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
+  }
 
   /// Sends queued answers to the server and removes those that have been settled.
   /// Handles rate‑limiting by pausing further attempts for a configured period.
@@ -63,16 +87,14 @@ class SyncService {
       ]);
       final results = (response['results'] as Map?)?.cast<String, dynamic>() ?? const <String, dynamic>{};
       final idsToClear = settledIds(queued, results);
-    if (idsToClear.isNotEmpty) {
-      await _quizRepository.clearQueuedAnswers(idsToClear);
-    }
+      if (idsToClear.isNotEmpty) {
+        await _quizRepository.clearQueuedAnswers(idsToClear);
+      }
 
       // If any answer was rate‑limited, pause future sync attempts.
-
       if (results.values.any((r) => r is Map && r['notSavedReason'] == 'rate-limited')) {
         _pausedUntil = DateTime.now().add(_backoff.compute());
         _backoff.increment();
-        // Do not reset backoff here to retain backoff state.
       } else {
         _backoff.reset();
         _pausedUntil = null;
@@ -84,20 +106,19 @@ class SyncService {
       if (onRetryRequested != null) {
         onRetryRequested!(_backoff.compute());
       }
-      // Optionally schedule a retry after backoff delay (handled by caller if needed).
     } finally {
       _running = false;
     }
   }
+
   bool get isPaused => _pausedUntil != null && DateTime.now().isBefore(_pausedUntil!);
   int get backoffAttempts => _backoff._retryAttempts;
-  /// Test‑only helper to reset pause state.
+
   /// Test‑only helper to reset pause state and backoff counter.
   void resetPauseForTest() {
     _pausedUntil = null;
     _backoff.reset();
   }
-
 }
 
 /// Helper to collect IDs of rows the server has settled.

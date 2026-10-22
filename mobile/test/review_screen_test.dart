@@ -57,7 +57,7 @@ void main() {
       ProviderScope(
         overrides: [
           qp.quizProvider.overrideWith(() => FakeQuizNotifier()),
-          boardProvider.overrideWithValue(const AsyncValue.data(const Board())),
+          boardProvider.overrideWithValue(const AsyncValue.data(Board())),
           authProvider.overrideWith((ref) => FakeAuthNotifier(ref)),
         ],
         child: const MaterialApp(home: ReviewScreen()),
@@ -90,7 +90,7 @@ void main() {
       ProviderScope(
         overrides: [
           qp.quizProvider.overrideWith(() => fakeNotifier),
-          boardProvider.overrideWithValue(const AsyncValue.data(const Board())),
+          boardProvider.overrideWithValue(const AsyncValue.data(Board())),
           authProvider.overrideWith((ref) => FakeAuthNotifier(ref)),
         ],
         child: const MaterialApp(home: ReviewScreen()),

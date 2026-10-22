@@ -1,5 +1,6 @@
 /// Dart models generated from the Web Quiz OpenAPI spec
 /// These classes correspond to the API contract and are used by the Flutter client.
+library;
 
 class QuizSummary {
   final String id;

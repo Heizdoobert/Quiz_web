@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quick Quiz</string>
+    <string name="shortcut_quiz_short">Play Quiz</string>
+    <string name="shortcut_quiz_long">Start Quick Quiz</string>
+    <string name="shortcut_leaderboard_short">Leaderboard</string>
+    <string name="shortcut_leaderboard_long">View Global Leaderboard</string>
+</resources>

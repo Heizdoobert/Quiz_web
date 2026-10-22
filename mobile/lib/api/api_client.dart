@@ -33,9 +33,7 @@ class ApiClient {
   /// Supports both the current 'jwt_token' key and the legacy 'auth_token' key used by older builds and integration tests.
   Future<String?> getToken() async {
     var token = await _storage.read(key: 'jwt_token');
-    if (token == null) {
-      token = await _storage.read(key: 'auth_token');
-    }
+    token ??= await _storage.read(key: 'auth_token');
     return token;
   }
 
