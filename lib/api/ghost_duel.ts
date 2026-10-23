@@ -2,7 +2,7 @@
 // This file implements the core business logic for the Ghost‑Duel + Remix feature.
 // It follows the contract defined in ghost_duel_api_design.md.
 
-import { supabase } from '@/lib/sdk/supabase';
+import { findGhostAttemptByPin, insertQuiz, insertGhostAttempt, getGhostAttemptByPin, selectPublicQuizzes } from '@/lib/db/quiz/ghost-duel';
 // Database type not needed for API slice
 import { z } from 'zod';
 
