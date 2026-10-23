@@ -3,7 +3,7 @@ import 'package:mobile/theme/app_theme.dart';
 
 /// The web's `.glass .glass-border`: translucent surface with a mint-to-indigo hairline.
 class GlassCard extends StatelessWidget {
-  const GlassCard({super.key, required this.child, this.padding = const EdgeInsets.all(20), this.radius = 24});
+  const GlassCard({super.key, required this.child, this.padding = const EdgeInsets.all(Responsive(context).scale(20)), this.radius = 24});
 
   final Widget child;
   final EdgeInsetsGeometry padding;
@@ -24,7 +24,7 @@ class GlassCard extends StatelessWidget {
         ),
         boxShadow: const [BoxShadow(color: Colors.black54, blurRadius: 24, offset: Offset(0, 12))],
       ),
-      padding: const EdgeInsets.all(1),
+      padding: const EdgeInsets.all(Responsive(context).scale(1)),
       child: Container(
         padding: padding,
         decoration: BoxDecoration(
@@ -45,7 +45,7 @@ class GradientButton extends StatelessWidget {
     required this.onPressed,
     this.icon,
     this.loading = false,
-    this.padding = const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+    this.padding = const EdgeInsets.symmetric(horizontal: Responsive(context).scale(24), vertical: Responsive(context).scale(14)),
   });
 
   final String label;
