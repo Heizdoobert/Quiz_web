@@ -22,6 +22,8 @@
 /build
 
 # misc
+coco/out/
+
 .DS_Store
 *.pem
 
