@@ -1,0 +1,67 @@
+
+/mnt/second_drive/web_quiz/app/api/v1/auth/logout/route.ts
+  3:10  warning  'createJwtCookie' is defined but never used. Allowed unused vars must match /^_/u      @typescript-eslint/no-unused-vars
+  3:27  warning  'createRefreshCookie' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  4:10  warning  'apiOk' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/app/api/v1/auth/refresh/route.ts
+   4:10  warning  'apiOk' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  27:12  warning  'e' is defined but never used                                            @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/app/rcm/page.tsx
+  23:11  warning  'roleIds' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  45:84  warning  'payload' is defined but never used. Allowed unused args must match /^_/u           @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/components/layout/Header.tsx
+  9:8  warning  'SearchBox' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/lib/api/ghost_duel.ts
+    5:1  error    '@/lib/sdk/supabase' import is restricted from being used by a pattern. Use the domain functions in lib/db instead of a Supabase client  no-restricted-imports
+   92:3  warning  'idempotencyKey' is defined but never used. Allowed unused args must match /^_/u                                                         @typescript-eslint/no-unused-vars
+  147:3  warning  'userId' is defined but never used. Allowed unused args must match /^_/u                                                                 @typescript-eslint/no-unused-vars
+  148:3  warning  'idempotencyKey' is defined but never used. Allowed unused args must match /^_/u                                                         @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/lib/supabaseClient.ts
+  1:1  error  '@supabase/supabase-js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/next.config.mjs
+  60:21  warning  'isServer' is defined but never used. Allowed unused args must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/packages/ui/build.mjs
+   7:7   warning  'result' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  29:10  warning  'e' is defined but never used                                                      @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/scripts/apply_username_index.js
+   1:1   error    '@supabase/supabase-js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+  15:11  warning  'data' is assigned a value but never used. Allowed unused vars must match /^_/u                                              @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/sdk/tests/transactions.test.ts
+  5:3  warning  'DEFAULT_UPGRADE_PACKAGES' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+/mnt/second_drive/web_quiz/sdk/vendors/gemini.ts
+  1:1  error  '@google/genai' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/sdk/vendors/supabase-admin.ts
+  2:1  error  '@supabase/supabase-js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/sdk/vendors/supabase-ssr.ts
+  1:1  error  '@supabase/ssr' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/sdk/vendors/supabase.ts
+  1:1  error  '@supabase/supabase-js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/server/src/app.ts
+   1:19  warning  'Request' is defined but never used. Allowed unused vars must match /^_/u                @typescript-eslint/no-unused-vars
+   1:28  warning  'Response' is defined but never used. Allowed unused vars must match /^_/u               @typescript-eslint/no-unused-vars
+  20:7   warning  'SignUpSchema' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  26:7   warning  'SignInSchema' is assigned a value but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+  38:20  error    Unexpected any. Specify a different type                                                 @typescript-eslint/no-explicit-any
+
+/mnt/second_drive/web_quiz/supabase/phoenix.mjs
+  1:1  error  '@supabase/phoenix/priv/static/phoenix.cjs.js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+  2:1  error  '@supabase/phoenix/priv/static/phoenix.cjs.js' import is restricted from being used by a pattern. Import vendor SDKs through lib/sdk, not directly  no-restricted-imports
+
+/mnt/second_drive/web_quiz/tests/auth-identifier.test.ts
+  2:32  warning  'beforeAll' is defined but never used. Allowed unused vars must match /^_/u  @typescript-eslint/no-unused-vars
+
+✖ 31 problems (10 errors, 21 warnings)

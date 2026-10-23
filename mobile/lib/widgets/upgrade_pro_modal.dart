@@ -90,7 +90,7 @@ class _UpgradeProModalContentState extends ConsumerState<_UpgradeProModalContent
           maxHeight: MediaQuery.of(context).size.height * 0.9,
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+          padding: const EdgeInsets.fromLTRB(Responsive(context).scale(24), Responsive(context).scale(16), Responsive(context).scale(24), Responsive(context).scale(32)),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -222,13 +222,13 @@ class _PackageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: Responsive(context).scale(10)),
       child: InkWell(
         key: Key('package_card_${pkg.id}'),
         onTap: onTap,
         borderRadius: BorderRadius.circular(14),
         child: Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(Responsive(context).scale(14)),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.gold.withValues(alpha: 0.12) : AppColors.cyberVioletLight,
             borderRadius: BorderRadius.circular(14),
@@ -262,7 +262,7 @@ class _PackageCard extends StatelessWidget {
                         if (pkg.badge != null) ...[
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(horizontal: Responsive(context).scale(6), vertical: Responsive(context).scale(2)),
                             decoration: BoxDecoration(
                               color: AppColors.gold.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(4),
@@ -324,7 +324,7 @@ class _ErrorMessageBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(Responsive(context).scale(10)),
       decoration: BoxDecoration(
         color: AppColors.popCoral.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
@@ -430,12 +430,12 @@ class _FeatureRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: Responsive(context).scale(10)),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(5),
+            padding: const EdgeInsets.all(Responsive(context).scale(5)),
             decoration: BoxDecoration(
               color: AppColors.cyberVioletLight,
               borderRadius: BorderRadius.circular(8),

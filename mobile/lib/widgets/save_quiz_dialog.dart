@@ -42,7 +42,7 @@ Future<bool> promptSaveQuizDialog(
         'Do you want to save this quiz list so you can reload and reuse it later?',
         style: TextStyle(fontSize: 14, color: AppColors.slate300, height: 1.4),
       ),
-      actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      actionsPadding: const EdgeInsets.symmetric(horizontal: Responsive(context).scale(16), vertical: Responsive(context).scale(12)),
       actions: [
         // Option 2: Don't Save
         OutlinedButton(
