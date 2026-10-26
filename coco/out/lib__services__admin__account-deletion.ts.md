@@ -4,7 +4,7 @@ lines:36 exports:DeleteAccountResult,deleteAccount
 import { logger } from '@/lib/logger';
 import { deleteAuthUser } from '@/lib/db/auth';
 import { authUserIdOf, deleteUserRow } from '@/lib/db/users';
-import type { SessionAccount } from '../session';
+import type { SessionAccount } from '@/lib/services/auth/session';
 
 export type DeleteAccountResult =
   | { success: true }

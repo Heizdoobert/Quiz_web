@@ -4,11 +4,11 @@ lines:56 exports:
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import AdminErrorsPage from '@/app/admin/errors/page';
-import { authorize } from '@/lib/services/authorize';
-import { listErrorIssues } from '@/lib/services/error-issues';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listErrorIssues } from '@/lib/services/api/error-issues';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
-vi.mock('@/lib/services/error-issues', () => ({ listErrorIssues: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/api/error-issues', () => ({ listErrorIssues: vi.fn() }));
 
 const allow = { success: true, data: { account: { id: 'a' }, role: 'admin' } } as const;
 const issue = { id: '1', title: '<img src=x onerror=alert(1)>', level: 'error', count: 7, lastSeen: '2026-10-13', link: 'https://sentry.io/i/1/' };

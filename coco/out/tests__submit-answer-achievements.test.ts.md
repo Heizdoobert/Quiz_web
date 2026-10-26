@@ -6,15 +6,15 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 vi.mock('@/lib/db/questions', () => ({ questionForAnswer: vi.fn() }));
 vi.mock('@/lib/db/results', () => ({ insertResult: vi.fn() }));
 vi.mock('@/lib/db/achievements', () => ({ awardAchievements: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn() }));
-vi.mock('@/lib/services/rate-limit', () => ({ allowAttemptFromIp: vi.fn() }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn() }));
+vi.mock('@/lib/services/auth/rate-limit', () => ({ allowAttemptFromIp: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
 import { questionForAnswer } from '@/lib/db/questions';
 import { insertResult } from '@/lib/db/results';
 import { awardAchievements } from '@/lib/db/achievements';
-import { getSessionAccount } from '@/lib/services/session';
-import { allowAttemptFromIp } from '@/lib/services/rate-limit';
+import { getSessionAccount } from '@/lib/services/auth/session';
+import { allowAttemptFromIp } from '@/lib/services/auth/rate-limit';
 import { logger } from '@/lib/logger';
 import { submitAnswer } from '@/lib/actions/quiz-actions';
 

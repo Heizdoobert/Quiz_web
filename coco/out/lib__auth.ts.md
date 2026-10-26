@@ -1,43 +1,39 @@
 # lib/auth.ts
-lines:93 exports:signJwt,signRefresh,verifyJwt,verifyRefresh,createJwtCookie,createRefreshCookie
+lines:36 exports:signJwt,signRefresh,verifyRefresh,createJwtCookie,createRefreshCookie
 ---
-// Authentication utilities for JWT and Refresh tokens
-import { createHmac } from 'crypto';
+// Authentication utilities
+import { signToken, verifyToken } from './api/auth/jwt';
+import { NextResponse } from 'next/server';
 
-const SECRET_KEY = process.env.SUPABASE_SECRET_KEY || (process.env.NODE_ENV === 'test' ? 'test-secret' : undefined);
-if (!SECRET_KEY) {
-  console.warn('SUPABASE_SECRET_KEY is not set; auth token functions will not work');
+/** Sign JWT for authentication */
+export function signJwt(payload: object, expiresIn: string = '1h'): string {
+  return signToken(payload, expiresIn);
 }
-
-function getKey(): Buffer | null {
-  return SECRET_KEY ? createHmac('sha256', SECRET_KEY).update('quiz-auth').digest() : null;
+/** Sign refresh token */
+export function signRefresh(payload: object, expiresIn: string = '7d'): string {
+  return signToken(payload, expiresIn);
 }
-
-function base64urlEncode(obj: any): string {
-  return Buffer.from(JSON.stringify(obj)).toString('base64url');
+/** Verify refresh token */
+export function verifyRefresh(token: string): object | null {
+  return verifyToken(token);
 }
-
-function sign(payload: object, ttlSeconds: number): string | null {
-  const key = getKey();
-  if (!key) return null;
-  const now = Math.floor(Date.now() / 1000);
-  const fullPayload = { ...payload, iat: now, exp: now + ttlSeconds };
-  const header = { alg: 'HS256', typ: 'JWT' };
-  const headerB64 = base64urlEncode(header);
-  const payloadB64 = base64urlEncode(fullPayload);
-  const signature = createHmac('sha256', key).update(`${headerB64}.${payloadB64}`).digest('base64url');
-  return `${headerB64}.${payloadB64}.${signature}`;
+/** Set JWT cookie on response */
+export function createJwtCookie(res: NextResponse, token: string): void {
+  res.cookies.set('jwt', token, {
+    httpOnly: true,
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24, // 1 day
+  });
 }
-
-export function signJwt(payload: object): string | null {
-  // JWT valid for 30 minutes
-  return sign(payload, 30 * 60);
+/** Set refresh cookie on response */
+export function createRefreshCookie(res: NextResponse, token: string): void {
+  res.cookies.set('refresh', token, {
+    httpOnly: true,
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 60 * 60 * 24 * 30, // 30 days
+  });
 }
-
-export function signRefresh(payload: object): string | null {
-  // Refresh token valid for 30 days
-  return sign(payload, 30 * 24 * 60 * 60);
-}
-
-function verify(token: string): object | null {
-  const parts = token.split('.');

@@ -14,17 +14,17 @@ import { POST as requestPassword } from '@/app/api/v1/auth/password/request/rout
 import { POST as verifyPassword } from '@/app/api/v1/auth/password/verify/route';
 import { POST as updatePassword } from '@/app/api/v1/auth/password/update/route';
 
-import { signUpAccount, signInAccount, signInAccountWithGoogle } from '@/lib/services/credentials';
-import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/mobile-auth';
+import { signUpAccount, signInAccount, signInAccountWithGoogle } from '@/lib/services/auth/credentials';
+import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 import { requestEmailCode, verifyEmailCode, getSessionInfo, signOut } from '@/lib/actions/auth-actions';
 import {
   requestPasswordReset,
   verifyPasswordResetCode,
   updatePasswordWithReset,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';
 
-vi.mock('@/lib/services/credentials');
-vi.mock('@/lib/services/password-reset');
+vi.mock('@/lib/services/auth/credentials');
+vi.mock('@/lib/services/auth/password-reset');
 vi.mock('@/lib/actions/auth-actions', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/lib/actions/auth-actions')>();
   return {

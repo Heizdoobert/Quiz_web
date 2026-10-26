@@ -2,12 +2,12 @@
 lines:52 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listAccountsForAdmin } from '@/lib/services/role-admin';
+import { listAccountsForAdmin } from '@/lib/services/admin/role-admin';
 import { listAccounts, roleOf } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
 
 vi.mock('@/lib/db/roles', () => ({ roleOf: vi.fn(), setRole: vi.fn(), listAccounts: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 
 const ADMIN = { id: '00000000-0000-4000-8000-0000000000a1' };

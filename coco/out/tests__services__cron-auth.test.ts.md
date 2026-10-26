@@ -2,7 +2,7 @@
 lines:28 exports:
 ---
 import { describe, it, expect, afterEach } from 'vitest';
-import { isCronAuthorized } from '@/lib/services/cron-auth';
+import { isCronAuthorized } from '@/lib/services/auth/cron-auth';
 
 const URL_BASE = 'https://quickquiz.app/api/cron/x';
 const original = process.env.CRON_SECRET;

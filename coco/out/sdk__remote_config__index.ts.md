@@ -1,5 +1,5 @@
 # sdk/remote_config/index.ts
 lines:2 exports:
 ---
-export * from './src';
-
+// Re-export public SDK API for remote_config
+export * from './src/index';

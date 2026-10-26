@@ -10,14 +10,14 @@ import {
   requestPasswordReset,
   verifyPasswordResetCode,
   updatePasswordWithReset,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';
 import {
   signUpWithEmail,
   signInWithEmail,
-} from '@/lib/services/credentials';
+} from '@/lib/services/auth/credentials';
 import { supabase } from '@/lib/sdk/supabase';
 import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
-import * as rateLimitModule from '@/lib/services/rate-limit';
+import * as rateLimitModule from '@/lib/services/auth/rate-limit';
 import { createHmac, createHash } from 'node:crypto';
 
 // In-memory cookie jar mock for server actions

@@ -1,5 +1,5 @@
 # sdk/formatter/index.ts
 lines:2 exports:
 ---
-export * from './src';
-
+// Re-export public SDK API for formatter
+export * from './src/index';

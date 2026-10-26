@@ -1,5 +1,5 @@
 # sdk/src/types.ts
-lines:256 exports:Question,ClientQuestion,QuestionDispute,QuizResult,Group,UserStats,LeaderboardEntry,AnswerSubmissionResult,SearchResult,HistoryItem,ActionErrorCode,ActionResult,PaginationParams,GetUserQuizzesFilter,UserBackupData,ProfileErrorCode,GetUserQuizzesResult,ExportUserDataResult,CommunityErrorCode,CommunityResult
+lines:295 exports:Question,ClientQuestion,QuestionDispute,QuizResult,Group,UserStats,LeaderboardEntry,AnswerSubmissionResult,SearchResult,HistoryItem,ActionErrorCode,ActionResult,PaginationParams,GetUserQuizzesFilter,UserBackupData,ProfileErrorCode,GetUserQuizzesResult,ExportUserDataResult,CommunityErrorCode,CommunityResult
 ---
 export interface Question {
   id: string;

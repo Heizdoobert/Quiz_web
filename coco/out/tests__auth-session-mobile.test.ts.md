@@ -3,7 +3,7 @@ lines:212 exports:
 ---
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/mobile-auth';
+import { issueMobileAuthToken, verifyMobileAuthToken } from '@/lib/services/auth/mobile-auth';
 
 // Mock Mobile Storage and Local Database Adapter simulating FlutterSecureStorage & sqflite
 interface QueuedAnswer {

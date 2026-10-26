@@ -3,14 +3,14 @@ lines:41 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { deleteMyAccount } from '../lib/actions/profile-actions';
-import { getSessionAccount, clearSessionAccount } from '../lib/services/session';
-import { deleteAccount } from '../lib/services/account-deletion';
+import { getSessionAccount, clearSessionAccount } from '@/lib/services/auth/session';
+import { deleteAccount } from '@/lib/services/admin/account-deletion';
 
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
   clearSessionAccount: vi.fn(),
 }));
-vi.mock('../lib/services/account-deletion', () => ({ deleteAccount: vi.fn() }));
+vi.mock('@/lib/services/admin/account-deletion', () => ({ deleteAccount: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn() } }));
 
 const ACCOUNT = { id: '00000000-0000-4000-8000-0000000000f1' };

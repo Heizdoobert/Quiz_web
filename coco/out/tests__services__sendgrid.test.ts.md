@@ -2,7 +2,7 @@
 lines:117 exports:
 ---
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { sendEmail } from '@/lib/services/sendgrid';
+import { sendEmail } from '@/lib/services/api/sendgrid';
 
 describe('SendGrid Email Service (TDD)', () => {
   const originalEnv = process.env;

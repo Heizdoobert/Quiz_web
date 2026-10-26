@@ -4,7 +4,7 @@ lines:13 exports:default
 import { redirect } from 'next/navigation';
 import { adminNavItems } from '@/app/admin/_modules/nav';
 import AdminDenied from '@/components/admin/AdminDenied';
-import { authorize } from '@/lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 
 // Sends the caller to the first admin page or module their role may open.
 export default async function AdminIndex() {

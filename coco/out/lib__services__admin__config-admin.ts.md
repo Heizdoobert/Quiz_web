@@ -5,8 +5,8 @@ import { upsertConfigValue } from '@/lib/db/remote-config';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
 import { KEYS } from '@/sdk/remote_config/keys';
-import { authorize } from '../authorize';
-import { SessionAccount } from '../session';
+import { authorize } from '@/lib/services/auth/authorize';
+import { SessionAccount } from '@/lib/services/auth/session';
 
 // Not in lib/actions for the reason given in role-admin.ts: the account is never an argument
 // a caller controls. A web page wraps this in a server action that takes none.

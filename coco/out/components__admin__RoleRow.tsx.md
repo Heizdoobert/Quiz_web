@@ -4,9 +4,9 @@ lines:48 exports:default
 'use client';
 
 import { useState, useTransition } from 'react';
-import { setRoleAction } from '@/lib/actions/admin-actions';
+import { setRoleAction } from '@/lib/actions/admin';
 import type { AccountRow } from '@/lib/db/roles';
-import { ROLES } from '@/lib/services/rbac';
+import { ROLES } from '@/lib/services/rbac/rbac';
 
 // One account. Picking a role asks first; your own row is fixed, the service refuses it anyway.
 export default function RoleRow({ account, isSelf }: { account: AccountRow; isSelf: boolean }) {

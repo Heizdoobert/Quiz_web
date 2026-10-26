@@ -2,9 +2,9 @@
 lines:15 exports:DELETE
 ---
 import { NextRequest } from 'next/server';
-import { apiError, apiOk } from '@/lib/services/api-response';
-import { requireAuth } from '@/lib/services/api-auth';
-import { deleteAccount } from '@/lib/services/account-deletion';
+import { apiError, apiOk } from '@/lib/services/api/api-response';
+import { requireAuth } from '@/lib/services/auth/api-auth';
+import { deleteAccount } from '@/lib/services/admin/account-deletion';
 
 // Deletes the signed-in player's account and data. The id comes from the token, never the request.
 // Tokens are stateless, so a deleted account's token stays valid until it expires; a repeat call is a no-op.

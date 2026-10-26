@@ -4,7 +4,7 @@ lines:51 exports:default
 'use client';
 
 import { useState, useTransition } from 'react';
-import { updateConfigAction } from '@/lib/actions/admin-actions';
+import { updateConfigAction } from '@/lib/actions/admin';
 
 // A boolean config key as a switch. Turning it either way asks first: a flip reaches every client.
 export default function ConfigToggle({ name, initial }: { name: string; initial: boolean }) {

@@ -4,7 +4,7 @@ lines:35 exports:dynamic,default
 import AdminDenied from '@/components/admin/AdminDenied';
 import ConfigToggle from '@/components/admin/ConfigToggle';
 import { logger } from '@/lib/logger';
-import { authorize } from '@/lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 import { getRemoteConfig } from '@/sdk/remote_config';
 
 export const dynamic = 'force-dynamic';

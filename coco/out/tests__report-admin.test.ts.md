@@ -2,17 +2,17 @@
 lines:111 exports:
 ---
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { getReportStatus, triggerSystemReport } from '@/lib/services/report-admin';
+import { getReportStatus, triggerSystemReport } from '@/lib/services/admin/report-admin';
 import { roleOf } from '@/lib/db/roles';
 import { ping } from '@/lib/db/questions';
 import { getSystemCounts } from '@/lib/db/metrics';
-import { sendEmail } from '@/lib/services/sendgrid';
+import { sendEmail } from '@/lib/services/api/sendgrid';
 
 vi.mock('@/lib/db/roles', () => ({ roleOf: vi.fn() }));
 vi.mock('@/lib/db/questions', () => ({ ping: vi.fn() }));
 vi.mock('@/lib/db/metrics', () => ({ getSystemCounts: vi.fn() }));
-vi.mock('@/lib/services/sendgrid', () => ({ sendEmail: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/services/api/sendgrid', () => ({ sendEmail: vi.fn() }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
 
 const ADMIN = { id: '00000000-0000-4000-8000-0000000000a1' };
 const MODERATOR = { id: '00000000-0000-4000-8000-0000000000b2' };

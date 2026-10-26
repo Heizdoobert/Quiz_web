@@ -5,9 +5,9 @@ lines:217 exports:
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as authActionsModule from '@/lib/actions/auth-actions';
 import { supabase } from '@/lib/sdk/supabase';
-import * as rateLimitModule from '@/lib/services/rate-limit';
-import * as usersService from '@/lib/services/users';
-import * as sessionService from '@/lib/services/session';
+import * as rateLimitModule from '@/lib/services/auth/rate-limit';
+import * as usersService from '@/lib/services/users/users';
+import * as sessionService from '@/lib/services/auth/session';
 
 // Mocks
 vi.mock('@/lib/sdk/supabase', () => ({
@@ -19,16 +19,16 @@ vi.mock('@/lib/sdk/supabase', () => ({
   },
 }));
 
-vi.mock('@/lib/services/rate-limit', () => ({
+vi.mock('@/lib/services/auth/rate-limit', () => ({
   allowAttempt: vi.fn().mockResolvedValue(true),
   allowAttemptFromIp: vi.fn().mockResolvedValue(true),
 }));
 
-vi.mock('@/lib/services/users', () => ({
+vi.mock('@/lib/services/users/users', () => ({
   ensureAccountForAuthUser: vi.fn().mockResolvedValue('acc-123'),
 }));
 
-vi.mock('@/lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   setSessionAccount: vi.fn().mockResolvedValue(true),
   getSessionAccount: vi.fn().mockResolvedValue(null),
   clearSessionAccount: vi.fn().mockResolvedValue(undefined),

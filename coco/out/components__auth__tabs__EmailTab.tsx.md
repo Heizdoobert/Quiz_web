@@ -3,7 +3,7 @@ lines:145 exports:EmailTabProps,EmailTab
 ---
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { requestEmailCode, verifyEmailCode } from "@/lib/actions/auth-actions";
+import { requestEmailCode, verifyEmailCode } from "@/lib/actions/auth";
 
 type EmailStep = "input" | "code";
 

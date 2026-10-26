@@ -3,7 +3,7 @@ lines:140 exports:
 ---
 // @vitest-environment node
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { allowAttempt, allowAttemptFromIp, clientIp } from '../lib/services/rate-limit';
+import { allowAttempt, allowAttemptFromIp, clientIp } from '@/lib/services/auth/rate-limit';
 import {
   requestEmailCode,
   verifyEmailCode,
@@ -31,13 +31,13 @@ vi.mock('../lib/sdk/supabase', () => ({
 vi.mock('../lib/sdk/supabase-admin', () => ({
   supabaseAdmin: { rpc: vi.fn(), auth: { admin: { createUser: vi.fn() } } },
 }));
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
   setSessionAccount: vi.fn(),
   clearSessionAccount: vi.fn(),
   shouldUseSecureCookies: vi.fn(),
 }));
-vi.mock('../lib/services/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
+vi.mock('@/lib/services/users/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
 
 const rpc = () => supabaseAdmin!.rpc as unknown as ReturnType<typeof vi.fn>;
 const allow = () => rpc().mockResolvedValue({ data: true, error: null });

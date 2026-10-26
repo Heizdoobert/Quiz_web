@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserQuizzes, exportUserData } from '../lib/actions/profile-actions';
 import { supabase } from '../lib/sdk/supabase';
 import { supabaseAdmin } from '../lib/sdk/supabase-admin';
-import { getSessionAccount } from '../lib/services/session';
+import { getSessionAccount } from '@/lib/services/auth/session';
 import { TOPIC_EMBED } from '../lib/db/topics';
 
 // Mock the supabase module
@@ -22,7 +22,7 @@ vi.mock('../lib/sdk/supabase-admin', () => ({
     from: vi.fn(),
   },
 }));
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
 }));
 

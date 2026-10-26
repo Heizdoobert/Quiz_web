@@ -1,5 +1,5 @@
 # sdk/package.json
-lines:88 exports:
+lines:89 exports:
 ---
 {
   "name": "@heizdoobert/quickquiz-sdk",

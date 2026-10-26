@@ -5,8 +5,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import AdminModuleRoute from '@/app/admin/[...module]/page';
 import type { AdminModule } from '@/app/admin/_modules/types';
-import { authorize } from '@/lib/services/authorize';
-import { can, type Role } from '@/lib/services/rbac';
+import { authorize } from '@/lib/services/auth/authorize';
+import { can, type Role } from '@/lib/services/rbac/rbac';
 
 const { loadAudit, loadReports } = vi.hoisted(() => ({ loadAudit: vi.fn(), loadReports: vi.fn() }));
 
@@ -24,7 +24,7 @@ vi.mock('@/app/admin/_modules/registry.generated', () => ({
     },
   ] satisfies AdminModule[],
 }));
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
 vi.mock('next/navigation', () => ({
   notFound: () => {
     throw new Error('NOT_FOUND');

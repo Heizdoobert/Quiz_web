@@ -1,7 +1,7 @@
 # components/admin/IssueList.tsx
 lines:26 exports:default
 ---
-import type { ErrorIssue } from '@/lib/services/error-issues';
+import type { ErrorIssue } from '@/lib/services/api/error-issues';
 
 // Sentry's text is rendered as text; the link is only ever an https URL (see error-issues.ts).
 export default function IssueList({ issues }: { issues: ErrorIssue[] }) {

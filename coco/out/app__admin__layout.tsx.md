@@ -5,7 +5,7 @@ import type { Metadata } from 'next';
 import { adminNavItems } from '@/app/admin/_modules/nav';
 import AdminDenied from '@/components/admin/AdminDenied';
 import AdminNav from '@/components/admin/AdminNav';
-import { authorize } from '@/lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 
 export const metadata: Metadata = { title: 'Admin', robots: { index: false, follow: false } };
 

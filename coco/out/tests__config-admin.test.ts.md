@@ -2,7 +2,7 @@
 lines:80 exports:
 ---
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { setConfigValue } from '@/lib/services/config-admin';
+import { setConfigValue } from '@/lib/services/admin/config-admin';
 import { upsertConfigValue } from '@/lib/db/remote-config';
 import { roleOf } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
@@ -10,7 +10,7 @@ import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
 
 vi.mock('@/lib/db/remote-config', () => ({ upsertConfigValue: vi.fn() }));
 vi.mock('@/lib/db/roles', () => ({ roleOf: vi.fn() }));
-vi.mock('@/lib/services/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
+vi.mock('@/lib/services/auth/session', () => ({ getSessionAccount: vi.fn().mockResolvedValue(null) }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));
 vi.mock('@/lib/sdk/supabase-admin', () => ({ supabaseAdmin: { from: vi.fn() } }));
 

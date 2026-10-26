@@ -1,11 +1,12 @@
 # middleware.ts
-lines:72 exports:config,middleware,default
+lines:73 exports:config,middleware,default
 ---
 import { NextRequest, NextResponse } from 'next/server';
 import { createHmac, timingSafeEqual } from 'crypto';
 
 export const config = {
   matcher: ['/profile/:path*', '/admin/:path*'],
+  runtime: 'nodejs',
 };
 
 /**
@@ -40,4 +41,3 @@ function verifySessionCookie(cookieValue: string | undefined): boolean {
 
 export function middleware(req: NextRequest): NextResponse {
   const pathname = req.nextUrl.pathname;
-  const search = req.nextUrl.search;

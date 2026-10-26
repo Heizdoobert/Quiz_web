@@ -4,7 +4,7 @@ lines:50 exports:default
 'use client';
 
 import { useState, useTransition } from 'react';
-import { listQuarantineAction } from '@/lib/actions/admin-actions';
+import { listQuarantineAction } from '@/lib/actions/admin';
 import type { QuarantinedQuestion } from '@/lib/db/questions';
 import QuarantineItem from './QuarantineItem';
 

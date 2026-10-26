@@ -2,8 +2,8 @@
 lines:56 exports:
 ---
 import { describe, it, expect } from 'vitest';
-import { can, isRole, PERMISSIONS, ROLES, type Permission } from '../lib/services/rbac';
-import { mapErrorCodeToStatus } from '../lib/services/api-response';
+import { can, isRole, PERMISSIONS, ROLES, type Permission } from '@/lib/services/rbac/rbac';
+import { mapErrorCodeToStatus } from '@/lib/services/api/api-response';
 import type { ActionErrorCode } from '../lib/types';
 
 describe('can', () => {

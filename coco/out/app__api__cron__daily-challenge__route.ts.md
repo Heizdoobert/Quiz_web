@@ -2,7 +2,7 @@
 lines:29 exports:dynamic,GET,POST
 ---
 import { pickDailyChallenge } from '@/lib/db/daily-challenge';
-import { isCronAuthorized } from '@/lib/services/cron-auth';
+import { isCronAuthorized } from '@/lib/services/auth/cron-auth';
 import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';

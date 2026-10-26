@@ -1,5 +1,5 @@
 # CHANGELOG.md
-lines:173 exports:
+lines:183 exports:
 ---
 # Changelog
 
@@ -8,7 +8,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.1] - 2026-10-22
+
+### Added
+- Fix Modal component (accessible close button, conditional rendering, single Escape handler).
+- Switch Vitest pool to `forks` and remove `poolOptions`.
+- Update tsconfig to exclude `.next`.
+
 ## [Unreleased]
+
+### Fixed
+- CI/CD workflow: update Node.js to 20 LTS, restore .gitmodules for SDK submodule, and refine CI gate.
 
 ### Added
 - **Admin area** at `/admin` (see `docs/admin-area.md`): switch remote config (`maintenance_mode`), grant roles, resolve quarantined questions, and read the top unresolved Sentry issues. Each page checks its own permission; moderators see only the quarantine page. New permission `errors.read` (admin only). The error list needs `SENTRY_AUTH_TOKEN`, `SENTRY_ORG` and `SENTRY_PROJECT` on the server and shows "not configured" without them.
@@ -28,5 +38,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **TypeScript SDK** `@heizdoobert/quickquiz-sdk` in `sdk/` (an npm workspace): a client with timeout, `AbortSignal` cancellation and retries for idempotent requests, plus an auth middleware for Next.js route handlers and Express under `@heizdoobert/quickquiz-sdk/server`. The web app reaches it through `getSdk` in `lib/sdk.ts`.
 - **Remote config**: the `remote_config` table (`supabase/migrations/remote-config.sql`, applied by hand), the required `sdk/remote_config` module and `GET /api/config`, which serves `maintenance_mode` to web and mobile with `s-maxage=60`. Unregistered keys and wrong-typed values never leave the server; a database failure answers 503 and the clients keep their defaults. The Flutter app reads it with built-in defaults.
 - **Optional `sdk/tracking-analytics`**: Sentry and PostHog load only when that folder exists; otherwise `lib/sdk/sentry.ts` and `lib/sdk/posthog.ts` are no-ops.
-- **Mobile**: a profile screen with stats and the player's own questions (`GET /api/mobile/v1/profile/quizzes`), Sentry crash reports when built with a DSN, release builds signed from repository secrets, and an app bundle published with the APK.
-- **Roles (RBAC)**: one role per account (`user`, `moderator`, `admin`) in `users.role`, permissions mapped in `lib/services/rbac.ts`, and one `authorize()` check that reads the role from the database on ev
+- **Mobile**: a profile screen with stats and the player's own questions (`GET /api/mobile/v1/profile/quizzes`)

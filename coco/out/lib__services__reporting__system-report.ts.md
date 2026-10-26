@@ -3,7 +3,7 @@ lines:181 exports:SystemMetrics,FormattedReport,collectSystemMetrics,formatSyste
 ---
 import { ping } from '@/lib/db/questions';
 import { getSystemCounts } from '@/lib/db/metrics';
-import { sendEmail, type SendEmailResult } from '../sendgrid';
+import { sendEmail, type SendEmailResult } from '@/lib/services/api/sendgrid';
 
 export interface SystemMetrics {
   timestamp: string;

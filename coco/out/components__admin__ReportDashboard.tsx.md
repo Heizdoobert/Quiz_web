@@ -4,8 +4,8 @@ lines:133 exports:default
 'use client';
 
 import { useState, useTransition } from 'react';
-import { triggerReportAction } from '@/lib/actions/admin-actions';
-import type { ReportStatus } from '@/lib/services/report-admin';
+import { triggerReportAction } from '@/lib/actions/admin';
+import type { ReportStatus } from '@/lib/services/admin/report-admin';
 
 export default function ReportDashboard({ initial }: { initial: ReportStatus }) {
   const [status, setStatus] = useState<ReportStatus>(initial);

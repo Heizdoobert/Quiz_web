@@ -3,8 +3,8 @@ lines:27 exports:dynamic,default
 ---
 import AdminDenied from '@/components/admin/AdminDenied';
 import ReportDashboard from '@/components/admin/ReportDashboard';
-import { authorize } from '@/lib/services/authorize';
-import { getReportStatus } from '@/lib/services/report-admin';
+import { authorize } from '@/lib/services/auth/authorize';
+import { getReportStatus } from '@/lib/services/admin/report-admin';
 
 export const dynamic = 'force-dynamic';
 

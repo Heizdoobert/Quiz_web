@@ -4,7 +4,7 @@ lines:31 exports:authorize
 import { roleOf } from '@/lib/db/roles';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
-import { can, isRole, Permission, Role } from '../rbac';
+import { can, isRole, Permission, Role } from '@/lib/services/rbac/rbac';
 import { getSessionAccount, SessionAccount } from './session';
 
 // The one check every gated action and route goes through. Identity comes from the

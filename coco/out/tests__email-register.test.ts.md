@@ -4,19 +4,19 @@ lines:62 exports:
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { requestEmailCode, verifyEmailCode } from '../lib/actions/auth-actions';
 import { usernameTaken } from '../lib/db/users';
-import { ensureAccountForAuthUser } from '../lib/services/users';
-import { setSessionAccount } from '../lib/services/session';
+import { ensureAccountForAuthUser } from '@/lib/services/users/users';
+import { setSessionAccount } from '@/lib/services/auth/session';
 import { supabase } from '../lib/sdk/supabase';
 
 vi.mock('../lib/sdk/supabase', () => ({ supabase: { auth: { signInWithOtp: vi.fn(), verifyOtp: vi.fn() } } }));
 vi.mock('../lib/db/users', () => ({ usernameTaken: vi.fn() }));
-vi.mock('../lib/services/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
-vi.mock('../lib/services/session', () => ({
+vi.mock('@/lib/services/users/users', () => ({ ensureAccountForAuthUser: vi.fn() }));
+vi.mock('@/lib/services/auth/session', () => ({
   getSessionAccount: vi.fn(),
   setSessionAccount: vi.fn(),
   clearSessionAccount: vi.fn(),
 }));
-vi.mock('../lib/services/rate-limit', () => ({
+vi.mock('@/lib/services/auth/rate-limit', () => ({
   allowAttempt: vi.fn().mockResolvedValue(true),
   allowAttemptFromIp: vi.fn().mockResolvedValue(true),
 }));

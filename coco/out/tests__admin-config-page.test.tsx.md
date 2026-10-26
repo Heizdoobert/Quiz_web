@@ -5,11 +5,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminConfigPage from '@/app/admin/config/page';
 import ConfigToggle from '@/components/admin/ConfigToggle';
-import { authorize } from '@/lib/services/authorize';
+import { authorize } from '@/lib/services/auth/authorize';
 import { getRemoteConfig } from '@/sdk/remote_config';
 import { updateConfigAction } from '@/lib/actions/admin-actions';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
 vi.mock('@/sdk/remote_config', () => ({ getRemoteConfig: vi.fn() }));
 vi.mock('@/lib/actions/admin-actions', () => ({ updateConfigAction: vi.fn() }));
 vi.mock('@/lib/logger', () => ({ logger: { error: vi.fn(), warn: vi.fn(), info: vi.fn() } }));

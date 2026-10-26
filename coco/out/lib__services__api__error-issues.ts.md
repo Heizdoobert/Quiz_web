@@ -4,8 +4,8 @@ lines:62 exports:ErrorIssue,ErrorIssues,listErrorIssues
 import 'server-only';
 import { logger } from '@/lib/logger';
 import { ActionResult } from '@/lib/types';
-import { authorize } from '../authorize';
-import { SessionAccount } from '../session';
+import { authorize } from '@/lib/services/auth/authorize';
+import { SessionAccount } from '@/lib/services/auth/session';
 
 // Read-only view of Sentry's top unresolved issues, over its REST API (no vendor package, so it
 // does not depend on the optional sdk/tracking-analytics). SENTRY_AUTH_TOKEN needs only the

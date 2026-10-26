@@ -5,10 +5,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import AdminLayout from '@/app/admin/layout';
 import AdminIndex from '@/app/admin/page';
-import { authorize } from '@/lib/services/authorize';
-import { can, type Role } from '@/lib/services/rbac';
+import { authorize } from '@/lib/services/auth/authorize';
+import { can, type Role } from '@/lib/services/rbac/rbac';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
 vi.mock('next/navigation', () => ({
   redirect: (to: string) => {
     throw new Error(`REDIRECT ${to}`);

@@ -3,8 +3,8 @@ lines:24 exports:dynamic,default
 ---
 import AdminDenied from '@/components/admin/AdminDenied';
 import RoleTable from '@/components/admin/RoleTable';
-import { authorize } from '@/lib/services/authorize';
-import { listAccountsForAdmin } from '@/lib/services/role-admin';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listAccountsForAdmin } from '@/lib/services/admin/role-admin';
 
 export const dynamic = 'force-dynamic';
 

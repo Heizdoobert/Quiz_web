@@ -1,7 +1,7 @@
 # lib/constants/admin-pages.ts
 lines:11 exports:ADMIN_PAGES
 ---
-import type { Permission } from '@/lib/services/rbac';
+import type { Permission } from '@/lib/services/rbac/rbac';
 
 // The admin pages in nav order. The first one a role may open is where /admin sends it.
 // Each page still calls authorize() itself: this list only decides what the nav shows.

@@ -5,12 +5,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import AdminRolesPage from '@/app/admin/roles/page';
 import RoleTable from '@/components/admin/RoleTable';
-import { authorize } from '@/lib/services/authorize';
-import { listAccountsForAdmin } from '@/lib/services/role-admin';
+import { authorize } from '@/lib/services/auth/authorize';
+import { listAccountsForAdmin } from '@/lib/services/admin/role-admin';
 import { listAccountsAction, setRoleAction } from '@/lib/actions/admin-actions';
 
-vi.mock('@/lib/services/authorize', () => ({ authorize: vi.fn() }));
-vi.mock('@/lib/services/role-admin', () => ({ listAccountsForAdmin: vi.fn() }));
+vi.mock('@/lib/services/auth/authorize', () => ({ authorize: vi.fn() }));
+vi.mock('@/lib/services/admin/role-admin', () => ({ listAccountsForAdmin: vi.fn() }));
 vi.mock('@/lib/actions/admin-actions', () => ({ listAccountsAction: vi.fn(), setRoleAction: vi.fn() }));
 
 const ME = '00000000-0000-4000-8000-0000000000a1';

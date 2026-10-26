@@ -10,7 +10,7 @@ import {
   verifyResetToken,
   clearUsedResetTokens,
   updatePasswordWithReset,
-} from '@/lib/services/password-reset';
+} from '@/lib/services/auth/password-reset';
 import { supabaseAdmin } from '@/lib/sdk/supabase-admin';
 
 

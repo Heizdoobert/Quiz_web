@@ -28,7 +28,7 @@ lines:37 exports:
       "@quizweb/sdk-core": ["./sdk/shared_modules/src/index.ts"]
     }
   },
-  "exclude": ["node_modules", ".agents", "mobile", "sdk/dist", "server", "lib/api"],
+  "exclude": ["node_modules", ".agents", "mobile", "sdk/dist", "server", "lib/api", ".next"],
   "include": [
     "next-env.d.ts",
     "**/*.ts",
