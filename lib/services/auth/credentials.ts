@@ -81,8 +81,9 @@ export async function signUpAccount(
     let authUserId: string | null = null;
     let requiresVerification = false;
 
-    // Test environment shortcut: use in‑memory store, bypass Supabase & rate limits
-    if (process.env.NODE_ENV === 'test') {
+    // Test environment shortcut: use in‑memory store, bypass Supabase & rate limits (unless auth().signUp is mocked)
+    const isMockedSignUp = typeof auth().signUp === 'function' && 'mock' in (auth().signUp as unknown as Record<string, unknown>);
+    if (process.env.NODE_ENV === 'test' && !isMockedSignUp) {
       const email = isEmail ? trimmed.toLowerCase() : usernameToEmail(trimmed);
       const targetUsername = !isEmail ? (displayName?.trim() ?? trimmed) : undefined;
 

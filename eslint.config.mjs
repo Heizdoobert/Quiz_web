@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     ".agents/**",
     "coverage/**",
     "mobile/**",
+    "vitest.node.config.cjs",
     "packages/**/dist/**",
     "sdk/**",
     "server/**",
