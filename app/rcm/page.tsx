@@ -20,7 +20,7 @@ export default function RcmPage() {
       console.error('Error loading roles', error);
       return [];
     }
-    const roleIds = data.map((r: any) => r.role_id);
+    const roleIds = data.map((r: { role_id: string }) => r.role_id);
     const { data: roleData, error: roleError } = await supabase
       .from('roles')
       .select('name')
@@ -29,7 +29,7 @@ export default function RcmPage() {
       console.error('Error fetching role names', roleError);
       return [];
     }
-    return roleData?.map((r: any) => r.name) ?? [];
+    return roleData?.map((r: { name: string }) => r.name) ?? [];
   }
 
   useEffect(() => {

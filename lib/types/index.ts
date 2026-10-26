@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // Minimal type placeholders used across the codebase
 // Adjust as needed when real definitions are added
 export type ClientQuestion = any;
