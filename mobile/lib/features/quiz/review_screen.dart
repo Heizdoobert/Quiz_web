@@ -67,7 +67,7 @@ class ReviewScreen extends ConsumerWidget {
         ),
       ),
       bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(Responsive(context).scale(16.0)),
         child: ElevatedButton(
           child: const Text('Submit'),
           onPressed: () async {
