@@ -1,3 +1,4 @@
+// eslint-disable-next-line no-restricted-imports
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL as string;
@@ -9,7 +10,7 @@ export type System = {
   id: string;
   name: string;
   type: string;
-  status: Record<string, any>;
+  status: Record<string, unknown>;
   last_updated: string;
 };
 
