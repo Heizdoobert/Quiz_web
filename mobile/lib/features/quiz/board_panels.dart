@@ -331,7 +331,7 @@ class _LeaderboardRow extends StatelessWidget {
     final rank = entry['rank'] as int;
     final topThree = rank <= 3;
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(Responsive(context).scale(12)),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: topThree ? Colors.transparent : AppColors.cyberBorder),
