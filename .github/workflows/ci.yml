@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          submodules: recursive
 
       - name: Install Gitleaks
         run: |
@@ -41,6 +42,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -60,6 +63,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -79,6 +84,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -98,6 +105,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -117,6 +126,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -140,6 +151,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -172,6 +185,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -190,6 +205,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
+        with:
+          submodules: recursive
 
       # Same scan as `npm run check:security`; the version is pinned so a new rule set cannot
       # turn the build red on its own.
