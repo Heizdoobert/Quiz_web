@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "type": "string",
+      "description": "The trivia question text"
+    },
+    "options": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "Exactly four multiple-choice answer options"
+    },
+    "correctIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "description": "Zero-based index of the correct option"
+    },
+    "explanation": {
+      "type": "string",
+      "description": "Brief explanation of why the correct option is right"
+    }
+  },
+  "required": ["prompt", "options", "correctIndex", "explanation"]
+}

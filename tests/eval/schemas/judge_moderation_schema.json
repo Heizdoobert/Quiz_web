@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "isSafe": {
+      "type": "boolean",
+      "description": "True if content is safe and free of malicious/harmful material, false otherwise"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Short explanation if unsafe, or empty string if safe"
+    }
+  },
+  "required": ["isSafe", "reason"]
+}

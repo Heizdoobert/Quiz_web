@@ -1,0 +1,18 @@
+{
+  "description": "Evaluation dataset for AI Trivia Question Generation",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "id": "quiz_crypto_pow",
+      "topic": "Bitcoin Proof of Work consensus mechanism",
+      "expected_category": "crypto",
+      "min_acceptable_score": 4.0
+    },
+    {
+      "id": "quiz_web_react_ssr",
+      "topic": "React Server Components vs Client Components",
+      "expected_category": "web_development",
+      "min_acceptable_score": 4.0
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "type": "object",
+  "properties": {
+    "factual_accuracy_score": {
+      "type": "number",
+      "description": "Score 1-5 for factual accuracy of question, correct answer, and explanation"
+    },
+    "distractor_quality_score": {
+      "type": "number",
+      "description": "Score 1-5 for plausibility and fairness of incorrect options"
+    },
+    "explanation_clarity_score": {
+      "type": "number",
+      "description": "Score 1-5 for educational clarity and conciseness of explanation"
+    },
+    "overall_score": {
+      "type": "number",
+      "description": "Overall composite quality score from 1 to 5"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Detailed explanation justifying the assigned scores"
+    }
+  },
+  "required": [
+    "factual_accuracy_score",
+    "distractor_quality_score",
+    "explanation_clarity_score",
+    "overall_score",
+    "rationale"
+  ]
+}
