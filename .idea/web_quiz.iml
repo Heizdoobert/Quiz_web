@@ -54,6 +54,12 @@
       <excludeFolder url="file://$MODULE_DIR$/sdk/dart/.dart_tool" />
       <excludeFolder url="file://$MODULE_DIR$/sdk/dart/.pub" />
       <excludeFolder url="file://$MODULE_DIR$/sdk/dart/build" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/linux/flutter/ephemeral/.plugin_symlinks/jni/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/linux/flutter/ephemeral/.plugin_symlinks/jni/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/mobile/linux/flutter/ephemeral/.plugin_symlinks/jni/build" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules/@heizdoobert/quickquiz-sdk/dart/.dart_tool" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules/@heizdoobert/quickquiz-sdk/dart/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/node_modules/@heizdoobert/quickquiz-sdk/dart/build" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
