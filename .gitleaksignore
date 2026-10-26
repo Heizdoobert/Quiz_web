@@ -42,3 +42,5 @@ a3714a2dc07beb0acbfc2ae717ef1252cbaed6da:tests/auth-session-web.test.ts:generic-
 a3714a2dc07beb0acbfc2ae717ef1252cbaed6da:tests/challenger-m1-2-adversarial.test.ts:generic-api-key:84
 a3714a2dc07beb0acbfc2ae717ef1252cbaed6da:tests/challenger-m1-iter2-empirical.test.ts:generic-api-key:77
 a3714a2dc07beb0acbfc2ae717ef1252cbaed6da:tests/challenger-m1-iter3-empirical.test.ts:generic-api-key:14
+10e7ce9cdb6885381661a7576cf71101e13ccf6a:coco/out/tests__auth-session-web.test.ts.md:generic-api-key:30
+10e7ce9cdb6885381661a7576cf71101e13ccf6a:coco/out/tests__challenger-m1-iter3-empirical.test.ts.md:generic-api-key:17
