@@ -25,6 +25,7 @@
     "eval:agy": "node tests/eval/run_eval.mjs",
     "test:coverage": "vitest run tests/ components/ sdk/tracking-analytics/ sdk/remote_config/ sdk/shared_modules/ sdk/formatter/ --coverage",
     "type-check": "tsc --noEmit",
+    "index:coco": "coco/.venv/bin/cocoindex update coco/main.py",
     "check:fast": "npm run type-check && npm run lint && gitleaks git --pre-commit --redact --no-banner",
     "check:architecture": "depcruise --validate app lib components hooks sdk/remote_config",
     "check:bundle": "node scripts/check-bundle.mjs",

@@ -24,9 +24,11 @@ SOURCE_DIRS = [
     "supabase",
     "tests",
     "mobile",
-    "contracts/contracts",
-    "contracts/scripts",
-    "contracts/test",
+    "packages",
+    "server",
+    "ai",
+    "tasks",
+    "migrations",
 ]
 
 MATCHER = PatternFilePathMatcher(
@@ -41,6 +43,7 @@ MATCHER = PatternFilePathMatcher(
         "**/*.py",
         "**/*.sol",
         "**/*.json",
+        "**/*.dart",
     ],
     excluded_patterns=[
         "**/*.db*",
@@ -52,16 +55,22 @@ MATCHER = PatternFilePathMatcher(
         "**/.git/**",
         "**/coverage/**",
         "**/dist/**",
+        "**/.dart_tool/**",
+        "**/build/**",
+        "**/.turbo/**",
+        "**/.gradle/**",
+        "**/.idea/**",
+        "**/.vscode/**",
+        "**/.flutter-plugins*",
+        "**/.pub-cache/**",
         "coco/**",
+        "artifacts/**",
+        "gameops-sentinel/**",
         "main.py",
         "coco_indexer.py",
         "search_docs.py",
         "*docs_indexer*",
         "*test_docs_indexer*",
-        "contracts/node_modules/**",
-        "contracts/artifacts/**",
-        "contracts/cache/**",
-        "contracts/typechain-types/**",
         "**/package-lock.json",
         "**/pnpm-lock.yaml",
         "**/*.tsbuildinfo",
@@ -125,12 +134,6 @@ async def agent_index_main(out: pathlib.Path = OUT) -> None:
     with coco.component_subpath("dir-root"):
         files = localfs.walk_dir(ROOT, recursive=False, path_matcher=MATCHER)
         await coco.mount_each(process_file, files.items(), out)
-    if pathlib.Path("contracts").is_dir():
-        with coco.component_subpath("dir-contracts-top"):
-            files = localfs.walk_dir(
-                pathlib.Path("contracts"), recursive=False, path_matcher=MATCHER
-            )
-            await coco.mount_each(process_file, files.items(), out)
 
 
 app = coco.App(

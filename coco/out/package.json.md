@@ -1,9 +1,9 @@
 # package.json
-lines:87 exports:
+lines:95 exports:
 ---
 {
   "name": "quick-quiz",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "private": true,
   "workspaces": [
     "sdk",
@@ -12,11 +12,11 @@ lines:87 exports:
   ],
   "scripts": {
     "postinstall": "node scripts/ensure-supabase-types.mjs",
-    "dev": "next dev --turbo",
+    "dev": "next dev --webpack",
     "gen:admin": "node scripts/gen-admin-modules.mjs",
     "predev": "npm run gen:admin && npm run build:ui",
     "prebuild": "npm run gen:admin && npm run build:sdk && npm run build:ui",
-    "build": "next build",
+    "build": "next build --webpack",
     "build:sdk": "npm run --prefix sdk/shared_modules build && npm run --prefix sdk build",
     "build:sdk-core": "npm run --prefix sdk/shared_modules build",
     "build:ui": "npm run --prefix packages/ui build",
@@ -25,8 +25,10 @@ lines:87 exports:
     "start": "next start",
     "lint": "eslint",
     "test": "vitest -c vitest.node.config.cjs run tests/ components/ sdk/tracking-analytics/ sdk/remote_config/ sdk/shared_modules/ sdk/formatter/",
+    "eval:agy": "node tests/eval/run_eval.mjs",
     "test:coverage": "vitest run tests/ components/ sdk/tracking-analytics/ sdk/remote_config/ sdk/shared_modules/ sdk/formatter/ --coverage",
     "type-check": "tsc --noEmit",
+    "index:coco": "coco/.venv/bin/cocoindex update coco/main.py",
     "check:fast": "npm run type-check && npm run lint && gitleaks git --pre-commit --redact --no-banner",
     "check:architecture": "depcruise --validate app lib components hooks sdk/remote_config",
     "check:bundle": "node scripts/check-bundle.mjs",
@@ -39,5 +41,3 @@ lines:87 exports:
     "check:db": "supabase db reset && supabase test db && supabase db lint --level warning",
     "docker:build": "docker compose build && docker image prune -f",
     "docker:up": "docker compose up -d --build && docker image prune -f"
-  },
-  "dependencies": {
