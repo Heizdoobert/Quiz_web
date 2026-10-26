@@ -60,6 +60,16 @@ jobs:
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
       - name: Type Check
         run: npm run type-check
 
@@ -87,6 +97,16 @@ jobs:
             SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
       - name: Lint
         run: npm run lint
@@ -116,6 +136,16 @@ jobs:
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
       - name: Architecture Boundary Check
         run: npm run check:architecture
 
@@ -143,6 +173,16 @@ jobs:
             SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
       - name: Run Tests with Coverage
         run: npm run test:coverage
@@ -178,6 +218,16 @@ jobs:
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+
       - name: Start local Supabase
         run: npx supabase start
 
@@ -209,6 +259,16 @@ jobs:
             SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
             NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
             NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+        - name: Wait for Supabase
+          run: |
+            echo "Waiting for Supabase to be ready..."
+            for i in {1..30}; do
+              if curl -s http://localhost:54321/health > /dev/null; then echo "Supabase ready"; break; fi
+              sleep 1
+            done
+          env:
+            SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
 
       - name: Build Next.js Application
         run: npm run build
