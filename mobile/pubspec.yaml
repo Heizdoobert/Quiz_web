@@ -28,6 +28,7 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+  # Added dependencies for Dart analysis fix
   flutter:
     sdk: flutter
 
@@ -53,6 +54,7 @@ dependencies:
     path: ../sdk/dart
 
 dev_dependencies:
+  # Added dependencies for Dart analysis fix
   flutter_test:
     sdk: flutter
   integration_test:
