@@ -313,7 +313,7 @@ class _HeaderButton extends StatelessWidget {
           child: Tooltip(
             message: tooltip,
             child: Padding(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(Responsive(context).scale(8)),
               child: Icon(icon, size: 18, color: AppColors.neoMint),
             ),
           ),
@@ -539,7 +539,7 @@ class _OptionTile extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(Responsive(context).scale(14)),
             child: Row(
               children: [
                 Container(
@@ -590,7 +590,7 @@ class _AnswerCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: const EdgeInsets.all(14),
+            padding: const EdgeInsets.all(Responsive(context).scale(14)),
             decoration: BoxDecoration(
               color: AppColors.neoMint.withValues(alpha: 0.1),
               border: Border.all(color: AppColors.neoMint.withValues(alpha: 0.4)),
@@ -649,7 +649,7 @@ class _Message extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(32),
+      padding: const EdgeInsets.all(Responsive(context).scale(32)),
       child: Center(
         child: Text(text, textAlign: TextAlign.center, style: const TextStyle(color: AppColors.slate400, fontSize: 14, height: 1.5)),
       ),

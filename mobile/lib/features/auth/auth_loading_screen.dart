@@ -16,7 +16,7 @@ class AuthLoadingScreen extends ConsumerStatefulWidget {
 }
 
 class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
-  bool? _isValid;
+  bool _navigated = false;
 
   @override
   void initState() {
@@ -27,23 +27,31 @@ class _AuthLoadingScreenState extends ConsumerState<AuthLoadingScreen> {
   Future<void> _validateToken() async {
     try {
       final valid = await widget.repository.isTokenValid();
-      if (mounted) setState(() => _isValid = valid);
+      if (mounted && !_navigated) {
+        _navigated = true;
+        if (valid) {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const QuizScreen()),
+          );
+        } else {
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const AuthScreen()),
+          );
+        }
+      }
     } catch (_) {
-      if (mounted) setState(() => _isValid = false);
+      if (mounted && !_navigated) {
+        _navigated = true;
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const AuthScreen()),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isValid == true) {
-      return const QuizScreen();
-    } else if (_isValid == false) {
-      // Show placeholder with Sign in text on validation failure.
-      return const Scaffold(body: Center(child: Text('Sign in')));
-    }
-    // Validation in progress.
-    return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    // Show a loading indicator while token validation is in progress.
+    return const Scaffold(body: Center(child: Text('Loading')));
   }
-
-
 }
