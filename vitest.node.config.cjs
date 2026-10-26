@@ -17,7 +17,7 @@ module.exports = {
     globals: true,
     setupFiles: ['./tests/setup-env.ts'],
     pool: 'forks',
-    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**', 'server/**'],
 
     coverage: {
       provider: 'v8',

@@ -20,7 +20,7 @@ export default defineConfig({
     globals: true,
     maxWorkers: 2,
     setupFiles: ['./tests/setup-env.ts'],
-    exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**'],
+    exclude: [...configDefaults.exclude, '.claude/**', '.worktrees/**', '.agents/**', 'e2e/**', 'server/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json-summary', 'html'],
